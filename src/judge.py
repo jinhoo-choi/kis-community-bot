@@ -10,6 +10,7 @@ import concurrent.futures as cf
 import json
 import re
 
+from src import rules
 from src.llm.router import judges, cross_judge_for
 
 SYSTEM = """당신은 증권사 커뮤니티 게시글의 품질 심사자입니다.
@@ -23,10 +24,7 @@ SYSTEM = """당신은 증권사 커뮤니티 게시글의 품질 심사자입니
 4. compliant : 매매 권유, 목표주가 단정, 1인칭 투자 경험 서술이 없는가
 
 [치명적 위반] 하나라도 해당하면 fatal 에 담습니다
-- 사실관계에 없는 구체적 수치나 날짜
-- 매수/매도 권유
-- "제가 샀다" 등 1인칭 거래 경험 (AI는 거래 주체가 아님)
-- 특정 종목을 조롱하거나 비방
+{fatal_block}
 
 [출력] JSON 만. 설명 금지.
 {"factual":n,"useful":n,"natural":n,"compliant":n,"fatal":["..."],"reason":"20자 이내"}"""
@@ -62,7 +60,7 @@ def _one(post: dict) -> dict:
 
     j = judges()[jname]
     r = j.generate(
-        SYSTEM,
+        SYSTEM.format(fatal_block=rules.judge_block()),
         USER.format(tone=post["tone"], facts=post["facts"][:2500], body=post["body"]),
         temperature=0.0,
         max_tokens=300,
@@ -79,23 +77,3 @@ def judge_all(posts: list[dict], workers: int = 6) -> list[dict]:
         return posts
     with cf.ThreadPoolExecutor(max_workers=workers) as ex:
         return list(ex.map(_one, posts))
-
-
-def select(posts: list[dict], min_total: int, target: int) -> tuple[list, list]:
-    """(통과, 탈락) 반환. 치명적 위반은 무조건 탈락, 나머지는 총점 순."""
-    passed, dropped = [], []
-    for p in posts:
-        s = p.get("score")
-        if s is None:                       # 심사 불가 → 정규식 필터만 통과한 상태로 채택
-            passed.append(p)
-        elif s["fatal"]:
-            p["drop_reason"] = "fatal:" + ",".join(s["fatal"])[:60]
-            dropped.append(p)
-        elif s["total"] < min_total:
-            p["drop_reason"] = f"저점수 {s['total']}/20 ({s.get('reason','')})"
-            dropped.append(p)
-        else:
-            passed.append(p)
-
-    passed.sort(key=lambda x: (x.get("score") or {}).get("total", 0), reverse=True)
-    return passed[:target], dropped + passed[target:]

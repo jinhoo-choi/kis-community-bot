@@ -9,6 +9,7 @@ import random
 import config
 from src import filters
 from src.llm import router
+from src.decide import temperature_for
 from src.personas import SLOT_TONES, build_messages
 
 
@@ -23,8 +24,16 @@ def _run(provider_name: str, items: list[dict], tones: list[str]) -> list[dict]:
     if not items:
         return []
     p = router.writers()[provider_name]
-    jobs = [build_messages(it, tn) for it, tn in zip(items, tones)]
-    results = p.generate_many(jobs, temperature=config.TEMPERATURE)
+    # temperature 가 다른 항목은 배치를 나눈다 (배치는 파라미터가 요청별로 고정되므로)
+    groups = {}
+    for i, (it, tn) in enumerate(zip(items, tones)):
+        groups.setdefault(temperature_for(it), []).append((i, it, tn))
+
+    results = [None] * len(items)
+    for temp, grp in groups.items():
+        jobs = [build_messages(it, tn) for _, it, tn in grp]
+        for (idx, _, _), r in zip(grp, p.generate_many(jobs, temperature=temp)):
+            results[idx] = r
 
     out = []
     for it, tn, r in zip(items, tones, results):
@@ -62,3 +71,10 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
 
     print(f"[gen] 정규식 통과 {len(posts)}건 / 시도 {len(items)}건")
     return posts
+
+
+def collect_fallbacks() -> list[str]:
+    out = []
+    for p in router.writers().values():
+        out += (p.fallbacks or [])
+    return out

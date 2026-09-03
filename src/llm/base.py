@@ -28,3 +28,6 @@ class Provider:
 
     def available(self) -> bool:
         return False
+
+    # 모델 은퇴 감지용. 폴백이 발생하면 여기에 기록되어 run_stats 로 넘어간다.
+    fallbacks: list = None

@@ -25,12 +25,25 @@ SLOT_QUOTA = {              # 슬롯별 목표 건수 (합 = TARGET_POSTS)
 
 # --- 모델 (멀티 프로바이더) ---
 # Claude: 대량 저비용 haiku / 문체 품질 우선 sonnet
-CLAUDE_MODEL       = os.environ.get("CLAUDE_MODEL", "claude-haiku-4-5-20251001")
+# 모델은 은퇴한다 (예: Gemini 2.0 계열 2026-06-01 종료).
+# 단일 문자열로 박아두면 그날 파이프라인이 통째로 죽으므로 candidate list 로 관리하고
+# 첫 호출 실패 시 다음 후보로 자동 폴백한다. 폴백 발생은 run_stats 에 기록된다.
+CLAUDE_CANDIDATES = [
+    os.environ.get("CLAUDE_MODEL", "claude-haiku-4-5-20251001"),
+    "claude-sonnet-5",
+]
+GEMINI_CANDIDATES = [
+    os.environ.get("GEMINI_MODEL", "gemini-3.5-flash"),
+    "gemini-flash-latest",
+    "gemini-3.1-flash-lite",
+]
+
+CLAUDE_MODEL       = CLAUDE_CANDIDATES[0]
 CLAUDE_JUDGE_MODEL = os.environ.get("CLAUDE_JUDGE_MODEL", "claude-haiku-4-5-20251001")
 USE_BATCH = os.environ.get("USE_BATCH", "1") == "1"
 
 # Gemini: 3.5-flash 가 GA 주력(=gemini-flash-latest), 3.1-flash-lite 는 저비용
-GEMINI_MODEL        = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
+GEMINI_MODEL        = GEMINI_CANDIDATES[0]
 GEMINI_ENRICH_MODEL = os.environ.get("GEMINI_ENRICH_MODEL", "gemini-3.5-flash")
 GEMINI_JUDGE_MODEL  = os.environ.get("GEMINI_JUDGE_MODEL", "gemini-3.1-flash-lite")
 
@@ -38,6 +51,21 @@ GEMINI_JUDGE_MODEL  = os.environ.get("GEMINI_JUDGE_MODEL", "gemini-3.1-flash-lit
 WRITER_RATIO = {"claude": 5, "gemini": 5}
 
 TEMPERATURE = float(os.environ.get("TEMPERATURE", "1.0"))
+
+# 슬롯별 temperature 차등.
+# 수치가 본문에 직접 등장하는 슬롯은 낮춰 숫자 창작을 억제하고,
+# 서술 위주 슬롯은 높게 유지해 문체 다양성을 지킨다.
+TEMPERATURE_BY_KIND = {
+    "flow":       0.4,   # 종가·등락률·거래대금이 그대로 들어감
+    "disclosure": 0.6,
+    "research":   0.8,
+    "policy":     1.0,
+    "poll":       1.0,
+    "theme":      1.0,
+}
+
+# 도배 방지 상한. 50건 중 한 종목에 5건이 몰리면 커뮤니티에서 바로 티가 난다.
+MAX_PER_STOCK = int(os.environ.get("MAX_PER_STOCK", "2"))
 
 # 교차 심사
 ENABLE_ENRICH = os.environ.get("ENABLE_ENRICH", "1") == "1"

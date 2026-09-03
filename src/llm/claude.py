@@ -5,7 +5,13 @@
 """
 import time
 
+import config
 from src.llm.base import Provider, GenResult
+
+# 모델이 은퇴하면 단일 문자열은 그날 파이프라인을 죽인다.
+# 404/not_found/deprecated 계열 오류에서만 다음 후보로 승격한다.
+_RETIRED = ("not_found", "404", "deprecated", "does not exist",
+            "is not supported", "NOT_FOUND", "unsupported")
 
 
 class ClaudeProvider(Provider):
@@ -22,6 +28,20 @@ class ClaudeProvider(Provider):
     def available(self) -> bool:
         return self._client is not None
 
+    def _promote(self, err: str) -> bool:
+        """모델 은퇴로 보이면 다음 후보로 교체. 교체했으면 True."""
+        if not any(k in err for k in _RETIRED):
+            return False
+        cands = config.CLAUDE_CANDIDATES
+        try:
+            nxt = cands[cands.index(self.model) + 1]
+        except (ValueError, IndexError):
+            return False
+        print(f"[{self.name}] 모델 은퇴 감지: {self.model} -> {nxt}")
+        self.fallbacks = (self.fallbacks or []) + [f"{self.model}->{nxt}"]
+        self.model = nxt
+        return True
+
     def generate(self, system, user, temperature=1.0, max_tokens=700) -> GenResult:
         try:
             r = self._client.messages.create(
@@ -31,7 +51,10 @@ class ClaudeProvider(Provider):
             txt = "".join(b.text for b in r.content if b.type == "text")
             return GenResult(txt.strip(), self.name, self.model)
         except Exception as e:
-            return GenResult("", self.name, self.model, ok=False, error=str(e)[:200])
+            msg = str(e)
+            if self._promote(msg):
+                return self.generate(system, user, temperature, max_tokens)
+            return GenResult("", self.name, self.model, ok=False, error=msg[:200])
 
     def generate_many(self, jobs, temperature=1.0, max_tokens=700,
                       poll_sec=20, timeout_sec=1800) -> list[GenResult]:

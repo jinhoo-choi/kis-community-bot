@@ -5,6 +5,7 @@
 1인칭 투자경험(샀다/물렸다/보유중)은 모든 톤에서 금지 — AI는 거래 주체가 아니므로
 뱃지가 있어도 허위 진술이 된다.
 """
+from src import rules
 
 TONES = {
     "pro": {
@@ -60,12 +61,7 @@ SYSTEM_PROMPT = """당신은 한국투자증권 앱 커뮤니티에 게시될 �
 {tone_desc}
 
 [절대 금지]
-- 1인칭 투자 경험 서술 (샀다 / 팔았다 / 보유 중 / 물렸다 / 수익 났다)
-  → AI는 거래 주체가 아니므로 허위 진술이 됩니다.
-- 매수·매도 권유 표현 (담아라, 들어가라, 비중확대, 손절 등)
-- 목표주가 단정 ("○○원 간다", "○○원까지")
-- 입력에 없는 숫자·날짜·기업명 생성 (환각 금지)
-- 마크다운, 소제목, 불릿, 이모지, 해시태그
+{rule_block}
 
 [규칙]
 - 8~10줄, 총 150~300자
@@ -87,8 +83,18 @@ USER_PROMPT = """다음 자료를 바탕으로 커뮤니티 게시글 본문을 
 
 
 def build_messages(item: dict, tone: str) -> tuple[str, str]:
-    """(system, user) 프롬프트 쌍 반환."""
-    system = SYSTEM_PROMPT.format(tone_desc=TONES[tone]["desc"])
+    """(system, user) 프롬프트 쌍 반환.
+
+    금지 규칙은 src/rules.py 단일 소스에서 주입된다.
+    심사 프롬프트(judge.py)도 같은 소스를 쓰므로 한쪽만 수정되어
+    규칙이 무력화되는 일이 구조적으로 발생하지 않는다.
+    """
+    system = SYSTEM_PROMPT.format(
+        tone_desc=TONES[tone]["desc"],
+        rule_block=rules.writer_block(),
+    )
+    if item.get("thin_facts"):
+        system += "\n" + rules.THIN_FACTS_WARNING
     user = USER_PROMPT.format(
         kind=item.get("kind", ""),
         stock=item.get("stock_name") or "해당 종목 없음(테마)",

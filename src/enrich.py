@@ -53,13 +53,18 @@ def _one(item: dict) -> dict:
         item["facts"] = item["facts"] + "\n\n[검색으로 확인된 배경]\n" + txt
         item["enriched"] = True
     else:
+        # 리스크봇의 _body_failed 와 같은 역할.
+        # 정보가 없는 상태를 '표시'해서 이후 프롬프트에 추측 금지를 주입한다.
         item["enriched"] = False
+        item["thin_facts"] = True
     return item
 
 
 def enrich_all(items: list[dict], workers: int = 5) -> list[dict]:
     if enricher() is None:
         print("[enrich] GEMINI_API_KEY 없음 → 보강 스킵")
+        for it in items:
+            it["thin_facts"] = True
         return items
 
     with cf.ThreadPoolExecutor(max_workers=workers) as ex:

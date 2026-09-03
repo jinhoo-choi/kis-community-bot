@@ -1,17 +1,24 @@
 """한국투자증권 커뮤니티 - AI 게시글 생성/배포 파이프라인.
 
-수집 → 종목매핑 → 중복제거
-     → [Gemini] 검색 그라운딩으로 사실 보강
-     → [Claude + Gemini 병렬] 게시글 작성
-     → 정규식 자동검수 → [교차 LLM 심사] → 상위 N건 선별
-     → 텔레그램 배포 → 상태저장
+수집 → [하드 게이트] → 종목매핑 → 중복제거
+     → [1] Gemini 검색 그라운딩으로 사실 보강 (실패 시 thin_facts 플래그)
+     → [2] Claude + Gemini 병렬 작성 (슬롯별 temperature 차등)
+     → [3] 정규식 검수 → 교차 LLM 심사
+     → [4] 배포 판정 (점수·종목상한·유형상한)
+     → 텔레그램 배포 → 상태·통계 저장
+
+설계 원칙
+  - 구조적 규칙(gate)은 확률적 AI 판단보다 항상 선행한다.
+  - 금지 규칙은 src/rules.py 단일 소스에서 3곳(작성·심사·정규식)에 파생된다.
+  - 판정 로직은 src/decide.py 순수 함수로 분리되어 테스트가 프로덕션 코드를 호출한다.
+  - 미탐 > 오탐. 애매하면 배포하지 않는다 (리스크 모니터링과 반대 방향).
 """
 import json
 import os
 import sys
 
 import config
-from src import state, tickers, generator, telegram_bot, enrich, judge
+from src import state, tickers, generator, telegram_bot, enrich, judge, gate, decide, stats
 from src.sources import dart, research, market, policy
 
 
@@ -33,14 +40,16 @@ def main():
     raw = collect()
     print(f"[main] 수집 총 {len(raw)}건")
 
+    # 하드 게이트 — AI 호출 이전에 구조적으로 배제
+    gated, blocked = gate.apply(raw)
+
     items = []
-    for it in raw:
+    for it in gated:
         it = tickers.resolve(it)
         it["board"] = tickers.board_of(it)
         if state.is_new(s, it["id"]):
             items.append(it)
 
-    # 슬롯 쿼터 컷
     picked, cnt = [], {k: 0 for k in config.SLOT_QUOTA}
     for it in items:
         k = it["kind"] if it["kind"] in config.SLOT_QUOTA else "research"
@@ -50,35 +59,37 @@ def main():
     print(f"[main] 생성 대상 {len(picked)}건 {cnt}")
 
     if dry:
-        print(json.dumps(picked[:3], ensure_ascii=False, indent=1))
+        print(json.dumps({"blocked": blocked[:10], "sample": picked[:2]},
+                         ensure_ascii=False, indent=1))
         return
 
-    # 1단계: 사실 보강 (Gemini + 검색 그라운딩)
     if config.ENABLE_ENRICH:
         picked = enrich.enrich_all(picked)
+    enriched_n = sum(1 for x in picked if x.get("enriched"))
 
-    # 2단계: 병렬 작성 (Claude + Gemini)
     posts = generator.generate(picked, s["recent_tone"])
 
-    # 3단계: 교차 심사 후 상위 N건 선별
     if config.ENABLE_JUDGE:
         posts = judge.judge_all(posts)
-        posts, dropped = judge.select(posts, config.MIN_JUDGE_SCORE, config.TARGET_POSTS)
-        print(f"[main] 심사 통과 {len(posts)}건 / 탈락 {len(dropped)}건")
-        for d in dropped[:5]:
-            print(f"   탈락 {d['id']} ({d.get('provider')}) - {d.get('drop_reason','')}")
-    else:
-        posts = posts[:config.TARGET_POSTS]
+
+    sent_posts, held = decide.decide_distribution(posts)
+    print(f"[main] 배포 {len(sent_posts)}건 / 보류 {len(held)}건")
+    for h in held[:5]:
+        print(f"   보류 {h['id']} ({h.get('provider')}) - {h.get('hold_reason','')}")
 
     os.makedirs(os.path.dirname(config.OUTPUT_PATH), exist_ok=True)
     with open(config.OUTPUT_PATH, "w", encoding="utf-8") as f:
-        json.dump(posts, f, ensure_ascii=False, indent=1)
+        json.dump(sent_posts, f, ensure_ascii=False, indent=1)
 
-    sent = telegram_bot.send_all(posts)
-    telegram_bot.send_summary(posts, sent)
-    print(f"[main] 전송 {sent}건")
+    sent = telegram_bot.send_all(sent_posts)
+    telegram_bot.send_summary(sent_posts, sent)
 
-    state.mark(s, posts)
+    row = stats.record(**stats.summarize(
+        raw, blocked, enriched_n, posts, sent_posts, held,
+        generator.collect_fallbacks()))
+    print("[main] stats " + json.dumps(row, ensure_ascii=False))
+
+    state.mark(s, sent_posts)
     state.save(s)
 
 
