@@ -66,8 +66,20 @@ def main():
     print(f"[main] 생성 대상 {len(picked)}건 {cnt}")
 
     if dry:
-        print(json.dumps({"blocked": blocked[:10], "sample": picked[:2]},
-                         ensure_ascii=False, indent=1))
+        print("\n───── 수집 표본 ─────")
+        for it in picked[:15]:
+            print(f"  [{it['kind']:10s}] {it.get('stock_name') or '테마':16s} "
+                  f"{(it.get('stock_code') or '-'):>7s}  {it['title'][:44]}")
+        print("\n───── 게이트 차단 ─────")
+        for bid, why in blocked[:15]:
+            print(f"  {bid:26s} {why}")
+        print("\n───── 귀속 강등 ─────")
+        for it in resolved:
+            if it.get("attr_reject"):
+                print(f"  {it['id']:26s} {it['attr_reject']} → {it['board']}")
+        print("\n───── 크롤링 헬스 ─────")
+        print(json.dumps(crawl.health(), ensure_ascii=False, indent=1))
+        print(f"\n───── dedup ─────\n {dup_reasons}")
         return
 
     if config.ENABLE_ENRICH:
