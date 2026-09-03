@@ -42,12 +42,17 @@ def listed() -> dict[str, str]:
                 continue
             for tr in soup.find_all("tr"):
                 tds = tr.find_all("td")
-                if len(tds) < 2:
+                if len(tds) < 3:
                     continue
+                # 컬럼: 회사명 | 시장구분 | 종목코드 | 업종 | 주요제품 | 상장일 | ...
                 name = tds[0].get_text(strip=True)
-                code = tds[1].get_text(strip=True)
+                code = tds[2].get_text(strip=True)
                 if not re.fullmatch(r"\d{6}", code):
-                    continue
+                    # 헤더 변경 대비: 행 안에서 6자리 셀을 찾아본다
+                    code = next((t.get_text(strip=True) for t in tds[1:5]
+                                 if re.fullmatch(r"\d{6}", t.get_text(strip=True))), "")
+                    if not code:
+                        continue
                 if name and not _EXCLUDE_NAME.search(name):
                     table[name] = code
             if len(table) > 1000:
@@ -55,8 +60,11 @@ def listed() -> dict[str, str]:
                 return table
 
         # 폴백: 태그 트리 없이 원문에서 직접 추출
-        for name, code in re.findall(
-                r"<td[^>]*>\s*([^<>]{2,40}?)\s*</td>\s*<td[^>]*>\s*(\d{6})\s*</td>", html):
+        # 회사명 → (시장구분 셀) → 종목코드 순서를 반영한다
+        _fallback_re = (r"<td[^>]*>\s*([^<>]{2,40}?)\s*</td>\s*"
+                        r"<td[^>]*>.*?</td>\s*"
+                        r"<td[^>]*>\s*(\d{6})\s*</td>")
+        for name, code in re.findall(_fallback_re, html, re.S):
             name = name.strip()
             if name and not _EXCLUDE_NAME.search(name):
                 table[name] = code

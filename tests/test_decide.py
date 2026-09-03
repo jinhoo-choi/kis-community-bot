@@ -164,6 +164,29 @@ def main():
         r, why = is_relevant(t, d)
         ok.append(run(f"정책기사 통과: {t[:14]}", r, why))
 
+
+    # ── KIND 상장목록 파싱 (2026-09-03 실측 구조 회귀)
+    #    실구조: 회사명 | 시장구분 | 종목코드 | 업종 | ...  (종목코드는 td[2])
+    import re as _re
+    from bs4 import BeautifulSoup as _BS
+    from src import tickers as _T
+    _sample = ("<table><tr><th>회사명</th><th>시장구분</th><th>종목코드</th></tr>"
+               "<tr><td>스카이랩스</td><td>\n 코스닥 \n</td>"
+               "<td style=\"mso-number-format:'@';\">386380</td></tr>"
+               "<tr><td>KODEX 인버스</td><td>유가증권</td><td>114800</td></tr>"
+               "<tr><td>삼성전자</td><td>유가증권</td><td>005930</td></tr></table>")
+    _tbl = {}
+    for _tr in _BS(_sample, "html.parser").find_all("tr"):
+        _tds = _tr.find_all("td")
+        if len(_tds) < 3:
+            continue
+        _n, _c = _tds[0].get_text(strip=True), _tds[2].get_text(strip=True)
+        if _re.fullmatch(r"\d{6}", _c) and _n and not _T._EXCLUDE_NAME.search(_n):
+            _tbl[_n] = _c
+    ok.append(run("KIND 종목코드 컬럼(td[2])", _tbl.get("삼성전자") == "005930", str(_tbl)))
+    ok.append(run("KIND 시장구분 오인 안함", "코스닥" not in _tbl.values()))
+    ok.append(run("KIND ETF 제외", "KODEX 인버스" not in _tbl))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
