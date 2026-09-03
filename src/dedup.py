@@ -48,9 +48,17 @@ def event_type(title: str) -> str:
 
 
 def keys(item: dict) -> list[str]:
-    """이 항목이 점유하는 모든 dedup 축. 조회와 저장이 반드시 이 함수를 공유한다."""
+    """이 항목이 점유하는 모든 dedup 축. 조회와 저장이 반드시 이 함수를 공유한다.
+
+    poll(토론 발제)은 원본 항목을 의도적으로 재사용해 만든 파생물이다.
+    사건 축을 그대로 쓰면 원본과 100% 충돌해 poll 슬롯이 영구 0건이 되므로
+    id 축만 점유하게 한다. (2026-09-03 실측: poll 3건이 매번 EVT 로 제거됨)
+    """
     out = [f"ID::{item.get('id','')}"]
     code = item.get("stock_code")
+
+    if item.get("kind") == "poll":
+        return out
 
     if code:
         ev = event_type(item.get("title", ""))
@@ -68,7 +76,7 @@ def is_dup(item: dict, seen: dict, titles: list[str] = None,
             return True, k.split("::")[0]
 
     # 제목 유사도 축 — 소스마다 표현만 다른 같은 사건을 잡는다
-    if titles:
+    if titles and item.get("kind") != "poll":
         n = normalize_title(item.get("title", ""))
         for t in titles:
             if n and SequenceMatcher(None, n, t).ratio() >= sim_threshold:
@@ -100,7 +108,8 @@ def filter_new(items: list[dict], seen: dict) -> tuple[list[dict], dict]:
             reasons[why] += 1
             continue
         passed.append(it)
-        titles.append(normalize_title(it.get("title", "")))
+        if it.get("kind") != "poll":
+            titles.append(normalize_title(it.get("title", "")))
         for k in keys(it):
             batch[k] = "_batch"
 

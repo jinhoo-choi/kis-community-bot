@@ -132,7 +132,60 @@ def diag_policy():
             log(f"  {name:20s} 실패 {type(e).__name__}")
 
 
+def diag_listing():
+    sec("4. 상장종목 리스트 소스 (KIND corpList 3종목만 파싱 원인)")
+
+    u = ("https://kind.krx.co.kr/corpgeneral/corpList.do"
+         "?method=download&searchType=13")
+    try:
+        r = requests.get(u, headers=H, timeout=30)
+        log(f"[KIND] HTTP {r.status_code}  {len(r.content)} bytes")
+        log(f"[KIND] Content-Type: {r.headers.get('Content-Type')}")
+        for enc in ("euc-kr", "cp949", "utf-8"):
+            try:
+                t = r.content.decode(enc, errors="strict")
+                log(f"[KIND] decode {enc}: OK")
+                break
+            except Exception as e:
+                log(f"[KIND] decode {enc}: {type(e).__name__}")
+                t = r.content.decode("euc-kr", errors="replace")
+        log(f"[KIND] head 400자:\n{t[:400]!r}")
+        log(f"[KIND] <tr> 개수(정규식): {len(re.findall(r'<tr', t, re.I))}")
+        log(f"[KIND] <td> 개수(정규식): {len(re.findall(r'<td', t, re.I))}")
+        log(f"[KIND] 6자리코드 개수: {len(re.findall(r'>\s*(\d{6})\s*<', t))}")
+        m = re.search(r"<tr[^>]*>.*?</tr>", t, re.S | re.I)
+        if m:
+            log(f"[KIND] 첫 tr:\n{m.group()[:500]!r}")
+        m2 = re.findall(r"<tr[^>]*>.*?</tr>", t, re.S | re.I)
+        if len(m2) > 1:
+            log(f"[KIND] 둘째 tr:\n{m2[1][:500]!r}")
+    except Exception:
+        log("[KIND] 실패:\n" + traceback.format_exc()[-500:])
+
+    # 대안: 네이버 시가총액 페이지 (페이지네이션)
+    try:
+        u2 = "https://finance.naver.com/sise/sise_market_sum.naver?sosok=0&page=1"
+        r = requests.get(u2, headers=H, timeout=15)
+        r.encoding = "euc-kr"
+        soup = BeautifulSoup(r.text, "html.parser")
+        codes = {m.group(1) for a in soup.select("a[href*='code=']")
+                 if (m := re.search(r"code=(\d{6})", a.get("href", "")))}
+        pages = soup.select("table.Nnavi a")
+        log(f"[대안A] naver sise_market_sum p1: {len(codes)}종목, 페이지링크 {len(pages)}개")
+    except Exception as e:
+        log(f"[대안A] 실패 {type(e).__name__}: {e}")
+
+    # 대안: 네이버 종목 검색 API
+    try:
+        u3 = "https://finance.naver.com/sise/entryJongmok.naver?&page=1"
+        r = requests.get(u3, headers=H, timeout=15)
+        log(f"[대안B] entryJongmok HTTP {r.status_code} {len(r.content)} bytes")
+    except Exception as e:
+        log(f"[대안B] 실패 {type(e).__name__}")
+
+
 if __name__ == "__main__":
+    diag_listing()
     diag_hankyung()
     diag_market()
     diag_policy()

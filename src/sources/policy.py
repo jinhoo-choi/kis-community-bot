@@ -66,6 +66,19 @@ ANCHORS = [
     "수출", "환율", "금리", "물가", "증시", "시장",
 ]
 
+# 증권사 의견 기사. 커뮤니티에 AI가 목표주가를 옮기는 것은 어떤 톤이든 위험하다.
+BROKER_OPINION = re.compile(
+    r"목표주가|목표가|투자의견|매수의견|비중확대|비중축소|커버리지|"
+    r"상향\s*조정|하향\s*조정|리포트에서|증권.{0,4}(전망|분석|제시)"
+)
+
+# 정당·정쟁 기사. gate tier3 는 키워드 매칭이라 정당 약칭·법안명을 못 잡는다.
+PARTISAN = re.compile(
+    r"국민의힘|국힘|더불어민주당|민주당|조국혁신당|개혁신당|정의당|"
+    r"노란봉투법|양곡법|방송법|특검|탄핵|국정감사|국감|본회의|상임위|"
+    r"이재명|대통령실|여야|야당|여당|당대표|원내대표"
+)
+
 # 인물 중심 기사 패턴 — 정책 신호어가 있어도 커뮤니티 글감이 아니다
 PERSON_LED = re.compile(
     r"만난|면담|간담회|접견|예방|축사|격려|방문했|참석했|"
@@ -84,6 +97,10 @@ def is_relevant(title: str, desc: str = "") -> tuple[bool, str]:
         return False, "제외어"
     if PERSON_LED.search(title):
         return False, "인물중심"
+    if BROKER_OPINION.search(blob):
+        return False, "증권사의견"
+    if PARTISAN.search(blob):
+        return False, "정당·정쟁"
     if not any(k in blob for k in KEYWORDS):
         return False, "키워드없음"
     if not any(x in blob for x in POLICY_SIGNALS):
