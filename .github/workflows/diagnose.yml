@@ -1,0 +1,29 @@
+name: diagnose
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11', cache: pip }
+      - run: pip install requests beautifulsoup4 lxml
+      - name: Diagnose
+        env: { TZ: Asia/Seoul }
+        run: |
+          mkdir -p data
+          python tools/diagnose.py || true
+      - name: Commit
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f data/diagnose.txt
+          git diff --staged --quiet || git commit -m "chore: diagnose $(date +%FT%H%M)"
+          git push
