@@ -45,13 +45,10 @@ def send_all(posts: list[dict]) -> int:
             "parse_mode": "HTML",
             "text": _text(p)[:4000],
             "disable_web_page_preview": True,
-            "reply_markup": {
-                "inline_keyboard": [[
-                    {"text": "✅ 게시완료", "callback_data": f"done:{p['id']}"},
-                    {"text": "🚫 반려",     "callback_data": f"drop:{p['id']}"},
-                ]]
-            },
         }
+        # 콜백 버튼은 제거했다. GitHub Actions 는 1회 실행 후 종료하므로
+        # 콜백을 수신할 상시 프로세스가 없어 버튼이 동작하지 않는다.
+        # 소진율 측정이 필요해지면 webhook 을 별도 구축한다.
         r = requests.post(API.format(TELEGRAM_TOKEN, "sendMessage"), json=payload, timeout=15)
         if r.ok:
             sent += 1

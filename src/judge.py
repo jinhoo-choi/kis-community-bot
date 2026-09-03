@@ -24,7 +24,7 @@ SYSTEM = """당신은 증권사 커뮤니티 게시글의 품질 심사자입니
 4. compliant : 매매 권유, 목표주가 단정, 1인칭 투자 경험 서술이 없는가
 
 [치명적 위반] 하나라도 해당하면 fatal 에 담습니다
-{fatal_block}
+__FATAL_BLOCK__
 
 [출력] JSON 만. 설명 금지.
 {"factual":n,"useful":n,"natural":n,"compliant":n,"fatal":["..."],"reason":"20자 이내"}"""
@@ -60,7 +60,8 @@ def _one(post: dict) -> dict:
 
     j = judges()[jname]
     r = j.generate(
-        SYSTEM.format(fatal_block=rules.judge_block()),
+        # ※ SYSTEM 에 JSON 리터럴이 있어 .format() 을 쓰면 KeyError 로 죽는다. replace 고정.
+        SYSTEM.replace("__FATAL_BLOCK__", rules.judge_block()),
         USER.format(tone=post["tone"], facts=post["facts"][:2500], body=post["body"]),
         temperature=0.0,
         max_tokens=300,

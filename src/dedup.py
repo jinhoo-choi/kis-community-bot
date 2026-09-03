@@ -82,17 +82,27 @@ def mark(item: dict, seen: dict, day: str):
 
 
 def filter_new(items: list[dict], seen: dict) -> tuple[list[dict], dict]:
-    """중복 제거. (통과목록, 사유별 카운트)"""
+    """중복 제거. (통과목록, 사유별 카운트)
+
+    seen(과거 실행분)과 batch(이번 실행분)를 함께 본다.
+    배치 내부 중복을 등록하지 않으면 DART와 리서치가 같은 실행에서
+    같은 사건을 들고 왔을 때 둘 다 통과한다. 프로덕션의 기본 상황이 그렇다.
+    seen 자체를 오염시키지 않도록 배치 키는 별도 dict 에 담는다.
+    """
     from collections import Counter
     passed, titles, reasons = [], [], Counter()
+    batch: dict = {}
 
     for it in items:
-        dup, why = is_dup(it, seen, titles)
+        merged = {**seen, **batch}
+        dup, why = is_dup(it, merged, titles)
         if dup:
             reasons[why] += 1
             continue
         passed.append(it)
         titles.append(normalize_title(it.get("title", "")))
+        for k in keys(it):
+            batch[k] = "_batch"
 
     if reasons:
         print(f"[dedup] 제외 {sum(reasons.values())}건 {dict(reasons)}")

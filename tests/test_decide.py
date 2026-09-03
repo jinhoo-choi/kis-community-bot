@@ -97,6 +97,22 @@ def main():
     ok.append(run("dedup 키 조회·저장 일치",
                   set(dedup.keys(a)) & set(seen.keys()) == set(dedup.keys(a))))
 
+
+    # ── 프롬프트 빌드가 예외 없이 되는지 (JSON 리터럴 + format 충돌 회귀)
+    from src.personas import build_messages
+    from src.judge import SYSTEM as JSYS
+    try:
+        build_messages({"kind": "flow", "title": "t", "facts": "f",
+                        "stock_name": "삼성전자", "thin_facts": True}, "pro")
+        JSYS.replace("__FATAL_BLOCK__", rules.judge_block())
+        built = True
+    except Exception as e:
+        built = False
+        print("     ", e)
+    ok.append(run("프롬프트 빌드 무예외", built))
+    ok.append(run("judge 템플릿에 미치환 필드 없음",
+                  "__FATAL_BLOCK__" not in JSYS.replace("__FATAL_BLOCK__", "x")))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
