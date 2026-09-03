@@ -113,6 +113,20 @@ def main():
     ok.append(run("judge 템플릿에 미치환 필드 없음",
                   "__FATAL_BLOCK__" not in JSYS.replace("__FATAL_BLOCK__", "x")))
 
+
+    # ── 한경 제목 파싱 회귀 (2026-09-03 실데이터)
+    from src.sources.research import _undouble, _strip_code
+    def hk(t):
+        return _strip_code(_undouble(t))
+    ok.append(run("한경 완전2배중복 정규화",
+        hk("롯데지주(004990) 노이즈보다 다가올 호황에 조명롯데지주(004990) 노이즈보다 다가올 호황에 조명")
+        == ("004990", "롯데지주 노이즈보다 다가올 호황에 조명")))
+    ok.append(run("한경 잘린중복 정규화",
+        hk("코리아써키트(007810) 시간을 주시면, 더 강해져 돌아옵니다코리아써키트")
+        == ("007810", "코리아써키트 시간을 주시면, 더 강해져 돌아옵니다")))
+    ok.append(run("한경 코드없는 제목 통과",
+        hk("반도체 업황 점검") == ("", "반도체 업황 점검")))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 

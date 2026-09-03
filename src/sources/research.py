@@ -70,7 +70,47 @@ def fetch_naver(limit: int = 12) -> list[dict]:
     return out
 
 
+def _undouble(s: str) -> str:
+    """한경 제목 셀은 span 이 중복되어 같은 문자열이 두 번 붙어 나온다."""
+    s = re.sub(r"\s+", " ", s or "").strip()
+    if not s:
+        return s
+    h = len(s) // 2
+    if len(s) % 2 == 0 and s[:h] == s[h:]:          # 완전 2배 반복
+        return s[:h]
+    hits = list(re.finditer(r"\(\d{6}\)", s))        # 뒤쪽이 잘려 있는 경우
+    if len(hits) >= 2:
+        return s[:hits[1].start()].rstrip()
+
+    # 반복분이 중간에서 잘린 경우: '종목명(코드) 부제 + 종목명(잘림)'
+    if hits:
+        name = s[:hits[0].start()].strip()
+        if len(name) >= 2:
+            tail = s[hits[0].end():]
+            idx = tail.find(name)
+            if idx > 0:
+                return (s[:hits[0].end()] + tail[:idx]).rstrip()
+    return s
+
+
+def _strip_code(title: str) -> tuple[str, str]:
+    """'롯데지주(004990) 부제' → ('004990', '롯데지주 부제')"""
+    m = re.match(r"\s*(.+?)\((\d{6})\)\s*(.*)", title)
+    if not m:
+        return "", title
+    return m.group(2), f"{m.group(1).strip()} {m.group(3).strip()}".strip()
+
+
 def fetch_hankyung(limit: int = 8) -> list[dict]:
+    """진단으로 확인된 실구조:
+      td[0]=작성일 td[1]=제목(span 중복) td[2]=적정가격 td[3]=투자의견
+      td[4]=작성자 td[5]=제공출처 td[7]=차트링크(business_code=종목코드)
+
+    기존 파서 결함 3개:
+      (1) business_code 미추출 → stock_code=None → 전건 테마글 강등
+      (2) 제목 텍스트 2배 중복을 그대로 사용
+      (3) tds[-2], tds[-1] 을 작성자/출처로 읽어 빈 문자열이 들어감
+    """
     url = "https://consensus.hankyung.com/analysis/list?skinType=business"
     out = []
     soup = crawl.get_soup(url)
@@ -80,25 +120,50 @@ def fetch_hankyung(limit: int = 8) -> list[dict]:
 
     for tr in crawl.select_rows(soup, HK_ROW_SELECTORS):
         tds = tr.find_all("td")
-        if len(tds) < 4:
-            continue
-        a = tr.find("a")
-        title = a.get_text(strip=True) if a else ""
-        if not title:
+        if len(tds) < 6:
             continue
 
+        raw = _undouble(tds[1].get_text(" ", strip=True))
+        if not raw:
+            continue
+
+        # 종목코드는 차트 링크의 business_code 가 가장 확실하다
+        code = ""
+        for a in tr.find_all("a", href=True):
+            m = re.search(r"business_code=(\d{6})", a["href"])
+            if m:
+                code = m.group(1)
+                break
+        code_from_title, title = _strip_code(raw)
+        code = code or code_from_title
+
+        report_idx = ""
+        pdf = tds[1].find("a", href=True)
+        if pdf:
+            m = re.search(r"report_idx=(\d+)", pdf["href"])
+            report_idx = m.group(1) if m else ""
+
+        target = tds[2].get_text(strip=True)
+        opinion = tds[3].get_text(strip=True)
+        analyst = tds[4].get_text(strip=True)
+        broker = tds[5].get_text(strip=True)
+
         out.append({
-            "id": "hk-" + re.sub(r"\W", "", title)[:24],
+            "id": f"hk-{report_idx or re.sub(chr(92)+'W', '', title)[:20]}",
             "kind": "research",
-            "stock_code": None,          # entity.verify_attribution 으로 후처리
-            "stock_name": None,
+            "stock_code": code or None,
+            "stock_name": None,              # tickers.resolve 가 코드로 역조회
             "title": title,
             "facts": (
                 f"리포트 제목: {title}\n"
-                f"작성: {tds[-2].get_text(strip=True)} / {tds[-1].get_text(strip=True)}\n"
-                f"※ 제목 외 본문 수치는 미제공."
+                + (f"종목코드: {code}\n" if code else "")
+                + f"작성: {broker} {analyst}\n"
+                + (f"제시 적정가격: {target}원 (해당 증권사 의견)\n" if target else "")
+                + (f"투자의견: {opinion} (해당 증권사 의견)\n" if opinion else "")
+                + "※ 제목 외 본문 수치는 미제공. 위 수치는 증권사 제시치이며 단정하지 말 것."
             ),
-            "src": "https://consensus.hankyung.com" + (a.get("href") or ""),
+            "src": (f"https://consensus.hankyung.com/analysis/downpdf?report_idx={report_idx}"
+                    if report_idx else url),
         })
         if len(out) >= limit:
             break
