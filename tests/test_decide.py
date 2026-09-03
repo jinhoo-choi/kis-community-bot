@@ -143,11 +143,26 @@ def main():
         ok.append(run(f"한경 파싱 {ecode or 'no-code'}", c == ecode and t == etitle, t))
 
 
-    # ── 2026-09-03 실측 오탐 회귀 (연합뉴스 RSS 정치·인사 유입)
-    for t in ["추미애 1차 추경서 예산 누락분 보강했어야",
-              "총학생회장단 만난 박홍근, 청년 성장단계별 종합투자 추진"]:
-        ok.append(run(f"정치소재 차단: {t[:12]}",
-                      is_hard_excluded({"title": t, "stock_code": None})[0]))
+    # ── 2026-09-03 실측 오탐 회귀 (연합뉴스 RSS 정치·인사·헤드라인 유입)
+    from src.sources.policy import is_relevant
+    bad = [
+        "추미애 1차 추경서 예산 누락분 보강했어야…도의회도 책임",
+        "총학생회장단 만난 박홍근, 청년 성장단계별 종합투자 추진",
+        "김석봉 씨티 부사장, 모건스탠리 韓IB 공동대표로 선임",
+        "[연합뉴스 이시각 헤드라인] 18:00",
+        "머니톡스 외국인 소문의 진실, 다음 파티가 열리기 전 해야 할",
+    ]
+    for t in bad:
+        r, why = is_relevant(t, "")
+        ok.append(run(f"뉴스 오탐 차단: {t[:14]}", not r, why))
+
+    good = [
+        ("산업부·코트라, 미국 첨단기업 4곳 28조원 투자유치", "산업통상자원부는 투자유치를 발표했다"),
+        ("정부, 반도체 소부장 세제지원 확대 시행", "기획재정부 세제 개편안"),
+    ]
+    for t, d in good:
+        r, why = is_relevant(t, d)
+        ok.append(run(f"정책기사 통과: {t[:14]}", r, why))
 
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)

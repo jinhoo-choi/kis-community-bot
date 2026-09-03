@@ -57,6 +57,42 @@ KEYWORDS = [
 ]
 
 
+# 기관·산업 앵커. 정책성 기사라면 최소한 하나는 등장한다.
+ANCHORS = [
+    "정부", "부처", "기획재정부", "금융위", "금감원", "산업부", "중기부",
+    "과기정통부", "국토부", "한국은행", "한은", "코트라", "공정위", "국세청",
+    "반도체", "배터리", "이차전지", "자동차", "조선", "철강", "화학", "원전",
+    "바이오", "제약", "통신", "유통", "건설", "항공", "방산", "기업", "업계",
+    "수출", "환율", "금리", "물가", "증시", "시장",
+]
+
+# 인물 중심 기사 패턴 — 정책 신호어가 있어도 커뮤니티 글감이 아니다
+PERSON_LED = re.compile(
+    r"만난|면담|간담회|접견|예방|축사|격려|방문했|참석했|"
+    r"[가-힣]{2,4}\s*(의원|장관|위원장|대표|총장|시장|지사|청장|처장)"
+)
+
+
+def is_relevant(title: str, desc: str = "") -> tuple[bool, str]:
+    """(수집여부, 제외사유). 순수 함수 — 테스트가 이 함수를 직접 호출한다."""
+    blob = f"{title} {desc}"
+    if not title:
+        return False, "제목없음"
+    if len(re.sub(r"\W", "", title)) < 8:
+        return False, "제목부족"
+    if any(x in title for x in EXCLUDE):
+        return False, "제외어"
+    if PERSON_LED.search(title):
+        return False, "인물중심"
+    if not any(k in blob for k in KEYWORDS):
+        return False, "키워드없음"
+    if not any(x in blob for x in POLICY_SIGNALS):
+        return False, "정책신호없음"
+    if not any(a in blob for a in ANCHORS):
+        return False, "기관·산업앵커없음"
+    return True, ""
+
+
 def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
     try:
         r = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=12)
@@ -70,14 +106,8 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
     for it in root.iter("item"):
         title = (it.findtext("title") or "").strip()
         desc = re.sub(r"<[^>]+>", "", it.findtext("description") or "").strip()
-        blob = title + " " + desc
-        if not title or not any(k in blob for k in KEYWORDS):
-            continue
-        if any(x in title for x in EXCLUDE):
-            continue
-        if not any(x in blob for x in POLICY_SIGNALS):
-            continue
-        if len(re.sub(r"\W", "", title)) < 8:
+        okay, _why = is_relevant(title, desc)
+        if not okay:
             continue
         out.append({
             "id": "pol-" + re.sub(r"\W", "", title)[:24],
