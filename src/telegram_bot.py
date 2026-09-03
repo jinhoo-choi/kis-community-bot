@@ -26,6 +26,7 @@ def _text(p: dict) -> str:
         f"<b>{name}{code}</b>\n"
         f"{KIND_LABEL.get(p['kind'], p['kind'])} · {TONES[p['tone']]['name']} · "
         f"{BOARD_LABEL.get(p.get('board', 'stock'))}\n"
+        f"<i>{p.get('provider','?')} · 심사 {(p.get('score') or {}).get('total','-')}/20</i>\n"
         f"<a href=\"{html.escape(p['src'])}\">원문 보기</a>\n"
     )
     body = p["body"].strip() + "\n\n" + FOOTER.format(src=p["src"])
@@ -65,11 +66,16 @@ def send_summary(posts: list[dict], sent: int):
     from collections import Counter
     c = Counter(p["kind"] for p in posts)
     t = Counter(TONES[p["tone"]]["name"] for p in posts)
+    v = Counter(p.get("provider", "?") for p in posts)
+    scored = [(p.get("score") or {}).get("total") for p in posts]
+    scored = [x for x in scored if x]
+    avg = f"{sum(scored)/len(scored):.1f}/20" if scored else "-"
     msg = (
         f"<b>오늘의 배포 요약</b>\n"
-        f"총 {sent}건 전송\n"
+        f"총 {sent}건 전송 · 평균 심사점수 {avg}\n"
         f"유형: " + ", ".join(f"{k} {v}" for k, v in c.items()) + "\n"
-        f"톤: " + ", ".join(f"{k} {v}" for k, v in t.items())
+        f"톤: " + ", ".join(f"{k} {v}" for k, v in t.items()) + "\n"
+        f"모델: " + ", ".join(f"{k} {n}" for k, n in v.items())
     )
     requests.post(API.format(TELEGRAM_TOKEN, "sendMessage"),
                   json={"chat_id": TELEGRAM_CHAT_ID, "parse_mode": "HTML", "text": msg},

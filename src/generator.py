@@ -1,104 +1,64 @@
-"""Claude API 로 게시글 본문 생성.
+"""2단계 — 게시글 생성. Claude / Gemini 병렬 작성.
 
-- 기본은 Message Batches API (비실시간 대량 작업이라 비용 효율이 좋다).
-- USE_BATCH=0 이면 동기 호출로 폴백.
-문서: https://docs.claude.com/en/docs/build-with-claude/batch-processing
+같은 톤이라도 모델이 다르면 문장 리듬·어휘 선택이 갈린다.
+50건을 한 모델로 뽑으면 문체 지문이 남아 커뮤니티에서 금방 티가 나므로
+프로바이더를 섞는 것 자체가 품질 방어책이다.
 """
 import random
-import time
 
-from anthropic import Anthropic
-
-from config import ANTHROPIC_API_KEY, MODEL, USE_BATCH
+import config
 from src import filters
+from src.llm import router
 from src.personas import SLOT_TONES, build_messages
-
-client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
 
 def pick_tone(item: dict, recent: dict) -> str:
-    """슬롯별 허용 톤 중, 최근 3일간 같은 종목에 쓴 톤은 제외."""
+    """슬롯별 허용 톤 중, 최근 같은 종목에 쓴 톤은 제외."""
     pool = SLOT_TONES.get(item["kind"], ["calm"])
     used = set(recent.get(item.get("stock_code") or "_theme", []))
-    cand = [t for t in pool if t not in used] or pool
-    return random.choice(cand)
+    return random.choice([t for t in pool if t not in used] or pool)
 
 
-def _req(item, tone, idx):
-    system, user = build_messages(item, tone)
-    return {
-        "custom_id": f"p{idx}",
-        "params": {
-            "model": MODEL,
-            "max_tokens": 700,
-            "temperature": 1.0,          # 문체 다양성 확보
-            "system": system,
-            "messages": [{"role": "user", "content": user}],
-        },
-    }
+def _run(provider_name: str, items: list[dict], tones: list[str]) -> list[dict]:
+    if not items:
+        return []
+    p = router.writers()[provider_name]
+    jobs = [build_messages(it, tn) for it, tn in zip(items, tones)]
+    results = p.generate_many(jobs, temperature=config.TEMPERATURE)
 
-
-def _sync(items, tones):
-    out = {}
-    for i, (item, tone) in enumerate(zip(items, tones)):
-        system, user = build_messages(item, tone)
-        r = client.messages.create(
-            model=MODEL, max_tokens=700, temperature=1.0,
-            system=system, messages=[{"role": "user", "content": user}],
-        )
-        out[f"p{i}"] = "".join(b.text for b in r.content if b.type == "text")
-        time.sleep(0.3)
-    return out
-
-
-def _batch(items, tones, poll_sec=20, timeout_sec=1800):
-    reqs = [_req(it, tn, i) for i, (it, tn) in enumerate(zip(items, tones))]
-    batch = client.messages.batches.create(requests=reqs)
-    print(f"[gen] batch {batch.id} 제출 ({len(reqs)}건)")
-
-    waited = 0
-    while waited < timeout_sec:
-        b = client.messages.batches.retrieve(batch.id)
-        if b.processing_status == "ended":
-            break
-        time.sleep(poll_sec)
-        waited += poll_sec
-    else:
-        raise TimeoutError("batch timeout")
-
-    out = {}
-    for res in client.messages.batches.results(batch.id):
-        if res.result.type == "succeeded":
-            msg = res.result.message
-            out[res.custom_id] = "".join(b.text for b in msg.content if b.type == "text")
+    out = []
+    for it, tn, r in zip(items, tones, results):
+        if not r.ok or not r.text:
+            continue
+        out.append({**it, "tone": tn, "body": r.text,
+                    "provider": r.provider, "model": r.model})
     return out
 
 
 def generate(items: list[dict], recent: dict) -> list[dict]:
-    tones = [pick_tone(it, recent) for it in items]
-    texts = (_batch(items, tones) if USE_BATCH else _sync(items, tones))
+    tones = {id(it): pick_tone(it, recent) for it in items}
+    buckets = router.split_by_ratio(items)
 
-    posts, retry_idx = [], []
-    for i, (item, tone) in enumerate(zip(items, tones)):
-        body = (texts.get(f"p{i}") or "").strip()
-        if not body:
-            continue
-        errs = filters.check(body, item["facts"])
-        if errs:
-            print(f"[gen] 리젝 {item['id']} {errs}")
-            retry_idx.append(i)
-            continue
-        posts.append({**item, "tone": tone, "body": body})
+    posts, retry = [], []
+    for name, chunk in buckets.items():
+        made = _run(name, chunk, [tones[id(x)] for x in chunk])
+        print(f"[gen] {name}: {len(made)}/{len(chunk)}건 생성")
+        for p in made:
+            errs = filters.check(p["body"], p["facts"])
+            if errs:
+                print(f"[gen] 정규식 리젝 {p['id']} {errs}")
+                retry.append(p)
+            else:
+                posts.append(p)
 
-    # 리젝분 1회 재생성 (동기, 소량)
-    if retry_idx:
-        r_items = [items[i] for i in retry_idx]
-        r_tones = [tones[i] for i in retry_idx]
-        r_texts = _sync(r_items, r_tones)
-        for j, (item, tone) in enumerate(zip(r_items, r_tones)):
-            body = (r_texts.get(f"p{j}") or "").strip()
-            if body and not filters.check(body, item["facts"]):
-                posts.append({**item, "tone": tone, "body": body})
+    # 리젝분은 '다른 프로바이더'로 1회 재생성 (같은 모델은 같은 실수를 반복한다)
+    if retry:
+        names = list(router.writers().keys())
+        for p in retry:
+            alt = next((n for n in names if n != p["provider"]), p["provider"])
+            made = _run(alt, [p], [p["tone"]])
+            if made and not filters.check(made[0]["body"], p["facts"]):
+                posts.append(made[0])
 
-    print(f"[gen] 최종 {len(posts)}건 통과 / {len(items)}건 시도")
+    print(f"[gen] 정규식 통과 {len(posts)}건 / 시도 {len(items)}건")
     return posts

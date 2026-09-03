@@ -4,8 +4,25 @@
 전일자 공시/리포트/수급/정책을 수집해 하루 50건의 게시글 초안을 만들고,
 텔레그램으로 직원에게 배포한다. **게시는 사람이 직접 하며, 게시글에는 'AI 작성' 뱃지를 부착한다.**
 
-## 흐름
-수집 → 종목매핑 → 중복제거 → Claude 생성 → 자동검수 → 텔레그램 배포 → 상태저장
+## 흐름 (멀티 LLM)
+```
+수집 → 종목매핑 → 중복제거
+  → [1] 사실 보강   : Gemini + Google 검색 그라운딩
+  → [2] 병렬 작성   : Claude + Gemini (문체 지문 분산)
+  → [3] 정규식 검수 → 교차 LLM 심사 (작성자와 다른 모델이 채점)
+  → 상위 50건 선별 → 텔레그램 배포 → 상태저장
+```
+
+### 왜 두 모델을 쓰는가
+| 단계 | 담당 | 이유 |
+|---|---|---|
+| 사실 보강 | Gemini (grounding) | 검색 그라운딩으로 배경 사실을 채워 환각과 공허한 글을 동시에 줄임 |
+| 작성 | Claude + Gemini 5:5 | 50건을 한 모델로 뽑으면 문체 지문이 남는다. 모델을 섞으면 리듬·어휘가 갈림 |
+| 심사 | 교차 (작성자 ≠ 심사자) | 같은 모델이 자기 글을 채점하면 점수가 후해진다(self-preference bias) |
+| 재생성 | 다른 프로바이더 | 같은 모델은 같은 실수를 반복함 |
+
+심사는 factual / useful / natural / compliant 각 5점, 20점 만점.
+치명적 위반(환각 수치·매매권유·1인칭 거래경험)은 점수와 무관하게 즉시 탈락.
 
 ## 소스
 | 슬롯 | 소스 | 종목코드 |
@@ -16,13 +33,21 @@
 | policy(5) | 정책브리핑·기재부·금융위·산업부 RSS | 없음(테마) |
 | poll(3) | 위에서 파생 | 혼합 |
 
+## 모델 (2026 기준)
+| 용도 | 모델 |
+|---|---|
+| 작성 | `claude-haiku-4-5-20251001` / `gemini-3.5-flash` |
+| 보강 | `gemini-3.5-flash` (Google 검색 그라운딩) |
+| 심사 | `claude-haiku-4-5-20251001` / `gemini-3.1-flash-lite` |
+
 ## 톤 5종
 `pro`(전문) `calm`(진중) `light`(장난) `buddy`(친근) `skeptic`(회의)
 → 전부 3인칭. 1인칭 투자 경험 서술은 필터에서 자동 리젝된다.
 
 ## 세팅
 1. `pip install -r requirements.txt`
-2. GitHub Secrets 등록: `ANTHROPIC_API_KEY`, `DART_API_KEY`, `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID`
+2. GitHub Secrets 등록: `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `DART_API_KEY`, `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID`
+   - 한쪽 키만 넣어도 동작한다. 살아있는 프로바이더에 물량이 자동으로 몰린다.
 3. 로컬 테스트: `python main.py --dry-run` (수집만, API 미호출)
 4. 스케줄: `.github/workflows/daily.yml` — UTC 21:00 = KST 06:00
 

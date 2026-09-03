@@ -26,10 +26,16 @@ jobs:
       - name: Generate & distribute
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}
           DART_API_KEY:      ${{ secrets.DART_API_KEY }}
           TELEGRAM_TOKEN:    ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID:  ${{ secrets.TELEGRAM_CHAT_ID }}
           CLAUDE_MODEL:      ${{ vars.CLAUDE_MODEL || 'claude-haiku-4-5-20251001' }}
+          GEMINI_MODEL:      ${{ vars.GEMINI_MODEL || 'gemini-3.5-flash' }}
+          GEMINI_JUDGE_MODEL: ${{ vars.GEMINI_JUDGE_MODEL || 'gemini-3.1-flash-lite' }}
+          ENABLE_ENRICH:     ${{ vars.ENABLE_ENRICH || '1' }}
+          ENABLE_JUDGE:      ${{ vars.ENABLE_JUDGE || '1' }}
+          MIN_JUDGE_SCORE:   ${{ vars.MIN_JUDGE_SCORE || '14' }}
           TZ: Asia/Seoul
         run: python main.py
 
