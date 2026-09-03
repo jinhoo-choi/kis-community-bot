@@ -187,6 +187,22 @@ def main():
     ok.append(run("KIND 시장구분 오인 안함", "코스닥" not in _tbl.values()))
     ok.append(run("KIND ETF 제외", "KODEX 인버스" not in _tbl))
 
+
+    # ── 복사 영역 분리 (고지 문구는 앱이 자동 표기하므로 <pre> 밖이어야 함)
+    import src.telegram_bot as _tg
+    _card = _tg._text({
+        "stock_name": "산일전기", "stock_code": "062040", "kind": "research",
+        "tone": "pro", "board": "stock", "provider": "claude",
+        "score": {"total": 18}, "src": "https://example.com/r",
+        "body": "본문 첫 줄.\n본문 둘째 줄.\n다들 어떻게 보시나요.",
+    })
+    _pre = _card[_card.index("<pre>") + 5:_card.index("</pre>")]
+    ok.append(run("복사영역에 본문만", _pre.strip().endswith("보시나요.")))
+    ok.append(run("복사영역에 AI생성 표기 없음", "AI 생성" not in _pre))
+    ok.append(run("복사영역에 투자책임 문구 없음", "투자 판단" not in _pre))
+    ok.append(run("복사영역에 출처 URL 없음", "http" not in _pre))
+    ok.append(run("고지문구는 pre 밖에 존재", "AI 생성" in _card.split("</pre>")[1]))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 

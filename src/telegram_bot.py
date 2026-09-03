@@ -2,6 +2,12 @@
 
 <pre> 로 본문을 감싸면 모바일에서 탭 1회로 전체 복사가 되므로
 직원이 커뮤니티에 붙여넣기 하기 쉽다.
+
+중요: <pre> 안에는 '커뮤니티에 그대로 붙여넣을 본문'만 들어간다.
+      AI 생성 표기·출처·투자책임 고지는 한국투자 앱이 게시 시 자동으로 붙이므로
+      복사 대상에서 제외해야 한다. 안에 두면 직원이 매번 지워야 하고,
+      안 지우면 앱 문구와 중복 표기된다.
+      → 고지 문구는 <pre> 밖에 참고용으로만 표시한다.
 """
 import html
 import time
@@ -29,8 +35,11 @@ def _text(p: dict) -> str:
         f"<i>{p.get('provider','?')} · 심사 {(p.get('score') or {}).get('total','-')}/20</i>\n"
         f"<a href=\"{html.escape(p['src'])}\">원문 보기</a>\n"
     )
-    body = p["body"].strip() + "\n\n" + FOOTER.format(src=p["src"])
-    return head + f"<pre>{html.escape(body)}</pre>"
+    # <pre> 안 = 복사 대상 (본문만)
+    body = html.escape(p["body"].strip())
+    # <pre> 밖 = 복사되지 않는 참고 정보. 앱이 자동 표기하므로 여기선 안내만 한다.
+    note = html.escape(FOOTER.format(src=p["src"]).replace("\n", " / "))
+    return head + f"<pre>{body}</pre>\n<i>↑ 박스만 복사됩니다 · 앱 자동표기: {note}</i>"
 
 
 def send_all(posts: list[dict]) -> int:
