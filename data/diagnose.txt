@@ -1,0 +1,71 @@
+
+==================================================================
+1. 한경컨센서스 테이블 구조
+==================================================================
+HTTP 200 / 27963 bytes
+
+[table 0] class=None rows=4
+  헤더: ['작성일', '제목', '적정가격', '투자의견', '작성자', '제공출처', '기업정보', '차트', '첨부파일']
+  ── row 0 (td 9개)
+     td[0] text='2026-09-03'
+     td[1] text='롯데지주(004990) 노이즈보다 다가올 호황에 조명롯데지주(004990) 노이즈보다 다가' href='/analysis/downpdf?report_idx=652107'
+     td[2] text='33,000'
+     td[3] text='매수'
+     td[4] text='이동주'
+     td[5] text='SK증권'
+     td[6] text='' href="javascript:_popup_open('https://comp.kisline.com/hi/HI0100M0"
+     td[7] text='' href='/chart/view_frame?report_type=CO&business_code=004990'
+     td[8] text='' href='/analysis/downpdf?report_idx=652107'
+  ── row 1 (td 9개)
+     td[0] text='2026-09-03'
+     td[1] text='산일전기(062040) 과도한 저평가 영역 + 8월 2개 Big Momentum → TP ' href='/analysis/downpdf?report_idx=652103'
+     td[2] text='290,000'
+     td[3] text='Buy'
+     td[4] text='성종화'
+     td[5] text='LS증권'
+     td[6] text='' href="javascript:_popup_open('https://comp.kisline.com/hi/HI0100M0"
+     td[7] text='' href='/chart/view_frame?report_type=CO&business_code=062040'
+     td[8] text='' href='/analysis/downpdf?report_idx=652103'
+  ── row 2 (td 9개)
+     td[0] text='2026-09-03'
+     td[1] text='코리아써키트(007810) 시간을 주시면, 더 강해져 돌아옵니다코리아써키트(007810) ' href='/analysis/downpdf?report_idx=652096'
+     td[2] text='90,000'
+     td[3] text='Buy'
+     td[4] text='양승수'
+     td[5] text='메리츠증권'
+     td[6] text='' href="javascript:_popup_open('https://comp.kisline.com/hi/HI0100M0"
+     td[7] text='' href='/chart/view_frame?report_type=CO&business_code=007810'
+     td[8] text='' href='/analysis/downpdf?report_idx=652096'
+
+==================================================================
+2. 전일 시세 소스 후보 (pykrx 대체)
+==================================================================
+[A] naver siseJson  HTTP 200  
+ [['날짜', '시가', '고가', '저가', '종가', '거래량', '외국인소진율'],
+
+	
+	
+		
+["20260825", 249000, 258000, 245000, 257000, 21617407, 46.65],
+		
+["20260826", 256500, 266500, 255500, 261500, 19532523, 46.71],
+		
+["20260827", 270000, 271000,
+[B] KODEX 200선물인버스2X 252670 종가=83 등락=0.00% 거래대금=82
+[B] KODEX 인버스 114800 종가=1,061 등락=-0.19% 거래대금=1,061
+[B] TIGER 200선물인버스2X 252710 종가=90 등락=0.00% 거래대금=89
+[B] naver sise_quant  HTTP 200  파싱 83건
+[C] KRX 상장법인목록  HTTP 200  1263334 bytes
+[C] 네이버 종목 시세 KOSPI  HTTP 200  102417 bytes
+
+==================================================================
+3. 정책 소스 후보 (korea.kr 대체)
+==================================================================
+  korea.kr RSS         실패 ConnectTimeout
+  기재부 보도자료             실패 ConnectTimeout
+  금융위 보도자료             실패 ConnectTimeout
+  한국은행 보도자료            HTTP 200   393086 bytes  '                                          \t \t\t \t\t \t \t  \t \t\t \t\t \t \t  \t '
+  산업부 보도자료             실패 ConnectTimeout
+  금감원 보도자료             실패 ConnectionError
+  연합뉴스 경제 RSS          HTTP 200    94447 bytes  '<?xml version="1.0" encoding="UTF-8"?> <rss version="2.0" xmlns:conten'
+  한경 정책 RSS            HTTP 200    22761 bytes  '<!DOCTYPE html> <html lang="ko"> <head> <meta charset="UTF-8"> <title>'
