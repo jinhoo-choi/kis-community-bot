@@ -7,6 +7,7 @@ CHAT 후보        : group      *******4253  커뮤니티게시글봇
 CHAT 후보        : private    ******2744  진후
   update 개수    : 2
   update 종류    : ['message']
+SUFFIX 발송      : OK  ...4253
 DART_API_KEY     : OK  총 450건
 ANTHROPIC_KEY    : OK
 GEMINI_KEY       : OK
