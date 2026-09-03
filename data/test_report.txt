@@ -1,0 +1,11 @@
+=== 1. syntax ===
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "<string>", line 1, in <listcomp>
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/ast.py", line 50, in parse
+    return compile(source, filename, mode, flags,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<unknown>", line 155
+    log(f"[KIND] 6자리코드 개수: {len(re.findall(r'>\s*(\d{6})\s*<', t))}")
+                                                                    ^
+SyntaxError: f-string expression part cannot include a backslash
