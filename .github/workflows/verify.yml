@@ -30,16 +30,11 @@ jobs:
           mkdir -p data
           : > data/verify.txt
           if [ -z "$TG" ]; then
-            echo "TELEGRAM_TOKEN : 미등록" | tee -a data/verify.txt
+            echo "TELEGRAM_TOKEN   : 미등록" | tee -a data/verify.txt
             exit 0
           fi
-          R=$(curl -s "https://api.telegram.org/bot${TG}/getMe")
-          OK=$(echo "$R" | python3 -c "import json,sys;print(json.load(sys.stdin).get('ok'))")
-          NAME=$(echo "$R" | python3 -c "
-import json,sys
-d=json.load(sys.stdin).get('result',{})
-print('@'+d.get('username','?'), '|', d.get('first_name',''))" 2>/dev/null || echo "-")
-          echo "TELEGRAM_TOKEN : $([ "$OK" = "True" ] && echo OK || echo FAIL)  $NAME" | tee -a data/verify.txt
+          curl -s "https://api.telegram.org/bot${TG}/getMe" -o /tmp/me.json
+          python3 tools/verify_helper.py getme | tee -a data/verify.txt
 
       - name: Telegram getUpdates (chat_id 조회)
         env:
@@ -47,39 +42,7 @@ print('@'+d.get('username','?'), '|', d.get('first_name',''))" 2>/dev/null || ec
         run: |
           [ -z "$TG" ] && exit 0
           curl -s "https://api.telegram.org/bot${TG}/getUpdates" -o /tmp/u.json
-          python3 - <<'PY'
-import json, os
-d = json.load(open('/tmp/u.json'))
-res = d.get('result', [])
-chats = {}
-for u in res:
-    for k in ('message', 'edited_message', 'channel_post', 'my_chat_member'):
-        c = (u.get(k) or {}).get('chat')
-        if c:
-            chats[c['id']] = (c.get('type'), c.get('title') or c.get('username') or c.get('first_name'))
-
-# 레포에 커밋되는 파일: 마스킹
-with open('data/verify.txt', 'a', encoding='utf-8') as f:
-    if not chats:
-        f.write("CHAT 후보     : 없음 — 봇을 그룹에 초대한 뒤 '/start@봇아이디' 를 그룹에 보내세요\n")
-    for cid, (t, title) in chats.items():
-        s = str(cid)
-        f.write(f"CHAT 후보     : {t:10s} {'*'*(len(s)-4)}{s[-4:]}  {title}\n")
-
-# Job Summary: 전체 값 (Actions UI 에서만 보이고 커밋되지 않음)
-sm = os.environ.get('GITHUB_STEP_SUMMARY')
-if sm:
-    with open(sm, 'a', encoding='utf-8') as f:
-        f.write("## TELEGRAM_CHAT_ID 후보\n\n")
-        if not chats:
-            f.write("업데이트 없음. 봇을 그룹에 초대하고 `/start@봇아이디` 를 그룹 채팅에 보낸 뒤 다시 실행하세요.\n")
-            f.write("(Privacy Mode 가 기본 ON 이라 봇을 명시하지 않은 메시지는 보이지 않습니다)\n")
-        else:
-            f.write("| type | chat_id | 이름 |\n|---|---|---|\n")
-            for cid, (t, title) in chats.items():
-                f.write(f"| {t} | `{cid}` | {title} |\n")
-            f.write("\n이 값을 `TELEGRAM_CHAT_ID` 시크릿으로 등록하세요.\n")
-PY
+          python3 tools/verify_helper.py updates
 
       - name: Telegram sendMessage (테스트 발송)
         if: ${{ inputs.send_test }}
@@ -101,43 +64,34 @@ PY
         env:
           K: ${{ secrets.DART_API_KEY }}
         run: |
-          if [ -z "$K" ]; then echo "DART_API_KEY   : 미등록" | tee -a data/verify.txt; exit 0; fi
+          if [ -z "$K" ]; then echo "DART_API_KEY     : 미등록" | tee -a data/verify.txt; exit 0; fi
           D=$(date -d "yesterday" +%Y%m%d)
           R=$(curl -s "https://opendart.fss.or.kr/api/list.json?crtfc_key=${K}&bgn_de=${D}&end_de=${D}&page_count=10")
-          python3 - "$R" <<'PY' | tee -a data/verify.txt
-import json, sys
-try:
-    d = json.loads(sys.argv[1])
-except Exception:
-    print("DART_API_KEY   : FAIL (응답 파싱 불가)"); raise SystemExit
-st = d.get('status')
-msg = {'000': 'OK', '010': 'FAIL 미등록 키', '011': 'FAIL 사용중지', '013': 'OK (해당일 공시 없음)',
-       '020': 'FAIL 요청한도 초과', '100': 'FAIL 필드 오류'}.get(st, f"status={st}")
-print(f"DART_API_KEY   : {msg}  총 {d.get('total_count', 0)}건")
-PY
+          echo "$R" > /tmp/dart.json
+          python3 tools/verify_helper.py dart | tee -a data/verify.txt
 
       - name: Anthropic
         env:
           K: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          if [ -z "$K" ]; then echo "ANTHROPIC_KEY  : 미등록" | tee -a data/verify.txt; exit 0; fi
+          if [ -z "$K" ]; then echo "ANTHROPIC_KEY    : 미등록" | tee -a data/verify.txt; exit 0; fi
           C=$(curl -s -o /tmp/a.json -w "%{http_code}" https://api.anthropic.com/v1/messages \
             -H "x-api-key: $K" -H "anthropic-version: 2023-06-01" -H "content-type: application/json" \
             -d '{"model":"claude-haiku-4-5-20251001","max_tokens":8,"messages":[{"role":"user","content":"ping"}]}')
           E=$(python3 -c "import json;d=json.load(open('/tmp/a.json'));print((d.get('error') or {}).get('message','')[:80])" 2>/dev/null)
-          echo "ANTHROPIC_KEY  : $([ "$C" = "200" ] && echo OK || echo "FAIL($C) $E")" | tee -a data/verify.txt
+          echo "ANTHROPIC_KEY    : $([ "$C" = "200" ] && echo OK || echo "FAIL($C) $E")" | tee -a data/verify.txt
 
       - name: Gemini
         env:
           K: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          if [ -z "$K" ]; then echo "GEMINI_KEY     : 미등록" | tee -a data/verify.txt; exit 0; fi
+          if [ -z "$K" ]; then echo "GEMINI_KEY       : 미등록" | tee -a data/verify.txt; exit 0; fi
           C=$(curl -s -o /tmp/g.json -w "%{http_code}" \
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent" \
             -H "x-goog-api-key: $K" -H "content-type: application/json" \
             -d '{"contents":[{"parts":[{"text":"ping"}]}]}')
           E=$(python3 -c "import json;d=json.load(open('/tmp/g.json'));print((d.get('error') or {}).get('message','')[:80])" 2>/dev/null)
-          echo "GEMINI_KEY     : $([ "$C" = "200" ] && echo OK || echo "FAIL($C) $E")" | tee -a data/verify.txt
+          echo "GEMINI_KEY       : $([ "$C" = "200" ] && echo OK || echo "FAIL($C) $E")" | tee -a data/verify.txt
 
       - name: Summary & commit
         if: always()
