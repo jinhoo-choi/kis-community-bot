@@ -10,8 +10,8 @@ def P(i, code="005930", total=18, fatal=None, kind="disclosure"):
     return {"id": f"p{i}", "stock_code": code, "kind": kind, "provider": "claude",
             "score": {"total": total, "fatal": fatal or []}}
 
-def run(name, cond):
-    print(("  OK  " if cond else "  FAIL") + f"  {name}")
+def run(name, cond, detail=""):
+    print(("  OK  " if cond else "  FAIL") + f"  {name}" + (f"  ({detail})" if detail else ""))
     return cond
 
 def main():
@@ -126,6 +126,21 @@ def main():
         == ("007810", "코리아써키트 시간을 주시면, 더 강해져 돌아옵니다")))
     ok.append(run("한경 코드없는 제목 통과",
         hk("반도체 업황 점검") == ("", "반도체 업황 점검")))
+
+
+    # ── 한경 제목 파싱 (2026-09-03 실측 HTML 기반 회귀)
+    from src.sources.research import _undouble, _strip_code
+    hk = [
+        ("롯데지주(004990) 노이즈보다 다가올 호황에 조명롯데지주(004990) 노이즈보다 다가올 호황에 조명",
+         "004990", "롯데지주 노이즈보다 다가올 호황에 조명"),
+        ("코리아써키트(007810) 시간을 주시면, 더 강해져 돌아옵니다코리아써키트",
+         "007810", "코리아써키트 시간을 주시면, 더 강해져 돌아옵니다"),
+        ("산일전기(062040) 과도한 저평가 영역", "062040", "산일전기 과도한 저평가 영역"),
+        ("반도체 업황 점검", "", "반도체 업황 점검"),
+    ]
+    for raw, ecode, etitle in hk:
+        c, t = _strip_code(_undouble(raw))
+        ok.append(run(f"한경 파싱 {ecode or 'no-code'}", c == ecode and t == etitle, t))
 
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)

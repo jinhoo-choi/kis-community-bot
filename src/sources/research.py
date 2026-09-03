@@ -78,18 +78,18 @@ def _undouble(s: str) -> str:
     h = len(s) // 2
     if len(s) % 2 == 0 and s[:h] == s[h:]:          # 완전 2배 반복
         return s[:h]
-    hits = list(re.finditer(r"\(\d{6}\)", s))        # 뒤쪽이 잘려 있는 경우
-    if len(hits) >= 2:
-        return s[:hits[1].start()].rstrip()
-
-    # 반복분이 중간에서 잘린 경우: '종목명(코드) 부제 + 종목명(잘림)'
+    # 두 번째 사본은 '종목명' 부터 시작한다. 코드 위치가 아니라 이름 위치에서 잘라야
+    # 앞의 종목명이 남지 않는다. (2026-09-03: '조명 롯데지주' 잔여 사례)
+    hits = list(re.finditer(r"\(\d{6}\)", s))
     if hits:
         name = s[:hits[0].start()].strip()
+        tail = s[hits[0].end():]
         if len(name) >= 2:
-            tail = s[hits[0].end():]
             idx = tail.find(name)
             if idx > 0:
                 return (s[:hits[0].end()] + tail[:idx]).rstrip()
+        if len(hits) >= 2:
+            return s[:hits[1].start()].rstrip()
     return s
 
 
