@@ -12,16 +12,22 @@ TELEGRAM_TOKEN    = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID  = os.environ.get("TELEGRAM_CHAT_ID", "")
 
 # --- 생성 목표 ---
-TARGET_POSTS = 50
+TARGET_POSTS = int(os.environ.get("TARGET_POSTS", "50"))
 OVERGEN_RATE = 1.5          # 정규식 리젝 + 심사 탈락 대비 150% 생성
 
-SLOT_QUOTA = {              # 슬롯별 목표 건수 (합 = TARGET_POSTS)
+_BASE_QUOTA = {             # 50건 기준 슬롯 배분
     "disclosure": 20,       # DART 공시
     "research":   12,       # 증권사 리포트
     "flow":       10,       # 특징주/수급
     "policy":      5,       # 정책/거시
     "poll":        3,       # 토론 발제
 }
+
+# TARGET_POSTS 를 줄이면 슬롯도 비례 축소한다.
+# 축소하지 않으면 소량 실행 시 disclosure 하나가 정원을 다 먹어
+# 다른 톤·유형을 확인할 수 없다. 각 슬롯 최소 1건은 보장한다.
+_scale = TARGET_POSTS / sum(_BASE_QUOTA.values())
+SLOT_QUOTA = {k: max(1, round(v * _scale)) for k, v in _BASE_QUOTA.items()}
 
 # --- 모델 (멀티 프로바이더) ---
 # Claude: 대량 저비용 haiku / 문체 품질 우선 sonnet

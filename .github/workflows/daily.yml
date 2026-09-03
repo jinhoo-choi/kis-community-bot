@@ -6,6 +6,10 @@ on:
     - cron: '0 21 * * 0-4'
   workflow_dispatch:
     inputs:
+      target_posts:
+        description: '배포 건수 (비우면 50)'
+        type: string
+        default: ''
       dry_run:
         description: '수집만 실행 (LLM/텔레그램 호출 없음)'
         type: boolean
@@ -50,6 +54,7 @@ jobs:
           ENABLE_JUDGE:      ${{ vars.ENABLE_JUDGE || '1' }}
           MIN_JUDGE_SCORE:   ${{ vars.MIN_JUDGE_SCORE || '14' }}
           MAX_PER_STOCK:     ${{ vars.MAX_PER_STOCK || '2' }}
+          TARGET_POSTS:      ${{ inputs.target_posts || vars.TARGET_POSTS || '50' }}
           TZ: Asia/Seoul
         run: |
           set -o pipefail
@@ -79,6 +84,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/state.json data/run_stats.jsonl
+          git add data/state.json data/run_stats.jsonl data/posts_latest.json
+          git add -f data/filter_log_*.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "chore: update state $(date +%F)"
           git push
