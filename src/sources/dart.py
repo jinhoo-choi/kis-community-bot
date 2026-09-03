@@ -1,0 +1,87 @@
+"""DART OpenAPI - 전일자 주요 공시 수집.
+
+API 키 발급: https://opendart.fss.or.kr (무료)
+list.json 은 종목코드(stock_code)를 직접 제공하므로 매핑 환각이 없다.
+"""
+import time
+import requests
+from datetime import datetime, timedelta
+
+from config import DART_API_KEY, KST, REQUEST_DELAY, USER_AGENT
+
+BASE = "https://opendart.fss.or.kr/api/list.json"
+
+# 커뮤니티에서 반응이 나오는 공시 유형만 화이트리스트
+KEYWORDS = [
+    "유상증자", "무상증자", "전환사채", "신주인수권", "자기주식",
+    "단일판매", "공급계약", "영업(잠정)실적", "매출액또는손익구조",
+    "주식분할", "주식병합", "합병", "분할", "타법인주식", "현금·현물배당",
+    "최대주주변경", "감자", "임상시험", "특허취득",
+]
+
+
+def _yesterday() -> str:
+    d = datetime.now(KST) - timedelta(days=1)
+    # 월요일 실행이면 금요일 공시를 본다
+    while d.weekday() >= 5:
+        d -= timedelta(days=1)
+    return d.strftime("%Y%m%d")
+
+
+def fetch(limit: int = 30) -> list[dict]:
+    if not DART_API_KEY:
+        print("[dart] DART_API_KEY 없음 → 스킵")
+        return []
+
+    day = _yesterday()
+    items, page = [], 1
+
+    while len(items) < limit and page <= 5:
+        r = requests.get(
+            BASE,
+            params={
+                "crtfc_key": DART_API_KEY,
+                "bgn_de": day,
+                "end_de": day,
+                "corp_cls": "Y",        # Y=유가증권, K=코스닥 (둘 다 원하면 루프)
+                "page_no": page,
+                "page_count": 100,
+            },
+            headers={"User-Agent": USER_AGENT},
+            timeout=15,
+        )
+        data = r.json()
+        if data.get("status") != "000":
+            print(f"[dart] status={data.get('status')} {data.get('message')}")
+            break
+
+        for row in data.get("list", []):
+            if not row.get("stock_code"):
+                continue
+            if not any(k in row["report_nm"] for k in KEYWORDS):
+                continue
+            items.append({
+                "id": f"dart-{row['rcept_no']}",
+                "kind": "disclosure",
+                "stock_code": row["stock_code"],
+                "stock_name": row["corp_name"],
+                "title": row["report_nm"].strip(),
+                "facts": (
+                    f"공시일: {row['rcept_dt']}\n"
+                    f"회사: {row['corp_name']} ({row['stock_code']})\n"
+                    f"공시명: {row['report_nm'].strip()}\n"
+                    f"제출인: {row.get('flr_nm', '')}\n"
+                    f"※ 공시 제목 외 상세 수치는 제공되지 않음. 수치를 추정하지 말 것."
+                ),
+                "src": f"https://dart.fss.or.kr/dsaf001/main.do?rcpNo={row['rcept_no']}",
+            })
+            if len(items) >= limit:
+                break
+
+        if page >= int(data.get("total_page", 1)):
+            break
+        page += 1
+        time.sleep(REQUEST_DELAY)
+
+    print(f"[dart] {len(items)}건 수집 ({day})")
+    return items
