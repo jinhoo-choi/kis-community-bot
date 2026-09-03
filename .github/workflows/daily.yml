@@ -29,7 +29,12 @@ jobs:
       - run: pip install -r requirements.txt
 
       - name: Tests
-        run: ./run_tests.sh
+        id: tests
+        continue-on-error: true
+        run: |
+          mkdir -p data
+          set -o pipefail
+          ./run_tests.sh 2>&1 | tee data/test_report.txt
 
       - name: Generate & distribute
         env:
@@ -55,14 +60,19 @@ jobs:
             python main.py
           fi
 
-      - name: Commit dry-run report
-        if: ${{ inputs.dry_run }}
+      - name: Commit reports
+        if: ${{ always() && inputs.dry_run }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f data/dryrun_report.txt
+          git add -f data/dryrun_report.txt data/test_report.txt || true
           git diff --staged --quiet || git commit -m "chore: dry-run report $(date +%FT%H%M)"
+          git pull --rebase -q origin main || true
           git push
+
+      - name: Fail if tests failed
+        if: ${{ always() && steps.tests.outcome == 'failure' && !inputs.dry_run }}
+        run: exit 1
 
       - name: Commit state
         if: ${{ !inputs.dry_run }}
