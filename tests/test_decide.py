@@ -142,6 +142,13 @@ def main():
         c, t = _strip_code(_undouble(raw))
         ok.append(run(f"한경 파싱 {ecode or 'no-code'}", c == ecode and t == etitle, t))
 
+
+    # ── 2026-09-03 실측 오탐 회귀 (연합뉴스 RSS 정치·인사 유입)
+    for t in ["추미애 1차 추경서 예산 누락분 보강했어야",
+              "총학생회장단 만난 박홍근, 청년 성장단계별 종합투자 추진"]:
+        ok.append(run(f"정치소재 차단: {t[:12]}",
+                      is_hard_excluded({"title": t, "stock_code": None})[0]))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 

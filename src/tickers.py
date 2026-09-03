@@ -31,22 +31,40 @@ def listed() -> dict[str, str]:
                          headers={"User-Agent": "Mozilla/5.0"})
         r.raise_for_status()
         r.encoding = "euc-kr"
-        soup = BeautifulSoup(r.text, "html.parser")
+        html = r.text
 
         table = {}
-        for tr in soup.select("tr"):
-            tds = tr.find_all("td")
-            if len(tds) < 2:
+        # 1.2MB 급 표는 html.parser 가 중간에 트리를 끊는다. lxml 우선.
+        for parser in ("lxml", "html.parser"):
+            try:
+                soup = BeautifulSoup(html, parser)
+            except Exception:
                 continue
-            name = tds[0].get_text(strip=True)
-            code = tds[1].get_text(strip=True)
-            if not re.fullmatch(r"\d{6}", code):
-                continue
-            if not name or _EXCLUDE_NAME.search(name):
-                continue
-            table[name] = code
+            for tr in soup.find_all("tr"):
+                tds = tr.find_all("td")
+                if len(tds) < 2:
+                    continue
+                name = tds[0].get_text(strip=True)
+                code = tds[1].get_text(strip=True)
+                if not re.fullmatch(r"\d{6}", code):
+                    continue
+                if name and not _EXCLUDE_NAME.search(name):
+                    table[name] = code
+            if len(table) > 1000:
+                print(f"[tickers] 상장 {len(table)}종목 로드 ({parser})")
+                return table
 
-        print(f"[tickers] 상장 {len(table)}종목 로드")
+        # 폴백: 태그 트리 없이 원문에서 직접 추출
+        for name, code in re.findall(
+                r"<td[^>]*>\s*([^<>]{2,40}?)\s*</td>\s*<td[^>]*>\s*(\d{6})\s*</td>", html):
+            name = name.strip()
+            if name and not _EXCLUDE_NAME.search(name):
+                table[name] = code
+
+        if len(table) < 1000:
+            print(f"[tickers] ⚠ 상장 {len(table)}종목만 파싱됨 — 소스 구조 변경 의심")
+        else:
+            print(f"[tickers] 상장 {len(table)}종목 로드 (regex)")
         return table
     except Exception as e:
         print(f"[tickers] ⚠ 상장리스트 로드 실패: {e}")

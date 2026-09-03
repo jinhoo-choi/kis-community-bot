@@ -33,6 +33,23 @@ OPTIONAL_FEEDS = [
     ("산업통상자원부", "https://www.korea.kr/rss/dept_motie.xml"),
 ]
 
+# 2026-09-03 실측 오탐: '추미애 1차 추경', '김석봉 씨티 부사장 선임',
+# '연합뉴스 이시각 헤드라인 1800', '머니톡스 외국인 소문의 진실'
+# 연합뉴스 RSS 는 정부 보도자료가 아니라 종합 뉴스라 이런 것이 섞인다.
+EXCLUDE = [
+    "헤드라인", "이시각", "종합]", "1보", "2보", "속보",
+    "선임", "인사", "취임", "별세", "부고", "인터뷰", "칼럼", "사설",
+    "의원", "장관 후보", "국감", "대표 발언", "논평", "회견",
+    "머니톡스", "오늘의", "주요뉴스", "브리핑]",
+]
+
+# 정책·산업 성격이 분명해야 통과시킨다 (단순 키워드 포함만으로는 부족)
+POLICY_SIGNALS = [
+    "발표", "추진", "도입", "시행", "확대", "지원", "규제", "완화", "개편",
+    "투자", "육성", "대책", "방안", "계획", "협약", "체결", "수주", "전망",
+    "인상", "인하", "동결", "결정",
+]
+
 KEYWORDS = [
     "금리", "물가", "수출", "반도체", "배터리", "이차전지", "원전", "방산",
     "바이오", "세제", "감세", "규제", "지원", "투자", "예산", "환율",
@@ -53,7 +70,14 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
     for it in root.iter("item"):
         title = (it.findtext("title") or "").strip()
         desc = re.sub(r"<[^>]+>", "", it.findtext("description") or "").strip()
-        if not title or not any(k in title + desc for k in KEYWORDS):
+        blob = title + " " + desc
+        if not title or not any(k in blob for k in KEYWORDS):
+            continue
+        if any(x in title for x in EXCLUDE):
+            continue
+        if not any(x in blob for x in POLICY_SIGNALS):
+            continue
+        if len(re.sub(r"\W", "", title)) < 8:
             continue
         out.append({
             "id": "pol-" + re.sub(r"\W", "", title)[:24],

@@ -29,8 +29,8 @@ _EXCLUDE = re.compile(
     r"파워|스팩|리츠$|제\d+호|인버스|레버리지"
 )
 
-MIN_TURNOVER_EOK = 300      # 거래대금 300억원 미만은 글감이 약하다
-MIN_ABS_CHANGE = 2.0        # 등락률 절댓값 2% 미만은 특징주가 아니다
+MIN_TURNOVER_EOK = 150      # 실측 결과 300억 기준에서 6건만 통과해 완화
+MIN_ABS_CHANGE = 1.5        # 실측 결과 2.0% 기준에서 물량 부족
 
 
 def _last_trading_day() -> str:
