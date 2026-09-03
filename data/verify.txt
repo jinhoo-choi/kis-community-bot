@@ -1,5 +1,12 @@
 TELEGRAM_TOKEN   : OK  @commwrite_bot (comwritebot)
-CHAT 후보        : 없음 — 봇 초대 후 그룹에 '/start@봇아이디' 전송 필요
+  privacy_mode   : ON (봇 명시 필요)
+  can_join_groups: True
+  webhook        : 없음 (getUpdates 정상 사용 가능)
+  pending        : 2건 대기 중
+CHAT 후보        : group      *******4253  커뮤니티게시글봇
+CHAT 후보        : private    ******2744  진후
+  update 개수    : 2
+  update 종류    : ['message']
 DART_API_KEY     : OK  총 450건
 ANTHROPIC_KEY    : OK
 GEMINI_KEY       : OK
