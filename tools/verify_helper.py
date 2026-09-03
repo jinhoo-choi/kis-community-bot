@@ -115,6 +115,25 @@ def dart():
     print(f"DART_API_KEY     : {msg}  총 {d.get('total_count', 0)}건")
 
 
+def resolve():
+    """CHAT_SUFFIX(뒤 4자리)로 chat_id 를 찾아 표준출력한다.
+
+    전체 chat_id 를 퍼블릭 레포에 남기지 않고 테스트 발송을 하기 위한 경로.
+    운영에서는 TELEGRAM_CHAT_ID 시크릿을 쓴다 — getUpdates 는 24시간만 보관하므로
+    이 방식을 상시 운영에 쓰면 어느 날 조용히 실패한다.
+    """
+    suffix = (os.environ.get("CHAT_SUFFIX") or "").strip()
+    d = _load("/tmp/u.json")
+    for u in d.get("result", []):
+        for k in ("message", "edited_message", "channel_post",
+                  "my_chat_member", "chat_member"):
+            c = (u.get(k) or {}).get("chat")
+            if c and str(c["id"]).endswith(suffix):
+                print(c["id"])
+                return
+    print("")
+
+
 if __name__ == "__main__":
     {"getme": getme, "updates": updates, "dart": dart,
-     "webhook": webhook}[sys.argv[1]]()
+     "webhook": webhook, "resolve": resolve}[sys.argv[1]]()

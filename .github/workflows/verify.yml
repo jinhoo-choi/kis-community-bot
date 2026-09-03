@@ -12,6 +12,11 @@ on:
         description: 'TELEGRAM_CHAT_ID 로 테스트 메시지 발송'
         type: boolean
         default: false
+      chat_suffix:
+        description: '테스트 발송할 chat_id 뒤 4자리 (시크릿 미등록 시 사용)'
+        type: string
+        default: ''
+
 
 permissions:
   contents: write
@@ -47,7 +52,29 @@ jobs:
           curl -s "https://api.telegram.org/bot${TG}/getUpdates?limit=100&timeout=0" -o /tmp/u.json
           python3 tools/verify_helper.py updates | tee -a data/verify.txt
 
-      - name: Telegram sendMessage (테스트 발송)
+      - name: Telegram sendMessage (suffix 매칭 발송)
+        if: ${{ inputs.chat_suffix != '' }}
+        env:
+          TG: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_SUFFIX: ${{ inputs.chat_suffix }}
+        run: |
+          CID=$(python3 tools/verify_helper.py resolve)
+          if [ -z "$CID" ]; then
+            echo "SUFFIX 매칭      : FAIL 해당 chat 없음 (getUpdates 24h 만료 가능)" | tee -a data/verify.txt
+            exit 0
+          fi
+          R=$(curl -s -X POST "https://api.telegram.org/bot${TG}/sendMessage" \
+                -d "chat_id=${CID}" -d "parse_mode=HTML" \
+                --data-urlencode "text=<b>[kis-community-bot] 연결 테스트</b>
+봇 연결이 정상입니다.
+이후 이 채널로 매일 아침 게시글 초안이 배포됩니다.
+<pre>이 회색 박스는 탭 한 번으로 전체 복사됩니다.
+직원분들은 여기 내용을 커뮤니티에 붙여넣으시면 됩니다.</pre>")
+          OK=$(echo "$R" | python3 -c "import json,sys;print(json.load(sys.stdin).get('ok'))")
+          echo "SUFFIX 발송      : $([ "$OK" = "True" ] && echo OK || echo FAIL)  ...${CID: -4}" | tee -a data/verify.txt
+          [ "$OK" = "True" ] || echo "$R" | head -c 200
+
+      - name: Telegram sendMessage (시크릿 발송)
         if: ${{ inputs.send_test }}
         env:
           TG: ${{ secrets.TELEGRAM_TOKEN }}
