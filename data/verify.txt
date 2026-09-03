@@ -1,0 +1,5 @@
+TELEGRAM_TOKEN   : OK  @commwrite_bot (comwritebot)
+CHAT 후보        : 없음 — 봇 초대 후 그룹에 '/start@봇아이디' 전송 필요
+DART_API_KEY     : OK  총 450건
+ANTHROPIC_KEY    : OK
+GEMINI_KEY       : OK
