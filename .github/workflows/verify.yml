@@ -63,13 +63,12 @@ jobs:
             echo "SUFFIX 매칭      : FAIL 해당 chat 없음 (getUpdates 24h 만료 가능)" | tee -a data/verify.txt
             exit 0
           fi
+          # ※ 여러 줄 문자열을 YAML 블록 스칼라에 직접 넣으면 들여쓰기가 깨져
+          #   워크플로 파일 자체가 무효화된다. 메시지는 파일로 만들어 전달한다.
+          python3 tools/verify_helper.py testmsg > /tmp/msg.txt
           R=$(curl -s -X POST "https://api.telegram.org/bot${TG}/sendMessage" \
                 -d "chat_id=${CID}" -d "parse_mode=HTML" \
-                --data-urlencode "text=<b>[kis-community-bot] 연결 테스트</b>
-봇 연결이 정상입니다.
-이후 이 채널로 매일 아침 게시글 초안이 배포됩니다.
-<pre>이 회색 박스는 탭 한 번으로 전체 복사됩니다.
-직원분들은 여기 내용을 커뮤니티에 붙여넣으시면 됩니다.</pre>")
+                --data-urlencode "text@/tmp/msg.txt")
           OK=$(echo "$R" | python3 -c "import json,sys;print(json.load(sys.stdin).get('ok'))")
           echo "SUFFIX 발송      : $([ "$OK" = "True" ] && echo OK || echo FAIL)  ...${CID: -4}" | tee -a data/verify.txt
           [ "$OK" = "True" ] || echo "$R" | head -c 200

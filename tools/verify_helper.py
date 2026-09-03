@@ -134,6 +134,23 @@ def resolve():
     print("")
 
 
+def testmsg():
+    """테스트 발송 본문. 실제 배포 카드와 같은 형식으로 보여 준다."""
+    print(
+        "<b>[kis-community-bot] 연결 테스트</b>\n"
+        "봇 연결이 정상입니다.\n"
+        "이후 이 채널로 매일 아침 게시글 초안이 배포됩니다.\n\n"
+        "<b>산일전기 (062040)</b>\n"
+        "리포트 · 전문 · 종목방\n"
+        "<pre>아래 회색 박스가 실제 게시글 초안입니다.\n"
+        "모바일에서 박스를 한 번 탭하면 전체가 복사됩니다.\n"
+        "복사해서 커뮤니티에 그대로 붙여넣으시면 됩니다.\n\n"
+        "— AI 생성 · 출처 표기\n"
+        "※ 투자 판단과 그 책임은 본인에게 있습니다.</pre>"
+    )
+
+
 if __name__ == "__main__":
     {"getme": getme, "updates": updates, "dart": dart,
-     "webhook": webhook, "resolve": resolve}[sys.argv[1]]()
+     "webhook": webhook, "resolve": resolve,
+     "testmsg": testmsg}[sys.argv[1]]()

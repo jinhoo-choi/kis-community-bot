@@ -17,6 +17,27 @@ print('ok' if not bad else f'{bad} file(s) failed')
 sys.exit(1 if bad else 0)
 PYEOF
 echo
+echo "=== 1b. workflow YAML ==="
+# 워크플로 블록 스칼라에 컬럼0 텍스트(파이썬/여러줄 메시지)를 넣어
+# 워크플로 파일 자체가 무효화된 사고가 2회 있었다. 푸시 전에 잡는다.
+python3 - <<'PYEOF'
+import glob, sys
+try:
+    import yaml
+except ImportError:
+    print("  (pyyaml 미설치 - 스킵)"); sys.exit(0)
+bad = 0
+for f in glob.glob('.github/workflows/*.yml'):
+    try:
+        d = yaml.safe_load(open(f, encoding='utf-8'))
+        n = sum(len(j.get('steps', [])) for j in d['jobs'].values())
+        print(f"  OK   {f}  ({n} steps)")
+    except Exception as e:
+        print(f"  FAIL {f}  {str(e).splitlines()[-1][:80]}")
+        bad += 1
+sys.exit(1 if bad else 0)
+PYEOF
+echo
 echo "=== 2. unit (decide / gate / entity / dedup / rules) ==="
 python3 tests/test_decide.py
 echo
