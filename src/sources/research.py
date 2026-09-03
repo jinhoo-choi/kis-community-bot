@@ -31,7 +31,7 @@ def fetch_naver(limit: int = 12) -> list[dict]:
     out = []
     soup = crawl.get_soup(url, encoding="euc-kr")
     if soup is None:
-        crawl.report("naver_research", 0, limit)
+        crawl.report("naver_research", 0, limit, "페이지 로드 실패")
         return out
 
     for tr in crawl.select_rows(soup, NAVER_ROW_SELECTORS):
@@ -65,7 +65,7 @@ def fetch_naver(limit: int = 12) -> list[dict]:
         if len(out) >= limit:
             break
 
-    crawl.report("naver_research", len(out), limit)
+    crawl.report("naver_research", len(out), limit, "셀렉터 개편 의심")
     crawl.sleep_jitter()
     return out
 
@@ -75,7 +75,7 @@ def fetch_hankyung(limit: int = 8) -> list[dict]:
     out = []
     soup = crawl.get_soup(url)
     if soup is None:
-        crawl.report("hankyung", 0, limit)
+        crawl.report("hankyung", 0, limit, "페이지 로드 실패")
         return out
 
     for tr in crawl.select_rows(soup, HK_ROW_SELECTORS):
@@ -103,7 +103,7 @@ def fetch_hankyung(limit: int = 8) -> list[dict]:
         if len(out) >= limit:
             break
 
-    crawl.report("hankyung", len(out), limit)
+    crawl.report("hankyung", len(out), limit, "셀렉터 개편 의심")
     crawl.sleep_jitter()
     return out
 

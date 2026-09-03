@@ -6,6 +6,7 @@ pykrx 로 KRX 공식 데이터를 받는다. 여기서 나온 수치는 사실�
 from datetime import datetime, timedelta
 
 from config import KST
+from src import crawl
 
 
 def _last_trading_day() -> str:
@@ -20,14 +21,17 @@ def fetch(limit: int = 12) -> list[dict]:
         from pykrx import stock
     except ImportError:
         print("[market] pykrx 미설치 → 스킵")
+        crawl.report("market", 0, 0, "pykrx 미설치")
         return []
 
     day = _last_trading_day()
-    out = []
+    out, _is_holiday = [], False
     try:
         df = stock.get_market_ohlcv(day, market="ALL")
         if df is None or df.empty:
             print(f"[market] {day} 데이터 없음(휴장)")
+            _is_holiday = True
+            crawl.report("market", 0, 0)
             return []
 
         # 거래대금 상위 중 등락률 절댓값이 큰 종목
@@ -57,5 +61,6 @@ def fetch(limit: int = 12) -> list[dict]:
     except Exception as e:
         print(f"[market] 실패: {e}")
 
-    print(f"[market] {len(out)}건 수집")
+    # 휴장일은 정상적인 0건이므로 경고 대상에서 제외한다
+    crawl.report("market", len(out), 0 if not out and _is_holiday else limit)
     return out

@@ -80,12 +80,19 @@ def first_text(node, selectors: list[str], attr: str = None) -> str:
     return ""
 
 
-def report(source: str, got: int, expected: int):
-    """소스별 수집 결과 기록. 0건 또는 기대의 30% 미만이면 경고."""
+def report(source: str, got: int, expected: int, reason: str = ""):
+    """소스별 수집 결과 기록. 0건 또는 기대의 30% 미만이면 경고.
+
+    expected=0 은 '정상적인 0건'(휴장 등)을 뜻하며 경고하지 않는다.
+    reason 은 왜 0건인지를 담는다. HTML 소스는 셀렉터 개편, API 소스는 키·응답 문제로
+    원인이 다르므로 같은 문구를 쓰면 오진한다.
+    """
     _health[source] = (got, expected)
-    if got == 0:
-        print(f"[crawl] ⚠ {source} 수집 0건 — 셀렉터 개편 의심")
-    elif expected and got < expected * 0.3:
+    if expected == 0:
+        print(f"[crawl] {source} {got}건 (정상 0건)")
+    elif got == 0:
+        print(f"[crawl] ⚠ {source} 수집 0건 — {reason or '원인 미상'}")
+    elif got < expected * 0.3:
         print(f"[crawl] ⚠ {source} {got}/{expected}건 — 수집률 저조")
     else:
         print(f"[crawl] {source} {got}건")
@@ -94,7 +101,8 @@ def report(source: str, got: int, expected: int):
 def health() -> dict:
     """(수집, 기대, 이상여부). run_stats 와 텔레그램 경고에 쓰인다."""
     return {
-        s: {"got": g, "expected": e, "degraded": g == 0 or (e and g < e * 0.3)}
+        s: {"got": g, "expected": e,
+            "degraded": bool(e) and (g == 0 or g < e * 0.3)}
         for s, (g, e) in _health.items()
     }
 

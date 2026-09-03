@@ -7,7 +7,8 @@ import time
 import requests
 from datetime import datetime, timedelta
 
-from config import DART_API_KEY, KST, REQUEST_DELAY, USER_AGENT
+from config import DART_API_KEY, KST, USER_AGENT
+from src import crawl
 
 BASE = "https://opendart.fss.or.kr/api/list.json"
 
@@ -31,6 +32,7 @@ def _yesterday() -> str:
 def fetch(limit: int = 30) -> list[dict]:
     if not DART_API_KEY:
         print("[dart] DART_API_KEY 없음 → 스킵")
+        crawl.report("dart", 0, 0, "API 키 미설정")
         return []
 
     day = _yesterday()
@@ -81,7 +83,7 @@ def fetch(limit: int = 30) -> list[dict]:
         if page >= int(data.get("total_page", 1)):
             break
         page += 1
-        time.sleep(REQUEST_DELAY)
+        crawl.sleep_jitter()
 
-    print(f"[dart] {len(items)}건 수집 ({day})")
+    crawl.report("dart", len(items), limit, "DART API 응답 이상 또는 키 만료")
     return items

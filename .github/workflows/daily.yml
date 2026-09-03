@@ -5,6 +5,11 @@ on:
     # UTC 21:00 = KST 익일 06:00 / 월~금 배포 (일~목 UTC 실행)
     - cron: '0 21 * * 0-4'
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '수집만 실행 (LLM/텔레그램 호출 없음)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -41,9 +46,10 @@ jobs:
           MIN_JUDGE_SCORE:   ${{ vars.MIN_JUDGE_SCORE || '14' }}
           MAX_PER_STOCK:     ${{ vars.MAX_PER_STOCK || '2' }}
           TZ: Asia/Seoul
-        run: python main.py
+        run: python main.py ${{ inputs.dry_run && '--dry-run' || '' }}
 
       - name: Commit state
+        if: ${{ !inputs.dry_run }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

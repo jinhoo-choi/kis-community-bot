@@ -6,7 +6,8 @@ import time
 import requests
 from xml.etree import ElementTree as ET
 
-from config import REQUEST_DELAY, USER_AGENT
+from config import USER_AGENT
+from src import crawl
 
 FEEDS = [
     ("정책브리핑", "https://www.korea.kr/rss/policy.xml"),
@@ -24,13 +25,15 @@ KEYWORDS = [
 
 
 def fetch(limit: int = 8) -> list[dict]:
-    out = []
+    out, feed_ok = [], 0
     for dept, url in FEEDS:
         if len(out) >= limit:
             break
         try:
             r = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=15)
+            r.raise_for_status()
             root = ET.fromstring(r.content)
+            feed_ok += 1
             for it in root.iter("item"):
                 title = (it.findtext("title") or "").strip()
                 desc = re.sub(r"<[^>]+>", "", it.findtext("description") or "").strip()
@@ -53,10 +56,14 @@ def fetch(limit: int = 8) -> list[dict]:
                 if len(out) >= limit:
                     break
         except Exception as e:
-            print(f"[policy] {dept} 실패: {e}")
-        time.sleep(REQUEST_DELAY)
+            print(f"[policy] {dept} 실패: {type(e).__name__} {e}")
+        crawl.sleep_jitter()
 
-    print(f"[policy] {len(out)}건 수집")
+    # 피드가 하나도 안 열렸으면 '0건'이 아니라 '장애'다. 구분해서 보고한다.
+    if feed_ok == 0:
+        crawl.report("policy_rss", 0, limit, "RSS 피드 전건 실패")
+    else:
+        crawl.report("policy_rss", len(out), limit, "키워드 매칭 0건")
     return out
 
 
