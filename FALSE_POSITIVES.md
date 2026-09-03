@@ -30,6 +30,8 @@
 | 2026-09-03 | 상장리스트 0건 | KRX KIND `corpList.do` 가 HTTP 200 / 1.26MB 를 반환했는데 파싱 결과 0종목 | `html.parser` 가 1.2MB 급 표 중간에서 트리를 끊음 | (본 커밋) | `lxml` 우선 + 정규식 폴백 + 1,000종목 미만이면 경고 |
 | 2026-09-03 | 정치 소재 유입 | 연합뉴스 RSS 로 `추미애 1차 추경`, `박홍근 청년 투자`, `연합뉴스 이시각 헤드라인` 등이 수집됨 | korea.kr 대체로 종합 뉴스 RSS 를 쓰면서 정부 보도자료 성격 필터가 없었음 | (본 커밋) | `gate` tier3 에 정치 키워드 추가 + policy 에 `EXCLUDE`/`POLICY_SIGNALS` 이중 조건. 회귀 2케이스 |
 
+| 2026-09-03 | CI 전용 크래시 | 로컬 `run_tests.sh` 는 통과하는데 GitHub Actions 에서만 syntax 스텝 실패 | 로컬 Python 3.12 / CI 3.11. 3.11 은 f-string 표현식 안 백슬래시를 금지하는데 `tools/diagnose.py` 에서 사용 | (본 커밋) | 백슬래시 정규식을 f-string 밖으로 분리. `run_tests.sh` 의 syntax 게이트를 `ast.parse(feature_version=(3,11))` 로 변경해 **로컬에서도 CI 문법으로 검사** |
+
 ### 알려진 의도적 동작 (버그 아님)
 | 동작 | 판단 |
 |---|---|

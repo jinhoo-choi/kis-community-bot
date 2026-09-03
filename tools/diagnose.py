@@ -152,7 +152,10 @@ def diag_listing():
         log(f"[KIND] head 400자:\n{t[:400]!r}")
         log(f"[KIND] <tr> 개수(정규식): {len(re.findall(r'<tr', t, re.I))}")
         log(f"[KIND] <td> 개수(정규식): {len(re.findall(r'<td', t, re.I))}")
-        log(f"[KIND] 6자리코드 개수: {len(re.findall(r'>\s*(\d{6})\s*<', t))}")
+        # ※ Python 3.11 은 f-string 표현식 안에 백슬래시를 허용하지 않는다.
+        #   CI(3.11)와 로컬(3.12) 차이로 SyntaxError 가 났던 지점이라 밖으로 뺀다.
+        _code_cnt = len(re.findall(r">\s*(\d{6})\s*<", t))
+        log(f"[KIND] 6자리코드 개수: {_code_cnt}")
         m = re.search(r"<tr[^>]*>.*?</tr>", t, re.S | re.I)
         if m:
             log(f"[KIND] 첫 tr:\n{m.group()[:500]!r}")
