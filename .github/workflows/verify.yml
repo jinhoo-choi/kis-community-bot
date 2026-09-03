@@ -41,8 +41,11 @@ jobs:
           TG: ${{ secrets.TELEGRAM_TOKEN }}
         run: |
           [ -z "$TG" ] && exit 0
-          curl -s "https://api.telegram.org/bot${TG}/getUpdates" -o /tmp/u.json
-          python3 tools/verify_helper.py updates
+          curl -s "https://api.telegram.org/bot${TG}/getWebhookInfo" -o /tmp/wh.json
+          python3 tools/verify_helper.py webhook | tee -a data/verify.txt
+          # offset 을 주지 않아야 대기 중 업데이트가 소비되지 않는다
+          curl -s "https://api.telegram.org/bot${TG}/getUpdates?limit=100&timeout=0" -o /tmp/u.json
+          python3 tools/verify_helper.py updates | tee -a data/verify.txt
 
       - name: Telegram sendMessage (테스트 발송)
         if: ${{ inputs.send_test }}

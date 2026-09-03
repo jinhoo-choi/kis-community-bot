@@ -27,12 +27,42 @@ def getme():
     r = d.get("result") or {}
     if d.get("ok"):
         print(f"TELEGRAM_TOKEN   : OK  @{r.get('username','?')} ({r.get('first_name','')})")
+        # Privacy Mode 가 ON 이면 그룹에서 봇을 명시하지 않은 메시지가 보이지 않는다
+        grp = r.get("can_read_all_group_messages")
+        print(f"  privacy_mode   : {'OFF (전체 수신)' if grp else 'ON (봇 명시 필요)'}")
+        print(f"  can_join_groups: {r.get('can_join_groups')}")
     else:
         print(f"TELEGRAM_TOKEN   : FAIL  {str(d.get('description') or d.get('_err'))[:60]}")
 
 
+def webhook():
+    """getUpdates 가 비는 가장 흔한 원인: webhook 이 설정되어 있으면 폴링이 막힌다."""
+    d = _load("/tmp/wh.json")
+    r = d.get("result") or {}
+    url = r.get("url") or ""
+    if url:
+        print(f"  webhook        : 설정됨 → getUpdates 차단 상태  {url[:40]}")
+        print("                   해결: deleteWebhook 호출 필요")
+    else:
+        print("  webhook        : 없음 (getUpdates 정상 사용 가능)")
+    if r.get("pending_update_count"):
+        print(f"  pending        : {r.get('pending_update_count')}건 대기 중")
+    if r.get("last_error_message"):
+        print(f"  last_error     : {str(r.get('last_error_message'))[:50]}")
+
+
 def updates():
     d = _load("/tmp/u.json")
+    if not d.get("ok", True) or "_err" in d:
+        print(f"  getUpdates     : FAIL {str(d.get('description') or d.get('_err'))[:60]}")
+    n = len(d.get("result", []))
+    print(f"  update 개수    : {n}")
+    if n:
+        # 어떤 종류의 업데이트가 왔는지 보여준다 (message 가 아니면 파서가 놓칠 수 있음)
+        kinds = set()
+        for u in d.get("result", []):
+            kinds |= {k for k in u if k != "update_id"}
+        print(f"  update 종류    : {sorted(kinds)}")
     chats = {}
     for u in d.get("result", []):
         for k in ("message", "edited_message", "channel_post",
@@ -86,4 +116,5 @@ def dart():
 
 
 if __name__ == "__main__":
-    {"getme": getme, "updates": updates, "dart": dart}[sys.argv[1]]()
+    {"getme": getme, "updates": updates, "dart": dart,
+     "webhook": webhook}[sys.argv[1]]()
