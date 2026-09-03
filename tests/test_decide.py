@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.decide import decide_distribution, temperature_for
 from src.gate import is_hard_excluded
-from src import rules
+from src import rules, entity, dedup
 
 def P(i, code="005930", total=18, fatal=None, kind="disclosure"):
     return {"id": f"p{i}", "stock_code": code, "kind": kind, "provider": "claude",
@@ -68,6 +68,34 @@ def main():
     ok.append(run("규칙 단일소스 연결",
                   len(rules.writer_block().splitlines()) == len(rules.RULES)
                   and len(rules.judge_block()) > 0))
+
+
+    # ── 귀속 검증 (인사이트봇 2026-08-02 사례 이식)
+    ok.append(run("모호명 단독 거부", not entity.verify_attribution(
+        "대상", "대상 기업 실적 점검 리포트")[0]))
+    ok.append(run("모호명+주체신호 인정", entity.verify_attribution(
+        "대상", "대상, 3분기 영업이익 증가")[0]))
+    ok.append(run("일반 종목명 인정", entity.verify_attribution(
+        "한미반도체", "한미반도체 공급계약 체결")[0]))
+    ok.append(run("제목 미등장 거부", not entity.verify_attribution(
+        "한미반도체", "반도체 업황 점검", "한미반도체 언급")[0]))
+
+    # ── 부수 언급 (fail-open 확인)
+    ok.append(run("부수언급 드롭", entity.is_incidental(
+        "한미반도체", "SK하이닉스 실적 점검", "밸류체인 한미반도체, 협력사 수혜")))
+    ok.append(run("주체는 fail-open 유지", not entity.is_incidental(
+        "한미반도체", "한미반도체 공급계약", "한미반도체 계약 체결")))
+
+    # ── 다축 dedup
+    seen = {}
+    a = {"id": "dart-1", "stock_code": "005930", "title": "유상증자 결정"}
+    b = {"id": "naver-9", "stock_code": "005930", "title": "삼성전자 유상증자 영향 점검"}
+    dedup.mark(a, seen, "2026-09-03")
+    ok.append(run("다른 소스 같은 사건 중복 제거", dedup.is_dup(b, seen)[0]))
+    c = {"id": "dart-2", "stock_code": "005930", "title": "자기주식 취득 결정"}
+    ok.append(run("다른 사건은 통과", not dedup.is_dup(c, seen)[0]))
+    ok.append(run("dedup 키 조회·저장 일치",
+                  set(dedup.keys(a)) & set(seen.keys()) == set(dedup.keys(a))))
 
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)

@@ -18,7 +18,8 @@ import os
 import sys
 
 import config
-from src import state, tickers, generator, telegram_bot, enrich, judge, gate, decide, stats
+from src import (state, tickers, generator, telegram_bot, enrich, judge,
+                 gate, decide, stats, dedup, crawl)
 from src.sources import dart, research, market, policy
 
 
@@ -43,12 +44,18 @@ def main():
     # 하드 게이트 — AI 호출 이전에 구조적으로 배제
     gated, blocked = gate.apply(raw)
 
-    items = []
+    resolved = []
     for it in gated:
         it = tickers.resolve(it)
         it["board"] = tickers.board_of(it)
-        if state.is_new(s, it["id"]):
-            items.append(it)
+        resolved.append(it)
+
+    # 다축 dedup — 같은 사건이 DART/리서치/수급으로 중복 유입되는 것을 잡는다
+    items, dup_reasons = dedup.filter_new(resolved, s["seen"])
+
+    degraded = crawl.degraded_sources()
+    if degraded:
+        print(f"[main] ⚠ 수집 이상 소스: {degraded}")
 
     picked, cnt = [], {k: 0 for k in config.SLOT_QUOTA}
     for it in items:
@@ -86,9 +93,15 @@ def main():
 
     row = stats.record(**stats.summarize(
         raw, blocked, enriched_n, posts, sent_posts, held,
-        generator.collect_fallbacks()))
+        generator.collect_fallbacks()),
+        dedup=dup_reasons, crawl_health=crawl.health())
+    print("[main] filter_log " + stats.detail_log(picked, sent_posts, held))
+    if degraded:
+        telegram_bot.send_warning(f"수집 이상 소스: {', '.join(degraded)}")
     print("[main] stats " + json.dumps(row, ensure_ascii=False))
 
+    for p_ in sent_posts:
+        dedup.mark(p_, s["seen"], __import__("datetime").datetime.now(config.KST).strftime("%Y-%m-%d"))
     state.mark(s, sent_posts)
     state.save(s)
 

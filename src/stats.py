@@ -56,3 +56,27 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) ->
         "by_provider": by_provider,
         "model_fallbacks": fallbacks,
     }
+
+
+def detail_log(items: list[dict], sent: list[dict], held: list[dict]) -> str:
+    """건별 통과/탈락 사유 로그 (인사이트봇 filter_log 패턴).
+    집계만으로는 '왜 이 글이 안 나갔는지'를 못 본다. 튜닝은 건별 사유에서 나온다."""
+    import json as _j
+    from datetime import datetime as _d
+    path = f"data/filter_log_{_d.now(KST).strftime('%Y%m%d_%H%M')}.json"
+    sent_ids = {p["id"] for p in sent}
+    rows = []
+    for p in sent + held:
+        rows.append({
+            "id": p["id"], "kind": p.get("kind"), "stock": p.get("stock_name"),
+            "title": p.get("title", "")[:60], "provider": p.get("provider"),
+            "tone": p.get("tone"), "score": (p.get("score") or {}).get("total"),
+            "result": "sent" if p["id"] in sent_ids else "held",
+            "reason": p.get("hold_reason", ""),
+            "attr_reject": p.get("attr_reject"),
+            "thin_facts": p.get("thin_facts", False),
+        })
+    os.makedirs("data", exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        _j.dump(rows, f, ensure_ascii=False, indent=1)
+    return path

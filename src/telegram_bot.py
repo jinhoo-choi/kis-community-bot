@@ -80,3 +80,13 @@ def send_summary(posts: list[dict], sent: int):
     requests.post(API.format(TELEGRAM_TOKEN, "sendMessage"),
                   json={"chat_id": TELEGRAM_CHAT_ID, "parse_mode": "HTML", "text": msg},
                   timeout=15)
+
+
+def send_warning(text: str):
+    """운영 이상 알림. 게시글 카드와 섞이지 않도록 별도 포맷."""
+    if not TELEGRAM_TOKEN:
+        return
+    requests.post(API.format(TELEGRAM_TOKEN, "sendMessage"),
+                  json={"chat_id": TELEGRAM_CHAT_ID, "parse_mode": "HTML",
+                        "text": f"<b>[운영 경고]</b>\n{html.escape(text)}"},
+                  timeout=15)
