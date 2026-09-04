@@ -32,7 +32,10 @@ def _direction_errors(body: str, facts: str) -> list[str]:
 
 
 _HEDGE = re.compile(r"것 같|로 보입니다|인 듯|듯합니다|듯요|보이네요|것으로 보")
-_ENDING = re.compile(r"([가-힣]{1,4})[.!?]")
+# 종결어미만 잡는다. 이전 정규식은 마지막 1~4글자를 통째로 떠서
+# '올랐네요' 와 '늘었네요' 가 서로 다른 값으로 세어졌다(실측 FAIL).
+_ENDING = re.compile(
+    r"(습니다|네요|어요|예요|에요|인데요|더군요|거든요|겠죠|하죠|합니다|입니다)\s*[.!?]")
 
 
 def _hedge_errors(body: str) -> list[str]:
@@ -55,7 +58,7 @@ def _number_overuse(body: str) -> list[str]:
     """숫자 나열. 제공된 수치를 전부 소비하면 표지 나열이 된다.
     실측: Voice 를 바꿔도 4건 모두 같은 6개 숫자를 같은 순서로 썼다."""
     nums = {n.replace(",", "") for n in NUM_RE.findall(body) if len(n.replace(",", "")) >= 2}
-    return [f"수치과다({len(nums)}개)"] if len(nums) > 4 else []
+    return [f"수치과다({len(nums)}개)"] if len(nums) > 3 else []
 
 
 def check(body: str, facts: str, fmt: str = None, angle: str = None,
