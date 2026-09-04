@@ -6,7 +6,7 @@
 뱃지가 있어도 허위 진술이 된다.
 """
 import config
-from src import angles, rules
+from src import angles, claims, rules
 from src import personas_v2 as v2
 
 # ── Voice (말투) 4종 ───────────────────────────────────────────
@@ -286,6 +286,7 @@ def build_messages_v2(item: dict, persona: str, angle: str = "") -> tuple[str, s
               .replace("{sentences}", p["sentences"])
               .replace("{num_cap}", str(p["num_cap"]))
               .replace("{angle_desc}", angles.contract(angle))
+              .replace("{claim_block}", claims.block(item))
               .replace("{rule_block}", rules.writer_block()))
     if item.get("thin_facts"):
         system += "\n" + rules.THIN_FACTS_WARNING

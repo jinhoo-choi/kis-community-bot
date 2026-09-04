@@ -137,6 +137,8 @@ SYSTEM_PROMPT = """당신은 한국투자증권 앱 커뮤니티에 게시될 �
 [이 글이 독자에게 알려줄 하나]
 {angle_desc}
 
+{claim_block}
+
 [절대 금지]
 {rule_block}
 

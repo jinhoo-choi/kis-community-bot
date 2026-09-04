@@ -580,6 +580,33 @@ def main():
         "x", "fact_note", "context", "fact_note", "삼성전자"))))
     _tk.listed = _bak_listed
 
+
+    # ── Positive Claim Grammar (규칙 확장의 대안)
+    from src import claims as _cl2, facts as _fx
+    _it3 = {"kind": "flow", "facts": "종가: 8,600원\n등락률: 12.41%\n"
+                                     "거래대금: 942억원\n거래량: 20일 평균의 3.2배"}
+    _cs = _cl2.build(_it3)
+    ok.append(run("claim 추출", len(_cs) == 4, str([c["type"] for c in _cs])))
+    ok.append(run("claim 블록 생성", "사용 가능한 주장" in _cl2.block(_it3)))
+    ok.append(run("금지 claim type 명시", "등락의 원인" in _cl2.block(_it3)))
+    from src.personas import build_messages_v2 as _bm2
+    _s3, _ = _bm2(_it3, "quick_memo", "reaction")
+    ok.append(run("프롬프트에 claim 주입", "C1. 등락률" in _s3))
+    for _bad in ["기대감이 반영된 것으로 보입니다.",
+                 "반도체 업황 수혜가 예상됩니다.",
+                 "수익 구조를 안정화하려는 전략으로 보입니다."]:
+        ok.append(run(f"범위이탈 차단: {_bad[:10]}",
+                      any("claim_out_of_scope" in e
+                          for e in _f2.check(_bad * 4, "x", "fact_note", "reaction",
+                                             "fact_note"))))
+    # Fact 계열화 / contrast_pair
+    ok.append(run("계열당 최대2 절충", _fx.count(_it3) == 2, str(_fx.count(_it3))))
+    _ct = _fx.contrast_pairs({"facts": "등락률: 12.41%\n마감 위치: 장중 고가 대비 8.2% 낮은 수준"})
+    ok.append(run("contrast_pair 생성", len(_ct) == 1, str(_ct)))
+    ok.append(run("호환 그래프 timeline×ratio 차단",
+                  not __import__("src.personas_v2", fromlist=["x"]).compatible(
+                      "timeline_note", "ratio")))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
