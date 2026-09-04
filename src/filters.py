@@ -31,7 +31,7 @@ def _direction_errors(body: str, facts: str) -> list[str]:
     return [f"방향오용({wrong.group()})"] if wrong else []
 
 
-def check(body: str, facts: str, fmt: str = None) -> list[str]:
+def check(body: str, facts: str, fmt: str = None, angle: str = None) -> list[str]:
     """위반 사유 리스트 반환. 빈 리스트면 통과."""
     errs = []
 
@@ -54,6 +54,18 @@ def check(body: str, facts: str, fmt: str = None) -> list[str]:
         errs.append(f"미확인수치{hallu[:3]}")
 
     errs += _direction_errors(body, facts)
+
+    # 미확인 표현은 uncertainty 앵글에서만 허용한다.
+    # "정보가 없다"는 안전한 문장이라 모델이 습관적으로 쓰고, 그게 50건 중 20건에
+    # 한 번씩 나오면 전체가 똑같아 보인다 (외부 검토 지적).
+    # 정보의 부재를 생략하는 것은 거짓을 쓰는 것과 다르다 — 원인을 암시하지 않았다면
+    # 원인을 모른다고 밝힐 필요도 없다.
+    if angle is not None:
+        from src import angles as _ang
+        if _ang.forbids_missing(angle):
+            m = _ang.MISSING_RE.search(body)
+            if m:
+                errs.append(f"미확인표현({m.group()[:12]})")
 
     # 구조가 질문 마무리를 요구하지 않는데 물음표로 끝나면 리젝.
     # 실측: 프롬프트에서 질문 강제를 뺐는데도 4건 전부 물음표로 끝났다.

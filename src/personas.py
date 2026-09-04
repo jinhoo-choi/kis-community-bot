@@ -36,74 +36,87 @@ VOICES = {
 # 하위 호환 (기존 코드/테스트가 TONES 를 참조한다)
 TONES = VOICES
 
-# ── Format (구조) 7종 ─────────────────────────────────────────
-# 길이·문장수는 여기에 귀속시킨다.
-# 기존에는 Global 규칙이 '최소 5문장'을 요구하는데 short_note 는 '3~4문장'을
-# 요구해서 동시에 만족 불가능한 조합이 있었다 (외부 검토 지적, 코드에서 확인됨).
+# ── Format (구조) 6종 ─────────────────────────────────────────
+# short_note 를 제거했다. 그건 구조가 아니라 '길이'다 (외부 검토 지적).
+# 길이를 Format 에 섞어두니 reaction/context/amount 어떤 앵글이 뽑혀도
+# "3~4문장 안에서 모델이 가장 익숙한 구조"로 수렴했다.
 FORMATS = {
     "fact_read": {
-        "no_question": True, "name": "사실→해석", "sentences": "5~7문장",
-        "desc": "확인된 사실을 먼저 쭉 적고, 마지막 한두 문장에서만 해석을 붙인다. "
+        "no_question": True, "name": "사실→해석",
+        "desc": "확인된 사실을 먼저 적고, 마지막 한 문장에서만 해석을 붙인다. "
                 "질문으로 끝내지 말고 담담하게 마무리한다.",
     },
     "question": {
-        "no_question": False, "name": "질문마무리", "sentences": "4~6문장",
+        "no_question": False, "name": "질문마무리",
         "desc": "사실을 적고 마지막 줄을 구체적인 질문으로 끝낸다. "
-                "'어떻게 보시나요' 같은 막연한 질문은 쓰지 않는다.",
+                "'어떻게 보시나요' 같은 막연한 질문은 쓰지 않는다. "
+                "입력에 있는 항목을 지목해 묻는다.",
     },
     "two_sides": {
-        "no_question": True, "name": "양면", "sentences": "5~7문장",
-        "desc": "그렇게 볼 여지와 조심할 부분을 각각 두 문장씩 적는다. "
-                "결론을 내지 않고 양쪽을 나란히 둔 채 끝낸다.",
+        "no_question": True, "name": "양면",
+        "desc": "그렇게 볼 여지와 조심할 부분을 나란히 적는다. "
+                "결론을 내지 않고 양쪽을 둔 채 끝낸다.",
     },
     "check_points": {
-        "no_question": False, "name": "확인포인트", "sentences": "4~6문장",
-        "desc": "앞으로 무엇을 더 봐야 하는지 구체적으로 두세 가지 짚는다. "
-                "불릿이 아니라 문장으로 이어 쓴다.",
+        "no_question": False, "name": "확인포인트",
+        "desc": "앞으로 어떤 정형 숫자를 보면 되는지 구체적으로 짚는다. "
+                "불릿이 아니라 문장으로 이어 쓴다. 막연한 '지켜봐야 한다'는 쓰지 않는다.",
     },
     "timeline": {
-        "no_question": True, "name": "시간순", "sentences": "4~6문장",
+        "no_question": True, "name": "시간순",
         "desc": "언제 무엇이 있었는지 순서대로 적는다. 사실관계에 있는 날짜만 쓴다. "
                 "마지막 시점으로 마무리한다.",
     },
-    "short_note": {
-        "no_question": True, "name": "짧은메모", "sentences": "3~4문장",
-        "desc": "아주 짧게 끝낸다. 배경 설명 없이 사실과 한 줄 감상만. "
-                "질문으로 끝내지 않는다.",
-    },
-    "plain_summary": {
-        "no_question": True, "name": "쉬운요약", "sentences": "4~6문장",
-        "desc": "어려운 내용을 쉬운 말로 바꿔 설명한다. 용어가 나오면 바로 풀어 쓴다. "
-                "요약으로 마무리한다.",
+    "lead_number": {
+        "no_question": True, "name": "숫자리드",
+        "desc": "숫자 하나를 첫 문장에 단독으로 던지고 시작한다. "
+                "예: '20% 상승.' / '6,500원.' 그다음 문장에서 그 숫자의 정체를 밝힌다. "
+                "회사명이나 배경 설명으로 시작하지 않는다.",
     },
 }
 
+# ── Length (길이) 3종 ─────────────────────────────────────────
+# 구조와 분리한다. 같은 구조라도 길이가 다르면 다른 글이 되고,
+# 길이가 같아도 구조가 다르면 다른 글이 되어야 한다.
+LENGTHS = {
+    "short":  {"name": "짧게", "spec": "3문장, 120자 이내"},
+    "medium": {"name": "보통", "spec": "4~5문장, 180자 이내"},
+    "long":   {"name": "길게", "spec": "6~7문장, 250자 이내"},
+}
+
 # ── 조합 가중치 ────────────────────────────────────────────────
-# 0=금지 1=어색 2=보통 3=추천.
-# 허용/금지 이분법은 poll 처럼 조합이 6가지밖에 안 남는 문제를 만든다 (외부 검토 지적).
-# 가중 랜덤으로 뽑되, 어울리지 않는 짝의 확률만 낮춘다.
+# 0=금지 1=어색 2=보통 3=추천. 가중 랜덤으로 뽑고 이미 쓴 값은 0.3배로 억제한다.
 VOICE_W = {
-    "disclosure": {"dry": 3, "calm": 3, "explainer": 2, "light": 1},
-    "research":   {"dry": 3, "calm": 3, "explainer": 2, "light": 1},
-    "flow":       {"light": 3, "dry": 3, "calm": 2, "explainer": 2},
+    "disclosure": {"dry": 3, "calm": 3, "explainer": 3, "light": 1},
+    "research":   {"dry": 3, "calm": 3, "explainer": 2, "light": 2},
+    "flow":       {"light": 3, "dry": 3, "calm": 2, "explainer": 1},
     "policy":     {"explainer": 3, "calm": 3, "dry": 2, "light": 2},
     "poll":       {"explainer": 3, "light": 3, "calm": 2, "dry": 1},
     "theme":      {"explainer": 3, "calm": 3, "light": 2, "dry": 2},
 }
 
 FORMAT_W = {
-    "disclosure": {"fact_read": 3, "short_note": 2, "check_points": 3,
-                   "timeline": 2, "plain_summary": 2, "two_sides": 1, "question": 1},
-    "research":   {"fact_read": 3, "two_sides": 3, "check_points": 2,
-                   "question": 2, "short_note": 2, "plain_summary": 1, "timeline": 1},
-    "flow":       {"short_note": 2, "fact_read": 3, "question": 3,
-                   "check_points": 2, "two_sides": 1, "plain_summary": 1, "timeline": 1},
-    "policy":     {"plain_summary": 3, "two_sides": 3, "check_points": 2,
-                   "question": 2, "fact_read": 2, "timeline": 2, "short_note": 1},
+    "disclosure": {"fact_read": 3, "check_points": 3, "lead_number": 3,
+                   "timeline": 2, "two_sides": 1, "question": 2},
+    "research":   {"fact_read": 3, "lead_number": 3, "two_sides": 2,
+                   "check_points": 2, "question": 2, "timeline": 1},
+    "flow":       {"lead_number": 3, "fact_read": 3, "question": 2,
+                   "check_points": 2, "two_sides": 1, "timeline": 1},
+    "policy":     {"two_sides": 3, "check_points": 3, "fact_read": 2,
+                   "question": 2, "timeline": 2, "lead_number": 1},
     "poll":       {"question": 3, "two_sides": 3, "check_points": 2,
-                   "plain_summary": 1, "fact_read": 1, "short_note": 1, "timeline": 1},
-    "theme":      {"plain_summary": 3, "two_sides": 2, "question": 2,
-                   "fact_read": 2, "check_points": 2, "short_note": 1, "timeline": 1},
+                   "fact_read": 1, "lead_number": 1, "timeline": 1},
+    "theme":      {"two_sides": 3, "fact_read": 2, "question": 2,
+                   "check_points": 2, "lead_number": 2, "timeline": 1},
+}
+
+LENGTH_W = {
+    "disclosure": {"short": 2, "medium": 3, "long": 2},
+    "research":   {"short": 3, "medium": 3, "long": 1},
+    "flow":       {"short": 3, "medium": 3, "long": 1},
+    "policy":     {"short": 2, "medium": 3, "long": 2},
+    "poll":       {"short": 2, "medium": 3, "long": 1},
+    "theme":      {"short": 2, "medium": 3, "long": 2},
 }
 
 SYSTEM_PROMPT = """당신은 한국투자증권 앱 커뮤니티에 게시될 글을 쓰는 AI 작성 봇입니다.
@@ -112,12 +125,15 @@ SYSTEM_PROMPT = """당신은 한국투자증권 앱 커뮤니티에 게시될 �
 [말투]
 {voice_desc}
 
-[이번 글에서 강조할 것]
+[이 글이 독자에게 알려줄 하나]
 {angle_desc}
 
 [글 구조]
 {format_desc}
-- 분량: {sentences}, 총 250자 이내
+
+[분량]
+{length_spec}
+입력 데이터를 전부 쓰려 하지 마세요. 하나만 주인공으로 세우고 나머지는 버립니다.
 
 [절대 금지]
 {rule_block}
@@ -153,7 +169,7 @@ USER_PROMPT = """다음 자료를 바탕으로 커뮤니티 게시글 본문을 
 
 
 def build_messages(item: dict, tone: str, fmt: str = "fact_read",
-                   angle: str = "") -> tuple[str, str]:
+                   angle: str = "", length: str = "medium") -> tuple[str, str]:
     """(system, user) 프롬프트 쌍 반환.
 
     금지 규칙은 src/rules.py 단일 소스에서 주입된다.
@@ -163,9 +179,9 @@ def build_messages(item: dict, tone: str, fmt: str = "fact_read",
     f = FORMATS[fmt]
     system = SYSTEM_PROMPT.format(
         voice_desc=VOICES[tone]["desc"],
-        angle_desc=angles.desc(angle),
+        angle_desc=angles.contract(angle),
         format_desc=f["desc"],
-        sentences=f["sentences"],
+        length_spec=LENGTHS.get(length, LENGTHS["medium"])["spec"],
         rule_block=rules.writer_block(),
     )
     if item.get("thin_facts"):

@@ -135,13 +135,14 @@ class FakeProvider:
             return GenResult(BODIES[iid], self.name, self.model)
 
         thin = "배경 정보 확보에 실패" in system
+        # 미확인 표현을 넣지 않는다. 그건 uncertainty 앵글에서만 허용되며
+        # 정상 산출물 픽스처가 매번 리젝되면 시나리오가 검증되지 않는다.
         body = (
-            f"{_title(user)} 관련 내용이 공시로 나왔습니다.\n"
-            f"자세한 수치는 원문에 나와 있지 않습니다. "
-            + ("배경이 확인되지 않아 더 적기는 어렵네요. " if thin else
+            f"{_title(user)} 관련 공시가 어제 나왔습니다.\n"
+            + ("공시 제목 기준으로만 정리해 둡니다. " if thin else
                "업황 흐름과 같이 보면 좋을 것 같습니다. ")
-            + "짧게 짚고 넘어갑니다.\n"
-              "무엇을 더 확인해봐야 할까요."
+            + "규모는 원문에서 확인하시면 됩니다.\n"
+              "다음 공시에서 이어지는 내용이 나올 것 같습니다."
         )
         return GenResult(body, self.name, self.model)
 

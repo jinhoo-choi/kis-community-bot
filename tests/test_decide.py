@@ -105,7 +105,7 @@ def main():
     try:
         build_messages({"kind": "flow", "title": "t", "facts": "f",
                         "stock_name": "삼성전자", "thin_facts": True},
-                       "dry", "short_note", "reaction")
+                       "dry", "lead_number", "reaction", "short")
         JSYS.replace("__FATAL_BLOCK__", rules.judge_block())
         built = True
     except Exception as e:
@@ -304,15 +304,17 @@ def main():
     from src.generator import pick_style as _pick
     from src import angles as _ang
     ok.append(run("Voice 4종", len(_V) == 4, str(len(_V))))
-    ok.append(run("Format 7종", len(_F) == 7, str(len(_F))))
-    ok.append(run("Angle 8종", len(_ang.ANGLES) == 8, str(len(_ang.ANGLES))))
-    ok.append(run("3축 조합 200가지 이상",
-                  len(_V) * len(_ang.ANGLES) * len(_F) >= 200,
-                  str(len(_V) * len(_ang.ANGLES) * len(_F))))
-    # 가중치 방식이므로 슬롯별로 모든 Voice/Format 이 확률 > 0 이어야 한다
+    from src.personas import LENGTHS as _L
+    ok.append(run("Format 6종(길이 분리)", len(_F) == 6, str(len(_F))))
+    ok.append(run("Length 축 신설", len(_L) == 3, str(len(_L))))
+    ok.append(run("short_note 제거", "short_note" not in _F))
+    ok.append(run("Angle 10종", len(_ang.ANGLES) == 10, str(len(_ang.ANGLES))))
+    ok.append(run("4축 조합 700가지 이상",
+                  len(_V) * len(_ang.ANGLES) * len(_F) * len(_L) >= 700,
+                  str(len(_V) * len(_ang.ANGLES) * len(_F) * len(_L))))
     ok.append(run("금지 조합 없음(가중치 방식)",
                   all(len(v) == 4 for v in _VW.values()) and
-                  all(len(f) == 7 for f in _FW.values())))
+                  all(len(f) == 6 for f in _FW.values())))
 
     _it = {"kind": "disclosure", "stock_code": "005930",
            "facts": "발행 총액: 200억원\n전환가액: 2,396원\n만기: 2031-09-11\n"
@@ -321,6 +323,7 @@ def main():
     _c = [_pick(_it, {}, _used) for _ in range(6)]
     ok.append(run("같은 실행 내 축 반복 억제",
                   len({x[1] for x in _c}) >= 4, str([x[1] for x in _c])))
+    ok.append(run("Length 도 분산", len({x[3] for x in _c}) >= 2, str([x[3] for x in _c])))
 
     # Angle 은 사실관계가 허용하는 것만
     ok.append(run("데이터에 없는 Angle 미생성",
@@ -329,7 +332,7 @@ def main():
                   _ang.available({"facts": "상세 수치는 공개되지 않음"}) == []))
 
     # 길이·문장수는 Format 에 귀속 (Global '최소 5문장' 과 충돌하던 문제)
-    ok.append(run("short_note 문장수 지정", _F["short_note"]["sentences"] == "3~4문장"))
+    ok.append(run("Length spec 존재", "3문장" in _L["short"]["spec"]))
     from src.personas import SYSTEM_PROMPT as _SP
     ok.append(run("Global 최소문장수 제거", "최소 5문장" not in _SP))
     ok.append(run("'확인되지 않았다' 강제 제거", '"확인되지 않았다"고 적을 것' not in _SP))
@@ -346,8 +349,8 @@ def main():
 
     # ── 구조별 질문 마무리 금지 (실측: 프롬프트만으로는 4건 전부 물음표로 끝남)
     _qb = "디케이티가 어제 올랐네요. 거래대금도 늘었는데요. 사유는 확인이 안 됩니다. 배경이 뭐라고 보시나요?"
-    ok.append(run("short_note 질문마무리 리젝",
-                  any("질문마무리금지" in e for e in _f2.check(_qb, "", "short_note"))))
+    ok.append(run("fact_read 질문마무리 리젝",
+                  any("질문마무리금지" in e for e in _f2.check(_qb, "", "fact_read"))))
     ok.append(run("open_question 은 허용",
                   not any("질문마무리금지" in e for e in _f2.check(_qb, "", "open_question"))))
 
@@ -377,6 +380,28 @@ def main():
         {"facts": "발행 총액: 200억원\n\n[검색으로 확인된 배경]\n- 코스닥 상장사"})))
     ok.append(run("업종 서술 있으면 context 채택", "context" in _ang.available(
         {"facts": "발행 총액: 200억원\n- 바이오시밀러 기업으로 의약품 제조업 영위"})))
+
+
+    # ── 미확인 표현 fatal (uncertainty 앵글에서만 허용)
+    _mb = "로보티즈가 어제 크게 올랐습니다. 거래대금도 늘었습니다. 다만 구체적인 상승 배경은 확인되지 않았습니다."
+    ok.append(run("미확인표현 fatal", any("미확인표현" in e for e in
+                  _f2.check(_mb, "등락률: 20.4%", "fact_read", "reaction"))))
+    ok.append(run("uncertainty 앵글은 허용", not any("미확인표현" in e for e in
+                  _f2.check(_mb, "등락률: 20.4%", "fact_read", "uncertainty"))))
+    ok.append(run("공개되지않음도 탐지",
+                  bool(_ang.MISSING_RE.search("상세 수치는 아직 공개되지 않았으니"))))
+
+    # ── Angle eligibility (쿠콘 사례: 데이터 없는데 context 선택)
+    _thin = {"facts": "등락률: 18.2%\n종가: 41,300원\n거래대금: 312억원"}
+    ok.append(run("빈약한 특징주에 context 미채택",
+                  "context" not in _ang.available(_thin), str(_ang.available(_thin))))
+    _rich = dict(_thin); _rich["facts"] += "\n20일 평균 거래대금 대비: 4.2배\n최근 5거래일 누적: +31.20%"
+    ok.append(run("지표 보강 시 compare 채택",
+                  "compare" in _ang.available(_rich), str(_ang.available(_rich))))
+
+    # ── Angle 이 생성 계약을 담고 있는가
+    ok.append(run("Angle 계약에 첫문장 규칙", "첫 문장" in _ang.contract("reaction")))
+    ok.append(run("lead_number 구조 존재", "lead_number" in _F))
 
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)

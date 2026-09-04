@@ -12,7 +12,7 @@ from src import filters
 from src.llm import router
 from src.decide import temperature_for
 from src import angles
-from src.personas import VOICE_W, FORMAT_W, build_messages
+from src.personas import VOICE_W, FORMAT_W, LENGTH_W, build_messages
 
 
 # 리젝된 생성물 보관 (품질 검토용). main 이 filter_log 에 함께 기록한다.
@@ -63,7 +63,12 @@ def _weighted(weights: dict, penalize: set) -> str:
     return items[-1][0]
 
 
-def pick_style(item: dict, recent: dict, used_now: set) -> tuple[str, str, str]:
+# uncertainty 앵글은 전체의 일부만 허용한다. 안 그러면 '정보가 없다'는 글이 늘어난다.
+UNCERTAINTY_QUOTA = 0.10
+
+
+def pick_style(item: dict, recent: dict, used_now: set,
+               allow_uncertainty: bool = False) -> tuple[str, str, str, str]:
     """(voice, angle, format) 선택.
 
     외부 검토 반영으로 축을 셋으로 나눴다. 그리고 회피 기준을 조합 ID 가 아니라
@@ -73,25 +78,27 @@ def pick_style(item: dict, recent: dict, used_now: set) -> tuple[str, str, str]:
     """
     kind = item["kind"]
     vw = VOICE_W.get(kind, {"calm": 3, "dry": 2, "explainer": 2, "light": 1})
-    fw = FORMAT_W.get(kind, {"fact_read": 3, "question": 2, "short_note": 2})
+    fw = FORMAT_W.get(kind, {"fact_read": 3, "question": 2, "check_points": 2})
+    lw = LENGTH_W.get(kind, {"short": 2, "medium": 3, "long": 2})
 
     hist = recent.get(item.get("stock_code") or "_theme", [])
     used_v = {h.split(":")[0] for h in hist} | {u[0] for u in used_now}
     used_a = {h.split(":")[1] for h in hist if h.count(":") >= 2} | {u[1] for u in used_now}
     used_f = {h.split(":")[-1] for h in hist} | {u[2] for u in used_now}
 
+    used_l = {h.split(":")[3] for h in hist if h.count(":") >= 3} | {u[3] for u in used_now}
+
     voice = _weighted(vw, used_v)
     fmt = _weighted(fw, used_f)
+    length = _weighted(lw, used_l)
 
     cand = angles.available(item)
-    if cand:
-        # Angle 도 동일하게 가중 억제한다. 후보가 하나뿐이면 그대로 쓴다.
-        angle = _weighted({a: 3 for a in cand}, used_a)
-    else:
-        angle = ""
+    if not allow_uncertainty:
+        cand = [a for a in cand if a != "uncertainty"] or cand
+    angle = _weighted({a: 3 for a in cand}, used_a) if cand else ""
 
-    used_now.add((voice, angle, fmt))
-    return voice, angle, fmt
+    used_now.add((voice, angle, fmt, length))
+    return voice, angle, fmt, length
 
 
 def pick_tone(item: dict, recent: dict) -> str:      # 하위 호환
@@ -99,25 +106,27 @@ def pick_tone(item: dict, recent: dict) -> str:      # 하위 호환
 
 
 def _run(provider_name: str, items: list[dict], tones: list[str],
-         fmts: list[str] = None, angs: list[str] = None) -> list[dict]:
+         fmts: list[str] = None, angs: list[str] = None,
+         lens: list[str] = None) -> list[dict]:
     if not items:
         return []
     fmts = fmts or ["fact_read"] * len(items)
     angs = angs or [""] * len(items)
+    lens = lens or ["medium"] * len(items)
     p = router.writers()[provider_name]
     # temperature 가 다른 항목은 배치를 나눈다 (배치는 파라미터가 요청별로 고정되므로)
     groups = {}
-    for i, (it, tn, fm, ag) in enumerate(zip(items, tones, fmts, angs)):
-        groups.setdefault(temperature_for(it), []).append((i, it, tn, fm, ag))
+    for i, (it, tn, fm, ag, ln) in enumerate(zip(items, tones, fmts, angs, lens)):
+        groups.setdefault(temperature_for(it), []).append((i, it, tn, fm, ag, ln))
 
     results = [None] * len(items)
     for temp, grp in groups.items():
-        jobs = [build_messages(it, tn, fm, ag) for _, it, tn, fm, ag in grp]
+        jobs = [build_messages(it, tn, fm, ag, ln) for _, it, tn, fm, ag, ln in grp]
         for g, r in zip(grp, p.generate_many(jobs, temperature=temp)):
             results[g[0]] = r
 
     out = []
-    for it, tn, fm, ag, r in zip(items, tones, fmts, angs, results):
+    for it, tn, fm, ag, ln, r in zip(items, tones, fmts, angs, lens, results):
         if not r.ok or not r.text:
             # 원인을 삼키면 '0건 생성'만 보이고 왜인지 알 수 없다
             print(f"[gen] ⚠ {provider_name} 실패 {it['id']}: "
@@ -127,14 +136,17 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
         if not body:
             print(f"[gen] ⚠ {provider_name} 후처리 후 빈 본문 {it['id']}")
             continue
-        out.append({**it, "tone": tn, "fmt": fm, "angle": ag, "body": body,
-                    "provider": r.provider, "model": r.model})
+        out.append({**it, "tone": tn, "fmt": fm, "angle": ag, "length": ln,
+                    "body": body, "provider": r.provider, "model": r.model})
     return out
 
 
 def generate(items: list[dict], recent: dict) -> list[dict]:
     used_now: set = set()
-    styles = {id(it): pick_style(it, recent, used_now) for it in items}
+    n_unc = max(1, int(len(items) * UNCERTAINTY_QUOTA))
+    styles = {}
+    for i, it in enumerate(items):
+        styles[id(it)] = pick_style(it, recent, used_now, allow_uncertainty=(i < n_unc))
     buckets = router.split_by_ratio(items)
 
     posts, retry = [], []
@@ -142,10 +154,11 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
         made = _run(name, chunk,
                     [styles[id(x)][0] for x in chunk],
                     [styles[id(x)][2] for x in chunk],
-                    [styles[id(x)][1] for x in chunk])
+                    [styles[id(x)][1] for x in chunk],
+                    [styles[id(x)][3] for x in chunk])
         print(f"[gen] {name}: {len(made)}/{len(chunk)}건 생성")
         for p in made:
-            errs = filters.check(p["body"], p["facts"], p.get("fmt"))
+            errs = filters.check(p["body"], p["facts"], p.get("fmt"), p.get("angle"))
             if errs:
                 # 본문을 함께 남겨야 '이 리젝이 타당했는지' 사후 검토가 된다
                 print(f"[gen] 정규식 리젝 {p['id']} {errs}")
@@ -162,8 +175,9 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
         for p in retry:
             alt = next((n for n in names if n != p["provider"]), p["provider"])
             made = _run(alt, [p], [p["tone"]], [p.get("fmt", "fact_read")],
-                        [p.get("angle", "")])
-            if made and not filters.check(made[0]["body"], p["facts"], p.get("fmt")):
+                        [p.get("angle", "")], [p.get("length", "medium")])
+            if made and not filters.check(made[0]["body"], p["facts"],
+                                          p.get("fmt"), p.get("angle")):
                 posts.append(made[0])
 
     print(f"[gen] 정규식 통과 {len(posts)}건 / 시도 {len(items)}건")

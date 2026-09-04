@@ -47,6 +47,41 @@ def _num(s: str) -> float:
         return 0.0
 
 
+SISE_JSON = ("https://api.finance.naver.com/siseJson.naver"
+             "?symbol={code}&requestType=1&startTime={s}&endTime={e}&timeframe=day")
+
+
+def _add_history(r: dict):
+    """네이버 siseJson 으로 20일 평균 거래대금·5일 수익률·장중 고저를 붙인다.
+    원인 추정이 아니라 정형 수치라 안전하면서 콘텐츠 variation 을 크게 늘린다."""
+    import json
+    from datetime import datetime, timedelta
+    try:
+        end = datetime.now(KST)
+        beg = end - timedelta(days=45)
+        url = SISE_JSON.format(code=r["code"], s=beg.strftime("%Y%m%d"),
+                               e=end.strftime("%Y%m%d"))
+        txt = crawl.requests.get(url, headers=crawl.HEADERS, timeout=12).text
+        rows = json.loads(txt.replace("'", '"'))[1:]      # [0] 은 헤더
+        if len(rows) < 6:
+            return
+        # [날짜, 시가, 고가, 저가, 종가, 거래량, 외국인소진율]
+        last = rows[-1]
+        r["high"], r["low"] = int(last[2]), int(last[3])
+        if last[1]:
+            r["from_open"] = (int(last[4]) - int(last[1])) / int(last[1]) * 100
+        if len(rows) >= 6 and int(rows[-6][4]):
+            r["ret5"] = (int(last[4]) - int(rows[-6][4])) / int(rows[-6][4]) * 100
+        # 거래량 기준 배수 (거래대금 대신 거래량으로 계산 — siseJson 에 금액이 없다)
+        vols = [int(x[5]) for x in rows[-21:-1] if x[5]]
+        if vols and int(last[5]):
+            avg = sum(vols) / len(vols)
+            if avg > 0:
+                r["vol_x"] = int(last[5]) / avg
+    except Exception:
+        pass
+
+
 def fetch(limit: int = 12) -> list[dict]:
     day = _last_trading_day()
     rows, ok = [], 0
@@ -93,6 +128,12 @@ def fetch(limit: int = 12) -> list[dict]:
         return []
 
     rows.sort(key=lambda r: abs(r["pct"]), reverse=True)
+
+    # 입력이 종가·등락률·거래대금 3개뿐이면 아무리 축을 늘려도
+    # 표현법만 30가지지 콘텐츠는 3가지다 (외부 검토 지적).
+    # 원인 추정 없이 안전하게 늘릴 수 있는 정형 지표를 붙인다.
+    for r in rows[:limit]:
+        _add_history(r)
 
     out = []
     for r in rows[:limit]:
