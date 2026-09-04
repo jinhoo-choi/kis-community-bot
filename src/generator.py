@@ -61,6 +61,11 @@ def _fix_cliche(b: str) -> str:
         # "이었습니다" 로 통째로 사라진다.
         return m.group(1) + _josa_was(m.group(1), polite)
 
+    # 동작 명사(상승/하락/증가)는 '이었습니다' 보다 '했습니다' 가 자연스럽다
+    b = re.sub(r"(상승|하락|증가|감소|반등|급등|급락)[을를]\s*기록했습니다",
+               r"\1했습니다", b)
+    b = re.sub(r"(상승|하락|증가|감소|반등|급등|급락)[을를]\s*기록했어요",
+               r"\1했어요", b)
     b = re.sub(r"([가-힣A-Za-z0-9,\.%]+)\s*[을를]\s*기록했습니다",
                lambda m: _rep(m, "습니다"), b)
     b = re.sub(r"([가-힣A-Za-z0-9,\.%]+)\s*[을를]\s*기록했어요",
@@ -132,7 +137,7 @@ def pick_style(item: dict, recent: dict, used_now: set,
             "quick_memo": 1, "brief_report": 1,
             "fact_note": 2, "data_focus": 2, "open_talk": 2,
             "term_guide": 2, "careful_note": 2,
-            "check_list": 3, "timeline_note": 2, "two_view": 2,
+            "check_list": 2, "timeline_note": 2, "two_view": 2,
         }
         for pid in list(pw):
             if n_fact < need.get(pid, 2):
@@ -142,8 +147,12 @@ def pick_style(item: dict, recent: dict, used_now: set,
             pw["two_view"] = 0                     # 양방향 근거가 있어야 성립
         if "term_word" not in sl:
             pw["term_guide"] = 0                   # 풀어줄 용어가 있어야 성립
-        if "date" not in sl and "five_day" not in sl:
-            pw["timeline_note"] = 0                # 명시된 시점이 있어야 성립
+        # 5거래일 누적은 '기간'이지 별개 시점이 아니다. 정렬 가능한 시점 2개가 필요하다.
+        import re as _re
+        n_anchor = len(_re.findall(r"\d{4}[-.]\d{1,2}[-.]?\d{0,2}|\d{1,2}월 \d{1,2}일",
+                                   item.get("facts", "")))
+        if n_anchor < 2:
+            pw["timeline_note"] = 0
         if not (sl & {"vs_avg", "five_day", "intraday", "flow_inv", "short"}):
             pw["data_focus"] = 0                   # 비교값이 있어야 성립
         if not any(pw.values()):
@@ -156,6 +165,9 @@ def pick_style(item: dict, recent: dict, used_now: set,
         cand2 = angles.available(item)
         if not allow_uncertainty:
             cand2 = [a for a in cand2 if a != "uncertainty"] or cand2
+        # 호환 그래프: 성립하지 않는 조합은 처음부터 만들지 않는다
+        compat = [a for a in cand2 if P.v2.compatible(persona, a)]
+        cand2 = compat or cand2
         ang2 = _weighted({a: 3 for a in cand2}, used_a2) if cand2 else ""
         used_now.add((persona, ang2, persona, persona))
         return persona, ang2, persona, persona

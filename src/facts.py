@@ -58,62 +58,120 @@ def has_both_sides(item: dict) -> bool:
     return bool(s & POSITIVE) and bool(s & NEGATIVE)
 
 
+# 슬롯을 그대로 세면 왜곡된다. change/price/turnover/intraday/vs_avg 는
+# 모두 '같은 날 시세'라는 한 소스에서 파생된 관찰이다 (외부 검토 지적).
+# source_family 로 묶어 독립 사실만 센다.
+FAMILY = {
+    "change": "market_daily", "price": "market_daily", "turnover": "market_daily",
+    "intraday": "market_daily",
+    "vs_avg": "market_relative", "five_day": "market_relative",
+    "flow_inv": "investor_flow", "short": "short_sale",
+    "amount": "corp_action", "terms": "corp_action", "purpose": "corp_action",
+    "quantity": "corp_action",
+    "inquiry": "exchange_inquiry",
+    "date": "_meta", "term_word": "_meta", "sector": "_meta", "missing": "_meta",
+}
+
+
+def families(item: dict) -> set[str]:
+    """독립 사실 계열. _meta 는 생성 가능성 판단용 보조 속성이라 제외한다."""
+    return {FAMILY.get(s, s) for s in slots(item)} - {"_meta", None}
+
+
 def count(item: dict) -> int:
-    """서술 가능한 독립 사실 개수 (방향 파생 슬롯은 제외)."""
-    return len(slots(item) - {"change_up", "change_down", "five_day_up", "five_day_down"})
+    """독립 사실 개수.
+
+    같은 계열을 1개로 완전히 합치면 전환사채 공시(발행총액·전환가액·자금용도)가
+    1개가 되어 짧은 페르소나만 남는다. 반대로 슬롯을 그대로 세면 시세 파생값이
+    부풀려진다. 계열당 최대 2개까지만 인정하는 절충을 쓴다.
+    """
+    from collections import Counter
+    c = Counter(FAMILY.get(s, s) for s in slots(item)
+                if s not in ("change_up", "change_down",
+                             "five_day_up", "five_day_down"))
+    c.pop("_meta", None)
+    return sum(min(n, 2) for n in c.values())
+
+
+# ② two_view 는 슬롯 교집합이 아니라 '상반된 관찰 쌍'이 있어야 성립한다.
+#    flow_inv 는 순매수면 한 방향, 순매도면 반대 방향이라 슬롯만으로는 판정할 수 없다.
+#    호재/악재로 분류하지 않고 '서로 다른 방향의 관찰값'으로만 취급한다.
+def contrast_pairs(item: dict) -> list[tuple[str, str]]:
+    core = item.get("facts", "")
+    out = []
+
+    up = re.search(r"등락률[:\s]*\+?(\d+(?:\.\d+)?)", core)
+    down = re.search(r"등락률[:\s]*-(\d+(?:\.\d+)?)", core)
+    back = re.search(r"장중 고가 대비 ([\d.]+)% 낮은", core)
+    frgn_sell = re.search(r"외국인 순매도", core)
+    frgn_buy = re.search(r"외국인 순매수", core)
+    inst_sell = re.search(r"기관 순매도", core)
+
+    if up and back:
+        out.append(("종가 상승", f"장중 고가 대비 {back.group(1)}% 낮게 마감"))
+    if up and (frgn_sell or inst_sell):
+        who = "외국인" if frgn_sell else "기관"
+        out.append(("종가 상승", f"{who} 순매도"))
+    if down and frgn_buy:
+        out.append(("종가 하락", "외국인 순매수"))
+    if re.search(r"공매도 비중", core) and up:
+        out.append(("종가 상승", "공매도 비중 존재"))
+    return out
+
+
+def has_both_sides(item: dict) -> bool:
+    return bool(contrast_pairs(item))
 
 
 # ── 코드가 하는 정량 평가 ────────────────────────────────────
 # 모델에게 판단시키지 않는다. 서술적 사실만 라벨로 붙인다.
 
 def evaluate(r: dict) -> list[str]:
-    """시세 딕셔너리에서 관찰 라벨을 만든다. 원인·전망은 넣지 않는다."""
+    """게시글 입력에 넣을 관찰값. **판단 라벨을 붙이지 않는다.**
+
+    외부 검토 지적: "3.2배로 평소보다 크게 많음"에서 '크게 많음'은 정보를 늘리지 않고
+    투자판단 뉘앙스만 더한다. 독자는 3.2배를 보고 스스로 판단한다.
+    판단이 필요한 곳은 Angle 선정 같은 내부 로직이며, 그건 rank() 가 담당한다.
+    """
     out = []
+    if r.get("vol_x"):
+        out.append(f"거래량: 20일 평균의 {r['vol_x']:.1f}배")
 
-    x = r.get("vol_x")
-    if x:
-        if x >= 5:
-            out.append(f"거래량 평가: 20일 평균의 {x:.1f}배로 매우 이례적인 수준")
-        elif x >= 2.5:
-            out.append(f"거래량 평가: 20일 평균의 {x:.1f}배로 평소보다 크게 많음")
-        elif x >= 1.5:
-            out.append(f"거래량 평가: 20일 평균의 {x:.1f}배로 평소보다 많음")
-        elif x < 0.7:
-            out.append(f"거래량 평가: 20일 평균의 {x:.1f}배로 한산한 편")
-
-    hi, lo = r.get("high"), r.get("low")
+    hi, lo, cl = r.get("high"), r.get("low"), r.get("close")
     if hi and lo and lo > 0:
-        rng = (hi - lo) / lo * 100
-        if rng >= 15:
-            out.append(f"장중 변동 평가: 고저 차이가 저가 대비 {rng:.1f}%로 매우 큼")
-        elif rng >= 8:
-            out.append(f"장중 변동 평가: 고저 차이가 저가 대비 {rng:.1f}%로 큰 편")
+        out.append(f"장중 고저 차이: 저가 대비 {(hi - lo) / lo * 100:.1f}%")
+    if hi and cl:
+        out.append(f"마감 위치: 장중 고가 대비 {(hi - cl) / hi * 100:.1f}% 낮은 수준")
 
-    fo = r.get("open")
-    if fo and r.get("close") and hi:
-        # 고가 대비 종가가 얼마나 밀렸는지 (되돌림 여부, 사실 서술)
-        back = (hi - r["close"]) / hi * 100
-        if back >= 7:
-            out.append(f"마감 위치 평가: 장중 고가 대비 {back:.1f}% 낮은 수준에서 마감")
-        elif back <= 1:
-            out.append("마감 위치 평가: 장중 고가 부근에서 마감")
+    # 누적수익률과 변동성은 다른 개념이다. '변동이 컸다'로 서술하지 않는다.
+    if r.get("ret5") is not None:
+        out.append(f"5거래일 누적 등락률: {r['ret5']:+.2f}%")
 
-    d5 = r.get("ret5")
-    if d5 is not None and abs(d5) >= 20:
-        out.append(f"최근 흐름 평가: 5거래일 누적 {d5:+.1f}%로 단기 변동이 컸음")
-
-    fr = r.get("frgn_net")
-    if fr:
-        side = "순매수" if fr > 0 else "순매도"
-        out.append(f"외국인 {side}: {abs(fr)/1e8:,.0f}억원")
-    ins = r.get("inst_net")
-    if ins:
-        side = "순매수" if ins > 0 else "순매도"
-        out.append(f"기관 {side}: {abs(ins)/1e8:,.0f}억원")
+    tv = r.get("eok") or r.get("value_eok")
+    for key, who in (("frgn_net", "외국인"), ("inst_net", "기관")):
+        v = r.get(key)
+        if not v:
+            continue
+        side = "순매수" if v > 0 else "순매도"
+        line = f"{who} {side}: {abs(v)/1e8:,.0f}억원"
+        if tv:
+            line += f" (거래대금 대비 {abs(v)/1e8 / tv * 100:.1f}%)"
+        out.append(line)
 
     sr = r.get("short_ratio")
     if sr is not None:
-        lvl = "높은 편" if sr >= 10 else ("보통" if sr >= 3 else "낮은 편")
-        out.append(f"공매도 비중: 거래대금 대비 {sr:.1f}% ({lvl})")
-
+        line = f"공매도 비중: 거래대금 대비 {sr:.1f}%"
+        if r.get("short_avg40"):
+            line += f" (40거래일 평균 {r['short_avg40']:.1f}%의 {sr/r['short_avg40']:.1f}배)"
+        out.append(line)
     return out
+
+
+def rank(r: dict) -> dict:
+    """내부용 상대 강도. 게시글에 노출하지 않고 Angle 선정에만 쓴다."""
+    return {
+        "vol_x": r.get("vol_x") or 0,
+        "range_pct": ((r["high"] - r["low"]) / r["low"] * 100)
+                     if r.get("high") and r.get("low") else 0,
+        "abs_chg": abs(r.get("pct") or 0),
+    }

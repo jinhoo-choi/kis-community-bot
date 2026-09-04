@@ -53,10 +53,36 @@ def _pick_names(text: str) -> list[str]:
 
 # 종목방에 올리면 부자연스러운 유형. 지역 행사·채용·수상 같은 건
 # 어떤 종목방에 넣어도 맞지 않는다 (실측: 원주 의료기기 채용행사 -> 셀트리온).
-NOT_STOCK_RE = re.compile(
-    r"채용|취업|일자리|박람회|전시회|축제|행사|협약식|간담회|표창|수상|"
-    r"위촉|개소|착공|준공|봉사|캠페인|공모전|설명회"
+# 키워드 일괄 차단은 과했다 (외부 검토 지적).
+# 상장사가 직접 공장을 착공·준공했다면 그 종목방에서 중요한 소재다.
+# 차단 기준은 키워드가 아니라 '종목과 사건의 직접 연결성'이어야 한다.
+#
+#   DIRECT_COMPANY : 상장사 본인이 당사자 → 본문에 종목명 허용
+#   SECTOR_PROXY   : 산업·정책 일반 → 섹터 대표주 방에 게시, 본문 종목 언급 금지
+#   NO_BOARD       : 어느 종목방에도 맞지 않음 → 생성 안 함
+#
+# 지역 행사·박람회는 '주최가 지자체이고 상장사는 참가자'인 경우가 대부분이라
+# proxy 로도 부적합하다. 다만 상장사가 당사자로 확인되면 DIRECT 로 살린다.
+PROXY_UNFIT_RE = re.compile(
+    r"채용|취업|일자리|박람회|전시회|축제|공모전|설명회|간담회|위촉|봉사|캠페인|표창|수상"
 )
+
+
+def classify(item: dict, table: dict) -> tuple[str, str]:
+    """(mapping_type, 종목명). 종목과 사건의 직접 연결성으로 판정한다."""
+    title = item.get("title", "")
+    facts = item.get("facts", "")[:600]
+
+    # 상장사 본인이 당사자로 제목에 등장하면 DIRECT
+    for name in sorted(table, key=len, reverse=True):
+        if len(name) < 2:
+            continue
+        if re.search(rf"(?<![가-힣A-Za-z0-9]){re.escape(name)}(?![가-힣A-Za-z0-9])", title):
+            return "DIRECT_COMPANY", name
+
+    if PROXY_UNFIT_RE.search(title):
+        return "NO_BOARD", ""
+    return "SECTOR_PROXY", ""
 
 
 def assign(item: dict) -> bool:
@@ -65,13 +91,21 @@ def assign(item: dict) -> bool:
 
     if item.get("stock_code"):
         return False
-    if NOT_STOCK_RE.search(item.get("title", "")):
-        item["no_stock_fit"] = True
-        return False
     table = tickers.listed()
     if not table:
         return False
 
+    kind, name = classify(item, table)
+    item["board_mapping"] = kind
+    if kind == "NO_BOARD":
+        item["no_stock_fit"] = True
+        return False
+    if kind == "DIRECT_COMPANY":
+        # 회사가 당사자이므로 본문에 종목명을 써도 된다
+        item["stock_code"] = table[name]
+        item["stock_name"] = name
+        item["board"] = "stock"
+        return True
     text = f"{item.get('title','')} {item.get('facts','')[:400]}"
     cands = [n for n in _pick_names(text) if n in table]
     if not cands:

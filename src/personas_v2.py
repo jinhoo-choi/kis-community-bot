@@ -78,8 +78,10 @@ PERSONAS = {
         # 등락률·가격·거래대금만으로 이미 3개다 (실측 리젝).
         "name": "짧은메모", "sentences": "2~3문장", "min": 35, "max": 120,
         "num_cap": 3, "no_question": True,
+        # '5어절 이하' 강제가 문장을 부쉈다 (실측: "저가 대비 고가." 비문 발생).
+        # 전체 길이 35~120자 제한이 이미 있어 별도 어절 강제가 필요 없다.
         "desc": "아주 짧게 끝냅니다. 배경 설명 없이 사실 하나와 한 줄 감상만.\n"
-                "한 문장은 반드시 5어절 이하로 끊습니다.\n"
+                "문장을 억지로 끊지 말고 자연스럽게 씁니다.\n"
                 "종결어미는 '~네요', '~어요' 위주로 씁니다.\n"
                 "숫자는 가장 눈에 띄는 하나만 쓰고 나머지는 버립니다. "
                 "쓰기로 한 숫자는 입력 그대로 옮깁니다.",
@@ -153,6 +155,9 @@ SYSTEM_PROMPT = """당신은 한국투자증권 앱 커뮤니티에 게시될 �
 - 서로 다른 숫자를 {num_cap}개까지만 씁니다. 숫자가 없는 문장을 하나 이상 넣으세요.
 - 미확인 정보는 원칙적으로 언급하지 않습니다. "상세 수치는 확인되지 않았습니다" 류로
   분량을 채우지 마세요.
+- 입력의 수치를 그대로 전하고 그 크기를 평가하지 마세요.
+  "3.2배로 크게 많았습니다"(X) → "20일 평균의 3.2배였습니다"(O)
+  "요동쳤네요", "몰렸어요" 처럼 감정을 얹는 표현도 쓰지 마세요.
 - 입력에 없는 업황·수혜 일반론을 덧붙이지 마세요.
   예: "업계의 움직임이 구체화되고 있습니다", "관련 기업들의 사업 확장이 이어지고 있습니다",
   "정책 흐름을 살펴볼 만합니다". 이런 문장은 아무 정보도 주지 않습니다.
@@ -163,3 +168,29 @@ SYSTEM_PROMPT = """당신은 한국투자증권 앱 커뮤니티에 게시될 �
 
 [출력]
 본문 텍스트만 출력. 제목, 설명, JSON, 따옴표 없이 본문만."""
+
+
+# ── Persona × Angle 호환 그래프 ────────────────────────────────
+# 110 완전조합이라는 개념을 버린다. timeline × ratio 처럼 성립하지 않는 조합을
+# 처음부터 없애는 것만으로 이상한 생성 시도가 줄어든다 (외부 검토 1순위).
+# 비어 있으면 전체 허용.
+COMPAT = {
+    "brief_report":  {"reaction", "amount", "ratio", "compare", "terms", "inquiry"},
+    "fact_note":     {"reaction", "amount", "ratio", "compare", "terms",
+                      "purpose", "duration", "inquiry", "context"},
+    "term_guide":    {"decode", "terms", "ratio", "purpose"},
+    "data_focus":    {"reaction", "compare", "ratio", "amount"},
+    "careful_note":  {"reaction", "compare", "ratio", "uncertainty", "inquiry", "terms"},
+    "two_view":      {"reaction", "compare", "ratio", "amount", "purpose",
+                      "inquiry", "uncertainty", "context"},
+    "check_list":    {"terms", "duration", "purpose", "uncertainty", "inquiry", "amount"},
+    "quick_memo":    {"reaction", "amount", "ratio", "compare", "decode", "inquiry"},
+    "timeline_note": {"duration", "inquiry", "context", "purpose"},
+    "open_talk":     {"inquiry", "uncertainty", "reaction", "amount",
+                      "terms", "purpose", "context"},
+}
+
+
+def compatible(persona: str, angle: str) -> bool:
+    allowed = COMPAT.get(persona)
+    return (not allowed) or (not angle) or (angle in allowed)
