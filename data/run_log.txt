@@ -3,29 +3,46 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
 [crawl] dart 6건
 [crawl] naver_research 2건
 [crawl] hankyung 1건
-[crawl] market 0건 (정상 0건)
+[crawl] market 3건
 [crawl] policy_rss 3건
-[main] 수집 총 13건
+[main] 수집 총 16건
 [gate] 차단 3건 {'tier4': 3}
 [tickers] 상장 2632종목 로드 (lxml)
-[main] 생성 대상 10건 {'disclosure': 3, 'research': 3, 'flow': 0, 'policy': 3, 'poll': 1}
-[enrich] 7/10건 배경 보강 완료
-[gen] ⚠ claude 실패 dart-20260903800625: Messages.create() got an unexpected keyword argument 'temperature'
-[gen] ⚠ claude 실패 dart-20260903800579: Messages.create() got an unexpected keyword argument 'temperature'
-[gen] ⚠ claude 실패 dart-20260903000316: Messages.create() got an unexpected keyword argument 'temperature'
-[gen] ⚠ claude 실패 naver-y_readnavernid96009page1: Messages.create() got an unexpected keyword argument 'temperature'
-[gen] ⚠ claude 실패 naver-y_readnavernid96008page1: Messages.create() got an unexpected keyword argument 'temperature'
-[gen] claude: 0/5건 생성
-[gen] gemini: 5/5건 생성
-[gen] 정규식 리젝 hk-652124 ['너무짧음(47자)']
-[gen] 정규식 리젝 pol-NH증권원달러환율단기1천300원대초반까지하락 ['너무짧음(47자)']
-[gen] 정규식 리젝 poll-pol-IBK증권中메모리약진현지장비밸류체인수혜확산 ['너무짧음(48자)']
-[gen] ⚠ claude 실패 hk-652124: Messages.create() got an unexpected keyword argument 'temperature'
-[gen] ⚠ claude 실패 pol-NH증권원달러환율단기1천300원대초반까지하락: Messages.create() got an unexpected keyword argument 'temperature'
-[gen] ⚠ claude 실패 poll-pol-IBK증권中메모리약진현지장비밸류체인수혜확산: Messages.create() got an unexpected keyword argument 'temperature'
-[gen] 정규식 통과 2건 / 시도 10건
+[dedup] 제외 1건 {'ID': 1}
+[main] 생성 대상 12건 {'disclosure': 3, 'research': 3, 'flow': 3, 'policy': 2, 'poll': 1}
+[enrich] 9/12건 배경 보강 완료
+[claude] SDK 1.3.0
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[gen] claude: 6/6건 생성
+[gen] 정규식 리젝 dart-20260903800625 ['너무김(315자)']
+       └ '대양금속이 유상증자 또는 주식관련사채 청약결과를 공시했습니다. 스테인리스 냉연강판 제조사인 만큼 자금 조달을 통한 사업 확장이나 시설투자를 진행하려는 것으로 보입니다. 다만 상세 수치가 공개되지 않았기 때문에 청약 규모나 공모가, 납입일정 등은 추가 공시 또는 공식 자료를 통해 확인이 필요합니다. 이런 자금조달은 회사의 자본력 강화 측면에서는 긍정적일 수 '
+[gen] 정규식 리젝 dart-20260903000316 ['너무김(304자)']
+       └ '에이프로젠바이오로직스가 유상증자를 결정했다는 공시가 나왔습니다. 유상증자는 자금 조달 수단으로 기존 주주의 지분을 희석시킬 수 있다는 점이 먼저 고려할 대목입니다. 다만 조달 자금이 어떤 용도로 쓰일지, 규모가 얼마나 되는지는 아직 공시 상세 내용이 확인되지 않았습니다. 의약품 제조사가 증자를 결정하는 배경은 R&D 투자, 임상시험 진행, 시설 확충 등 다'
+[gen] gemini: 6/6건 생성
+[gen] 정규식 리젝 flow-2026-09-03-108490 ['format']
+       └ '1 sentence with <= 5 words? Yes.\n        *   Last line open question? Yes.\n        *   Only'
+[gen] 정규식 리젝 pol-중소기업지원대전시지식재산진흥최우수기관표창 ['너무짧음(46자)']
+       └ '안녕하세요, AI 작성 도우미입니다. 대전시가 지식재산(특허나 상표 같은 지적 재산'
+[gen] 정규식 리젝 poll-flow-2026-09-03-108490 ['너무짧음(44자)']
+       └ '안녕하세요 AI 작성 봇입니다. 2026년 9월 3일 기준 코스닥 시장의 로보티'
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[gen] 정규식 통과 9건 / 시도 12건
+[claude] SDK 1.3.0
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 1건 / 보류 1건
-   보류 pol-신한증권25년만의에너지공기업재편관건은부담배분 (gemini) - 유형상한(policy)
-[main] filter_log data/filter_log_20260904_0907.json
-[main] stats {"ts": "2026-09-04T09:07:33+09:00", "collected": 13, "gate_blocked": 3, "gate_reasons": {"tier4": 3}, "enrich_ok": 7, "generated": 2, "sent": 1, "held": 1, "hold_reasons": {"유형상한": 1}, "avg_score": null, "by_provider": {"gemini": {"generated": 2, "sent": 1, "avg_score": null}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 6, "expected": 6, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 0, "expected": 0, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}}}
+[main] 배포 5건 / 보류 4건
+   보류 flow-2026-09-03-234340 (gemini) - fatal:1인칭 거래 경험 암시 ('저보다 더'),게시글 내용 불완전/단편적
+   보류 pol-신한증권25년만의에너지공기업재편관건은부담배분 (gemini) - fatal:게시글이 불완전함(7단어만 존재),제공 사실관계와 무관한 내용,읽을 수 있는 본문 부재
+   보류 poll-flow-2026-09-03-108490 (claude) - 정원초과
+   보류 flow-2026-09-03-294570 (gemini) - 정원초과
+[main] filter_log data/filter_log_20260904_0926.json
+[main] stats {"ts": "2026-09-04T09:26:27+09:00", "collected": 16, "gate_blocked": 3, "gate_reasons": {"tier4": 3}, "enrich_ok": 9, "generated": 9, "sent": 5, "held": 4, "hold_reasons": {"fatal": 2, "정원초과": 2}, "avg_score": 19.0, "by_provider": {"gemini": {"generated": 3, "sent": 0, "avg_score": 9.33}, "claude": {"generated": 6, "sent": 5, "avg_score": 19.0}}, "model_fallbacks": [], "dedup": {"ID": 1}, "crawl_health": {"dart": {"got": 6, "expected": 6, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 3, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}}}
