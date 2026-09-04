@@ -31,7 +31,7 @@ def _direction_errors(body: str, facts: str) -> list[str]:
     return [f"방향오용({wrong.group()})"] if wrong else []
 
 
-def check(body: str, facts: str) -> list[str]:
+def check(body: str, facts: str, fmt: str = None) -> list[str]:
     """위반 사유 리스트 반환. 빈 리스트면 통과."""
     errs = []
 
@@ -54,5 +54,12 @@ def check(body: str, facts: str) -> list[str]:
         errs.append(f"미확인수치{hallu[:3]}")
 
     errs += _direction_errors(body, facts)
+
+    # 구조가 질문 마무리를 요구하지 않는데 물음표로 끝나면 리젝.
+    # 실측: 프롬프트에서 질문 강제를 뺐는데도 4건 전부 물음표로 끝났다.
+    if fmt:
+        from src.personas import FORMATS
+        if FORMATS.get(fmt, {}).get("no_question") and body.rstrip().endswith("?"):
+            errs.append(f"질문마무리금지({fmt})")
 
     return errs

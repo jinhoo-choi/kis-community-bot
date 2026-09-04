@@ -105,11 +105,20 @@ _SUBSTANCE = re.compile(
 )
 
 
+# 리포트는 별도 기준을 쓴다.
+# 리포트 제목만으로는 "본문 읽어보세요" 수준의 글밖에 안 나온다 (실측:
+# "리포트의 구체적인 분석 내용이 어떻게 펼쳐지는지 확인해 보고 싶으신 분들이…").
+# 검색으로 얻은 '회사 배경'은 리포트 내용이 아니므로 글감으로 치지 않는다.
+_RESEARCH_SUBSTANCE = re.compile(r"제시 적정가격|투자의견")
+
+
 def has_substance(item: dict) -> bool:
     facts = item.get("facts", "")
     # 주석(※)과 메타 줄을 뺀 실질 내용만 본다
     core = "\n".join(l for l in facts.splitlines()
                       if l.strip() and not l.strip().startswith("※"))
+    if item.get("kind") == "research":
+        return bool(_RESEARCH_SUBSTANCE.search(core))
     return bool(_SUBSTANCE.search(core))
 
 

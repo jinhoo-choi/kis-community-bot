@@ -25,6 +25,11 @@ _STRIP_PATTERNS = [
     r"^\s*(본문|게시글|출력)\s*[:：][^\n]*\n",
     r"^\s*```[a-z]*\s*|\s*```\s*$",
     r"\n\s*[*\-]\s+[^\n]*(Yes|No)\.[^\n]*$",
+    # Gemini 가 자기검토 결과를 본문에 섞는 사례 (실측)
+    r"^[^\n]*\b\d+\s*(sentences?|문장)\?[^\n]*\n?",
+    r"^[^\n]*(충족|만족)\.\s*$",
+    r"^\s*\(?\d+문장[^)\n]*\)?\s*(->|→)[^\n]*\n?",
+    r"^\s*(말투|글 ?구조|규칙|출력)\s*[:：][^\n]*\n?",
 ]
 
 
@@ -108,7 +113,7 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
                     [styles[id(x)][1] for x in chunk])
         print(f"[gen] {name}: {len(made)}/{len(chunk)}건 생성")
         for p in made:
-            errs = filters.check(p["body"], p["facts"])
+            errs = filters.check(p["body"], p["facts"], p.get("fmt"))
             if errs:
                 # 본문을 함께 남겨야 '이 리젝이 타당했는지' 사후 검토가 된다
                 print(f"[gen] 정규식 리젝 {p['id']} {errs}")
@@ -125,7 +130,7 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
         for p in retry:
             alt = next((n for n in names if n != p["provider"]), p["provider"])
             made = _run(alt, [p], [p["tone"]], [p.get("fmt", "fact_then_read")])
-            if made and not filters.check(made[0]["body"], p["facts"]):
+            if made and not filters.check(made[0]["body"], p["facts"], p.get("fmt")):
                 posts.append(made[0])
 
     print(f"[gen] 정규식 통과 {len(posts)}건 / 시도 {len(items)}건")

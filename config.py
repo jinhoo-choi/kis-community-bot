@@ -17,11 +17,15 @@ TARGET_POSTS = int(os.environ.get("TARGET_POSTS", "50"))
 # 소량 실행은 후보가 몇 건뿐이라 한두 건만 리젝돼도 0건이 된다. 배율을 올린다.
 OVERGEN_RATE = 1.5 if TARGET_POSTS >= 30 else 3.0
 
-_BASE_QUOTA = {             # 50건 기준 슬롯 배분
-    "disclosure": 20,       # DART 공시
-    "research":   12,       # 증권사 리포트
-    "flow":       10,       # 특징주/수급
-    "policy":      5,       # 정책/거시
+# 50건 기준 슬롯 배분.
+# 리포트는 목표가·투자의견이 있는 건만 쓸 수 있어(한경 위주) 물량이 적다.
+# 억지로 채우면 "본문 읽어보세요" 수준의 글이 나오므로 비중을 줄이고
+# 정형 수치가 확실한 공시·특징주로 옮긴다.
+_BASE_QUOTA = {
+    "disclosure": 22,       # DART 공시 (정형 API 로 수치 확보)
+    "research":    7,       # 증권사 리포트 (적정가격·투자의견 있는 건만)
+    "flow":       14,       # 특징주/수급 (종가·등락률·거래대금)
+    "policy":      4,       # 정책/거시
     "poll":        3,       # 토론 발제
 }
 
@@ -56,7 +60,10 @@ GEMINI_ENRICH_MODEL = os.environ.get("GEMINI_ENRICH_MODEL", "gemini-3.5-flash")
 GEMINI_JUDGE_MODEL  = os.environ.get("GEMINI_JUDGE_MODEL", "gemini-3.1-flash-lite")
 
 # 작성 물량 배분 (프로바이더가 하나만 살아있으면 자동으로 몰아준다)
-WRITER_RATIO = {"claude": 5, "gemini": 5}
+# 실측 평균 심사점수: claude 16.4 / gemini 4.0.
+# Gemini 가 체크리스트를 본문으로 출력하는 등 지시 준수가 약해 비중을 낮춘다.
+# 0 으로 두지 않는 이유는 문체 지문 분산 효과가 있고, 폴백 경로도 살려두기 위해서다.
+WRITER_RATIO = {"claude": 8, "gemini": 2}
 
 TEMPERATURE = float(os.environ.get("TEMPERATURE", "1.0"))
 

@@ -324,6 +324,23 @@ def main():
     ok.append(run("억원 단위 변환", _dfmt("12345678900", "원") == "123억원", _dfmt("12345678900", "원")))
     ok.append(run("빈값은 빈 문자열", _dfmt("-", "원") == ""))
 
+
+    # ── 구조별 질문 마무리 금지 (실측: 프롬프트만으로는 4건 전부 물음표로 끝남)
+    _qb = "디케이티가 어제 올랐네요. 거래대금도 늘었는데요. 사유는 확인이 안 됩니다. 배경이 뭐라고 보시나요?"
+    ok.append(run("short_note 질문마무리 리젝",
+                  any("질문마무리금지" in e for e in _f2.check(_qb, "", "short_note"))))
+    ok.append(run("open_question 은 허용",
+                  not any("질문마무리금지" in e for e in _f2.check(_qb, "", "open_question"))))
+
+    # ── 리포트 글감 기준 (제목만 있으면 차단)
+    ok.append(run("리포트 제목만 차단", not _hs2(
+        {"kind": "research", "facts": "리포트 제목: 하이 앤 드라이\n발간: 대신증권"})))
+    ok.append(run("리포트 배경보강만으로는 불충분", not _hs2(
+        {"kind": "research", "facts": "리포트 제목: 하이 앤 드라이\n\n"
+                                      "[검색으로 확인된 배경]\n- 팬오션은 벌크선사"})))
+    ok.append(run("적정가격 있으면 통과", _hs2(
+        {"kind": "research", "facts": "리포트 제목: 실적 반등\n제시 적정가격: 33,000원"})))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 

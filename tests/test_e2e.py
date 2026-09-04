@@ -39,6 +39,9 @@ def setup():
         "gemini": H.FakeProvider("gemini"),
     }
     judges = {"claude": H.FakeJudge("claude"), "gemini": H.FakeJudge("gemini")}
+    # 운영 비율(8:2)에서는 소량 배치일 때 한쪽이 0건이 될 수 있다.
+    # 이 시나리오는 '두 프로바이더가 모두 동작하는지'를 보는 것이므로 5:5 로 고정한다.
+    config.WRITER_RATIO = {"claude": 5, "gemini": 5}
     router.writers = lambda: writers
     router.judges = lambda: judges
     router.enricher = lambda: None          # [S9] enrich 실패 → thin_facts 전건
