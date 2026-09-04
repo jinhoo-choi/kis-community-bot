@@ -20,7 +20,7 @@ import sys
 import config
 from src import (state, tickers, generator, telegram_bot, enrich, judge,
                  gate, decide, stats, dedup, crawl, assign)
-from src.sources import dart, research, market, policy, telegram_ch
+from src.sources import dart, research, market, policy, telegram_ch, kind_inquiry
 
 
 def collect() -> list[dict]:
@@ -28,7 +28,15 @@ def collect() -> list[dict]:
     items = []
     items += dart.fetch(int(q["disclosure"] * over))
     items += research.fetch(int(q["research"] * over))
-    items += market.fetch(int(q["flow"] * over))
+    flow_items = market.fetch(int(q["flow"] * over))
+    # 조회공시는 특징주의 '왜 올랐는지'를 메우는 유일한 공식 확정 정보다.
+    # 독립 항목으로도 쓰고, 같은 종목 특징주에 근거로도 붙인다.
+    inquiries = kind_inquiry.fetch(max(2, int(q["disclosure"] * over / 4)))
+    n_att = kind_inquiry.attach_to_flow(flow_items, inquiries)
+    if n_att:
+        print(f"[kind] 특징주 {n_att}건에 조회공시 연결")
+    items += flow_items
+    items += inquiries
     items += policy.fetch(int(q["policy"] * over))
     # 운용사 공식 채널. verified 채널이 없으면 0건 반환한다.
     items += telegram_ch.fetch(max(1, int(q["policy"] * over / 2)))

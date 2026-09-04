@@ -308,7 +308,7 @@ def main():
     ok.append(run("Format 6종(길이 분리)", len(_F) == 6, str(len(_F))))
     ok.append(run("Length 축 신설", len(_L) == 3, str(len(_L))))
     ok.append(run("short_note 제거", "short_note" not in _F))
-    ok.append(run("Angle 10종", len(_ang.ANGLES) == 10, str(len(_ang.ANGLES))))
+    ok.append(run("Angle 11종", len(_ang.ANGLES) == 11, str(len(_ang.ANGLES))))
     ok.append(run("4축 조합 700가지 이상",
                   len(_V) * len(_ang.ANGLES) * len(_F) * len(_L) >= 700,
                   str(len(_V) * len(_ang.ANGLES) * len(_F) * len(_L))))
@@ -427,6 +427,22 @@ def main():
         "미 증시는 다우 +1.18%로 마감했습니다. 연준 위원 발언에 금리가 안정되며 "
         "위험자산 선호가 회복된 모습입니다. 오늘 국내 증시도 이를 반영할 것으로 보입니다.")
         for r in (_tg2.PRODUCT_RE, _tg2.SOLICIT_RE, _tg2.NEWS_LINK_RE))))
+
+
+    # ── 거래소 조회공시 (특징주 '왜 올랐는지' 공백을 메우는 유일한 확정 정보)
+    from src.sources.kind_inquiry import _stance as _st, attach_to_flow as _att
+    ok.append(run("미확정 답변 해석", "미확정" in _st("풍문 또는 보도에 대한 해명(미확정)")))
+    ok.append(run("부인 답변 해석", "부인" in _st("풍문 또는 보도에 대한 해명(부인)")))
+    _iq_facts = ("거래소 조회공시\n종목: SK하이닉스 (000660)\n"
+                 "공시 제목: 풍문 또는 보도에 대한 해명(미확정)\n"
+                 "답변 성격: 회사는 '미확정'이라고 답변")
+    ok.append(run("조회공시는 글감 인정", _hs2({"kind": "disclosure", "facts": _iq_facts})))
+    ok.append(run("inquiry 앵글 채택", "inquiry" in _ang.available({"facts": _iq_facts})))
+    _fl = [{"stock_code": "000660", "facts": "등락률: 8.2%"}]
+    _n = _att(_fl, [{"stock_code": "000660", "title": "풍문 또는 보도에 대한 해명(미확정)"}])
+    ok.append(run("특징주에 조회공시 연결", _n == 1 and "조회공시" in _fl[0]["facts"]))
+    ok.append(run("무관 종목엔 미연결",
+                  _att([{"stock_code": "005930", "facts": "x"}], []) == 0))
 
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
