@@ -27,7 +27,11 @@ def decide_distribution(
     """
     target = target if target is not None else config.TARGET_POSTS
     per_stock = per_stock if per_stock is not None else config.MAX_PER_STOCK
-    per_kind_cap = per_kind_cap or config.SLOT_QUOTA
+    # 소량 실행은 슬롯당 1건뿐이라 유형상한이 멀쩡한 글을 버린다.
+    # 다양성 확보가 목적인데 오히려 다양성을 줄이므로 상한을 풀고 종목상한만 남긴다.
+    if per_kind_cap is None and config.TARGET_POSTS < 30:
+        per_kind_cap = {}
+    per_kind_cap = per_kind_cap if per_kind_cap is not None else config.SLOT_QUOTA
     min_score = min_score if min_score is not None else config.MIN_JUDGE_SCORE
 
     held = []

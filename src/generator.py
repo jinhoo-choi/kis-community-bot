@@ -13,6 +13,10 @@ from src.decide import temperature_for
 from src.personas import SLOT_TONES, build_messages
 
 
+# 리젝된 생성물 보관 (품질 검토용). main 이 filter_log 에 함께 기록한다.
+REJECTED: list[dict] = []
+
+
 def pick_tone(item: dict, recent: dict) -> str:
     """슬롯별 허용 톤 중, 최근 같은 종목에 쓴 톤은 제외."""
     pool = SLOT_TONES.get(item["kind"], ["calm"])
@@ -58,7 +62,11 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
         for p in made:
             errs = filters.check(p["body"], p["facts"])
             if errs:
+                # 본문을 함께 남겨야 '이 리젝이 타당했는지' 사후 검토가 된다
                 print(f"[gen] 정규식 리젝 {p['id']} {errs}")
+                print(f"       └ {p['body'][:200]!r}")
+                p["reject_errs"] = errs
+                REJECTED.append(dict(p))
                 retry.append(p)
             else:
                 posts.append(p)

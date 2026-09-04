@@ -103,13 +103,14 @@ def main():
     with open(config.OUTPUT_PATH, "w", encoding="utf-8") as f:
         json.dump(sent_posts, f, ensure_ascii=False, indent=1)
 
+    telegram_bot.send_brief(sent_posts)
     sent = telegram_bot.send_all(sent_posts)
-    telegram_bot.send_summary(sent_posts, sent)
 
     row = stats.record(**stats.summarize(
         raw, blocked, enriched_n, posts, sent_posts, held,
         generator.collect_fallbacks()),
         dedup=dup_reasons, crawl_health=crawl.health())
+    telegram_bot.send_summary(sent_posts, sent, row)
     print("[main] filter_log " + stats.detail_log(picked, sent_posts, held))
     if degraded:
         telegram_bot.send_warning(f"수집 이상 소스: {', '.join(degraded)}")

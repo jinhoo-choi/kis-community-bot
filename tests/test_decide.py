@@ -190,18 +190,20 @@ def main():
 
     # ── 복사 영역 분리 (고지 문구는 앱이 자동 표기하므로 <pre> 밖이어야 함)
     import src.telegram_bot as _tg
-    _card = _tg._text({
+    _card = _tg.card({
         "stock_name": "산일전기", "stock_code": "062040", "kind": "research",
         "tone": "pro", "board": "stock", "provider": "claude",
         "score": {"total": 18}, "src": "https://example.com/r",
         "body": "본문 첫 줄.\n본문 둘째 줄.\n다들 어떻게 보시나요.",
     })
-    _pre = _card[_card.index("<pre>") + 5:_card.index("</pre>")]
+    _pre = _card[_card.index("<pre>"):_card.index("</pre>")]
+    _pre = _pre[_pre.index(">", _pre.index("<code")) + 1:].replace("</code>", "")
     ok.append(run("복사영역에 본문만", _pre.strip().endswith("보시나요.")))
     ok.append(run("복사영역에 AI생성 표기 없음", "AI 생성" not in _pre))
     ok.append(run("복사영역에 투자책임 문구 없음", "투자 판단" not in _pre))
     ok.append(run("복사영역에 출처 URL 없음", "http" not in _pre))
     ok.append(run("고지문구는 pre 밖에 존재", "AI 생성" in _card.split("</pre>")[1]))
+    ok.append(run("복사영역 끝이 본문", _pre.strip().endswith("보시나요.")))
 
 
     # ── 담당자 배정 (중복 게시 방지)
@@ -233,6 +235,18 @@ def main():
     ok.append(run("60자 통과", not any("너무짧" in e or "너무김" in e
                                        for e in _f.check("가" * 60, ""))))
     ok.append(run("300자 초과 리젝", any("너무김" in e for e in _f.check("가" * 350, ""))))
+
+
+    # ── 카드 구조 (잘림·복사 회귀)
+    _long = {"stock_name": "삼성전자", "stock_code": "005930", "kind": "disclosure",
+             "tone": "pro", "board": "stock", "assignee": "김선임",
+             "src": "https://dart.fss.or.kr/x", "body": "가" * 5000}
+    _c = _tg.card(_long, 3, 5)
+    ok.append(run("카드 태그 미절단", _c.count("<pre>") == 1 and _c.count("</pre>") == 1))
+    ok.append(run("본문만 절단", len(_c) < 4096, f"{len(_c)}자"))
+    ok.append(run("복사블록 language 지정", 'class="language-' in _c))
+    ok.append(run("담당자 첫줄 표기", _c.splitlines()[0].startswith("[3/5] <b>담당: 김선임")))
+    ok.append(run("provider/심사점수 미노출", "심사" not in _c and "claude" not in _c))
 
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)

@@ -64,8 +64,14 @@ def detail_log(items: list[dict], sent: list[dict], held: list[dict]) -> str:
     import json as _j
     from datetime import datetime as _d
     path = f"data/filter_log_{_d.now(KST).strftime('%Y%m%d_%H%M')}.json"
+    from src.generator import REJECTED
     sent_ids = {p["id"] for p in sent}
     rows = []
+    for p in REJECTED:
+        rows.append({"id": p.get("id"), "result": "rejected",
+                     "reason": ",".join(p.get("reject_errs", [])),
+                     "provider": p.get("provider"), "tone": p.get("tone"),
+                     "len": len(p.get("body", "")), "body": p.get("body", "")})
     for p in sent + held:
         rows.append({
             "id": p["id"], "kind": p.get("kind"), "stock": p.get("stock_name"),
@@ -75,6 +81,8 @@ def detail_log(items: list[dict], sent: list[dict], held: list[dict]) -> str:
             "reason": p.get("hold_reason", ""),
             "attr_reject": p.get("attr_reject"),
             "thin_facts": p.get("thin_facts", False),
+            "len": len(p.get("body", "")),
+            "body": p.get("body", ""),
         })
     os.makedirs("data", exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:

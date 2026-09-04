@@ -21,9 +21,12 @@ class ClaudeProvider(Provider):
         self.model = model
         self.use_batch = use_batch
         self._client = None
+        self._no_temp = False
         if api_key:
+            import anthropic
             from anthropic import Anthropic
             self._client = Anthropic(api_key=api_key)
+            print(f"[claude] SDK {getattr(anthropic, '__version__', '?')}")
 
     def available(self) -> bool:
         return self._client is not None
@@ -42,12 +45,22 @@ class ClaudeProvider(Provider):
         self.model = nxt
         return True
 
+    def _create(self, system, user, temperature, max_tokens):
+        """설치된 SDK 가 temperature 를 안 받는 경우가 있어(실측) 방어적으로 호출한다."""
+        kw = dict(model=self.model, max_tokens=max_tokens, system=system,
+                  messages=[{"role": "user", "content": user}])
+        try:
+            return self._client.messages.create(temperature=temperature, **kw)
+        except TypeError as e:
+            if "temperature" not in str(e):
+                raise
+            print(f"[claude] SDK 가 temperature 미지원 → 제외하고 재호출 ({e})")
+            self._no_temp = True
+            return self._client.messages.create(**kw)
+
     def generate(self, system, user, temperature=1.0, max_tokens=700) -> GenResult:
         try:
-            r = self._client.messages.create(
-                model=self.model, max_tokens=max_tokens, temperature=temperature,
-                system=system, messages=[{"role": "user", "content": user}],
-            )
+            r = self._create(system, user, temperature, max_tokens)
             txt = "".join(b.text for b in r.content if b.type == "text")
             return GenResult(txt.strip(), self.name, self.model)
         except Exception as e:
@@ -65,9 +78,9 @@ class ClaudeProvider(Provider):
             reqs = [{
                 "custom_id": f"j{i}",
                 "params": {
-                    "model": self.model, "max_tokens": max_tokens,
-                    "temperature": temperature, "system": s,
+                    "model": self.model, "max_tokens": max_tokens, "system": s,
                     "messages": [{"role": "user", "content": u}],
+                    **({} if self._no_temp else {"temperature": temperature}),
                 },
             } for i, (s, u) in enumerate(jobs)]
 
