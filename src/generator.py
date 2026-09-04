@@ -12,6 +12,7 @@ from src import filters
 from src.llm import router
 from src.decide import temperature_for
 from src import angles
+from src import facts as facts_mod
 from src import personas as P
 from src.personas import VOICE_W, FORMAT_W, LENGTH_W, build_messages
 
@@ -85,24 +86,36 @@ def pick_style(item: dict, recent: dict, used_now: set,
     if P.is_v2():
         # v2: 페르소나 하나가 말투·구조·길이를 모두 갖는다. 축은 Persona × Angle.
         pw = dict(P.style_ids().get(kind, {}))
-        # 입력이 빈약한데 긴 페르소나가 걸리면 분량을 못 채워 리젝된다
-        # (실측: 리젝 10건 중 5건이 '너무짧음', two_view 하한 110자에 36자가 나옴).
-        core = len("".join(l for l in item.get("facts", "").splitlines()
-                           if l.strip() and not l.strip().startswith("※")))
-        for pid, spec in P.v2.PERSONAS.items():
-            if pid not in pw:
-                continue
-            # 사실관계 분량의 절반을 넘는 하한을 요구하는 페르소나는 제외한다
-            # 0.6 은 느슨했다. 연합뉴스 요지(2~3문장) 항목에 fact_note(하한 80자)가
-            # 계속 선택돼 35~42자가 나왔다(실측 2회 연속).
-            if spec["min"] > core * 0.45:
+        # 글자수 기준을 버리고 Fact Slot(독립 사실 개수·종류)으로 판단한다.
+        # 글자수는 정보량이 아니다 — "A사가 B사를 흡수합병" 은 짧지만 사실 1개,
+        # 시세 3종은 길이가 비슷해도 독립 사실 3개다 (외부 검토 지적).
+        n_fact = facts_mod.count(item)
+        both = facts_mod.has_both_sides(item)
+        sl = facts_mod.slots(item)
+        need = {
+            "quick_memo": 1, "brief_report": 1,
+            "fact_note": 2, "data_focus": 2, "open_talk": 2,
+            "term_guide": 2, "careful_note": 2,
+            "check_list": 3, "timeline_note": 2, "two_view": 2,
+        }
+        for pid in list(pw):
+            if n_fact < need.get(pid, 2):
                 pw[pid] = 0
-        if not any(pw.values()):        # 전부 막히면 가장 짧은 것으로
-            shortest = min(P.style_ids().get(kind, {}) or {"quick_memo": 1},
-                           key=lambda k: P.v2.PERSONAS[k]["min"])
-            pw = {shortest: 1}
-        used_p = {h.split(":")[0] for h in hist_v2(recent, item)} | {u[0] for u in used_now}
-        used_a2 = {h.split(":")[1] for h in hist_v2(recent, item) if ":" in h} | {u[1] for u in used_now}
+        # 구조적 전제 조건
+        if not both:
+            pw["two_view"] = 0                     # 양방향 근거가 있어야 성립
+        if "term_word" not in sl:
+            pw["term_guide"] = 0                   # 풀어줄 용어가 있어야 성립
+        if "date" not in sl and "five_day" not in sl:
+            pw["timeline_note"] = 0                # 명시된 시점이 있어야 성립
+        if not (sl & {"vs_avg", "five_day", "intraday", "flow_inv", "short"}):
+            pw["data_focus"] = 0                   # 비교값이 있어야 성립
+        if not any(pw.values()):
+            pw = {"quick_memo": 1}
+
+        hist = hist_v2(recent, item)
+        used_p = {h.split(":")[0] for h in hist} | {u[0] for u in used_now}
+        used_a2 = {h.split(":")[1] for h in hist if ":" in h} | {u[1] for u in used_now}
         persona = _weighted(pw, used_p)
         cand2 = angles.available(item)
         if not allow_uncertainty:

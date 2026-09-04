@@ -41,8 +41,15 @@ SYSTEM = """당신은 증권사 커뮤니티 게시글의 품질 심사자입니
 [치명적 위반] 하나라도 해당하면 fatal 에 담습니다
 __FATAL_BLOCK__
 
+5. gain      : 정보 증가량. 맞는 말이지만 아무 정보도 더하지 않는 문장이 있는가
+   감점 — 앞 문장의 정의를 반복 ("12.41% 상승했습니다. 이는 종가 기준 등락률입니다")
+          / 리포트 제목만 재전달 / "상세 수치는 리포트에 있습니다" 류 filler
+6. fit       : 커뮤니티 적합성. **이미 그 종목을 보고 있는 사람이**
+   이 글에서 새로 얻는 정보나, 답하고 싶은 구체적 논점이 있는가.
+   없으면 2점 이하다. 문장이 매끄러운 것과 무관하다.
+
 [출력] JSON 만. 설명 금지.
-{"factual":n,"useful":n,"natural":n,"compliant":n,"fatal":["..."],"reason":"20자 이내"}"""
+{"factual":n,"useful":n,"natural":n,"compliant":n,"gain":n,"fit":n,"fatal":["..."],"reason":"20자 이내"}"""
 
 USER = """[톤] {tone}
 [제공된 사실관계]
@@ -58,10 +65,14 @@ def _parse(txt: str) -> dict | None:
         return None
     try:
         d = json.loads(m.group())
-        for k in ("factual", "useful", "natural", "compliant"):
+        for k in ("factual", "useful", "natural", "compliant", "gain", "fit"):
             d[k] = int(d.get(k, 0))
         d["fatal"] = d.get("fatal") or []
-        d["total"] = d["factual"] + d["useful"] + d["natural"] + d["compliant"]
+        # 30점 만점 → 20점 환산 (기존 임계값 유지)
+        raw = sum(d[k] for k in ("factual", "useful", "natural",
+                                 "compliant", "gain", "fit"))
+        d["raw30"] = raw
+        d["total"] = round(raw / 30 * 20, 1)
         return d
     except Exception:
         return None

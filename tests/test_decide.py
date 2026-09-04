@@ -288,8 +288,13 @@ def main():
     _good = ("로보티즈가 어제 21.73% 올랐네요. 종가는 302,500원이고 거래대금도 2,790억원이었습니다. "
              "이 정도 폭이면 뭔가 있었을 것 같은데 원인은 확인이 안 되네요. "
              "공시는 따로 없었던 것 같고요. 혹시 배경 아시는 분 계신가요.")
-    ok.append(run("정상 글은 통과", not _f2.check(_good, "302,500 21.73 2,790"),
-                  str(_f2.check(_good, "302,500 21.73 2,790"))))
+    _good2 = _good.replace("기록했습니다", "였습니다")
+    ok.append(run("정상 글은 통과", not _f2.check(_good2, "302,500 21.73 2,790"),
+                  str(_f2.check(_good2, "302,500 21.73 2,790"))))
+    ok.append(run("금융기사 상투어 차단", any("news_cliche" in e for e in
+                  _f2.check("거래대금은 942억원을 기록했습니다. " * 3, ""))))
+    ok.append(run("주체없는 평가 차단", any("unsourced_eval" in e for e in
+                  _f2.check("수익성이 개선되는 중이라는 평가네요. " * 3, ""))))
 
     # 글감 부족 게이트
     from src.gate import has_substance as _hs

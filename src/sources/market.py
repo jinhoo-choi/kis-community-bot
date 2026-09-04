@@ -14,7 +14,7 @@ import re
 from datetime import datetime, timedelta
 
 from config import KST
-from src import crawl
+from src import crawl, facts
 
 URLS = [
     ("KOSPI",  "https://finance.naver.com/sise/sise_quant.naver?sosok=0"),
@@ -51,6 +51,39 @@ SISE_JSON = ("https://api.finance.naver.com/siseJson.naver"
              "?symbol={code}&requestType=1&startTime={s}&endTime={e}&timeframe=day")
 
 
+FRGN_URL = "https://finance.naver.com/item/frgn.naver?code={code}"
+
+
+def _add_flow(r: dict):
+    """외국인·기관 순매매를 붙인다.
+
+    '왜 올랐는지'를 추정하지 않고도 관찰 가능한 사실을 늘리는 안전한 방법이다.
+    네이버 종목별 외국인·기관 페이지에서 최근 1일치만 읽는다.
+    """
+    soup = crawl.get_soup(FRGN_URL.format(code=r["code"]), encoding="euc-kr")
+    if soup is None:
+        return
+    try:
+        for tr in soup.select("table.type2 tr"):
+            tds = tr.find_all("td")
+            if len(tds) < 9:
+                continue
+            def _n(i):
+                t = tds[i].get_text(strip=True).replace(",", "")
+                return int(t) if re.fullmatch(r"[-+]?\d+", t) else None
+            close, inst, frgn = _n(1), _n(5), _n(6)
+            if close is None or (inst is None and frgn is None):
+                continue
+            # 순매매 '수량'이므로 종가를 곱해 금액으로 환산한다 (코드가 계산)
+            if inst is not None:
+                r["inst_net"] = inst * close
+            if frgn is not None:
+                r["frgn_net"] = frgn * close
+            break
+    except Exception:
+        pass
+
+
 def _add_history(r: dict):
     """네이버 siseJson 으로 20일 평균 거래대금·5일 수익률·장중 고저를 붙인다.
     원인 추정이 아니라 정형 수치라 안전하면서 콘텐츠 variation 을 크게 늘린다."""
@@ -73,6 +106,8 @@ def _add_history(r: dict):
         if len(rows) >= 6 and int(rows[-6][4]):
             r["ret5"] = (int(last[4]) - int(rows[-6][4])) / int(rows[-6][4]) * 100
         # 거래량 기준 배수 (거래대금 대신 거래량으로 계산 — siseJson 에 금액이 없다)
+        r["open"] = int(last[1]) if last[1] else None
+        r["close"] = int(last[4]) if last[4] else None
         vols = [int(x[5]) for x in rows[-21:-1] if x[5]]
         if vols and int(last[5]):
             avg = sum(vols) / len(vols)
@@ -134,6 +169,8 @@ def fetch(limit: int = 12) -> list[dict]:
     # 원인 추정 없이 안전하게 늘릴 수 있는 정형 지표를 붙인다.
     for r in rows[:limit]:
         _add_history(r)
+        _add_flow(r)
+        crawl.sleep_jitter(0.4, 0.9)
 
     out = []
     for r in rows[:limit]:
@@ -150,7 +187,9 @@ def fetch(limit: int = 12) -> list[dict]:
                 f"종가: {int(r['close']):,}원\n"
                 f"등락률: {r['pct']:.2f}%\n"
                 f"거래대금: {r['eok']:,.0f}억원\n"
-                f"※ 등락 사유는 데이터에 없음. 원인을 추측해 단정하지 말 것."
+                + "".join(f"{lbl}\n" for lbl in facts.evaluate(r))
+                + "※ '평가' 항목은 코드가 계산한 관찰 결과다. 그대로 인용하되 원인으로 해석하지 말 것.\n"
+                + "※ 등락 사유는 데이터에 없음. 원인을 추측해 단정하지 말 것."
             ),
             "src": f"https://finance.naver.com/item/main.naver?code={r['code']}",
         })
