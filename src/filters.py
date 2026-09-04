@@ -51,6 +51,13 @@ def _ending_variety(body: str) -> list[str]:
     return [f"어미반복({top}×{n})"] if n >= 4 else []
 
 
+def _number_overuse(body: str) -> list[str]:
+    """숫자 나열. 제공된 수치를 전부 소비하면 표지 나열이 된다.
+    실측: Voice 를 바꿔도 4건 모두 같은 6개 숫자를 같은 순서로 썼다."""
+    nums = {n.replace(",", "") for n in NUM_RE.findall(body) if len(n.replace(",", "")) >= 2}
+    return [f"수치과다({len(nums)}개)"] if len(nums) > 4 else []
+
+
 def check(body: str, facts: str, fmt: str = None, angle: str = None,
           length: str = None) -> list[str]:
     """위반 사유 리스트 반환. 빈 리스트면 통과."""
@@ -84,6 +91,7 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
 
     errs += _direction_errors(body, facts)
     errs += _hedge_errors(body)
+    errs += _number_overuse(body)
     errs += _ending_variety(body)
 
     # 미확인 표현은 uncertainty 앵글에서만 허용한다.

@@ -444,6 +444,29 @@ def main():
     ok.append(run("무관 종목엔 미연결",
                   _att([{"stock_code": "005930", "facts": "x"}], []) == 0))
 
+
+    # ── AI 티 제거 규칙
+    _f_ai = "등락률: 20.32%\n종가: 299,000원\n거래대금: 2,990억원"
+    ok.append(run("상투 마무리 차단", any("stock_ending" in e for e in _f2.check(
+        "로보티즈가 올랐습니다. 거래대금도 늘었습니다. 추가 공시를 지켜봐야 할 것 같습니다.",
+        _f_ai, "fact_read", "reaction", "short"))))
+    ok.append(run("완충표현 남발 차단", any("완충표현" in e for e in _f2.check(
+        "오른 것 같습니다. 거래도 는 것으로 보입니다. 배경이 있는 듯합니다. 흐름이 이어질 것 같습니다.",
+        _f_ai, "fact_read", "reaction", "short"))))
+    ok.append(run("어미 반복 차단", any("어미반복" in e for e in _f2.check(
+        "올랐네요. 늘었네요. 컸네요. 많았네요. 재밌네요.",
+        _f_ai, "fact_read", "reaction", "short"))))
+    ok.append(run("수치 과다 차단", any("수치과다" in e for e in _f2.check(
+        "20.32% 상승에 299,000원 마감. 거래대금 2,990억원, 5.8배, 34.10%, 305,000원, 251,000원입니다.",
+        _f_ai, "fact_read", "reaction", "medium"))))
+    ok.append(run("자연스러운 글 통과", not _f2.check(
+        "20.32% 상승. 로보티즈 종가는 299,000원입니다. 거래대금은 2,990억원을 기록했습니다.",
+        _f_ai, "fact_read", "reaction", "short")))
+
+    # ── Voice 가 계약을 담고 있는가 (라벨이면 문체가 안 바뀐다)
+    ok.append(run("Voice 계약에 어미 규칙", "종결어미" in _V["dry"]["desc"]))
+    ok.append(run("Voice 계약에 문장 규칙", "5어절" in _V["light"]["desc"]))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
