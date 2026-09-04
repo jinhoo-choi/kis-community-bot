@@ -600,7 +600,9 @@ def main():
                           for e in _f2.check(_bad * 4, "x", "fact_note", "reaction",
                                              "fact_note"))))
     # Fact 계열화 / contrast_pair
-    ok.append(run("계열당 최대2 절충", _fx.count(_it3) == 2, str(_fx.count(_it3))))
+    ok.append(run("계열당 최대2 절충", _fx.count(_it3) == 3, str(_fx.count(_it3))))
+    _many = {"facts": "등락률: 1%\n종가: 1원\n거래대금: 1억원\n장중 고저 차이: 저가 대비 1%"}
+    ok.append(run("같은 계열 4슬롯도 2로 계산", _fx.count(_many) == 2, str(_fx.count(_many))))
     _ct = _fx.contrast_pairs({"facts": "등락률: 12.41%\n마감 위치: 장중 고가 대비 8.2% 낮은 수준"})
     ok.append(run("contrast_pair 생성", len(_ct) == 1, str(_ct)))
     ok.append(run("호환 그래프 timeline×ratio 차단",
