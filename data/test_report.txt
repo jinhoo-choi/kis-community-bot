@@ -87,8 +87,8 @@ ok
   OK    Angle 11종  (11)
   OK    4축 조합 700가지 이상  (792)
   OK    금지 조합 없음(가중치 방식)
-  OK    같은 실행 내 축 반복 억제  (['duration', 'purpose', 'terms', 'terms', 'amount', 'ratio'])
-  OK    Length 도 분산  (['short', 'medium', 'long', 'medium', 'short', 'medium'])
+  OK    같은 실행 내 축 반복 억제  (['purpose', 'ratio', 'terms', 'amount', 'purpose', 'duration'])
+  OK    Length 도 분산  (['medium', 'long', 'short', 'medium', 'short', 'short'])
   OK    데이터에 없는 Angle 미생성  (['amount', 'ratio', 'duration', 'terms', 'purpose'])
   OK    uncertainty 단독은 앵글 없음
   OK    Length spec 존재
@@ -103,7 +103,7 @@ ok
   OK    리포트 배경보강만으로는 불충분
   OK    적정가격 있으면 통과
   OK    억제 계수 0.5 미만  (0.3)
-  OK    Format 4종 이상 등장  ({'fact_read': 3, 'question': 1, 'two_sides': 3, 'lead_number': 2, 'check_points': 2, 'timeline': 1})
+  OK    Format 4종 이상 등장  ({'check_points': 4, 'fact_read': 4, 'lead_number': 1, 'timeline': 1, 'question': 1, 'two_sides': 1})
   OK    배경블록만으로 context 미채택
   OK    업종 서술 있으면 context 채택
   OK    미확인표현 fatal
@@ -151,10 +151,11 @@ ok
   OK    접근자 v1 호환
   OK    접근자 v2 호환
   OK    접근자 숫자상한
+  OK    v2 슬롯 가중치 0 허용(정책×수치중심)
   OK    v2 프롬프트 미치환 없음
   OK    v2 프롬프트에 공통규칙 주입
 
-146/146 passed
+147/147 passed
 
 === 3. E2E 시뮬레이션 ===
 ==============================================================
@@ -188,7 +189,7 @@ ok
        └ '두산에너빌리티 원전 수주 소식이 나왔네요. 저는 이거 물렸는데 이번엔 좀 오르려나요. 체코 건 이후로 분위기가 달라진 건 맞습니다. 다만 확정된 수치는 없습니다. 어떻게 보시나요.'
 [gen] 정규식 리젝 v2 ['trade_advice', 'price_target']
        └ '카카오 광고매출 회복 얘기가 나옵니다. 지금 비중확대 하세요. 목표가 6만원 갑니다. 반드시 오릅니다. 지금이 기회입니다. 다들 어떻게 보시나요.'
-[gen] 정규식 리젝 v3 ["미확인수치['452', '8742', '1530']"]
+[gen] 정규식 리젝 v3 ["미확인수치['1530', '452', '8742']"]
        └ 'LG에너지솔루션이 어제 2.30% 올랐습니다. 거래대금은 8,742억원이었고 외국인이 1,530억 순매수했습니다. 수주잔고도 452조원까지 늘었다고 합니다. 배터리 업황이 돌아서는 걸까요.'
 [gen] 정규식 통과 8건 / 시도 13건
 

@@ -1,4 +1,7 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 [dart] corp_code 3988종목 매핑
 [dart] 상세 보강 2/12건
 [crawl] dart 12건
@@ -6,42 +9,42 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
 [crawl] hankyung 1건
 [crawl] market 6건
 [tickers] 상장 2632종목 로드 (lxml)
-[crawl] kind_inquiry 3건
+[crawl] kind_inquiry 2건
 [crawl] policy_rss 3건
 [tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
 [crawl] telegram_ch 0건 (정상 0건)
-[main] 수집 총 28건
-[enrich] 20/28건 배경 보강 완료
+[main] 수집 총 27건
+[enrich] 19/27건 배경 보강 완료
 [gate] 차단 13건 {'tier4': 6, 'tier5': 6, 'tier1': 1}
-[main] 생성 대상 15건 {'disclosure': 5, 'research': 1, 'flow': 6, 'policy': 2, 'poll': 1}
+[main] 생성 대상 14건 {'disclosure': 4, 'research': 1, 'flow': 6, 'policy': 2, 'poll': 1}
 [claude] SDK 1.3.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] claude: 12/12건 생성
-[gen] 정규식 리젝 dart-20260903000285 ['수치과다(5개/careful_note)']
-       └ '에이프로젠이 200억원 규모의 전환사채를 발행하기로 결정했습니다. 이번 발행은 무기명이권부무보증사모전환사채 35회차로, 전환가액은 2,396원입니다. 표면이자율은 0%이며 만기일은 2031년 9월 11일로 설정됐습니다. 전환사채는 채권으로서의 안정성과 주식으로 전환할 수 있는 옵션을 동시에 제공하는 금융상품입니다. 회사의 자금 조달 방식 변화를 보여주는 공'
-[gen] 정규식 리젝 dart-20260903800469 ['미확인표현(공개되지 않)']
-       └ '토니모리가 9월 3일 최대주주변경 공시를 냈습니다. 화장품 제조 및 판매를 주력으로 하는 회사에서 경영진 구조에 변화가 생긴 거네요. 공시 세부 내용은 아직 상세히 공개되지 않은 상태입니다. 추가 공시나 공식 발표를 통해 구체적인 상황을 확인할 수 있을 것으로 보입니다.'
-[gen] 정규식 리젝 flow-2026-09-03-386380 ["미확인수치['135']"]
-       └ '23,500원에서 거래대금 234억원을 기록하며 전일 대비 135% 올랐어요. KOSDAQ 스카이랩스의 급등이 어떤 배경에서 나왔는지는 공식 공시로 확인할 필요가 있습니다. 이런 큰 등락 뒤에는 보통 실적 발표, 신규 계약 체결, 공모 일정 같은 구체적인 트리거가 있으니 회사 공지사항과 거래소 정보공시를 먼저 살펴보세요. 오늘 같은 변동성 큰 날은 진입 전'
-[gen] 정규식 리젝 flow-2026-09-03-030530 ['미확인표현(확인되지 않)', '질문마무리금지(careful_note)']
-       └ '원익홀딩스가 어제 29.91% 올랐습니다. 종가는 22,500원이고 거래대금은 225억원을 기록했어요. 장중 거래가 활발하게 이루어졌네요. 구체적인 상승 배경은 확인되지 않았습니다. 혹시 소식을 아시는 분 계신가요?'
-[gen] 정규식 리젝 flow-2026-09-03-234340 ['stock_ending', '미확인표현(공개되지 않)']
-       └ '어제 헥토파이낸셜이 13.48% 올랐습니다. 종가는 25,250원이고 거래대금은 252억원이었습니다. 등락 사유가 공개되지 않아 정확한 배경은 확인이 필요합니다. 상세 내용이 궁금하신 분들은 공시를 참고하시면 될 것 같습니다.'
-[gen] 정규식 리젝 flow-2026-09-03-336260 ['방향오용(급락)', '미확인표현(확인되지 않)']
-       └ '두산퓨얼셀이 어제 12.44% 상승하며 43,850원에 마감했습니다. 거래대금은 438억원을 기록했는데요. 상승 사유에 대해 공식 공시나 뉴스가 확인되지 않아 정확한 원인은 파악되지 않고 있습니다. 현물주와 선물, ETF 등 여러 투자 수단에서 거래가 이뤄지는 만큼 개별 종목의 급락락은 시장 전체의 변동성을 반영할 수도 있습니다.'
-[gen] 정규식 리젝 flow-2026-09-03-058610 ['수치과다(3개/quick_memo)']
-       └ '94,200원까지 올랐어요. 에스피지가 어제 12.41% 상승했네요. 거래대금이 942억원을 기록했어요.'
+[gen] claude: 11/11건 생성
+[gen] 정규식 리젝 dart-20260903800625 ['미확인표현(공개되지 않)']
+       └ '대양금속이 어제 유상증자 청약결과를 공시했어요. 유상증자란 회사가 새로운 주식을 발행해서 자금을 모으는 방식이에요. 기존 주주들이 정해진 가격으로 새 주식을 살 수 있는 기회를 주는 거거든요. 이번 공시는 그 청약이 어떻게 진행됐는지를 알리는 거네요. 상세 수치는 아직 공개되지 않았어요. 추가 정보는 공식 공시로 확인할 수 있습니다.'
+[gen] 정규식 리젝 dart-20260903000285 ['수치과다(5개/medium)']
+       └ '200억원 규모 전환사채를 발행하기로 결정했는데요. 에이프로젠이 무기명이권부무보증사모전환사채 35회차를 내놓기로 공시한 겁니다. 전환가액은 2,396원이고 만기는 2031년 9월 11일까지인데, 표면이자는 붙지 않네요. 채권 형태의 자금 조달로 향후 자본 구성에 변수가 생기는 셈입니다.'
+[gen] 정규식 리젝 flow-2026-09-03-386380 ['너무짧음(77자/medium)', "미확인수치['135']"]
+       └ '135% 상승했어요. 스카이랩스네요. 종가는 23,500원이었어요. 거래대금이 234억원에 달렸어요. 장 내내 매수세가 강했던 모습입니다.'
+[gen] 정규식 리젝 flow-2026-09-03-234340 ['너무짧음(129자/long)', '어미반복(습니다×5)', '미확인표현(확인되지 않)']
+       └ '2026년 9월 3일 헥토파이낸셜이 전날 대비 13.48% 올랐습니다. 종가는 25,250원으로 마감했습니다.\n\n거래대금은 252억원을 기록했습니다. 코스닥 시장에서 거래가 활발했습니다.\n\n상승의 구체적 배경은 확인되지 않았습니다.'
+[gen] 정규식 리젝 flow-2026-09-03-336260 ['미확인표현(확인되지 않)']
+       └ '어제 두산퓨얼셀이 전날 종가 대비 12.44% 상승했습니다. 종가는 43,850원이고 거래대금은 438억원입니다. 장 중에 거래가 몰렸습니다. 구체적 상승 원인은 공시나 뉴스에서 확인되지 않았습니다.'
+[gen] 정규식 리젝 flow-2026-09-03-058610 ['stock_ending', '어미반복(습니다×5)']
+       └ '12.41% 상승한 에스피지는 94,200원에 마감했습니다. 거래대금은 942억원에 달했습니다. 장 중 매수 물량이 모였습니다. 코스닥 거래대금 상위권에 올랐습니다. 이 정도 수준의 오름은 지속할 수 있다는 해석도 있고, 일시적 반등에 불과하다는 시각도 있습니다. 향후 추세 전환이 확인되는지 지켜봐야 합니다.'
+[gen] 정규식 리젝 kind-20260904000786 ['stock_ending']
+       └ '거래소가 회사에 풍문이나 보도 관련 확인을 요청했네요. 오늘 18시 32분 공시된 주권매매거래정지기간변경 공시인데요, 이는 시황 변동이나 시장 풍문에 대해 거래소가 답변을 요구한 건입니다. 공시 내용의 정확한 답변 성격은 원문 확인이 필요한 상태예요. 자세한 내용은 공시 전문을 확인해 보시면 좋겠습니다.'
 [gen] gemini: 3/3건 생성
-[gen] 정규식 리젝 pol-강원도신한은행강원주민들에밀착형복합금융지원제공 ['너무짧음(37자/data_focus)']
-       └ '2026년 9월 4일부터 강원특별자치도와 신한은행이 복합 금융지원을'
-[gen] 정규식 리젝 pol-듀켐바이오정읍에343억원규모투자전북도등과협약 ['너무짧음(42자/timeline_note)']
-       └ '343억원은 방사성의약품 전문기업 듀켐바이오가 전북 정읍에 투자하기로 결정한'
-[gen] 정규식 리젝 poll-flow-2026-09-03-386380 ['너무짧음(34자/two_view)']
-       └ '135.00%, 23,500원) -> 비율이 첫 문장에 나옴.'
-[gen] 정규식 통과 7건 / 시도 15건
+[gen] 정규식 리젝 pol-듀켐바이오정읍에343억원규모투자전북도등과협약 ['format', 'meta_output', '너무짧음(47자/medium)']
+       └ '숫자가 하나도 없는 문장을 반드시 하나 이상 넣으세요.\n    *   [절대 금지]:'
+[gen] 정규식 리젝 pol-원주의료기기기업15곳현장채용구직자와해피데이 ['너무짧음(38자/short)']
+       └ '2026년 9월 4일에 열리네요. 의료기기 산업의 채용 기회가 늘어납'
+[gen] 정규식 리젝 poll-flow-2026-09-03-386380 ['너무짧음(34자/long)']
+       └ '스카이랩스 주가가 하루 만에 전날보다 135.00% 올랐습니다'
+[gen] 정규식 통과 6건 / 시도 14건
 [claude] SDK 1.3.0
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 6건 / 보류 1건
-   보류 kind-20260904000786 (claude) - fatal:상투적 마무리 문구 사용
-[main] filter_log data/filter_log_20260904_1846.json
-[main] stats {"ts": "2026-09-04T18:46:39+09:00", "persona_mode": "v2", "collected": 28, "gate_blocked": 13, "gate_reasons": {"tier4": 6, "tier5": 6, "tier1": 1}, "enrich_ok": 20, "generated": 7, "sent": 6, "held": 1, "hold_reasons": {"fatal": 1}, "avg_score": 16.67, "by_provider": {"claude": {"generated": 7, "sent": 6, "avg_score": 15.86}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 12, "expected": 12, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 6, "expected": 6, "degraded": false}, "kind_inquiry": {"got": 3, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+[main] 배포 5건 / 보류 1건
+   보류 flow-2026-09-03-030530 (claude) - fatal:독자를 '당신'으로 지칭(질문형태로 유도)
+[main] filter_log data/filter_log_20260904_2013.json
+[main] stats {"ts": "2026-09-04T20:13:48+09:00", "persona_mode": "v1", "collected": 27, "gate_blocked": 13, "gate_reasons": {"tier4": 6, "tier5": 6, "tier1": 1}, "enrich_ok": 19, "generated": 6, "sent": 5, "held": 1, "hold_reasons": {"fatal": 1}, "avg_score": 16.0, "by_provider": {"claude": {"generated": 6, "sent": 5, "avg_score": 15.67}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 12, "expected": 12, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 6, "expected": 6, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
