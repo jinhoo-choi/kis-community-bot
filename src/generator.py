@@ -38,6 +38,9 @@ def _run(provider_name: str, items: list[dict], tones: list[str]) -> list[dict]:
     out = []
     for it, tn, r in zip(items, tones, results):
         if not r.ok or not r.text:
+            # 원인을 삼키면 '0건 생성'만 보이고 왜인지 알 수 없다
+            print(f"[gen] ⚠ {provider_name} 실패 {it['id']}: "
+                  f"{r.error or '빈 응답'}")
             continue
         out.append({**it, "tone": tn, "body": r.text,
                     "provider": r.provider, "model": r.model})

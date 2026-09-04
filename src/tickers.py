@@ -7,6 +7,7 @@ GitHub Actions 에서 `KRX 로그인 실패` 로 전건 실패했다 (dry-run �
 """
 import functools
 import re
+import time
 
 import requests
 from bs4 import BeautifulSoup
@@ -23,12 +24,59 @@ _EXCLUDE_NAME = re.compile(
 )
 
 
+NAVER_SUM = ("https://finance.naver.com/sise/sise_market_sum.naver"
+             "?sosok={sosok}&page={page}")
+
+
+def _from_naver(max_page: int = 8) -> dict[str, str]:
+    """KRX 가 막혔을 때의 폴백. 시총 상위부터 받아 주요 종목을 커버한다.
+
+    전 종목을 받지는 못하지만, 리포트·기사에 등장하는 종목은 대부분 상위권이라
+    제목 매칭 용도로는 충분하다. 전건 실패보다 낫다.
+    """
+    table = {}
+    for sosok in (0, 1):                    # 0=KOSPI, 1=KOSDAQ
+        for page in range(1, max_page + 1):
+            try:
+                r = requests.get(NAVER_SUM.format(sosok=sosok, page=page),
+                                 headers=_HEADERS, timeout=15)
+                r.encoding = "euc-kr"
+                soup = BeautifulSoup(r.text, "html.parser")
+                found = 0
+                for a in soup.select("a[href*='code=']"):
+                    m = re.search(r"code=(\d{6})", a.get("href", ""))
+                    nm = a.get_text(strip=True)
+                    if m and nm and not _EXCLUDE_NAME.search(nm):
+                        table[nm] = m.group(1)
+                        found += 1
+                if not found:
+                    break
+            except Exception:
+                break
+    return table
+
+
+_HEADERS = {
+    "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                   "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
+    "Referer": "https://kind.krx.co.kr/corpgeneral/corpList.do?method=loadInitPage",
+}
+
+
 @functools.lru_cache(maxsize=1)
 def listed() -> dict[str, str]:
     """{종목명: 종목코드}. 실패 시 빈 dict (호출부는 전부 테마글로 강등)."""
     try:
-        r = requests.get(KIND_URL, timeout=25,
-                         headers={"User-Agent": "Mozilla/5.0"})
+        # KIND 는 단순 UA 로는 403 을 내는 경우가 있다 (실측). 브라우저 헤더 + 재시도.
+        r = None
+        for attempt in range(3):
+            r = requests.get(KIND_URL, timeout=25, headers=_HEADERS)
+            if r.status_code == 200:
+                break
+            print(f"[tickers] KIND {r.status_code} 재시도 {attempt + 1}/3")
+            time.sleep(2 + attempt * 3)
         r.raise_for_status()
         r.encoding = "euc-kr"
         html = r.text
@@ -75,8 +123,13 @@ def listed() -> dict[str, str]:
             print(f"[tickers] 상장 {len(table)}종목 로드 (regex)")
         return table
     except Exception as e:
-        print(f"[tickers] ⚠ 상장리스트 로드 실패: {e}")
-        return {}
+        print(f"[tickers] ⚠ KIND 실패: {e} → 네이버 폴백")
+        t = _from_naver()
+        if t:
+            print(f"[tickers] 네이버 폴백 {len(t)}종목 로드")
+        else:
+            print("[tickers] ⚠ 폴백도 실패 — 전건 테마글로 강등된다")
+        return t
 
 
 @functools.lru_cache(maxsize=1)

@@ -21,10 +21,11 @@ def check(body: str, facts: str) -> list[str]:
         if re.search(pat, body, re.MULTILINE):
             errs.append(name)
 
+    # 커뮤니티 글은 짧은 게 자연스럽다. 길면 오히려 AI 티가 난다.
     n = len(body.strip())
-    if n < 100:
+    if n < 50:
         errs.append(f"너무짧음({n}자)")
-    if n > 400:
+    if n > 300:
         errs.append(f"너무김({n}자)")
 
     # 환각 수치 탐지: 본문 숫자가 원본 facts 에 없으면 리젝

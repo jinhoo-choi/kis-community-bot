@@ -19,7 +19,7 @@ import sys
 
 import config
 from src import (state, tickers, generator, telegram_bot, enrich, judge,
-                 gate, decide, stats, dedup, crawl)
+                 gate, decide, stats, dedup, crawl, assign)
 from src.sources import dart, research, market, policy
 
 
@@ -92,6 +92,9 @@ def main():
         posts = judge.judge_all(posts)
 
     sent_posts, held = decide.decide_distribution(posts)
+    # 담당자 배정은 최종 배포분이 확정된 뒤에 한다.
+    # 보류될 글까지 배정하면 담당자별 건수가 실제와 달라진다.
+    sent_posts = assign.assign(sent_posts)
     print(f"[main] 배포 {len(sent_posts)}건 / 보류 {len(held)}건")
     for h in held[:5]:
         print(f"   보류 {h['id']} ({h.get('provider')}) - {h.get('hold_reason','')}")

@@ -13,7 +13,9 @@ TELEGRAM_CHAT_ID  = os.environ.get("TELEGRAM_CHAT_ID", "")
 
 # --- 생성 목표 ---
 TARGET_POSTS = int(os.environ.get("TARGET_POSTS", "50"))
-OVERGEN_RATE = 1.5          # 정규식 리젝 + 심사 탈락 대비 150% 생성
+# 정규식 리젝 + 심사 탈락 대비 초과 생성.
+# 소량 실행은 후보가 몇 건뿐이라 한두 건만 리젝돼도 0건이 된다. 배율을 올린다.
+OVERGEN_RATE = 1.5 if TARGET_POSTS >= 30 else 3.0
 
 _BASE_QUOTA = {             # 50건 기준 슬롯 배분
     "disclosure": 20,       # DART 공시

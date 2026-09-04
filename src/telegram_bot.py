@@ -26,10 +26,11 @@ KIND_LABEL = {
 
 
 def _text(p: dict) -> str:
-    name = html.escape(p.get("stock_name") or "테마")
+    name = "<b>" + html.escape(p.get("stock_name") or "테마") + "</b>"
     code = " ({})".format(p["stock_code"]) if p.get("stock_code") else ""
+    who = html.escape(p.get("assignee") or "미지정")
     head = (
-        f"<b>{name}{code}</b>\n"
+        f"<b>[담당: {who}]</b>  {name}{code}\n"
         f"{KIND_LABEL.get(p['kind'], p['kind'])} · {TONES[p['tone']]['name']} · "
         f"{BOARD_LABEL.get(p.get('board', 'stock'))}\n"
         f"<i>{p.get('provider','?')} · 심사 {(p.get('score') or {}).get('total','-')}/20</i>\n"
@@ -76,9 +77,11 @@ def send_summary(posts: list[dict], sent: int):
     scored = [(p.get("score") or {}).get("total") for p in posts]
     scored = [x for x in scored if x]
     avg = f"{sum(scored)/len(scored):.1f}/20" if scored else "-"
+    from src import assign as _assign
     msg = (
         f"<b>오늘의 배포 요약</b>\n"
         f"총 {sent}건 전송 · 평균 심사점수 {avg}\n"
+        f"담당: {_assign.summary(posts)}\n"
         f"유형: " + ", ".join(f"{k} {v}" for k, v in c.items()) + "\n"
         f"톤: " + ", ".join(f"{k} {v}" for k, v in t.items()) + "\n"
         f"모델: " + ", ".join(f"{k} {n}" for k, n in v.items())

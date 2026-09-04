@@ -203,6 +203,37 @@ def main():
     ok.append(run("복사영역에 출처 URL 없음", "http" not in _pre))
     ok.append(run("고지문구는 pre 밖에 존재", "AI 생성" in _card.split("</pre>")[1]))
 
+
+    # ── 담당자 배정 (중복 게시 방지)
+    import json as _j, os as _os
+    from src import assign as _as
+    _bak = None
+    if _os.path.exists(_as.PATH):
+        _bak = open(_as.PATH, encoding="utf-8").read()
+    _os.makedirs("data", exist_ok=True)
+    _j.dump({"members": ["A", "B", "C"]}, open(_as.PATH, "w", encoding="utf-8"))
+    _ps = [{"id": f"a{i}", "stock_code": c} for i, c in
+           enumerate(["005930", "005930", "000660", "042700", None, None])]
+    _as.assign(_ps)
+    _by = {p["id"]: p["assignee"] for p in _ps}
+    ok.append(run("전건 배정됨", all(_by.values())))
+    ok.append(run("같은 종목은 같은 담당자", _by["a0"] == _by["a1"], f"{_by['a0']}/{_by['a1']}"))
+    from collections import Counter as _C
+    _load = _C(_by.values())
+    ok.append(run("균등 분배(편차 1 이하)", max(_load.values()) - min(_load.values()) <= 1, str(dict(_load))))
+    _j.dump({"members": []}, open(_as.PATH, "w", encoding="utf-8"))
+    _as.assign(_ps)
+    ok.append(run("명단 없으면 미지정", all(p["assignee"] == "" for p in _ps)))
+    if _bak is not None:
+        open(_as.PATH, "w", encoding="utf-8").write(_bak)
+
+    # ── 길이 기준 (50~300자)
+    from src import filters as _f
+    ok.append(run("50자 미만 리젝", any("너무짧음" in e for e in _f.check("짧은 글." * 3, ""))))
+    ok.append(run("60자 통과", not any("너무짧" in e or "너무김" in e
+                                       for e in _f.check("가" * 60, ""))))
+    ok.append(run("300자 초과 리젝", any("너무김" in e for e in _f.check("가" * 350, ""))))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
