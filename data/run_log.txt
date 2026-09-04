@@ -1,33 +1,37 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-[crawl] dart 6건
-[crawl] naver_research 2건
-[crawl] hankyung 1건
-[crawl] market 3건
+[dart] corp_code 3988종목 매핑
+[dart] 상세 보강 2/9건
+[crawl] dart 9건
+[crawl] naver_research 4건
+[crawl] hankyung 2건
+[crawl] market 6건
 [crawl] policy_rss 3건
-[main] 수집 총 16건
-[enrich] 10/16건 배경 보강 완료
-[gate] 차단 6건 {'tier4': 3, 'tier5': 3}
+[main] 수집 총 25건
+[enrich] 14/25건 배경 보강 완료
+[gate] 차단 10건 {'tier4': 4, 'tier5': 6}
 [tickers] 상장 2632종목 로드 (lxml)
-[dedup] 제외 5건 {'ID': 5}
-[main] 생성 대상 5건 {'disclosure': 2, 'research': 1, 'flow': 0, 'policy': 2, 'poll': 0}
+[dedup] 제외 8건 {'ID': 7, 'SIM': 1}
+[main] 생성 대상 7건 {'disclosure': 1, 'research': 2, 'flow': 3, 'policy': 1, 'poll': 0}
 [claude] SDK 1.3.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] claude: 2/2건 생성
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[gen] claude: 4/4건 생성
 [gen] gemini: 3/3건 생성
-[gen] 정규식 리젝 naver-y_readnavernid96013page1 ['너무짧음(29자)']
-       └ '2문장, 4어절) -> 5어절 이하 짧은 문장 충족.'
-[gen] 정규식 리젝 pol-중소기업지원대전시지식재산진흥최우수기관표창 ['너무짧음(43자)']
-       └ '대전시가 중소기업 지원 공로를 인정받아 지식재산 진흥 최우수 기관 표창을 받았'
+[gen] 정규식 리젝 flow-2026-09-03-058610 ['너무짧음(34자)']
+       └ '지난 2026년 9월 3일 코스닥 시장에서 에스피지 주가가 전'
+[gen] 정규식 리젝 flow-2026-09-03-263750 ['너무짧음(40자)']
+       └ '펄어비스가 어제 9.85% 오른 34,000원으로 마감했습니다. 거래대금'
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] 정규식 통과 4건 / 시도 5건
+[gen] 정규식 통과 6건 / 시도 7건
 [claude] SDK 1.3.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 2건 / 보류 2건
-   보류 pol-신한증권25년만의에너지공기업재편관건은부담배분 (gemini) - fatal:게시글이 미완성 상태임 - '통합'으로 끝남
-   보류 naver-y_readnavernid96013page1 (claude) - fatal:외부 기관으로 문의 안내
-[main] filter_log data/filter_log_20260904_0938.json
-[main] stats {"ts": "2026-09-04T09:38:47+09:00", "collected": 16, "gate_blocked": 6, "gate_reasons": {"tier4": 3, "tier5": 3}, "enrich_ok": 10, "generated": 4, "sent": 2, "held": 2, "hold_reasons": {"fatal": 2}, "avg_score": 15.5, "by_provider": {"claude": {"generated": 3, "sent": 2, "avg_score": 14.0}, "gemini": {"generated": 1, "sent": 0, "avg_score": 8.0}}, "model_fallbacks": [], "dedup": {"ID": 5}, "crawl_health": {"dart": {"got": 6, "expected": 6, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 3, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}}}
+[main] 배포 4건 / 보류 2건
+   보류 pol-與박해철尹정부4년간청년일자리사업예산6천718 (gemini) - fatal:게시글이 완성되지 않음(5 sentences? 표기 후 1문장만 제시),제공된 사실관계를 기반한 완전한 글이
+   보류 flow-2026-09-03-263750 (claude) - fatal:사실관계에 없는 배경을 추측
+[main] filter_log data/filter_log_20260904_0954.json
+[main] stats {"ts": "2026-09-04T09:54:20+09:00", "collected": 25, "gate_blocked": 10, "gate_reasons": {"tier4": 4, "tier5": 6}, "enrich_ok": 14, "generated": 6, "sent": 4, "held": 2, "hold_reasons": {"fatal": 2}, "avg_score": 17.0, "by_provider": {"gemini": {"generated": 1, "sent": 0, "avg_score": 4.0}, "claude": {"generated": 5, "sent": 4, "avg_score": 16.4}}, "model_fallbacks": [], "dedup": {"ID": 7, "SIM": 1}, "crawl_health": {"dart": {"got": 9, "expected": 9, "degraded": false}, "naver_research": {"got": 4, "expected": 4, "degraded": false}, "hankyung": {"got": 2, "expected": 2, "degraded": false}, "market": {"got": 6, "expected": 6, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}}}
