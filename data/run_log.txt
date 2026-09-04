@@ -1,37 +1,35 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 [dart] corp_code 3988종목 매핑
 [dart] 상세 보강 2/9건
 [crawl] dart 9건
-[crawl] naver_research 4건
-[crawl] hankyung 2건
+[crawl] naver_research 2건
+[crawl] hankyung 1건
 [crawl] market 6건
 [crawl] policy_rss 3건
-[main] 수집 총 25건
-[enrich] 14/25건 배경 보강 완료
-[gate] 차단 10건 {'tier4': 4, 'tier5': 6}
+[main] 수집 총 22건
+[enrich] 12/22건 배경 보강 완료
+[gate] 차단 8건 {'tier4': 4, 'tier5': 4}
 [tickers] 상장 2632종목 로드 (lxml)
-[dedup] 제외 8건 {'ID': 7, 'SIM': 1}
-[main] 생성 대상 7건 {'disclosure': 1, 'research': 2, 'flow': 3, 'policy': 1, 'poll': 0}
+[dedup] 제외 8건 {'ID': 8}
+[main] 생성 대상 6건 {'disclosure': 1, 'research': 0, 'flow': 2, 'policy': 2, 'poll': 1}
 [claude] SDK 1.3.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] claude: 4/4건 생성
-[gen] gemini: 3/3건 생성
-[gen] 정규식 리젝 flow-2026-09-03-058610 ['너무짧음(34자)']
-       └ '지난 2026년 9월 3일 코스닥 시장에서 에스피지 주가가 전'
-[gen] 정규식 리젝 flow-2026-09-03-263750 ['너무짧음(40자)']
-       └ '펄어비스가 어제 9.85% 오른 34,000원으로 마감했습니다. 거래대금'
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[gen] claude: 5/5건 생성
+[gen] 정규식 리젝 flow-2026-09-03-058610 ['질문마무리금지(numbers_first)']
+       └ '에스피지가 전일 11.93% 올랐네요. 종가 93,800원에 거래대금 928억원이 나왔습니다. 급등의 구체적 사유는 아직 확인되지 않았습니다. 소형 기어드 모터와 감속기를 만드는 회사인데, 산업용 부품 섹터 전반적 움직임이나 회사 공시를 확인해 보면 배경을 알 수 있을 것 같습니다. 거래량이 늘어난 만큼 어떤 계기가 있었을 거라고 봅니다. 요즘 이 주에 특'
+[gen] 정규식 리젝 pol-與박해철尹정부4년간청년일자리사업예산6천718 ["미확인수치['700']"]
+       └ '정부의 청년 일자리 지원 사업에서 2022년부터 2025년까지 4년간 예산이 제대로 쓰이지 않았다는 지적이 나왔네요. 언론 보도에 따르면 해당 기간 6천 700억대의 예산이 불용되었다고 하는데요.\n\n긍정적으로 보면 미사용 예산이 다른 정책으로 재배분될 가능성이 있고, 예산 낭비 구조를 개선할 계기가 될 수 있습니다. 한편 현장에서 실제로 필요한 청년 일자리'
+[gen] gemini: 1/1건 생성
+[gen] 정규식 리젝 poll-flow-2026-09-03-386380 ['format', 'meta_output', '너무짧음(46자)']
+       └ ', 마크다운 없이 줄바꿈만 사용.\n    *   독자 대상 구체적인 질문으로 끝맺음'
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] 정규식 통과 6건 / 시도 7건
+[gen] 정규식 통과 4건 / 시도 6건
 [claude] SDK 1.3.0
-[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 4건 / 보류 2건
-   보류 pol-與박해철尹정부4년간청년일자리사업예산6천718 (gemini) - fatal:게시글이 완성되지 않음(5 sentences? 표기 후 1문장만 제시),제공된 사실관계를 기반한 완전한 글이
-   보류 flow-2026-09-03-263750 (claude) - fatal:사실관계에 없는 배경을 추측
-[main] filter_log data/filter_log_20260904_0954.json
-[main] stats {"ts": "2026-09-04T09:54:20+09:00", "collected": 25, "gate_blocked": 10, "gate_reasons": {"tier4": 4, "tier5": 6}, "enrich_ok": 14, "generated": 6, "sent": 4, "held": 2, "hold_reasons": {"fatal": 2}, "avg_score": 17.0, "by_provider": {"gemini": {"generated": 1, "sent": 0, "avg_score": 4.0}, "claude": {"generated": 5, "sent": 4, "avg_score": 16.4}}, "model_fallbacks": [], "dedup": {"ID": 7, "SIM": 1}, "crawl_health": {"dart": {"got": 9, "expected": 9, "degraded": false}, "naver_research": {"got": 4, "expected": 4, "degraded": false}, "hankyung": {"got": 2, "expected": 2, "degraded": false}, "market": {"got": 6, "expected": 6, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}}}
+[main] 배포 4건 / 보류 0건
+[main] filter_log data/filter_log_20260904_1012.json
+[main] stats {"ts": "2026-09-04T10:12:16+09:00", "collected": 22, "gate_blocked": 8, "gate_reasons": {"tier4": 4, "tier5": 4}, "enrich_ok": 12, "generated": 4, "sent": 4, "held": 0, "hold_reasons": {}, "avg_score": 17.75, "by_provider": {"claude": {"generated": 4, "sent": 4, "avg_score": 17.75}}, "model_fallbacks": [], "dedup": {"ID": 8}, "crawl_health": {"dart": {"got": 9, "expected": 9, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 6, "expected": 6, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}}}
