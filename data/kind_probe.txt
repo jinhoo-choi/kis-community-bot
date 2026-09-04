@@ -12,13 +12,13 @@ KIND 조회공시 엔드포인트 프로브
 
 [C. 오늘의 공시(POST)]
   POST https://kind.krx.co.kr/disclosure/todaydisclosure.do
-  HTTP 200  16196 bytes  ct=text/html; charset=UTF-8
+  HTTP 200  16138 bytes  ct=text/html; charset=UTF-8
   <tr> 16개
-  row0: ['17:43', 'HEM파마', '[정정] 단일판매ㆍ공급계약체결', '에이치이엠파마', '공시차트 주가차트']
+  row0: ['17:44', '빌리언스', '주식등의대량보유상황보고서(일반)', '휴마시스', '공시차트 주가차트']
         href: #companysum
-  row1: ['17:43', '시지트로닉스', '소액공모공시서류(지분증권)', '시지트로닉스', '공시차트 주가차트']
+  row1: ['17:43', 'HEM파마', '[정정] 단일판매ㆍ공급계약체결', '에이치이엠파마', '공시차트 주가차트']
         href: #companysum
-  row2: ['17:43', '한화투자증권', '투자설명서[일괄신고-사채]', '한화투자증권', '공시차트 주가차트']
+  row2: ['17:43', '시지트로닉스', '소액공모공시서류(지분증권)', '시지트로닉스', '공시차트 주가차트']
         href: #companysum
 
 [D. 전체공시 검색(POST)]
@@ -26,3 +26,30 @@ KIND 조회공시 엔드포인트 프로브
   HTTP 200  2298 bytes  ct=text/html; charset=UTF-8
   <tr> 0개
   본문 앞부분: ''
+
+==================================================================
+행 원본 HTML 덤프 + 조회공시 필터 테스트
+==================================================================
+총 100행 (currentPageSize=100)
+
+[행 원본 HTML]
+<tr class="first" id="parkman">
+<td class="first txc">17:44</td>
+<td><img alt="코스닥" class="vmiddle legend" src="/images/common/icn_t_ko.gif"/> <a href="#companysum" id="companysum" onclick="companysummary_open('04448'); return false;" title="빌리언스"> 빌리언스</a> </td>
+<td><a href="#viewer" onclick="openDisclsViewer('20260904000744','')" title="주식등의대량보유상황보고서(일반)">주식등의대량보유상황보고서(일반)</a></td>
+<td>휴마시스</td>
+<td class="txc">
+<a class="btn ico chart-00" href="#" onclick="openDisclsChart('04448');return false;" title="공시차트"><span>공시차트</span></a>
+<a class="btn ico chart-01" href="#" onclick="fnPopStockPrices('04448');return false;" title="주가차트"><span>주가차트</span></a>
+</td>
+</tr>
+
+[조회공시 관련 행]
+  ['17:11', 'SK하이닉스', '풍문 또는 보도에 대한 해명(미확정)', '에스케이하이닉스', '공시차트 주가차트']
+    RAW: <tr id="parkman">
+<td class="first txc">17:11</td>
+<td><img alt="유가증권" class="vmiddle legend" src="/images/common/icn_t_yu.gif"/> <a href="#companysum" id="companysum" onclick="companysummary_open('00066'); return false;" title="SK하이닉스"> SK하이닉스</a> <img alt="V100" class="vmiddle legend" src="/images/common/icn_t_v100.gif"/> <img alt="KOSPI200" class="vmiddle legend" src="/images/common/icn_t_k200.gif"/> <img alt="KRX300" class="vmiddle legend" src="/images/common/icn_t_x300.gif"/> <img alt="KTOP
+  조회공시 행 1건
+
+6자리 코드 후보: ['000744', '000696', '000743']
+acptno 후보: []
