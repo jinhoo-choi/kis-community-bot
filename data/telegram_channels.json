@@ -1,0 +1,39 @@
+{
+  "_notes": [
+    "회사가 직접 운영하는 공식 채널만 등록한다. 비공식 정보공유방·리딩방은 절대 금지.",
+    "verified=true 인 채널만 실제로 수집한다. 프로브 결과만으로 true 로 올리지 말 것.",
+    "등록 전 반드시 확인: (1) 회사 공식 홈페이지·IR 에 해당 채널이 안내되어 있는가",
+    "                    (2) 채널 소개에 회사명과 disclaimer 가 있는가",
+    "                    (3) 준법감시 검토를 받았는가",
+    "2026-09-04 프로브에서 @aceetf 는 채널 판매 스팸, @kodexetf 는 비공식 방치 채널로 확인됨."
+  ],
+  "channels": [
+    {
+      "handle": "activeetf",
+      "company": "타임폴리오자산운용",
+      "verified": false,
+      "evidence": "시사저널e 2025-02 보도. 채널 소개에 'TIME ACT!VE ETF 공식채널' 명시",
+      "status": "준법감시 검토 대기"
+    },
+    {
+      "handle": "plusetf",
+      "company": "한화자산운용",
+      "verified": false,
+      "evidence": "채널 소개에 'PLUS ETF 텔레그램' 및 Disclaimer 존재. 공식 여부 미확인",
+      "status": "회사 공식 안내 확인 필요"
+    },
+    {
+      "handle": "soletf",
+      "company": "신한자산운용",
+      "verified": false,
+      "evidence": "채널명 'SOL ETF'. 공식 여부 미확인",
+      "status": "회사 공식 안내 확인 필요"
+    }
+  ],
+  "rejected": [
+    {"handle": "aceetf", "reason": "채널 판매 스팸 (For Sell only 200 USDT)"},
+    {"handle": "kodexetf", "reason": "비공식 '정보공유방', 2023-12 이후 방치"},
+    {"handle": "tigeretf", "reason": "웹 프리뷰 비활성"},
+    {"handle": "riseetf", "reason": "웹 프리뷰 비활성"}
+  ]
+}

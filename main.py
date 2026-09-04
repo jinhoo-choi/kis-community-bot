@@ -20,7 +20,7 @@ import sys
 import config
 from src import (state, tickers, generator, telegram_bot, enrich, judge,
                  gate, decide, stats, dedup, crawl, assign)
-from src.sources import dart, research, market, policy
+from src.sources import dart, research, market, policy, telegram_ch
 
 
 def collect() -> list[dict]:
@@ -30,6 +30,8 @@ def collect() -> list[dict]:
     items += research.fetch(int(q["research"] * over))
     items += market.fetch(int(q["flow"] * over))
     items += policy.fetch(int(q["policy"] * over))
+    # 운용사 공식 채널. verified 채널이 없으면 0건 반환한다.
+    items += telegram_ch.fetch(max(1, int(q["policy"] * over / 2)))
     items += policy.make_polls(items, q["poll"])
     return items
 

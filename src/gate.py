@@ -31,6 +31,13 @@ TIER2_CONFLICT_KW = [
     "한국투자증권", "한국금융지주", "한국투자", "카카오뱅크",
 ]
 
+# 타 운용사·타 증권사 상품 홍보. 자사 커뮤니티에 옮길 수 없다.
+# 텔레그램 운용사 채널 소스를 붙이면서 실제로 필요해졌다.
+TIER2_RIVAL_PRODUCT = [
+    "TIGER", "KODEX", "TIMEFOLIO", "KOSEF", "ARIRANG", "HANARO",
+    "순자산총액", "설정액", "총보수", "분배금 지급", "신규 상장 ETF",
+]
+
 # tier 3 — 투기·선동 소지
 TIER3_SPECULATIVE = [
     "정치테마", "대선", "총선", "테마주", "작전", "세력",
@@ -76,6 +83,10 @@ def is_hard_excluded(item: dict) -> tuple[bool, str]:
     k = _hit(text, TIER2_CONFLICT_KW)
     if k:
         return True, f"tier2:이해상충({k})"
+
+    k = _hit(f"{text} {item.get('facts','')[:300]}", TIER2_RIVAL_PRODUCT)
+    if k:
+        return True, f"tier2:타사상품({k})"
 
     k = _hit(text, TIER1_LEGAL)
     if k:

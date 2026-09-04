@@ -415,6 +415,19 @@ def main():
     ok.append(run("Length spec 에 하한 명시", "이상" in _L["short"]["spec"]))
     ok.append(run("프롬프트 상한 < 필터 상한", _L["long"]["max"] > 270))
 
+
+    # ── 텔레그램 운용사 채널 (화이트리스트 + 필터)
+    from src.sources import telegram_ch as _tg2
+    ok.append(run("verified 아니면 미수집", len(_tg2._load()) == 0))
+    ok.append(run("타사 상품 홍보 차단", is_hard_excluded(
+        {"title": "TIGER 미국나스닥 ETF 순자산총액 1조 돌파", "facts": ""})[0]))
+    ok.append(run("상품명 필터", bool(_tg2.PRODUCT_RE.search("TIME 글로벌AI ETF 순자산"))))
+    ok.append(run("기사 재배포 필터", bool(_tg2.NEWS_LINK_RE.search("https://n.news.naver.com/x"))))
+    ok.append(run("시장 코멘트는 통과", not any(r.search(
+        "미 증시는 다우 +1.18%로 마감했습니다. 연준 위원 발언에 금리가 안정되며 "
+        "위험자산 선호가 회복된 모습입니다. 오늘 국내 증시도 이를 반영할 것으로 보입니다.")
+        for r in (_tg2.PRODUCT_RE, _tg2.SOLICIT_RE, _tg2.NEWS_LINK_RE))))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
