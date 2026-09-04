@@ -1,0 +1,199 @@
+[
+ {
+  "id": "dart-20260903000316",
+  "result": "rejected",
+  "reason": "너무김(121자/quick_memo)",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "len": 121,
+  "body": "에이프로젠바이오로직스가 유상증자를 결정했어요. 12,706,481주를 제3자배정으로 발행해 200억원을 모을 예정입니다. 제3자배정증자는 기존 주주가 아닌 특정 투자자에게만 새 주식을 팔아 자금을 조달하는 방식이에요."
+ },
+ {
+  "id": "dart-20260903000285",
+  "result": "rejected",
+  "reason": "수치과다(4개/timeline_note)",
+  "provider": "claude",
+  "tone": "timeline_note",
+  "len": 165,
+  "body": "9월 3일 에이프로젠이 전환사채 발행을 결정했어요. 200억원 규모의 무기명이권부무보증사모전환사채로, 전환가액은 2,396원입니다. 표면이자율은 0%이고 만기는 2031년 9월 11일이에요. 이는 회사가 자금을 조달하면서 투자자에게 일정 시점 이후 주식으로 전환할 수 있는 기회를 주는 구조네요."
+ },
+ {
+  "id": "dart-20260903800469",
+  "result": "rejected",
+  "reason": "미확인표현(공개되지 않)",
+  "provider": "claude",
+  "tone": "term_guide",
+  "len": 158,
+  "body": "화장품 제조 및 판매를 주력으로 하는 토니모리가 최대주주 변경을 공시했습니다. 어제 공식 공시로 올라온 내용인데요. 상세 수치는 아직 공개되지 않았네요. 최대주주 변경이 어떤 배경에서 나왔는지, 지분 구조가 어떻게 재편되는지는 추가 공시나 정정 공시를 통해 확인할 수 있을 듯합니다."
+ },
+ {
+  "id": "flow-2026-09-03-386380",
+  "result": "rejected",
+  "reason": "방향오용(낙폭)",
+  "provider": "claude",
+  "tone": "open_talk",
+  "len": 109,
+  "body": "스카이랩스가 전일 대비 135.00% 올랐네요. 종가는 23,500원이고 거래대금은 234억원이었습니다. 이 정도 낙폭은 상당한 수준인데, 무엇 때문에 이런 움직임이 나왔는지 아시는 분 계신가요?"
+ },
+ {
+  "id": "flow-2026-09-03-234340",
+  "result": "rejected",
+  "reason": "미확인표현(확인되지 않)",
+  "provider": "claude",
+  "tone": "data_focus",
+  "len": 86,
+  "body": "25,250원에서 마감한 헥토파이낸셜이 전날 대비 13.48% 올랐습니다. 거래대금은 252억원을 기록했습니다. 구체적인 상승 요인은 확인되지 않았습니다."
+ },
+ {
+  "id": "flow-2026-09-03-336260",
+  "result": "rejected",
+  "reason": "너무짧음(39자/quick_memo)",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "len": 39,
+  "body": "두산퓨얼셀이 어제 12.44% 올랐어요. 거래대금은 438억원이었네요."
+ },
+ {
+  "id": "flow-2026-09-03-058610",
+  "result": "rejected",
+  "reason": "너무짧음(72자/timeline_note)",
+  "provider": "claude",
+  "tone": "timeline_note",
+  "len": 72,
+  "body": "에스피지가 12.41% 올랐어요. 종가는 94,200원이고 거래대금은 942억원을 기록했습니다. 장중 매매가 활발하게 이뤄졌네요."
+ },
+ {
+  "id": "pol-듀켐바이오정읍에343억원규모투자전북도등과협약",
+  "result": "rejected",
+  "reason": "너무짧음(36자/two_view)",
+  "provider": "gemini",
+  "tone": "two_view",
+  "len": 36,
+  "body": "343억원은 듀켐바이오가 전북도 등과 협약을 맺고 정읍에 투자하기"
+ },
+ {
+  "id": "pol-원주의료기기기업15곳현장채용구직자와해피데이",
+  "result": "rejected",
+  "reason": "너무짧음(40자/check_list)",
+  "provider": "gemini",
+  "tone": "check_list",
+  "len": 40,
+  "body": "의료기기전시회를 개최합니다. (44자)\n    이 전시회는 지역 의료기기"
+ },
+ {
+  "id": "poll-flow-2026-09-03-386380",
+  "result": "rejected",
+  "reason": "너무짧음(44자/open_talk)",
+  "provider": "gemini",
+  "tone": "open_talk",
+  "len": 44,
+  "body": "구체적인 찬반 질문)*: \"스카이랩스의 이번 급등이 반지형 웨어러블 기기 시장의"
+ },
+ {
+  "id": "pol-원주의료기기기업15곳현장채용구직자와해피데이",
+  "kind": "policy",
+  "stock": null,
+  "title": "원주 의료기기 기업 15곳 현장채용…구직자와 '해피데이'",
+  "provider": "claude",
+  "tone": "check_list",
+  "score": 19,
+  "result": "sent",
+  "reason": "",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "thin_facts": false,
+  "len": 209,
+  "body": "강원 원주시가 올해 의료기기 산업 채용에 나섰네요. 시가 4일 의료기기종합지원센터에서 지역 의료기기 기업 15곳과 함께 현장채용 행사를 열었다고 합니다. 강원의료기기전시회와 연계한 행사인데, 이는 원주 의료기기 클러스터 활성화의 일환으로 보입니다. 구직자 입장에서는 여러 기업을 한 자리에서 만날 수 있는 기회고, 기업 입장에서는 현지 인력 수급을 앞당길 수 있는 구조네요."
+ },
+ {
+  "id": "pol-듀켐바이오정읍에343억원규모투자전북도등과협약",
+  "kind": "policy",
+  "stock": "듀켐바이오",
+  "title": "듀켐바이오, 정읍에 343억원 규모 투자…전북도 등과 협약",
+  "provider": "claude",
+  "tone": "two_view",
+  "score": 18,
+  "result": "sent",
+  "reason": "",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 166,
+  "body": "343억원이 정읍에 투자되는 규모네요. 듀켐바이오가 전북특별자치도와 협약을 맺고 방사성의약품 생산시설과 연구개발 시설을 구축하는 내용입니다.\n\n방사성의약품 시장이 성장하면서 생산 기지 확충이 의미 있다는 관점이 있습니다. 다만 협약 단계이고 실제 투자 실행까지는 여러 변수가 남아있을 수 있습니다."
+ },
+ {
+  "id": "flow-2026-09-03-030530",
+  "kind": "flow",
+  "stock": "원익홀딩스",
+  "title": "원익홀딩스 전일 29.91% 상승",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "score": 16,
+  "result": "sent",
+  "reason": "",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 56,
+  "body": "22,500원까지 올랐어요.\n어제 원익홀딩스가\n29.91% 상승했네요.\n거래대금은 225억원이었어요."
+ },
+ {
+  "id": "flow-2026-09-03-108490",
+  "kind": "flow",
+  "stock": "로보티즈",
+  "title": "로보티즈 전일 22.54% 상승",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "score": 16,
+  "result": "sent",
+  "reason": "",
+  "attr_reject": null,
+  "thin_facts": true,
+  "len": 60,
+  "body": "304,500원까지 올랐어요. 로보티즈가 어제 22.54% 뛰었네요. 거래대금은 3,040억원을 기록했어요."
+ },
+ {
+  "id": "hk-652142",
+  "kind": "research",
+  "stock": "엔에프씨",
+  "title": "엔에프씨 화장품 ODM 고성장, 소재 턴어라운드 본격화",
+  "provider": "claude",
+  "tone": "brief_report",
+  "score": 14,
+  "result": "sent",
+  "reason": "",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 105,
+  "body": "한국IR협의회에서 엔에프씨에 대한 리포트를 발표했습니다. 리포트 제목은 '화장품 ODM 고성장, 소재 턴어라운드 본격화'입니다. 엔에프씨는 화장품 베이스 소재 개발 업체로 알려져 있습니다."
+ },
+ {
+  "id": "dart-20260903800579",
+  "kind": "disclosure",
+  "stock": "에이프로젠",
+  "title": "주요사항보고서(유상증자결정)(자회사의 주요경영사항)",
+  "provider": "claude",
+  "tone": "term_guide",
+  "score": 12,
+  "result": "held",
+  "reason": "fatal:상세 수치는 공개되지 않았다가 내용의 절반,유상증자는 일반적으로~ 같은 사전식 일반론으로 분량을 채움",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 200,
+  "body": "에이프로젠이 자회사 에이프로젠바이오의 유상증자를 결정했습니다. 유상증자는 기존 주주뿐 아니라 새로운 투자자들도 주식을 사서 회사에 자금을 공급하는 방식이에요. 자회사가 사업 확장이나 운영자금이 필요할 때 모회사가 이런 결정을 내립니다. 에이프로젠바이오의 구체적인 모금 규모나 일정은 공시에 담기지 않았습니다. 자회사의 사업 전개를 위한 자본 조달로 보입니다."
+ },
+ {
+  "id": "kind-20260904000786",
+  "kind": "disclosure",
+  "stock": "디에이치엑스컴퍼니",
+  "title": "주권매매거래정지기간변경(풍문 또는 보도 관련)",
+  "provider": "claude",
+  "tone": "check_list",
+  "score": 16,
+  "result": "held",
+  "reason": "fatal:자기소개나 작성 과정·체크리스트가 본문에 노출됨",
+  "attr_reject": null,
+  "thin_facts": true,
+  "len": 133,
+  "body": "디에이치엑스컴퍼니가 오늘 저녁 6시 32분 거래소로부터 풍문 또는 보도 관련 주권매매거래정지기간변경 공시를 냈어요. 거래소가 시황 변동이나 풍문에 대해 회사에 답변을 요구한 건데, 공시 원문을 직접 확인해야 정확한 내용을 알 수 있습니다."
+ }
+]
