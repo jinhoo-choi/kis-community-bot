@@ -6,6 +6,15 @@ on:
     - cron: '0 21 * * 0-4'
   workflow_dispatch:
     inputs:
+      test_mode:
+        description: '테스트 채널로 발송 (TELEGRAM_TEST_CHAT_ID)'
+        type: boolean
+        default: true
+      use_batch:
+        description: 'Batch API 사용 (50건 이상일 때만 권장)'
+        type: choice
+        options: ['auto', '0', '1']
+        default: 'auto'
       persona_mode:
         description: '페르소나 설계 (v1=4축 / v2=10페르소나)'
         type: choice
@@ -51,7 +60,10 @@ jobs:
           GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}
           DART_API_KEY:      ${{ secrets.DART_API_KEY }}
           TELEGRAM_TOKEN:    ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID:  ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_CHAT_ID:      ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_TEST_CHAT_ID: ${{ secrets.TELEGRAM_TEST_CHAT_ID }}
+          TEST_MODE:             ${{ inputs.test_mode && '1' || '0' }}
+          USE_BATCH:             ${{ inputs.use_batch || 'auto' }}
           CLAUDE_MODEL:      ${{ vars.CLAUDE_MODEL || 'claude-haiku-4-5-20251001' }}
           GEMINI_MODEL:      ${{ vars.GEMINI_MODEL || 'gemini-3.5-flash' }}
           GEMINI_JUDGE_MODEL: ${{ vars.GEMINI_JUDGE_MODEL || 'gemini-3.1-flash-lite' }}

@@ -517,6 +517,28 @@ def main():
                                              "{rule_block}", "{num_cap}"))))
     ok.append(run("v2 프롬프트에 공통규칙 주입", "1인칭" in _s2 and "당신" in _s2))
 
+
+    # ── 테스트 채널 분리 (운영 단톡방에 테스트 50건을 쏘는 사고 방지)
+    import importlib, os as _os2, config as _cfg
+    _bak_env = {k: _os2.environ.get(k) for k in
+                ("TEST_MODE", "TELEGRAM_CHAT_ID", "TELEGRAM_TEST_CHAT_ID")}
+    _os2.environ.update({"TEST_MODE": "1", "TELEGRAM_CHAT_ID": "-100main",
+                         "TELEGRAM_TEST_CHAT_ID": ""})
+    importlib.reload(_cfg)
+    ok.append(run("테스트채널 미등록 시 발송 차단", _cfg.target_chat() == ("", True)))
+    _os2.environ["TELEGRAM_TEST_CHAT_ID"] = "123test"
+    importlib.reload(_cfg)
+    ok.append(run("테스트 모드는 테스트채널로", _cfg.target_chat() == ("123test", True)))
+    _os2.environ["TEST_MODE"] = "0"
+    importlib.reload(_cfg)
+    ok.append(run("운영 모드는 운영채널로", _cfg.target_chat() == ("-100main", False)))
+    for _k, _v in _bak_env.items():
+        if _v is None:
+            _os2.environ.pop(_k, None)
+        else:
+            _os2.environ[_k] = _v
+    importlib.reload(_cfg)
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 

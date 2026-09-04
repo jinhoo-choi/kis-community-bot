@@ -11,6 +11,19 @@ DART_API_KEY      = os.environ.get("DART_API_KEY", "")
 TELEGRAM_TOKEN    = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID  = os.environ.get("TELEGRAM_CHAT_ID", "")
 
+# 테스트 발송 채널. 운영 단톡방에는 사람이 있어 반복 테스트를 보낼 수 없다.
+# 수동 실행(workflow_dispatch)은 이쪽으로, 정기 cron 은 운영 채널로 보낸다.
+TELEGRAM_TEST_CHAT_ID = os.environ.get("TELEGRAM_TEST_CHAT_ID", "")
+TEST_MODE = os.environ.get("TEST_MODE", "0") == "1"
+
+
+def target_chat() -> tuple[str, bool]:
+    """(chat_id, is_test). 테스트 모드인데 테스트 채널이 없으면 발송하지 않는다.
+    실수로 운영 채널에 테스트 50건을 쏘는 사고를 구조적으로 막는다."""
+    if TEST_MODE:
+        return TELEGRAM_TEST_CHAT_ID, True
+    return TELEGRAM_CHAT_ID, False
+
 # --- 생성 목표 ---
 TARGET_POSTS = int(os.environ.get("TARGET_POSTS", "50"))
 # 정규식 리젝 + 심사 탈락 대비 초과 생성.

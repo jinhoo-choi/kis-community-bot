@@ -23,7 +23,8 @@ import time
 
 import requests
 
-from config import TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, FOOTER
+import config
+from config import TELEGRAM_TOKEN, FOOTER
 from src.personas import TONES
 
 API = "https://api.telegram.org/bot{}/{}"
@@ -74,6 +75,12 @@ def _text(p: dict) -> str:
 
 
 def _post(method: str, payload: dict):
+    chat, is_test = config.target_chat()
+    if not chat:
+        if is_test:
+            print("[tg] ⚠ TEST_MODE 인데 TELEGRAM_TEST_CHAT_ID 미등록 → 발송 안 함")
+        return None
+    payload = {**payload, "chat_id": chat}
     return requests.post(API.format(TELEGRAM_TOKEN, method), json=payload, timeout=20)
 
 
@@ -86,11 +93,12 @@ def send_all(posts: list[dict]) -> int:
     sent = 0
     for i, p in enumerate(posts, 1):
         r = _post("sendMessage", {
-            "chat_id": TELEGRAM_CHAT_ID,
             "parse_mode": "HTML",
             "text": card(p, i, total),
             "disable_web_page_preview": True,
         })
+        if r is None:
+            return sent
         if r.ok:
             sent += 1
         else:
@@ -109,7 +117,9 @@ def send_brief(posts: list[dict], stats_row: dict = None):
     by_person = Counter(p.get("assignee") or "미지정" for p in posts)
     by_board = Counter(BOARD_LABEL.get(p.get("board", "stock"), "종목방") for p in posts)
 
-    lines = [f"<b>오늘의 게시글 {len(posts)}건</b>", ""]
+    _, is_test = config.target_chat()
+    head = "<b>[테스트]</b> " if is_test else ""
+    lines = [f"{head}<b>오늘의 게시글 {len(posts)}건</b>", ""]
     for who, n in by_person.most_common():
         stocks = [p.get("stock_name") or "테마" for p in posts
                   if (p.get("assignee") or "미지정") == who]
@@ -117,7 +127,7 @@ def send_brief(posts: list[dict], stats_row: dict = None):
     lines += ["", f"게시판: " + ", ".join(f"{k} {v}" for k, v in by_board.items())]
     lines.append("아래 카드를 순서대로 확인하고, 담당 건만 게시해 주세요.")
 
-    _post("sendMessage", {"chat_id": TELEGRAM_CHAT_ID, "parse_mode": "HTML",
+    _post("sendMessage", {"parse_mode": "HTML",
                           "text": "\n".join(lines), "disable_web_page_preview": True})
 
 
@@ -150,7 +160,7 @@ def send_summary(posts: list[dict], sent: int, stats_row: dict = None):
         if deg:
             lines.append(f"⚠ 수집 이상: {', '.join(deg)}")
 
-    _post("sendMessage", {"chat_id": TELEGRAM_CHAT_ID, "parse_mode": "HTML",
+    _post("sendMessage", {"parse_mode": "HTML",
                           "text": "\n".join(lines), "disable_web_page_preview": True})
 
 
@@ -158,5 +168,5 @@ def send_warning(text: str):
     """운영 이상 알림. 게시글 카드와 섞이지 않도록 별도 포맷."""
     if not TELEGRAM_TOKEN:
         return
-    _post("sendMessage", {"chat_id": TELEGRAM_CHAT_ID, "parse_mode": "HTML",
+    _post("sendMessage", {"parse_mode": "HTML",
                           "text": f"<b>[운영 경고]</b>\n{_esc(text)}"})
