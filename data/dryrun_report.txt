@@ -1,72 +1,61 @@
-[dart] DART_API_KEY 없음 → 스킵
-[crawl] dart 0건 (정상 0건)
-[crawl] naver_research 12건
-[crawl] hankyung 6건
-[crawl] market 14건
-[crawl] policy_rss 7건
-[main] 수집 총 42건
-[gate] 차단 1건 {'tier4': 1}
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+[crawl] dart 6건
+[crawl] naver_research 2건
+[crawl] hankyung 1건
+[crawl] market 3건
+[crawl] policy_rss 3건
+[main] 수집 총 16건
+[enrich] 10/16건 배경 보강 완료
+[gate] 차단 6건 {'tier4': 3, 'tier5': 3}
 [tickers] 상장 2632종목 로드 (lxml)
-[dedup] 제외 2건 {'SIM': 2}
-[main] 생성 대상 39건 {'disclosure': 0, 'research': 15, 'flow': 14, 'policy': 7, 'poll': 3}
+[dedup] 제외 8건 {'ID': 8}
+[main] 생성 대상 2건 {'disclosure': 0, 'research': 1, 'flow': 0, 'policy': 1, 'poll': 0}
 
 ───── 수집 표본 ─────
-  [research  ] 코스맥스              192820  중복상장 리스크 해소
-  [research  ] 두산퓨얼셀             336260  미국 진출에도 웃지 못한 주가
-  [research  ] 코스맥스              192820  코스맥스이스트 중복상장 우려 해소
-  [research  ] DB손해보험            005830  새로운 밸류업 정책으로 확대되는 배당총액
-  [research  ] 삼성전기              009150  3Q 영업이익 상향. 환율 악재는 상쇄, AI 부..
-  [research  ] 알테오젠              196170  반복되는 기술수출, ALT-B4 가치 재평가
-  [research  ] 제이앤티씨             204270  2Q26 Review: 하반기 HDD사업 매출 가시화 기..
-  [research  ] 하나머티리얼즈           166090  노이즈보다 다가올 호황에 조명
-  [research  ] 대원미디어             048910  반다이남코는 신고가
-  [research  ] 알테오젠              196170  세계 최초 유전자 치료제 SC, 서프라이즈
-  [research  ] 티씨케이              064760  SiC 포커스링, 두 번째 성장기 진입
-  [research  ] 롯데지주              004990  관심 가져볼 만한 주가
-  [research  ] 산일전기              062040  산일전기 과도한 저평가 영역 + 8월 2개 Big Momentum → TP 상향
-  [research  ] 코리아써키트            007810  코리아써키트 시간을 주시면, 더 강해져 돌아옵니다
-  [research  ] 삼성전기              009150  삼성전기 MLCC 수주 공시 코멘트: 플랫폼 단위로 확대된 LTA
+  [research  ] 팬오션               028670  High & Dry
+  [policy    ] 테마                     -  "중소기업 지원"…대전시, 지식재산 진흥 최우수 기관 표창
 
 ───── 게이트 차단 ─────
-  hk-652077                  tier4:제목부족
+  dart-20260903000384        tier4:정보없음(기재정정)
+  dart-20260903800541        tier4:정보없음(기재정정)
+  dart-20260903800538        tier4:정보없음(기재정정)
+  naver-y_readnavernid96014page1 tier5:글감부족
+  pol-IBK증권中메모리약진현지장비밸류체인수혜확산 tier5:글감부족
+  pol-신한증권25년만의에너지공기업재편관건은부담배분 tier5:글감부족
 
 ───── 귀속 강등 ─────
-  pol-산업부코트라미국첨단기업4곳28조원투자유치 ['종목명미검출'] → free
-  pol-충북도추석앞두고은행보증기관과중기소상공금융지원 ['종목명미검출'] → free
-  pol-aT일본큐텐재팬입점K반려동물기업50곳모집 ['종목명미검출'] → free
-  pol-수은행장주한인도대사와전략산업금융협력강화방안논 ['종목명미검출'] → free
-  pol-금융위2차망분리규제완화선정기관10개15개사확 ['종목명미검출'] → free
-  pol-강원의료기기전시회원주서개막147개기업기관참가 ['종목명미검출'] → free
-  pol-농식품수출7월까지82억달러역대최대포도1억달러 ['종목명미검출'] → free
+  pol-중소기업지원대전시지식재산진흥최우수기관표창 ['종목명미검출'] → free
 
 ───── 크롤링 헬스 ─────
 {
  "dart": {
-  "got": 0,
-  "expected": 0,
-  "degraded": false
- },
- "naver_research": {
-  "got": 12,
-  "expected": 12,
-  "degraded": false
- },
- "hankyung": {
   "got": 6,
   "expected": 6,
   "degraded": false
  },
+ "naver_research": {
+  "got": 2,
+  "expected": 2,
+  "degraded": false
+ },
+ "hankyung": {
+  "got": 1,
+  "expected": 1,
+  "degraded": false
+ },
  "market": {
-  "got": 14,
-  "expected": 15,
+  "got": 3,
+  "expected": 3,
   "degraded": false
  },
  "policy_rss": {
-  "got": 7,
-  "expected": 7,
+  "got": 3,
+  "expected": 3,
   "degraded": false
  }
 }
 
 ───── dedup ─────
- {'SIM': 2}
+ {'ID': 8}
