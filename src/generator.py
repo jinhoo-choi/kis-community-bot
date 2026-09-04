@@ -5,6 +5,7 @@
 프로바이더를 섞는 것 자체가 품질 방어책이다.
 """
 import random
+import re
 
 import config
 from src import filters
@@ -15,6 +16,26 @@ from src.personas import SLOT_TONES, build_messages
 
 # 리젝된 생성물 보관 (품질 검토용). main 이 filter_log 에 함께 기록한다.
 REJECTED: list[dict] = []
+
+# 모델이 본문 앞뒤에 붙이는 군더더기. 리젝하기 전에 정리해 준다.
+# (실측: Gemini 가 "안녕하세요 AI 작성 봇입니다" 로 시작하거나
+#  자기검토 체크리스트를 본문으로 출력하는 사례가 있었다)
+_STRIP_PATTERNS = [
+    r"^\s*안녕하세요[,.]?\s*(저는\s*)?AI[^\n]*\n",
+    r"^\s*(본문|게시글|출력)\s*[:：][^\n]*\n",
+    r"^\s*```[a-z]*\s*|\s*```\s*$",
+    r"\n\s*[*\-]\s+[^\n]*(Yes|No)\.[^\n]*$",
+]
+
+
+def clean(body: str) -> str:
+    b = body.strip()
+    for pat in _STRIP_PATTERNS:
+        b = re.sub(pat, "", b, flags=re.M)
+    # 따옴표로 통째로 감싼 출력
+    if len(b) > 2 and b[0] in "\"'" and b[-1] == b[0]:
+        b = b[1:-1]
+    return b.strip()
 
 
 def pick_tone(item: dict, recent: dict) -> str:
@@ -46,7 +67,11 @@ def _run(provider_name: str, items: list[dict], tones: list[str]) -> list[dict]:
             print(f"[gen] ⚠ {provider_name} 실패 {it['id']}: "
                   f"{r.error or '빈 응답'}")
             continue
-        out.append({**it, "tone": tn, "body": r.text,
+        body = clean(r.text)
+        if not body:
+            print(f"[gen] ⚠ {provider_name} 후처리 후 빈 본문 {it['id']}")
+            continue
+        out.append({**it, "tone": tn, "body": body,
                     "provider": r.provider, "model": r.model})
     return out
 

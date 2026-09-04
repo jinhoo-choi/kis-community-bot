@@ -94,12 +94,32 @@ def is_hard_excluded(item: dict) -> tuple[bool, str]:
     return False, ""
 
 
+# 글이 되려면 제목 말고 '말할 수 있는 사실'이 있어야 한다.
+# 리포트 제목만 있는 항목으로 억지로 글을 쓰면 내용 없는 글이 나온다 (실측:
+# "리포트 제목은 'Never Stop Rising'이다" 수준의 글이 배포됨).
+_SUBSTANCE = re.compile(
+    r"\d[\d,]*\s*(원|%|억|조|배|건|주)"      # 구체 수치
+    r"|적정가격|투자의견|등락률|거래대금|종가"     # 정형 필드
+    r"|\[검색으로 확인된 배경\]"                 # enrich 성공
+)
+
+
+def has_substance(item: dict) -> bool:
+    facts = item.get("facts", "")
+    # 주석(※)과 메타 줄을 뺀 실질 내용만 본다
+    core = "\n".join(l for l in facts.splitlines()
+                      if l.strip() and not l.strip().startswith("※"))
+    return bool(_SUBSTANCE.search(core))
+
+
 def apply(items: list[dict]) -> tuple[list[dict], list[tuple[str, str]]]:
     passed, blocked = [], []
     for it in items:
         ex, why = is_hard_excluded(it)
         if ex:
             blocked.append((it.get("id", "?"), why))
+        elif not has_substance(it):
+            blocked.append((it.get("id", "?"), "tier5:글감부족"))
         else:
             passed.append(it)
 

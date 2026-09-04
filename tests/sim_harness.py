@@ -33,7 +33,10 @@ FAKE_LISTED = {
 # 시나리오 입력 — 각 항목이 어떤 함정을 겨냥하는지 표기
 # ════════════════════════════════════════════════
 def scenario_items():
-    F = lambda t: f"제목: {t}\n※ 제목 외 상세 수치는 제공되지 않음."
+    # 실제 파이프라인은 gate.has_substance() 를 통과한 항목만 생성 단계로 보낸다.
+    # 픽스처에도 '말할 수 있는 사실'을 넣어야 실제와 같은 경로를 탄다.
+    F = lambda t: (f"제목: {t}\n제시 적정가격: 33,000원 (해당 증권사 의견)\n"
+                   f"투자의견: 매수 (해당 증권사 의견)\n※ 그 외 수치는 미제공.")
     return [
         # --- 정상 통과 기대 ---
         dict(id="d1", kind="disclosure", stock_code="005930", stock_name="삼성전자",
@@ -67,7 +70,8 @@ def scenario_items():
              title="SK하이닉스 실적 전망 상향", facts=F("정상 매핑"), src="u11"),
         dict(id="e3", kind="research", stock_code=None, stock_name=None,
              title="반도체 밸류체인 점검 - 협력사 한미반도체 수혜 전망",
-             facts="공급망 한미반도체, 납품처 확대 수혜 예상", src="u12"),
+             facts=("공급망 한미반도체, 납품처 확대 수혜 예상\n"
+                    "제시 적정가격: 210,000원 (해당 증권사 의견)"), src="u12"),
 
         # --- [S4] 중복 — d1과 같은 종목·같은 사건이 다른 소스로 ---
         dict(id="dup1", kind="research", stock_code="005930", stock_name="삼성전자",
