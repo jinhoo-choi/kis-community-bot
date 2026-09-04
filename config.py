@@ -52,7 +52,11 @@ GEMINI_CANDIDATES = [
 
 CLAUDE_MODEL       = CLAUDE_CANDIDATES[0]
 CLAUDE_JUDGE_MODEL = os.environ.get("CLAUDE_JUDGE_MODEL", "claude-haiku-4-5-20251001")
-USE_BATCH = os.environ.get("USE_BATCH", "1") == "1"
+# Batch API 는 비동기 대량 작업용이다. 소량 실행에서는 큐 대기가 길어
+# 5건 생성에 20분 넘게 걸리고 Actions 타임아웃(45분)에 근접한다(실측).
+# 정식 50건 운영에서는 비용 이점이 크므로 켜고, 소량 테스트에서는 끈다.
+USE_BATCH = (os.environ.get("USE_BATCH", "auto") == "1") or (
+    os.environ.get("USE_BATCH", "auto") == "auto" and TARGET_POSTS >= 30)
 
 # Gemini: 3.5-flash 가 GA 주력(=gemini-flash-latest), 3.1-flash-lite 는 저비용
 GEMINI_MODEL        = GEMINI_CANDIDATES[0]

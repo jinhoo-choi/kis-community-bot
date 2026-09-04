@@ -70,8 +70,8 @@ class ClaudeProvider(Provider):
             return GenResult("", self.name, self.model, ok=False, error=msg[:200])
 
     def generate_many(self, jobs, temperature=1.0, max_tokens=700,
-                      poll_sec=20, timeout_sec=1800) -> list[GenResult]:
-        if not self.use_batch or len(jobs) < 5:
+                      poll_sec=15, timeout_sec=600) -> list[GenResult]:
+        if not self.use_batch or len(jobs) < 15:
             return [self.generate(s, u, temperature, max_tokens) for s, u in jobs]
 
         try:
@@ -94,7 +94,8 @@ class ClaudeProvider(Provider):
                 time.sleep(poll_sec)
                 waited += poll_sec
             else:
-                raise TimeoutError("batch timeout")
+                # 30분을 기다리느니 동기로 다시 도는 편이 빠르다
+                raise TimeoutError(f"batch timeout {timeout_sec}s")
 
             got = {}
             for res in self._client.messages.batches.results(batch.id):
