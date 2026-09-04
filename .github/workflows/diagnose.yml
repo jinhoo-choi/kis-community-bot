@@ -21,10 +21,11 @@ jobs:
           mkdir -p data
           python tools/diagnose.py || true
           python tools/probe_telegram.py || true
+          python tools/probe_kind.py || true
       - name: Commit
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f data/diagnose.txt data/telegram_probe.txt data/telegram_probe.json
+          git add -f data/diagnose.txt data/telegram_probe.txt data/telegram_probe.json data/kind_probe.txt
           git diff --staged --quiet || git commit -m "chore: diagnose $(date +%FT%H%M)"
           git push
