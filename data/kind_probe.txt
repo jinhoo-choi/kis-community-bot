@@ -1,0 +1,28 @@
+==================================================================
+KIND 조회공시 엔드포인트 프로브
+==================================================================
+
+[A. 조회공시 메인(GET)]
+  GET https://kind.krx.co.kr/disclosure/inquirydisclosure.do
+  HTTP 404  1679 bytes  ct=text/html; charset=UTF-8
+
+[B. 조회공시 서브(POST)]
+  POST https://kind.krx.co.kr/disclosure/inquirydisclosure.do
+  HTTP 404  1679 bytes  ct=text/html; charset=UTF-8
+
+[C. 오늘의 공시(POST)]
+  POST https://kind.krx.co.kr/disclosure/todaydisclosure.do
+  HTTP 200  16196 bytes  ct=text/html; charset=UTF-8
+  <tr> 16개
+  row0: ['17:43', 'HEM파마', '[정정] 단일판매ㆍ공급계약체결', '에이치이엠파마', '공시차트 주가차트']
+        href: #companysum
+  row1: ['17:43', '시지트로닉스', '소액공모공시서류(지분증권)', '시지트로닉스', '공시차트 주가차트']
+        href: #companysum
+  row2: ['17:43', '한화투자증권', '투자설명서[일괄신고-사채]', '한화투자증권', '공시차트 주가차트']
+        href: #companysum
+
+[D. 전체공시 검색(POST)]
+  POST https://kind.krx.co.kr/disclosure/searchtotalinfo.do
+  HTTP 200  2298 bytes  ct=text/html; charset=UTF-8
+  <tr> 0개
+  본문 앞부분: ''

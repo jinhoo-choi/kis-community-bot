@@ -2,7 +2,7 @@
 ==================================================================
 4. 상장종목 리스트 소스 (KIND corpList 3종목만 파싱 원인)
 ==================================================================
-[KIND] HTTP 200  1263782 bytes
+[KIND] HTTP 200  1263772 bytes
 [KIND] Content-Type: application/vnd.ms-excel; charset=EUC-KR
 [KIND] decode euc-kr: OK
 [KIND] head 400자:
@@ -15,7 +15,7 @@
 [KIND] 둘째 tr:
 '<tr>\r\n\t\t<td>스카이랩스</td>\r\n\t\t<td>\r\n\t\t\t\r\n\t\t\t\t\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t코스닥\r\n\t\t\t\t\t\r\n\t\t\t\t\t\r\n\t\t\t\t\t\t\r\n\t\t\t\r\n\t\t</td>\r\n\t\t<td style="mso-number-format:\'@\';text-align:center;">386380</td>\r\n\t\t<td>의료용 기기 제조업</td>\r\n\t\t<td>커프리스 연속혈압 모니터링 의료기기 (CART)</td>\r\n\t\t<td style="text-align:center;">2026-09-04</td>\r\n\t\t<td style="text-align:center;">12월</td>\r\n\t\t<td>이병환</td>\r\n\t\t<td>\r\n\t\t\thttp://www.skylabs.io/\r\n\t\t</td>\r\n\t\t<td >경기도</td>\r\n\t</tr>'
 [대안A] naver sise_market_sum p1: 50종목, 페이지링크 12개
-[대안B] entryJongmok HTTP 200 9346 bytes
+[대안B] entryJongmok HTTP 200 9315 bytes
 
 ==================================================================
 1. 한경컨센서스 테이블 구조
@@ -69,21 +69,21 @@ HTTP 200 / 30504 bytes
 ["20260826", 256500, 266500, 255500, 261500, 19532523, 46.71],
 		
 ["20260827", 270000, 271000,
-[B] KODEX 200선물인버스2X 252670 종가=79 등락=-4.82% 거래대금=78
-[B] KODEX 인버스 114800 종가=1,039 등락=-2.07% 거래대금=1,036
-[B] KODEX 코스닥150레버리지 233740 종가=6,720 등락=+8.04% 거래대금=6,735
-[B] naver sise_quant  HTTP 200  파싱 79건
-[C] KRX 상장법인목록  HTTP 200  1263782 bytes
-[C] 네이버 종목 시세 KOSPI  HTTP 200  102434 bytes
+[B] KODEX 200선물인버스2X 252670 종가=79 등락=-4.82% 거래대금=79
+[B] KODEX 인버스 114800 종가=1,040 등락=-1.98% 거래대금=1,040
+[B] KODEX 코스닥150레버리지 233740 종가=6,725 등락=+8.12% 거래대금=6,720
+[B] naver sise_quant  HTTP 200  파싱 81건
+[C] KRX 상장법인목록  HTTP 200  1263772 bytes
+[C] 네이버 종목 시세 KOSPI  HTTP 200  102380 bytes
 
 ==================================================================
 3. 정책 소스 후보 (korea.kr 대체)
 ==================================================================
   korea.kr RSS         HTTP 404     1294 bytes  '\ufeff<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http:'
   기재부 보도자료             HTTP 200        0 bytes  ''
-  금융위 보도자료             HTTP 200   121837 bytes  '<!DOCTYPE html>\r <html lang="ko" class="ko">\r <head>\r \t<title>\r \t\t보도자료'
+  금융위 보도자료             HTTP 200   122404 bytes  '<!DOCTYPE html>\r <html lang="ko" class="ko">\r <head>\r \t<title>\r \t\t보도자료'
   한국은행 보도자료            HTTP 200   392734 bytes  '                                          \t \t\t \t\t \t \t  \t \t\t \t\t \t \t  \t '
   산업부 보도자료             HTTP 404     2036 bytes  '\r \r \r <!DOCTYPE html>\r <html lang="ko">\r <head>\r     <meta http-equiv='
-  금감원 보도자료             실패 ConnectTimeout
-  연합뉴스 경제 RSS          HTTP 200    91091 bytes  '<?xml version="1.0" encoding="UTF-8"?> <rss version="2.0" xmlns:conten'
+  금감원 보도자료             실패 ConnectionError
+  연합뉴스 경제 RSS          HTTP 200    89432 bytes  '<?xml version="1.0" encoding="UTF-8"?> <rss version="2.0" xmlns:conten'
   한경 정책 RSS            HTTP 200    22761 bytes  '<!DOCTYPE html> <html lang="ko"> <head> <meta charset="UTF-8"> <title>'
