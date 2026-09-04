@@ -104,7 +104,8 @@ def main():
     from src.judge import SYSTEM as JSYS
     try:
         build_messages({"kind": "flow", "title": "t", "facts": "f",
-                        "stock_name": "삼성전자", "thin_facts": True}, "pro")
+                        "stock_name": "삼성전자", "thin_facts": True},
+                       "dry", "short_note", "reaction")
         JSYS.replace("__FATAL_BLOCK__", rules.judge_block())
         built = True
     except Exception as e:
@@ -299,21 +300,39 @@ def main():
 
 
     # ── 문체 다양성 (실측: 5건이 전부 같은 구조로 수렴)
-    from src.personas import TONES as _T, FORMATS as _F, SLOT_TONES as _ST, SLOT_FORMATS as _SF
+    from src.personas import VOICES as _V, FORMATS as _F, VOICE_W as _VW, FORMAT_W as _FW
     from src.generator import pick_style as _pick
-    ok.append(run("페르소나 10종", len(_T) == 10, str(len(_T))))
-    ok.append(run("구조 8종", len(_F) == 8, str(len(_F))))
-    ok.append(run("슬롯별 조합 6가지 이상",
-                  all(len(_ST[k]) * len(_SF[k]) >= 6 for k in _ST),
-                  str({k: len(_ST[k]) * len(_SF[k]) for k in _ST})))
+    from src import angles as _ang
+    ok.append(run("Voice 4종", len(_V) == 4, str(len(_V))))
+    ok.append(run("Format 7종", len(_F) == 7, str(len(_F))))
+    ok.append(run("Angle 8종", len(_ang.ANGLES) == 8, str(len(_ang.ANGLES))))
+    ok.append(run("3축 조합 200가지 이상",
+                  len(_V) * len(_ang.ANGLES) * len(_F) >= 200,
+                  str(len(_V) * len(_ang.ANGLES) * len(_F))))
+    # 가중치 방식이므로 슬롯별로 모든 Voice/Format 이 확률 > 0 이어야 한다
+    ok.append(run("금지 조합 없음(가중치 방식)",
+                  all(len(v) == 4 for v in _VW.values()) and
+                  all(len(f) == 7 for f in _FW.values())))
+
+    _it = {"kind": "disclosure", "stock_code": "005930",
+           "facts": "발행 총액: 200억원\n전환가액: 2,396원\n만기: 2031-09-11\n"
+                    "운영자금: 100억원\n매출 대비 18%"}
     _used = set()
-    _combos = [_pick({"kind": "flow", "stock_code": f"00000{i}"}, {}, _used)
-               for i in range(8)]
-    ok.append(run("같은 실행 내 조합 중복 없음", len(set(_combos)) == len(_combos),
-                  str(len(set(_combos)))))
-    _seen = {"005930": ["data:numbers_first"]}
-    _c2 = [_pick({"kind": "flow", "stock_code": "005930"}, _seen, set()) for _ in range(20)]
-    ok.append(run("최근 사용 조합 회피", ("data", "numbers_first") not in _c2))
+    _c = [_pick(_it, {}, _used) for _ in range(6)]
+    ok.append(run("같은 실행 내 축 반복 억제",
+                  len({x[1] for x in _c}) >= 4, str([x[1] for x in _c])))
+
+    # Angle 은 사실관계가 허용하는 것만
+    ok.append(run("데이터에 없는 Angle 미생성",
+                  "reaction" not in _ang.available(_it), str(_ang.available(_it))))
+    ok.append(run("uncertainty 단독은 앵글 없음",
+                  _ang.available({"facts": "상세 수치는 공개되지 않음"}) == []))
+
+    # 길이·문장수는 Format 에 귀속 (Global '최소 5문장' 과 충돌하던 문제)
+    ok.append(run("short_note 문장수 지정", _F["short_note"]["sentences"] == "3~4문장"))
+    from src.personas import SYSTEM_PROMPT as _SP
+    ok.append(run("Global 최소문장수 제거", "최소 5문장" not in _SP))
+    ok.append(run("'확인되지 않았다' 강제 제거", '"확인되지 않았다"고 적을 것' not in _SP))
 
     # ── DART 상세 보강
     from src.gate import has_substance as _hs2

@@ -11,6 +11,8 @@ AI가 글을 다 쓰고 나서 거르는 구조였다. 게이트를 앞으로 �
 import functools
 import re
 
+from src import angles
+
 # tier 1 — 사안 자체가 커뮤니티 AI 게시에 부적합
 # 투자자 손실·수사·상장 지위와 직결된 건 사람이 판단해야 한다.
 TIER1_LEGAL = [
@@ -130,6 +132,9 @@ def apply(items: list[dict]) -> tuple[list[dict], list[tuple[str, str]]]:
             blocked.append((it.get("id", "?"), why))
         elif not has_substance(it):
             blocked.append((it.get("id", "?"), "tier5:글감부족"))
+        elif not angles.available(it):
+            # 강조할 각도가 하나도 없으면 어떤 페르소나를 줘도 글이 되지 않는다.
+            blocked.append((it.get("id", "?"), "tier5:앵글없음"))
         else:
             passed.append(it)
 

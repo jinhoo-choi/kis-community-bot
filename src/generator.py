@@ -11,7 +11,8 @@ import config
 from src import filters
 from src.llm import router
 from src.decide import temperature_for
-from src.personas import SLOT_TONES, SLOT_FORMATS, build_messages
+from src import angles
+from src.personas import VOICE_W, FORMAT_W, build_messages
 
 
 # 리젝된 생성물 보관 (품질 검토용). main 이 filter_log 에 함께 기록한다.
@@ -43,25 +44,45 @@ def clean(body: str) -> str:
     return b.strip()
 
 
-def pick_style(item: dict, recent: dict, used_now: set) -> tuple[str, str]:
-    """(톤, 구조) 조합 선택.
+def _weighted(weights: dict, penalize: set) -> str:
+    """가중 랜덤. 최근에 쓴 값은 가중치를 1로 낮춘다(금지가 아니라 억제)."""
+    items = [(k, 1 if k in penalize else w) for k, w in weights.items() if w > 0]
+    total = sum(w for _, w in items)
+    r = random.uniform(0, total)
+    acc = 0
+    for k, w in items:
+        acc += w
+        if r <= acc:
+            return k
+    return items[-1][0]
 
-    페르소나만 늘려도 글은 비슷해진다. 실측에서 모든 글이
-    '사실 → 정보없음 → 열린 질문' 하나의 구조로 수렴했다.
-    구조를 따로 뽑아 조합하고, 같은 실행 안에서도 조합 중복을 피한다.
+
+def pick_style(item: dict, recent: dict, used_now: set) -> tuple[str, str, str]:
+    """(voice, angle, format) 선택.
+
+    외부 검토 반영으로 축을 셋으로 나눴다. 그리고 회피 기준을 조합 ID 가 아니라
+    '의미적 반복'으로 바꿨다 — 사람은 조합 ID 반복보다
+    "또 숫자로 시작해서 질문으로 끝나네"를 훨씬 빨리 알아챈다.
+    그래서 voice/angle/format 을 각각 따로 억제한다.
     """
     kind = item["kind"]
-    tones = SLOT_TONES.get(kind, ["calm"])
-    fmts = SLOT_FORMATS.get(kind, ["fact_then_read"])
-    seen = set(recent.get(item.get("stock_code") or "_theme", []))
+    vw = VOICE_W.get(kind, {"calm": 3, "dry": 2, "explainer": 2, "light": 1})
+    fw = FORMAT_W.get(kind, {"fact_read": 3, "question": 2, "short_note": 2})
 
-    combos = [(t, f) for t in tones for f in fmts]
-    fresh = [c for c in combos if f"{c[0]}:{c[1]}" not in seen and c not in used_now]
-    if not fresh:                       # 이번 실행 안에서 겹치는 것만이라도 피한다
-        fresh = [c for c in combos if c not in used_now] or combos
-    choice = random.choice(fresh)
-    used_now.add(choice)
-    return choice
+    hist = recent.get(item.get("stock_code") or "_theme", [])
+    used_v = {h.split(":")[0] for h in hist} | {u[0] for u in used_now}
+    used_a = {h.split(":")[1] for h in hist if h.count(":") >= 2} | {u[1] for u in used_now}
+    used_f = {h.split(":")[-1] for h in hist} | {u[2] for u in used_now}
+
+    voice = _weighted(vw, used_v)
+    fmt = _weighted(fw, used_f)
+
+    cand = angles.available(item)
+    fresh = [a for a in cand if a not in used_a] or cand
+    angle = random.choice(fresh) if fresh else ""
+
+    used_now.add((voice, angle, fmt))
+    return voice, angle, fmt
 
 
 def pick_tone(item: dict, recent: dict) -> str:      # 하위 호환
@@ -69,24 +90,25 @@ def pick_tone(item: dict, recent: dict) -> str:      # 하위 호환
 
 
 def _run(provider_name: str, items: list[dict], tones: list[str],
-         fmts: list[str] = None) -> list[dict]:
+         fmts: list[str] = None, angs: list[str] = None) -> list[dict]:
     if not items:
         return []
-    fmts = fmts or ["fact_then_read"] * len(items)
+    fmts = fmts or ["fact_read"] * len(items)
+    angs = angs or [""] * len(items)
     p = router.writers()[provider_name]
     # temperature 가 다른 항목은 배치를 나눈다 (배치는 파라미터가 요청별로 고정되므로)
     groups = {}
-    for i, (it, tn, fm) in enumerate(zip(items, tones, fmts)):
-        groups.setdefault(temperature_for(it), []).append((i, it, tn, fm))
+    for i, (it, tn, fm, ag) in enumerate(zip(items, tones, fmts, angs)):
+        groups.setdefault(temperature_for(it), []).append((i, it, tn, fm, ag))
 
     results = [None] * len(items)
     for temp, grp in groups.items():
-        jobs = [build_messages(it, tn, fm) for _, it, tn, fm in grp]
-        for (idx, _, _, _), r in zip(grp, p.generate_many(jobs, temperature=temp)):
-            results[idx] = r
+        jobs = [build_messages(it, tn, fm, ag) for _, it, tn, fm, ag in grp]
+        for g, r in zip(grp, p.generate_many(jobs, temperature=temp)):
+            results[g[0]] = r
 
     out = []
-    for it, tn, fm, r in zip(items, tones, fmts, results):
+    for it, tn, fm, ag, r in zip(items, tones, fmts, angs, results):
         if not r.ok or not r.text:
             # 원인을 삼키면 '0건 생성'만 보이고 왜인지 알 수 없다
             print(f"[gen] ⚠ {provider_name} 실패 {it['id']}: "
@@ -96,7 +118,7 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
         if not body:
             print(f"[gen] ⚠ {provider_name} 후처리 후 빈 본문 {it['id']}")
             continue
-        out.append({**it, "tone": tn, "fmt": fm, "body": body,
+        out.append({**it, "tone": tn, "fmt": fm, "angle": ag, "body": body,
                     "provider": r.provider, "model": r.model})
     return out
 
@@ -110,6 +132,7 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
     for name, chunk in buckets.items():
         made = _run(name, chunk,
                     [styles[id(x)][0] for x in chunk],
+                    [styles[id(x)][2] for x in chunk],
                     [styles[id(x)][1] for x in chunk])
         print(f"[gen] {name}: {len(made)}/{len(chunk)}건 생성")
         for p in made:
@@ -129,7 +152,8 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
         names = list(router.writers().keys())
         for p in retry:
             alt = next((n for n in names if n != p["provider"]), p["provider"])
-            made = _run(alt, [p], [p["tone"]], [p.get("fmt", "fact_then_read")])
+            made = _run(alt, [p], [p["tone"]], [p.get("fmt", "fact_read")],
+                        [p.get("angle", "")])
             if made and not filters.check(made[0]["body"], p["facts"], p.get("fmt")):
                 posts.append(made[0])
 
