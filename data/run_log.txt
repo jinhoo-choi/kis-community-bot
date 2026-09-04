@@ -7,29 +7,24 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
 [crawl] market 6건
 [crawl] policy_rss 3건
 [main] 수집 총 22건
-[enrich] 12/22건 배경 보강 완료
-[gate] 차단 8건 {'tier4': 4, 'tier5': 4}
+[enrich] 15/22건 배경 보강 완료
+[gate] 차단 7건 {'tier4': 4, 'tier5': 3}
 [tickers] 상장 2632종목 로드 (lxml)
-[dedup] 제외 8건 {'ID': 8}
-[main] 생성 대상 6건 {'disclosure': 1, 'research': 0, 'flow': 2, 'policy': 2, 'poll': 1}
+[dedup] 제외 12건 {'ID': 12}
+[main] 생성 대상 3건 {'disclosure': 0, 'research': 0, 'flow': 1, 'policy': 2, 'poll': 0}
 [claude] SDK 1.3.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] claude: 5/5건 생성
-[gen] 정규식 리젝 flow-2026-09-03-058610 ['질문마무리금지(numbers_first)']
-       └ '에스피지가 전일 11.93% 올랐네요. 종가 93,800원에 거래대금 928억원이 나왔습니다. 급등의 구체적 사유는 아직 확인되지 않았습니다. 소형 기어드 모터와 감속기를 만드는 회사인데, 산업용 부품 섹터 전반적 움직임이나 회사 공시를 확인해 보면 배경을 알 수 있을 것 같습니다. 거래량이 늘어난 만큼 어떤 계기가 있었을 거라고 봅니다. 요즘 이 주에 특'
-[gen] 정규식 리젝 pol-與박해철尹정부4년간청년일자리사업예산6천718 ["미확인수치['700']"]
-       └ '정부의 청년 일자리 지원 사업에서 2022년부터 2025년까지 4년간 예산이 제대로 쓰이지 않았다는 지적이 나왔네요. 언론 보도에 따르면 해당 기간 6천 700억대의 예산이 불용되었다고 하는데요.\n\n긍정적으로 보면 미사용 예산이 다른 정책으로 재배분될 가능성이 있고, 예산 낭비 구조를 개선할 계기가 될 수 있습니다. 한편 현장에서 실제로 필요한 청년 일자리'
+[gen] claude: 2/2건 생성
+[gen] 정규식 리젝 pol-경남도1127일추석물가안정대책18개성수품현장 ['너무김(316자)']
+       └ '경남도가 추석 연휴 동안 물가안정 대책을 본격 추진한다고 나왔어요. 11일부터 27일까지 18개 성수품을 중심으로 현장 점검에 들어간다는 거예요. 추석 시즌에는 보관 식품과 생필품 수요가 몰리면서 가격 변동성이 커지는 시기거든요.\n\n정부 차원의 물가 관리가 강화되면 해당 업종들의 마진율 변화를 살펴볼 여지가 있어요. 선제적 점검으로 시장 안정성이 높아질 수'
 [gen] gemini: 1/1건 생성
-[gen] 정규식 리젝 poll-flow-2026-09-03-386380 ['format', 'meta_output', '너무짧음(46자)']
-       └ ', 마크다운 없이 줄바꿈만 사용.\n    *   독자 대상 구체적인 질문으로 끝맺음'
+[gen] 정규식 리젝 pol-與박해철尹정부4년간청년일자리사업예산6천718 ['format', 'meta_output']
+       └ '의 업황 변화에 관심이 쏠리네요. (31 words/77 chars)\n    *   *Sentence'
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] 정규식 통과 4건 / 시도 6건
+[gen] 정규식 통과 1건 / 시도 3건
 [claude] SDK 1.3.0
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 4건 / 보류 0건
-[main] filter_log data/filter_log_20260904_1012.json
-[main] stats {"ts": "2026-09-04T10:12:16+09:00", "collected": 22, "gate_blocked": 8, "gate_reasons": {"tier4": 4, "tier5": 4}, "enrich_ok": 12, "generated": 4, "sent": 4, "held": 0, "hold_reasons": {}, "avg_score": 17.75, "by_provider": {"claude": {"generated": 4, "sent": 4, "avg_score": 17.75}}, "model_fallbacks": [], "dedup": {"ID": 8}, "crawl_health": {"dart": {"got": 9, "expected": 9, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 6, "expected": 6, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}}}
+[main] 배포 1건 / 보류 0건
+[main] filter_log data/filter_log_20260904_1032.json
+[main] stats {"ts": "2026-09-04T10:32:19+09:00", "collected": 22, "gate_blocked": 7, "gate_reasons": {"tier4": 4, "tier5": 3}, "enrich_ok": 15, "generated": 1, "sent": 1, "held": 0, "hold_reasons": {}, "avg_score": 16.0, "by_provider": {"claude": {"generated": 1, "sent": 1, "avg_score": 16.0}}, "model_fallbacks": [], "dedup": {"ID": 12}, "crawl_health": {"dart": {"got": 9, "expected": 9, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 6, "expected": 6, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}}}
