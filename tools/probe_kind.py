@@ -71,6 +71,48 @@ def dump(soup, tag):
         log(f"  본문 앞부분: {soup.get_text(' ', strip=True)[:200]!r}")
 
 
+def raw_dump(s):
+    """작동이 확인된 엔드포인트에서 행 원본 HTML 을 떠서
+    종목코드·공시링크 추출 경로를 찾는다."""
+    log("\n" + "=" * 66)
+    log("행 원본 HTML 덤프 + 조회공시 필터 테스트")
+    log("=" * 66)
+    try:
+        r = s.post("https://kind.krx.co.kr/disclosure/todaydisclosure.do",
+                   data={"method": "searchTodayDisclosureSub", "currentPageSize": "100",
+                         "pageIndex": "1", "orderMode": "0", "orderStat": "D",
+                         "forward": "todaydisclosure_sub", "marketType": ""},
+                   timeout=25)
+        soup = BeautifulSoup(r.text, "html.parser")
+        rows = [tr for tr in soup.select("tr") if tr.find_all("td")]
+        log(f"총 {len(rows)}행 (currentPageSize=100)")
+
+        if rows:
+            log("\n[행 원본 HTML]")
+            log(str(rows[0])[:1200])
+
+        log("\n[조회공시 관련 행]")
+        hit = 0
+        for tr in rows:
+            txt = tr.get_text(" ", strip=True)
+            if re.search(r"조회공시|시황변동|풍문", txt):
+                tds = [re.sub(r"\s+", " ", td.get_text(" ", strip=True))[:50]
+                       for td in tr.find_all("td")]
+                log(f"  {tds}")
+                log(f"    RAW: {str(tr)[:500]}")
+                hit += 1
+                if hit >= 3:
+                    break
+        log(f"  조회공시 행 {hit}건")
+
+        codes = re.findall(r"(?:isurCd|codeNm|스크립트)?['\"]?(\d{6})['\"]", str(rows[:3]))
+        log(f"\n6자리 코드 후보: {codes[:6]}")
+        acpt = re.findall(r"acptno=?['\"]?(\d{10,})", str(rows[:3]))
+        log(f"acptno 후보: {acpt[:4]}")
+    except Exception:
+        log("실패:\n" + traceback.format_exc()[-400:])
+
+
 def main():
     log("=" * 66)
     log("KIND 조회공시 엔드포인트 프로브")
@@ -100,6 +142,8 @@ def main():
                         log(f"  ✔ '{kw}' 존재")
         except Exception:
             log("  실패:\n" + traceback.format_exc()[-400:])
+
+    raw_dump(s)
 
     with open("data/kind_probe.txt", "w", encoding="utf-8") as f:
         f.write("\n".join(OUT))
