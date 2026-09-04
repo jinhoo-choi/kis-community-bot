@@ -98,6 +98,12 @@ RULES: list[Rule] = [
               r"Yes\.|체크리스트|^\s*\*\s)",
     ),
     Rule(
+        id="direction_mismatch",
+        writer='등락 방향을 잘못 쓰는 것. 상승에 "낙폭", 하락에 "급등" 같은 표현',
+        judge="등락 방향이 사실관계와 반대 (상승인데 '낙폭', 하락인데 '급등' 등)",
+        regex="",          # 문맥 판단이 필요해 정규식 대신 별도 검사(filters._direction_check)
+    ),
+    Rule(
         id="textbook",
         writer="일반론 설명(\"유상증자는 일반적으로 ~입니다\" 같은 사전식 정의). "
                "이미 아는 사람들이 보는 곳이다",

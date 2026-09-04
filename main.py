@@ -41,6 +41,13 @@ def main():
     raw = collect()
     print(f"[main] 수집 총 {len(raw)}건")
 
+    # 사실 보강을 게이트보다 먼저 한다.
+    # 순서가 반대면 '보강하면 글감이 되는' 공시·리포트가 tier5(글감부족)로 미리 잘려
+    # 수치가 확실한 flow(특징주)만 살아남는 편향이 생긴다 (실측: 3건 전부 특징주).
+    if config.ENABLE_ENRICH:
+        raw = enrich.enrich_all(raw)
+    enriched_n = sum(1 for x in raw if x.get("enriched"))
+
     # 하드 게이트 — AI 호출 이전에 구조적으로 배제
     gated, blocked = gate.apply(raw)
 
@@ -81,10 +88,6 @@ def main():
         print(json.dumps(crawl.health(), ensure_ascii=False, indent=1))
         print(f"\n───── dedup ─────\n {dup_reasons}")
         return
-
-    if config.ENABLE_ENRICH:
-        picked = enrich.enrich_all(picked)
-    enriched_n = sum(1 for x in picked if x.get("enriched"))
 
     posts = generator.generate(picked, s["recent_tone"])
 

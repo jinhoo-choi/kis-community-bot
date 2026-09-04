@@ -1,23 +1,16 @@
 """텔레그램으로 직원 채널에 배포.
 
-카드 설계 원칙 (담당자·임원 관점에서 재작성)
+카드는 세 줄이다.
 
-담당자가 카드를 보고 3초 안에 답해야 하는 질문:
-  1) 내 것인가          → [담당: OO] 를 첫 줄 맨 앞에
-  2) 어디에 올리나       → 종목명(코드) + 게시판을 둘째 줄에
-  3) 무엇을 복사하나     → 복사 블록에 본문만
-  4) 몇 개 중 몇 번째인가 → [n/N] 로 진행 상황 파악, 누락 방지
+    카테고리 : 공시 · 삼성전자 (005930)
+    담당 : 김선임
+    [회색 복사 블록]
 
-임원이 요약 하나로 답해야 하는 질문:
-  - 오늘 몇 건이 어디로 나갔나 / 담당자별 분배는 균등한가
-  - 컴플라이언스 필터에서 몇 건이 걸렸나
-  - 소스에 이상은 없나
-
-제외한 것:
-  - provider(claude/gemini), 심사 점수 → 담당자에게 아무 의미 없는 내부 지표.
-    운영 지표는 data/run_stats.jsonl 에 남으므로 카드에서 뺀다.
-  - AI 생성·출처·투자책임 고지 → 한국투자 앱이 게시 시 자동 표기하므로
-    복사 영역에 넣으면 중복된다. 카드 밖에 안내만 남긴다.
+빼기로 한 것과 이유
+  - 원문 링크 / 진행 순번 / provider / 심사 점수
+      담당자가 게시할 때 쓰지 않는 정보다. 운영 지표는 run_stats.jsonl 에 남는다.
+  - AI 생성·출처·투자책임 고지와 그 안내 문구
+      한국투자 앱이 게시 시 자동으로 붙인다. 카드에 적으면 노이즈다.
 
 잘림/복사 관련 (실측 이슈 수정)
   - 조립된 HTML 을 [:4000] 으로 자르면 태그 중간이 끊겨 </pre> 가 사라지고
@@ -49,31 +42,30 @@ def _esc(s: str) -> str:
 
 
 def card(p: dict, idx: int = 0, total: int = 0) -> str:
-    who = _esc(p.get("assignee") or "미지정")
-    name = _esc(p.get("stock_name") or "테마")
-    code = f" ({p['stock_code']})" if p.get("stock_code") else ""
-    board = BOARD_LABEL.get(p.get("board", "stock"), "종목방")
+    """배포 카드.
+
+    담당자가 필요한 건 세 가지뿐이다: 어떤 종류인지 / 내 것인지 / 무엇을 복사하는지.
+    나머지(원문 링크, 심사 점수, 고지 문구 안내)는 전부 뺐다.
+    고지 문구는 한국투자 앱이 게시 시 자동으로 붙이므로 여기서 설명할 필요가 없다.
+    """
     kind = KIND_LABEL.get(p.get("kind"), p.get("kind", ""))
-    tone = TONES.get(p.get("tone", ""), {}).get("name", "")
-    seq = f"[{idx}/{total}] " if total else ""
+    who = _esc(p.get("assignee") or "미지정")
+
+    # 종목이 있는 건은 카테고리 옆에 종목명(코드)까지 붙인다
+    if p.get("stock_code"):
+        cat = f"{kind} · {_esc(p.get('stock_name') or '')} ({p['stock_code']})"
+    else:
+        cat = kind
 
     body = p.get("body", "").strip()
     if len(body) > BODY_LIMIT:
         body = body[:BODY_LIMIT].rstrip() + "…"
 
-    head = (
-        f"{seq}<b>담당: {who}</b>\n"
-        f"<b>{name}{code}</b> · {board}\n"
-        f"{kind} · {tone}\n"
+    return (
+        f"카테고리 : {cat}\n"
+        f"담당 : {who}\n"
+        f'<pre><code class="language-복사">{_esc(body)}</code></pre>'
     )
-    # language 라벨이 있어야 클라이언트가 복사 버튼을 안정적으로 띄운다
-    block = f'<pre><code class="language-복사">{_esc(body)}</code></pre>'
-    tail = (
-        f'<a href="{html.escape(p.get("src", ""), quote=True)}">원문</a>'
-        f"  ·  위 블록만 복사하세요\n"
-        f"<i>AI 생성 표기·출처·투자책임 문구는 앱이 자동으로 붙습니다</i>"
-    )
-    return head + block + tail
 
 
 # 하위 호환 (테스트에서 사용)

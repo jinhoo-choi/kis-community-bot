@@ -202,7 +202,8 @@ def main():
     ok.append(run("복사영역에 AI생성 표기 없음", "AI 생성" not in _pre))
     ok.append(run("복사영역에 투자책임 문구 없음", "투자 판단" not in _pre))
     ok.append(run("복사영역에 출처 URL 없음", "http" not in _pre))
-    ok.append(run("고지문구는 pre 밖에 존재", "AI 생성" in _card.split("</pre>")[1]))
+    ok.append(run("카드에 고지문구 없음", "AI 생성" not in _card and "투자 판단" not in _card))
+    ok.append(run("카드에 원문링크 없음", "<a href" not in _card))
     ok.append(run("복사영역 끝이 본문", _pre.strip().endswith("보시나요.")))
 
 
@@ -245,7 +246,19 @@ def main():
     ok.append(run("카드 태그 미절단", _c.count("<pre>") == 1 and _c.count("</pre>") == 1))
     ok.append(run("본문만 절단", len(_c) < 4096, f"{len(_c)}자"))
     ok.append(run("복사블록 language 지정", 'class="language-' in _c))
-    ok.append(run("담당자 첫줄 표기", _c.splitlines()[0].startswith("[3/5] <b>담당: 김선임")))
+    _lines = _c.splitlines()
+    ok.append(run("1행 카테고리", _lines[0].startswith("카테고리 : ")))
+    ok.append(run("2행 담당", _lines[1] == "담당 : 김선임"))
+    ok.append(run("3행부터 복사블록", _lines[2].startswith("<pre><code")))
+    ok.append(run("종목건은 종목명+코드 표기", "삼성전자 (005930)" in _lines[0], _lines[0]))
+    _t = _tg.card({"kind": "policy", "assignee": "이책임", "body": "가" * 60})
+    ok.append(run("테마건은 카테고리만", _t.splitlines()[0] == "카테고리 : 정책", _t.splitlines()[0]))
+
+    # 방향 오용 (2026-09-04 실측: +23.74% 상승 건에 '낙폭')
+    _ff = "등락률: 23.74%\n종가: 307,500원"
+    ok.append(run("방향오용 차단", any("방향오용" in e for e in
+                  _f2.check("로보티즈가 올랐네요. 이 정도 낙폭이면 뭔가 있을 법한데 확인이 안 되네요. "
+                            "아시는 분 계신가요. 저도 궁금하네요.", _ff))))
     ok.append(run("provider/심사점수 미노출", "심사" not in _c and "claude" not in _c))
 
 

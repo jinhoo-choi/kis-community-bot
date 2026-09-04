@@ -27,10 +27,13 @@ def decide_distribution(
     """
     target = target if target is not None else config.TARGET_POSTS
     per_stock = per_stock if per_stock is not None else config.MAX_PER_STOCK
-    # 소량 실행은 슬롯당 1건뿐이라 유형상한이 멀쩡한 글을 버린다.
-    # 다양성 확보가 목적인데 오히려 다양성을 줄이므로 상한을 풀고 종목상한만 남긴다.
+    # 소량 실행에서 슬롯 쿼터(1건)를 그대로 쓰면 멀쩡한 글을 버린다.
+    # 그렇다고 상한을 완전히 풀면 한 유형이 전부 차지한다
+    # (실측: 5건 요청에 특징주만 3건 — 구조가 똑같은 글이 연속으로 나감).
+    # 유형당 max(2, 목표/3) 로 느슨한 상한만 둔다.
     if per_kind_cap is None and config.TARGET_POSTS < 30:
-        per_kind_cap = {}
+        cap = max(2, target // 3)
+        per_kind_cap = {k: cap for k in config.SLOT_QUOTA} | {"theme": cap}
     per_kind_cap = per_kind_cap if per_kind_cap is not None else config.SLOT_QUOTA
     min_score = min_score if min_score is not None else config.MIN_JUDGE_SCORE
 

@@ -13,6 +13,24 @@ def _numbers(text: str) -> set[str]:
     return {n.replace(",", "").rstrip(".") for n in NUM_RE.findall(text)}
 
 
+_UP = re.compile(r"낙폭|급락|하락(?!률)|떨어졌|빠졌|내렸")
+_DOWN = re.compile(r"급등|상승(?!률)|올랐|뛰었|치솟")
+
+
+def _direction_errors(body: str, facts: str) -> list[str]:
+    """등락 방향 오용 검사.
+
+    실측: +23.74% 상승 건에 "이 정도 낙폭이면" 이라고 써놓고 심사 19점을 받았다.
+    facts 의 등락률 부호로 방향을 확정하고, 반대 방향 어휘가 나오면 리젝한다.
+    """
+    m = re.search(r"등락률[:\s]*([-+]?\d+(?:\.\d+)?)\s*%", facts or "")
+    if not m:
+        return []
+    up = float(m.group(1)) > 0
+    wrong = _UP.search(body) if up else _DOWN.search(body)
+    return [f"방향오용({wrong.group()})"] if wrong else []
+
+
 def check(body: str, facts: str) -> list[str]:
     """위반 사유 리스트 반환. 빈 리스트면 통과."""
     errs = []
@@ -34,5 +52,7 @@ def check(body: str, facts: str) -> list[str]:
     hallu = [x for x in _numbers(body) if x not in allow and len(x) >= 3]
     if hallu:
         errs.append(f"미확인수치{hallu[:3]}")
+
+    errs += _direction_errors(body, facts)
 
     return errs
