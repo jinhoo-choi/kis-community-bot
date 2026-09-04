@@ -78,7 +78,8 @@ ok
   OK    실배포 회귀 차단: 교과서  (['textbook'])
   OK    실배포 회귀 차단: 자기소개  (['meta_output'])
   OK    정상 글은 통과  ([])
-  OK    금융기사 상투어 차단
+  OK    상투어 치환('기록했습니다')
+  OK    상투어 리젝(치환불가)
   OK    주체없는 평가 차단
   OK    제목만 있는 항목 차단
   OK    수치 있는 항목 통과
@@ -91,7 +92,7 @@ ok
   OK    금지 조합 없음(가중치 방식)
   OK    가능한 Angle 전부 등장  ([] 미등장)
   OK    한 Angle 쏠림 없음(50% 미만)  (25%)
-  OK    같은 실행 내 억제 동작  (['ratio', 'purpose', 'amount', 'duration', 'amount', 'terms'])
+  OK    같은 실행 내 억제 동작  (['amount', 'terms', 'ratio', 'ratio', 'ratio', 'purpose'])
   OK    데이터에 없는 Angle 미생성  (['amount', 'ratio', 'duration', 'terms', 'purpose'])
   OK    uncertainty 단독은 앵글 없음
   OK    Length spec 존재
@@ -167,43 +168,15 @@ ok
   OK    본문 종목언급 금지 지시 주입
   OK    이미 종목 있으면 미배정
   OK    테마글 본문 종목언급 리젝
+  OK    claim 추출  (['change', 'close', 'turnover', 'vol_ratio'])
+  OK    claim 블록 생성
+  OK    금지 claim type 명시
+  OK    프롬프트에 claim 주입
+  OK    범위이탈 차단: 기대감이 반영된 것
+  OK    범위이탈 차단: 반도체 업황 수혜가
+  OK    범위이탈 차단: 수익 구조를 안정화
+  FAIL  계열당 최대2 절충  (3)
+  OK    contrast_pair 생성  ([('종가 상승', '장중 고가 대비 8.2% 낮게 마감')])
+  OK    호환 그래프 timeline×ratio 차단
 
-160/160 passed
-
-=== 2b. 전수검사 (설정-코드 정합성) ===
-
-=== 프롬프트 치환 ===
-  OK    v2 페르소나 10종 전건 치환 완료
-  OK    v1 72조합 전건 치환 완료
-
-=== 길이 규칙 ===
-  OK    v2 길이 지시와 필터 경계 정합
-  OK    v1 Length 지시와 필터 경계 정합
-
-=== 숫자 상한 vs Angle 계약 ===
-  OK    페르소나 숫자 상한이 Angle 최소 요구를 충족
-
-=== 슬롯 가중치 ===
-  OK    v2 슬롯 가중치 정합
-  OK    v1 슬롯 가중치 정합
-
-=== 규칙 단일 소스 ===
-  OK    규칙 19종이 작성·심사 프롬프트에 파생됨
-  OK    v2 프롬프트에 규칙 블록 주입 확인
-
-=== Angle ===
-  OK    Angle 11종 / 미확인 허용 ['inquiry', 'uncertainty']
-
-=== 필터 동작 ===
-  OK    필터 1인칭: ['first_person_trade', '너무짧음(43자/fact_note)']
-  OK    필터 매매권유: ['trade_advice', 'price_target', '너무짧음(42자/fact_note)']
-  OK    필터 기사체: ['literary_style', '너무짧음(40자/fact_note)', "미확인수치['200']"]
-  OK    필터 당신: ['second_person', '너무짧음(42자/fact_note)']
-  FAIL  필터 정상: 기대 False 실제 ['news_cliche']
-
-=== 설정 ===
-  OK    PERSONA_MODE=v2
-  OK    TARGET=50 QUOTA={'disclosure': 22, 'research': 7, 'flow': 14, 'policy': 4, 'poll': 3} OVERGEN=1.5
-
-==================================================
-FAIL 1 / WARN 0
+170/171 passed

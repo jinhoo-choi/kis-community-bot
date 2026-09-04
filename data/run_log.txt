@@ -1,61 +1,57 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 [dart] corp_code 3989종목 매핑
-[dart] 상세 보강 2/15건
-[crawl] dart 15건
-[crawl] naver_research 4건
-[crawl] hankyung 2건
+[dart] 상세 보강 2/12건
+[crawl] dart 12건
+[crawl] naver_research 2건
+[crawl] hankyung 1건
 [crawl] market 9건
 [tickers] 상장 2632종목 로드 (lxml)
 [crawl] kind_inquiry 2건
 [crawl] policy_rss 3건
 [tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
 [crawl] telegram_ch 0건 (정상 0건)
-[main] 수집 총 36건
-[enrich] 22/36건 배경 보강 완료
-[gate] 차단 16건 {'tier5': 8, 'tier4': 7, 'tier1': 1}
-[theme] 테마글 1건에 게시 종목 배정
+[main] 수집 총 30건
+[enrich] 25/30건 배경 보강 완료
+[gate] 차단 10건 {'tier5': 4, 'tier4': 5, 'tier1': 1}
+[theme] 테마글 2건에 게시 종목 배정
 [main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
-[main] 생성 대상 20건 {'disclosure': 6, 'research': 2, 'flow': 9, 'policy': 2, 'poll': 1}
+[main] 생성 대상 20건 {'disclosure': 6, 'research': 1, 'flow': 9, 'policy': 3, 'poll': 1}
 [claude] SDK 1.3.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [gen] claude: 16/16건 생성
-[gen] 정규식 리젝 dart-20260904000431 ['미확인표현(확인되지 않)']
-       └ '합병대가로 자기주식을 처분하기로 결정했습니다. 우성이 9월 4일 공시한 주요사항보고서에 따르면 자기주식을 교부하는 방식입니다. 상세 규모는 공시에서 확인되지 않았습니다.'
-[gen] 정규식 리젝 dart-20260904000367 ['너무김(152자/brief_report)']
-       └ '자기주식취득신탁계약을 해지하기로 결정했습니다. NICE가 9월 4일 공시한 주요사항보고서 내용입니다.\n\n자기주식취득신탁계약은 회사가 신탁사와 맺은 계약으로, 신탁사가 시장에서 회사 주식을 사들여 회사에 전달하는 방식입니다. 이번에 NICE가 이 계약을 해지하기로 했습니다.'
-[gen] 정규식 리젝 hk-652142 ['너무김(303자/careful_note)']
-       └ "한국IR협의회에서 엔에프씨에 관한 리포트를 내놨네요. 제목은 '화장품 ODM 고성장, 소재 턴어라운드 본격화'입니다.\n\n엔에프씨는 화장품 베이스 소재를 개발하고 생산하는 회사인데, 리포트에선 화장품 ODM 사업의 성장 흐름과 소재 사업의 턴어라운드가 함께 진행 중이라는 분석을 담고 있습니다. ODM 부문에서 고성장세를 보이는 가운데 소재 사업도 구조적 개선"
-[gen] 정규식 리젝 hk-652137 ['news_cliche', '너무김(241자/open_talk)']
-       └ '한화투자증권이 롯데이노베이트(286940)에 대해 적정가격 30,000원을 제시했네요. DBO 레퍼런스 확보를 통해 수익성이 개선되는 모습인데, DBO는 데이터베이스 아웃소싱으로 정기적 수익이 발생하는 사업 모델입니다. 같은 보고서에서는 멀티플 정상화가 남은 과제라고 언급했는데요. 현재 시장에서 보는 밸류에이션 수준이 이 정도 수익성 개선을 충분히 반영하고'
-[gen] 정규식 리젝 flow-2026-09-04-030530 ['news_cliche', '너무김(152자/brief_report)', '수치과다(5개/brief_report)', '어미반복(습니다×4)']
-       └ '29.91% 상승했습니다. 원익홀딩스가 전일 종가 기준 이 정도 상승률을 기록했습니다. 거래대금은 225억원이었고 거래량은 20일 평균의 6.0배 수준으로 매우 이례적이었습니다. 장중 저가 대비 고가의 차이가 28.6%에 달했으며 마감은 장중 고가 부근에서 이루어졌습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-108490 ['news_cliche', '수치과다(5개/open_talk)']
-       └ '로보티즈가 어제 22.54% 올랐네요. 종가는 304,500원이고 거래대금이 3,040억원대를 기록했는데요. 장중에 저가 대비 18.9%까지 변동폭이 컸고, 지난 5거래일 누적 수익률도 25.8%에 달합니다. 이 정도 급등을 견인한 구체적인 호재나 공시가 있었는지 아시는 분 계신가요?'
-[gen] 정규식 리젝 flow-2026-09-04-234340 ['news_cliche', '수치과다(6개/fact_note)']
-       └ '25,250원까지 오른 헥토파이낸셜이 어제 13.48% 상승했습니다. 거래대금은 252억원으로 20일 평균의 3.6배를 기록했는데요. 장중 변동성도 컸는데, 저가 대비 고가의 차이가 10.5%였습니다. 거래량과 변동성 모두 평소보다 크게 늘어난 모습입니다.'
-[gen] 정규식 리젝 flow-2026-09-04-263750 ['news_cliche', '수치과다(4개/quick_memo)']
-       └ '34,500원까지 올랐네요. 펄어비스가 전일 11.47% 상승했어요. 거래량은 평소의 2.1배를 기록했고, 장중 등락폭도 저가 대비 8.5%로 꽤 컸어요.'
-[gen] 정규식 리젝 flow-2026-09-04-090460 ['수치과다(7개/data_focus)', '어미반복(습니다×4)']
-       └ '비에이시가 전일 10.75% 상승해 21,850원에 마감했습니다. 거래량은 20일 평균의 2.0배로 평소보다 많았습니다. 장중 고저 차이가 저가 대비 11.4%로 컸고, 5거래일 누적 수익률은 27.8%였습니다. 거래대금은 218억원이었습니다.'
+[gen] 정규식 리젝 dart-20260904000355 ['너무김(154자/brief_report)']
+       └ '1.8702948배.\n\n우성이 우성유통을 흡수합병하면서 우성유통 주식 1주당 우성 주식 1.8702948주를 배정하기로 결정했습니다. 우성유통이 영위하던 유통 사업이 우성으로 내재화되어 사료-농장-유통으로 이어지는 축산 식품 사업 밸류체인이 단일 조직 내에서 통합 운영됩니다.'
+[gen] 정규식 리젝 flow-2026-09-04-030530 ['방향오용(내렸)', '수치과다(7개/open_talk)']
+       └ '225억원대의 거래대금이 몰린 가운데 원익홀딩스가 29.91% 올랐네요. 종가 22,500원에서 장중 고가와 동일한 수준으로 마감했고, 거래량은 20일 평균의 6.0배였습니다. 장중에는 저가 대비 28.6%까지 오르내렸는데요. 5거래일 누적으로도 17.92% 상승한 가운데, 이번 급등이 구체적으로 어떤 계약이나 공시와 연결되는 건지 아시는 분 계신가요?'
+[gen] 정규식 리젝 flow-2026-09-04-108490 ['수치과다(7개/open_talk)']
+       └ '로보티즈가 22.54% 올랐네요. 종가는 304,500원이었고 거래대금은 3,040억원이었습니다. 거래량이 20일 평균의 6.4배까지 불었고, 장중에는 저가 대비 18.9%의 변동폭을 보였는데요. 5거래일을 합치면 25.83% 오른 상황인데, 이번 상승을 견인한 구체적인 계기가 뭐라고 생각하시나요?'
+[gen] 정규식 리젝 flow-2026-09-04-234340 ['수치과다(8개/fact_note)']
+       └ '헥토파이낸셜이 13.48% 상승해 25,250원으로 마감했습니다. 거래대금은 252억원을 기록했는데요. 장중에는 저가 대비 10.5%의 변동폭을 보였으며, 종가는 장중 고가보다 5.8% 낮은 수준입니다. 거래량은 20일 평균의 3.6배였고, 5거래일 누적으로는 7.91% 상승했습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-336260 ['수치과다(7개/data_focus)', '어미반복(습니다×4)']
+       └ '두산퓨얼셀이 전일 12.44% 올랐습니다. 종가는 43,850원이었습니다. 거래대금 438억원에 거래량은 20일 평균의 1.4배였습니다. 장중에는 저가 대비 14.4% 변동폭을 기록했고 마감은 장중 고가 대비 2.3% 낮은 수준에서 나왔습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-058610 ['수치과다(5개/quick_memo)']
+       └ '에스피지가 12.41% 올랐어요. 거래대금은 942억원을 기록했고 거래량도 20일 평균의 2.3배였습니다. 장중 고가 대비 3.1% 낮은 수준에서 마감했네요.'
+[gen] 정규식 리젝 flow-2026-09-04-263750 ['너무김(165자/brief_report)', '수치과다(7개/brief_report)']
+       └ '11.47% 상승했습니다. 펄어비스가 어제 종가 기준으로 기록한 등락률입니다. 거래대금 345억원에 거래량은 20일 평균의 2.1배였으며, 장중에는 저가 대비 8.5% 변동폭을 보였습니다. 종가는 장중 고가보다 2.1% 낮은 34,500원으로 마감했고, 5거래일 누적으로는 6.15% 올랐습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-090460 ['수치과다(8개/data_focus)', '어미반복(습니다×4)']
+       └ '20일 평균 대비 2.0배 거래량이었습니다. 종가 21,850원으로 10.75% 올랐고, 거래대금은 218억원이었습니다. 장중에는 저가 대비 11.4% 변동했으며, 마감은 장중 고가에서 1.6% 낮은 수준에서 형성됐습니다. 5거래일 누적으로는 27.78% 상승했습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-240810 ['수치과다(8개/careful_note)']
+       └ '9.33% 오른 원익IPS가 종가 114,800원에서 마감했어요. 거래대금은 1,147억원이었습니다. 장중에는 저가 대비 10.7%의 변동폭을 보였고, 마감값은 장중 고가보다 1.9% 낮은 수준이었네요. 거래량은 20일 평균의 1.1배 정도였어요. 지난 5거래일 누적으로는 3.33% 상승한 모습입니다.'
+[gen] 정규식 리젝 kind-20260904000786 ['stock_ending']
+       └ '디에이치엑스컴퍼니가 거래소 조회공시에 답변했어요. 답변 내용은 공시 원문 확인이 필요해요.'
 [gen] gemini: 4/4건 생성
-[gen] 정규식 리젝 kind-20260904000786 ['너무짧음(36자/fact_note)']
-       └ '한국거래소는 디에이치엑스컴퍼니에 풍문 또는 보도와 관련한 조회공시'
-[gen] 정규식 리젝 pol-듀켐바이오정읍에343억원규모투자전북도등과협약 ['format']
-       └ '문장은 반드시 5어절 이하인가?\n    - 343억원을(1) 정읍에('
-[gen] 정규식 리젝 pol-원주의료기기기업15곳현장채용구직자와해피데이 ['너무짧음(34자/quick_memo)']
-       └ '2026년 9월 4일에 열립니다. \n\n원주 의료기기 기업 15'
-[gen] 정규식 리젝 poll-flow-2026-09-04-386380 ['너무짧음(35자/check_list)']
-       └ '2026년 9월 4일부터 향후 한 달간은 스카이랩스의 주가 흐름'
+[gen] 정규식 리젝 poll-flow-2026-09-04-386380 ['너무짧음(41자/open_talk)']
+       └ '135.00%라는 큰 폭의 상승세가 스카이랩스에서 나타났네요. 전일 종가는'
 [gen] 정규식 통과 11건 / 시도 20건
 [claude] SDK 1.3.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 5건 / 보류 6건
+[main] 배포 1건 / 보류 10건
+   보류 dart-20260904000431 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
    보류 dart-20260904800546 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반,유상증자는 일반적으로~ 같은 사전식 일반론으로 분량을 채움
+   보류 dart-20260904000367 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
    보류 dart-20260904000282 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
-   보류 flow-2026-09-04-386380 (claude) - 저점수 12.7/20 정보량이 부족하고 문체가 딱딱함
-   보류 flow-2026-09-04-336260 (claude) - 저점수 13.3/20 정보량이 부족하고 단순 나열에 그침
-   보류 flow-2026-09-04-263750 (gemini) - fatal:자기소개나 작성 과정이 노출됨,상투적 마무리 문구로 글을 닫음
+   보류 hk-652142 (claude) - fatal:상투적 마무리 문구로 글을 닫음 (지켜봐야/확인이 필요/주목됩니다 류)
 [tg] 테스트 채널 suffix 매칭: ...2744 (private)
-[main] filter_log data/filter_log_20260905_0657.json
-[main] stats {"ts": "2026-09-05T06:57:42+09:00", "persona_mode": "v2", "collected": 36, "gate_blocked": 16, "gate_reasons": {"tier5": 8, "tier4": 7, "tier1": 1}, "enrich_ok": 22, "generated": 11, "sent": 5, "held": 6, "hold_reasons": {"fatal": 3, "저점수 12.7/20 정보량이 부족하고 문체가 딱딱함": 1, "저점수 13.3/20 정보량이 부족하고 단순 나열에 그침": 1, "저점수 12.7/20 정보가 부족하고 문체가 딱딱함": 1}, "avg_score": 15.74, "by_provider": {"gemini": {"generated": 1, "sent": 0, "avg_score": 7.3}, "claude": {"generated": 10, "sent": 5, "avg_score": 13.74}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 15, "expected": 15, "degraded": false}, "naver_research": {"got": 4, "expected": 4, "degraded": false}, "hankyung": {"got": 2, "expected": 2, "degraded": false}, "market": {"got": 9, "expected": 9, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+[main] filter_log data/filter_log_20260905_0721.json
+[main] stats {"ts": "2026-09-05T07:21:54+09:00", "persona_mode": "v2", "collected": 30, "gate_blocked": 10, "gate_reasons": {"tier5": 4, "tier4": 5, "tier1": 1}, "enrich_ok": 25, "generated": 11, "sent": 1, "held": 10, "hold_reasons": {"fatal": 10}, "avg_score": 17.3, "by_provider": {"claude": {"generated": 7, "sent": 1, "avg_score": 12.17}, "gemini": {"generated": 4, "sent": 0, "avg_score": 9.32}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 12, "expected": 12, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 9, "expected": 9, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
