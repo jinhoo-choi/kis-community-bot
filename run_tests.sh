@@ -43,3 +43,5 @@ python3 tests/test_decide.py
 echo
 echo "=== 3. E2E 시뮬레이션 ==="
 python3 tests/test_e2e.py
+echo
+echo "ALL TESTS PASSED"

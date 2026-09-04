@@ -16,6 +16,7 @@ def run(name, cond, detail=""):
 
 def main():
     ok = []
+    from src import filters as _f2
 
     # 1) 종목 상한: 같은 종목 5건 → 2건만
     sent, held = decide_distribution([P(i) for i in range(5)], target=50, per_stock=2)
@@ -265,7 +266,6 @@ def main():
     # ── 2026-09-04 실제 배포분 회귀
     #    심사 19/20 를 받고 배포됐지만 담당자·임원 관점에서 게시 불가였던 글들.
     #    같은 유형이 다시 통과하면 실패한다.
-    from src import filters as _f2
     _bad = [
         ("신문체", "에이프로젠이 자회사의 유상증자를 결정했다. 9월 3일 공시된 주요사항보고서에 "
                    "따르면 제3자배정 방식으로 진행된다. 상세 수치는 아직 공개되지 않았다."),
