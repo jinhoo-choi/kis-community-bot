@@ -74,8 +74,10 @@ PERSONAS = {
                 "불릿이 아니라 문장으로 이어 씁니다.",
     },
     "quick_memo": {
+        # num_cap 2 는 계약이 불가능했다. reaction/amount 앵글이 붙으면
+        # 등락률·가격·거래대금만으로 이미 3개다 (실측 리젝).
         "name": "짧은메모", "sentences": "2~3문장", "min": 40, "max": 120,
-        "num_cap": 2, "no_question": True,
+        "num_cap": 3, "no_question": True,
         "desc": "아주 짧게 끝냅니다. 배경 설명 없이 사실 하나와 한 줄 감상만.\n"
                 "한 문장은 반드시 5어절 이하로 끊습니다.\n"
                 "종결어미는 '~네요', '~어요' 위주로 씁니다.\n"
@@ -111,15 +113,16 @@ SLOT_W = {
     "flow":       {"brief_report": 3, "quick_memo": 3, "data_focus": 3, "careful_note": 2,
                    "fact_note": 2, "open_talk": 2, "check_list": 1,
                    "two_view": 1, "term_guide": 1, "timeline_note": 1},
-    "policy":     {"term_guide": 3, "two_view": 3, "check_list": 2, "fact_note": 2,
+    # 정책 항목은 수치가 없는 경우가 많다. 수치 기반 페르소나는 확률을 낮춘다.
+    "policy":     {"term_guide": 3, "two_view": 3, "check_list": 3, "fact_note": 2,
                    "timeline_note": 2, "open_talk": 2, "careful_note": 2,
-                   "brief_report": 1, "data_focus": 1, "quick_memo": 1},
+                   "brief_report": 1, "data_focus": 0, "quick_memo": 1},
     "poll":       {"open_talk": 3, "two_view": 3, "check_list": 2, "quick_memo": 1,
                    "fact_note": 1, "term_guide": 1, "brief_report": 1,
                    "data_focus": 1, "careful_note": 1, "timeline_note": 1},
     "theme":      {"term_guide": 3, "two_view": 3, "fact_note": 2, "open_talk": 2,
                    "check_list": 2, "careful_note": 2, "timeline_note": 1,
-                   "brief_report": 1, "data_focus": 1, "quick_memo": 1},
+                   "brief_report": 1, "data_focus": 0, "quick_memo": 1},
 }
 
 SYSTEM_PROMPT = """당신은 한국투자증권 앱 커뮤니티에 게시될 글을 쓰는 AI 작성 봇입니다.
@@ -150,6 +153,9 @@ SYSTEM_PROMPT = """당신은 한국투자증권 앱 커뮤니티에 게시될 �
 - 서로 다른 숫자를 {num_cap}개까지만 씁니다. 숫자가 없는 문장을 하나 이상 넣으세요.
 - 미확인 정보는 원칙적으로 언급하지 않습니다. "상세 수치는 확인되지 않았습니다" 류로
   분량을 채우지 마세요.
+- 입력에 없는 업황·수혜 일반론을 덧붙이지 마세요.
+  예: "업계의 움직임이 구체화되고 있습니다", "관련 기업들의 사업 확장이 이어지고 있습니다",
+  "정책 흐름을 살펴볼 만합니다". 이런 문장은 아무 정보도 주지 않습니다.
 
 [타 증권사·운용사]
 - 리포트는 "어디에서 무슨 제목으로 나왔다"까지만 사실로 전달합니다.

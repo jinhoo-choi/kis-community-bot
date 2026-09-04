@@ -497,7 +497,8 @@ def main():
     # 모드 공통 접근자가 v1/v2 를 모두 흡수하는가
     ok.append(run("접근자 v1 호환", _PM.len_bounds("short") == (40, 160)))
     ok.append(run("접근자 v2 호환", _PM.len_bounds("quick_memo") == (40, 120)))
-    ok.append(run("접근자 숫자상한", _PM.num_cap("quick_memo") == 2))
+    ok.append(run("접근자 숫자상한", _PM.num_cap("quick_memo") == 3))
+    ok.append(run("v2 슬롯 가중치 0 허용(정책×수치중심)", _SW2["policy"]["data_focus"] == 0))
     _s2, _ = _PM.build_messages_v2({"kind": "flow", "title": "t", "facts": "등락률: 20.32%"},
                                    "brief_report", "reaction")
     ok.append(run("v2 프롬프트 미치환 없음",
