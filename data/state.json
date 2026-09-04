@@ -1,10 +1,30 @@
 {
- "seen": {},
+ "seen": {
+  "ID::dart-20260903000316": "2026-09-04",
+  "EVT::003060::유상증자": "2026-09-04",
+  "TTL::003060::주요사항보고서유상증자결정": "2026-09-04",
+  "ID::pol-듀켐바이오정읍에343억원규모투자전북도등과협약": "2026-09-04",
+  "TTL::176750::듀켐바이오정읍에343억원규모투자…전북도등과협약": "2026-09-04",
+  "ID::hk-652142": "2026-09-04",
+  "TTL::265740::엔에프씨화장품odm고성장소재턴어라운드본격화": "2026-09-04",
+  "ID::pol-강원도신한은행강원주민들에밀착형복합금융지원제공": "2026-09-04",
+  "ID::flow-2026-09-03-108490": "2026-09-04",
+  "EVT::108490::급등락": "2026-09-04",
+  "TTL::108490::로보티즈전일2254%상승": "2026-09-04",
+  "ID::kind-20260904000642": "2026-09-04",
+  "TTL::000660::풍문또는보도에대한해명미확정": "2026-09-04",
+  "dart-20260903000316": "2026-09-04",
+  "pol-듀켐바이오정읍에343억원규모투자전북도등과협약": "2026-09-04",
+  "hk-652142": "2026-09-04",
+  "pol-강원도신한은행강원주민들에밀착형복합금융지원제공": "2026-09-04",
+  "flow-2026-09-03-108490": "2026-09-04",
+  "kind-20260904000642": "2026-09-04"
+ },
  "recent_tone": {
   "_theme": [
-   "calm",
    "calm:open_question",
-   "explainer:duration:check_points:long"
+   "explainer:duration:check_points:long",
+   "data_focus:duration:data_focus:data_focus"
   ],
   "007460": [
    "explainer:context:fact_read",
@@ -23,9 +43,9 @@
    "light:amount:two_sides:long"
   ],
   "108490": [
-   "buddy",
    "calm:reaction:short_note",
-   "dry:reaction:lead_number:short"
+   "dry:reaction:lead_number:short",
+   "brief_report:amount:brief_report:brief_report"
   ],
   "234340": [
    "calm",
@@ -41,7 +61,8 @@
   ],
   "003060": [
    "calm",
-   "dry:amount:timeline:long"
+   "dry:amount:timeline:long",
+   "open_talk:duration:open_talk:open_talk"
   ],
   "290550": [
    "brief:short_note"
@@ -65,6 +86,15 @@
   ],
   "336260": [
    "dry:duration:fact_read:short"
+  ],
+  "176750": [
+   "timeline_note:amount:timeline_note:timeline_note"
+  ],
+  "265740": [
+   "term_guide:terms:term_guide:term_guide"
+  ],
+  "000660": [
+   "data_focus:inquiry:data_focus:data_focus"
   ]
  }
 }
