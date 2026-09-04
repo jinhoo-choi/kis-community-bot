@@ -1,16 +1,17 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 [dart] corp_code 3988종목 매핑
-[dart] 상세 보강 1/6건
-[crawl] dart 6건
+[dart] 상세 보강 2/9건
+[crawl] dart 9건
 [crawl] naver_research 2건
 [crawl] hankyung 1건
-[crawl] market 3건
+[crawl] market 6건
 [crawl] policy_rss 3건
-[main] 수집 총 16건
-[enrich] 11/16건 배경 보강 완료
-[gate] 차단 7건 {'tier4': 3, 'tier5': 4}
+[main] 수집 총 22건
+[enrich] 18/22건 배경 보강 완료
+[gate] 차단 9건 {'tier4': 4, 'tier5': 5}
 [tickers] 상장 2632종목 로드 (lxml)
-[main] 생성 대상 9건 {'disclosure': 3, 'research': 1, 'flow': 3, 'policy': 1, 'poll': 1}
+[dedup] 제외 4건 {'ID': 4}
+[main] 생성 대상 9건 {'disclosure': 2, 'research': 0, 'flow': 4, 'policy': 2, 'poll': 1}
 [claude] SDK 1.3.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
@@ -20,18 +21,30 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [gen] claude: 7/7건 생성
-[gen] 정규식 리젝 flow-2026-09-03-386380 ['질문마무리금지(plain_summary)']
-       └ '스카이랩스가 어제 92.20% 올랐네요. 종가 기준 19,220원이고 거래대금이 224억원 규모였습니다. \n\n이 정도 수준의 등락이면 보통 공시나 뉴스 같은 호재가 있을 때 나타나는데, 정확한 이유가 뭔지는 확인이 필요할 것 같습니다. 혹시 어제 공시나 뉴스 보셨나요?'
+[gen] 정규식 리젝 dart-20260903000316 ["미확인수치['1270']"]
+       └ '200억원 규모의 제3자배정증자를 결정했네요. 에이프로젠바이오로직스가 9월 3일 공시한 유상증자 결정 보고서에 따른 거고요. 약 1,270만 주를 새로 발행할 예정으로 보입니다. 조달 자금은 타법인증권취득자금으로 쓰일 것으로 나타났습니다. 제3자배정 방식인 만큼 특정 투자자를 대상으로 진행되는 상황인데요.'
+[gen] 정규식 리젝 dart-20260903000285 ['너무김(370자)']
+       └ '200억원 규모의 전환사채를 발행하기로 했네요. 전환사채는 채권처럼 이자를 받다가 정해진 시점에 주식으로 바꿀 수 있는 상품이에요.\n\n에이프로젠이 발행하는 전환사채는 무기명이권부무보증사모전환사채입니다. 무기명은 소유자 이름이 안 적혀 있다는 뜻이고, 이권부는 이자를 받을 수 있다는 뜻인데요, 이번 건은 표면이자율이 0%니까 이자를 받지 않습니다. 무보증이라'
+[gen] 정규식 리젝 flow-2026-09-03-386380 ["미확인수치['117']"]
+       └ '어제 스카이랩스 117% 올랐네요. 종가 21,700원에 거래대금 208억원을 기록했습니다. 반지형 커프리스 혈압계 개발사로 알려져 있는데요. 이 정도 움직임이 나온 배경이 뭐였을까요?'
+[gen] 정규식 리젝 flow-2026-09-03-030530 ['미확인표현(확인되지 않)']
+       └ '원익홀딩스가 어제 종가 기준으로 17.49% 올랐네요. 거래대금도 202억원 규모로 쏠렸습니다. 구체적인 상승 배경은 확인되지 않았는데, 관심 있으신 분들은 공시나 뉴스를 확인해보시면 좋을 것 같습니다.'
+[gen] 정규식 리젝 flow-2026-09-03-064290 ['방향오용(급락)']
+       └ '어제 인텍플러스가 17.30% 올랐네요. 종가 기준 40,350원이고 거래대금은 404억원 수준이었어요. 급락장이라는 점에서 보면 낙폭을 되찾은 건지, 아니면 별도 호재가 나온 건지 궁금한데 정확한 원인이 뭔지 알면 좋겠어요.'
+[gen] 정규식 리젝 flow-2026-09-03-234340 ['미확인표현(확인되지 않)']
+       └ '256억원. 어제 헥토파이낸셜의 하루 거래대금입니다. 14.83% 오른 와중에 나온 규모네요. 종가는 25,550원. \n\n구체적인 상승 원인은 아직 확인되지 않았습니다. 뉴스나 공시 소식이 있었는지, 아니면 순수 수급 때문인지 살펴볼 필요가 있어 보입니다.'
+[gen] 정규식 리젝 pol-광주본부세관추석맞아특별통관팀운영수출선적지원 ['너무김(393자)']
+       └ '추석 연휴 기간(7일~27일) 광주본부세관이 수출입 통관을 원활히 하기 위해 특별통관지원팀을 운영한다고 보도됐어요. 연휴로 인한 통관 정체를 막겠다는 취지네요.\n\n특별통관팀은 수출 물품의 신속한 선적과 수입 화물의 빠른 통관을 지원하는 역할을 맡을 예정이에요. 쉽게 말하면 휴일에도 항만과 공항의 통관 업무를 돌려서 기업들이 물품을 제때 못 보내는 상황을 막'
 [gen] gemini: 2/2건 생성
-[gen] 정규식 리젝 pol-노사발전재단몽골서한국취업예정노동자교육지원점검 ['너무짧음(40자)']
-       └ '노사발전재단이 몽골을 방문해 한국 취업 예정자들을 위한 지원 상황을 점검'
+[gen] 정규식 리젝 pol-경남도1127일추석물가안정대책18개성수품현장 ['너무짧음(38자)']
+       └ '경상남도가 오는 11일부터 27일까지 추석 물가안정 대책 기간으로 정'
+[gen] 정규식 리젝 poll-flow-2026-09-03-386380 ['너무짧음(34자)']
+       └ '전일 대비 117.00%나 올랐습니다. 208억원의 거래대금이'
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] 정규식 통과 7건 / 시도 9건
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[gen] 정규식 통과 1건 / 시도 9건
 [claude] SDK 1.3.0
-[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 5건 / 보류 2건
-   보류 poll-flow-2026-09-03-386380 (gemini) - fatal:게시글 본문이 작성되지 않음,평가 대상이 없음
-   보류 dart-20260903000316 (claude) - 정원초과
-[main] filter_log data/filter_log_20260904_1223.json
-[main] stats {"ts": "2026-09-04T12:23:02+09:00", "collected": 16, "gate_blocked": 7, "gate_reasons": {"tier4": 3, "tier5": 4}, "enrich_ok": 11, "generated": 7, "sent": 5, "held": 2, "hold_reasons": {"fatal": 1, "정원초과": 1}, "avg_score": 16.8, "by_provider": {"claude": {"generated": 6, "sent": 5, "avg_score": 16.5}, "gemini": {"generated": 1, "sent": 0, "avg_score": 4.0}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 6, "expected": 6, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 3, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}}}
+[main] 배포 1건 / 보류 0건
+[main] filter_log data/filter_log_20260904_1249.json
+[main] stats {"ts": "2026-09-04T12:49:40+09:00", "collected": 22, "gate_blocked": 9, "gate_reasons": {"tier4": 4, "tier5": 5}, "enrich_ok": 18, "generated": 1, "sent": 1, "held": 0, "hold_reasons": {}, "avg_score": 17.0, "by_provider": {"claude": {"generated": 1, "sent": 1, "avg_score": 17.0}}, "model_fallbacks": [], "dedup": {"ID": 4}, "crawl_health": {"dart": {"got": 9, "expected": 9, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 6, "expected": 6, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}}}
