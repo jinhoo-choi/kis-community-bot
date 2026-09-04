@@ -68,7 +68,7 @@ def _number_overuse(body: str, length: str = None) -> list[str]:
 
 
 def check(body: str, facts: str, fmt: str = None, angle: str = None,
-          length: str = None) -> list[str]:
+          length: str = None, theme_stock: str = None) -> list[str]:
     """위반 사유 리스트 반환. 빈 리스트면 통과."""
     errs = []
 
@@ -97,6 +97,11 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
         errs.append(f"미확인수치{hallu[:3]}")
 
     errs += _direction_errors(body, facts)
+    # 테마글은 게시 위치로만 종목방을 쓴다. 본문에 종목명이 들어가면
+    # '이 정책이 이 종목에 호재'라는 암시가 되어 투자권유로 오인될 수 있다.
+    if theme_stock and theme_stock in body:
+        errs.append(f"테마글종목언급({theme_stock})")
+
     errs += _hedge_errors(body)
     errs += _number_overuse(body, length)
     errs += _ending_variety(body)

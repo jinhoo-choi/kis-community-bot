@@ -19,7 +19,7 @@ import sys
 
 import config
 from src import (state, tickers, generator, telegram_bot, enrich, judge,
-                 gate, decide, stats, dedup, crawl, assign)
+                 gate, decide, stats, dedup, crawl, assign, theme_map)
 from src.sources import dart, research, market, policy, telegram_ch, kind_inquiry
 
 
@@ -66,6 +66,10 @@ def main():
         it = tickers.resolve(it)
         it["board"] = tickers.board_of(it)
         resolved.append(it)
+
+    # 커뮤니티에 종목방만 있어 테마글도 어딘가에는 올라가야 한다.
+    # 관련 섹터 대표주에 배정하고, 본문에서는 종목을 언급하지 않게 지시를 넣는다.
+    theme_map.assign_all(resolved)
 
     # 다축 dedup — 같은 사건이 DART/리서치/수급으로 중복 유입되는 것을 잡는다
     # 반복 테스트에서는 과거 이력을 무시한다(배치 내부 중복은 그대로 잡는다)

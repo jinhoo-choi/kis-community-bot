@@ -76,7 +76,7 @@ PERSONAS = {
     "quick_memo": {
         # num_cap 2 는 계약이 불가능했다. reaction/amount 앵글이 붙으면
         # 등락률·가격·거래대금만으로 이미 3개다 (실측 리젝).
-        "name": "짧은메모", "sentences": "2~3문장", "min": 40, "max": 120,
+        "name": "짧은메모", "sentences": "2~3문장", "min": 35, "max": 120,
         "num_cap": 3, "no_question": True,
         "desc": "아주 짧게 끝냅니다. 배경 설명 없이 사실 하나와 한 줄 감상만.\n"
                 "한 문장은 반드시 5어절 이하로 끊습니다.\n"

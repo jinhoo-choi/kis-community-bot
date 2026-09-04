@@ -379,8 +379,11 @@ def main():
     from src.generator import PENALTY as _PEN
     ok.append(run("억제 계수 0.5 미만", _PEN < 0.5, str(_PEN)))
     _it2 = {"kind": "disclosure", "stock_code": "005930",
-            "facts": "발행 총액: 200억원\n전환가액: 2,396원\n만기: 2031-09-11\n"
-                     "운영자금: 100억원\n매출 대비 18%"}
+            "facts": "회사: 삼성전자 (005930)\n공시명: 전환사채 발행 결정\n"
+                     "발행 총액: 200억원\n전환가액: 2,396원\n표면이자율: 0%\n"
+                     "만기: 2031-09-11\n운영자금: 100억원\n시설자금: 100억원\n"
+                     "매출 대비 18%\n증자 방식: 제3자배정\n상장 예정일: 2026-10-01\n"
+                     "제출인: 삼성전자 대표이사"}
     import collections as _co
     _u = set(); _cf = _co.Counter()
     for _ in range(12):
@@ -507,7 +510,7 @@ def main():
                       for v in _P2.values())))
     # 모드 공통 접근자가 v1/v2 를 모두 흡수하는가
     ok.append(run("접근자 v1 호환", _PM.len_bounds("short") == (40, 160)))
-    ok.append(run("접근자 v2 호환", _PM.len_bounds("quick_memo") == (40, 120)))
+    ok.append(run("접근자 v2 호환", _PM.len_bounds("quick_memo") == (35, 120)))
     ok.append(run("접근자 숫자상한", _PM.num_cap("quick_memo") == 3))
     ok.append(run("v2 슬롯 가중치 0 허용(정책×수치중심)", _SW2["policy"]["data_focus"] == 0))
     _s2, _ = _PM.build_messages_v2({"kind": "flow", "title": "t", "facts": "등락률: 20.32%"},
@@ -538,6 +541,32 @@ def main():
         else:
             _os2.environ[_k] = _v
     importlib.reload(_cfg)
+
+
+    # ── 테마글 종목 배정 (커뮤니티에 종목방만 존재)
+    from src import theme_map as _tm, tickers as _tk
+    _bak_listed = _tk.listed
+    _tk.listed = lambda: {"삼성전자": "005930", "SK하이닉스": "000660",
+                          "KB금융": "105560", "CJ제일제당": "097950",
+                          "두산에너빌리티": "034020", "NAVER": "035420"}
+    _cases = [("정부, 반도체 소부장 세제지원 확대", {"삼성전자", "SK하이닉스"}),
+              ("강원도-신한은행 서민 금융지원 협약", {"KB금융"}),
+              ("원전 수출 지원 방안", {"두산에너빌리티"})]
+    for _t, _expect in _cases:
+        _i = {"kind": "policy", "title": _t, "facts": "요지: 내용"}
+        _tm.assign(_i)
+        ok.append(run(f"섹터 매칭: {_t[:12]}", _i.get("stock_name") in _expect,
+                      str(_i.get("stock_name"))))
+    _i2 = {"kind": "policy", "title": "무관한 제목", "facts": "요지: 내용"}
+    _tm.assign(_i2)
+    ok.append(run("매칭 실패 시 대형주 폴백", bool(_i2.get("stock_code"))))
+    ok.append(run("본문 종목언급 금지 지시 주입", "종목명이나 종목코드를" in _i2["facts"]))
+    ok.append(run("이미 종목 있으면 미배정",
+                  not _tm.assign({"kind": "policy", "stock_code": "005930", "facts": "x"})))
+    ok.append(run("테마글 본문 종목언급 리젝", any("테마글종목언급" in e for e in _f2.check(
+        "삼성전자 수혜가 예상됩니다. 반도체 세제지원이 확대됩니다. 적용 시점은 내년입니다.",
+        "x", "fact_note", "context", "fact_note", "삼성전자"))))
+    _tk.listed = _bak_listed
 
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)

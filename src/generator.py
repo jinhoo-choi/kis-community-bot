@@ -84,7 +84,21 @@ def pick_style(item: dict, recent: dict, used_now: set,
     kind = item["kind"]
     if P.is_v2():
         # v2: 페르소나 하나가 말투·구조·길이를 모두 갖는다. 축은 Persona × Angle.
-        pw = P.style_ids().get(kind, {})
+        pw = dict(P.style_ids().get(kind, {}))
+        # 입력이 빈약한데 긴 페르소나가 걸리면 분량을 못 채워 리젝된다
+        # (실측: 리젝 10건 중 5건이 '너무짧음', two_view 하한 110자에 36자가 나옴).
+        core = len("".join(l for l in item.get("facts", "").splitlines()
+                           if l.strip() and not l.strip().startswith("※")))
+        for pid, spec in P.v2.PERSONAS.items():
+            if pid not in pw:
+                continue
+            # 사실관계 분량의 절반을 넘는 하한을 요구하는 페르소나는 제외한다
+            if spec["min"] > core * 0.6:
+                pw[pid] = 0
+        if not any(pw.values()):        # 전부 막히면 가장 짧은 것으로
+            shortest = min(P.style_ids().get(kind, {}) or {"quick_memo": 1},
+                           key=lambda k: P.v2.PERSONAS[k]["min"])
+            pw = {shortest: 1}
         used_p = {h.split(":")[0] for h in hist_v2(recent, item)} | {u[0] for u in used_now}
         used_a2 = {h.split(":")[1] for h in hist_v2(recent, item) if ":" in h} | {u[1] for u in used_now}
         persona = _weighted(pw, used_p)
@@ -178,8 +192,9 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
                     [styles[id(x)][3] for x in chunk])
         print(f"[gen] {name}: {len(made)}/{len(chunk)}건 생성")
         for p in made:
-            errs = filters.check(p["body"], p["facts"], p.get("fmt"),
-                                 p.get("angle"), p.get("length"))
+            errs = filters.check(
+                p["body"], p["facts"], p.get("fmt"), p.get("angle"), p.get("length"),
+                p.get("stock_name") if p.get("theme_assigned") else None)
             if errs:
                 # 본문을 함께 남겨야 '이 리젝이 타당했는지' 사후 검토가 된다
                 print(f"[gen] 정규식 리젝 {p['id']} {errs}")
@@ -198,8 +213,10 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
             alt = next((n for n in names if n != p["provider"]), p["provider"])
             made = _run(alt, [p], [p["tone"]], [p.get("fmt", "fact_read")],
                         [p.get("angle", "")], [p.get("length", "medium")])
-            if made and not filters.check(made[0]["body"], p["facts"], p.get("fmt"),
-                                          p.get("angle"), p.get("length")):
+            if made and not filters.check(
+                    made[0]["body"], p["facts"], p.get("fmt"), p.get("angle"),
+                    p.get("length"),
+                    p.get("stock_name") if p.get("theme_assigned") else None):
                 posts.append(made[0])
 
     print(f"[gen] 정규식 통과 {len(posts)}건 / 시도 {len(items)}건")
