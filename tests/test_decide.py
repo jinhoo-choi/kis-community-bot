@@ -297,6 +297,33 @@ def main():
     ok.append(run("수치 있는 항목 통과",
                   _hs({"facts": "종가: 302,500원\n등락률: 21.73%"})))
 
+
+    # ── 문체 다양성 (실측: 5건이 전부 같은 구조로 수렴)
+    from src.personas import TONES as _T, FORMATS as _F, SLOT_TONES as _ST, SLOT_FORMATS as _SF
+    from src.generator import pick_style as _pick
+    ok.append(run("페르소나 10종", len(_T) == 10, str(len(_T))))
+    ok.append(run("구조 8종", len(_F) == 8, str(len(_F))))
+    ok.append(run("슬롯별 조합 6가지 이상",
+                  all(len(_ST[k]) * len(_SF[k]) >= 6 for k in _ST),
+                  str({k: len(_ST[k]) * len(_SF[k]) for k in _ST})))
+    _used = set()
+    _combos = [_pick({"kind": "flow", "stock_code": f"00000{i}"}, {}, _used)
+               for i in range(8)]
+    ok.append(run("같은 실행 내 조합 중복 없음", len(set(_combos)) == len(_combos),
+                  str(len(set(_combos)))))
+    _seen = {"005930": ["data:numbers_first"]}
+    _c2 = [_pick({"kind": "flow", "stock_code": "005930"}, _seen, set()) for _ in range(20)]
+    ok.append(run("최근 사용 조합 회피", ("data", "numbers_first") not in _c2))
+
+    # ── DART 상세 보강
+    from src.gate import has_substance as _hs2
+    ok.append(run("DART 상세는 글감 인정",
+                  _hs2({"facts": "제목: 유상증자결정\n\n[유상증자 결정 상세 — DART 정형 데이터]\n"
+                                 "- 발행 보통주: 1,000,000주"})))
+    from src.sources.dart_detail import _fmt as _dfmt
+    ok.append(run("억원 단위 변환", _dfmt("12345678900", "원") == "123억원", _dfmt("12345678900", "원")))
+    ok.append(run("빈값은 빈 문자열", _dfmt("-", "원") == ""))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 

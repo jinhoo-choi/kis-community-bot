@@ -35,7 +35,7 @@ def mark(s: dict, posts: list[dict]):
         s["seen"][p["id"]] = today
         key = p.get("stock_code") or "_theme"
         hist = s["recent_tone"].setdefault(key, [])
-        hist.append(p["tone"])
+        hist.append(f"{p['tone']}:{p.get('fmt', '')}")
         s["recent_tone"][key] = hist[-3:]      # 최근 3개만 유지
 
 

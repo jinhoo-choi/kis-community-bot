@@ -85,5 +85,9 @@ def fetch(limit: int = 30) -> list[dict]:
         page += 1
         crawl.sleep_jitter()
 
+    # 제목만으로는 글이 안 된다. 정형 API 로 핵심 수치를 채운다.
+    from src.sources import dart_detail
+    dart_detail.enrich_all(items, day)
+
     crawl.report("dart", len(items), limit, "DART API 응답 이상 또는 키 만료")
     return items

@@ -11,7 +11,7 @@ import config
 from src import filters
 from src.llm import router
 from src.decide import temperature_for
-from src.personas import SLOT_TONES, build_messages
+from src.personas import SLOT_TONES, SLOT_FORMATS, build_messages
 
 
 # 리젝된 생성물 보관 (품질 검토용). main 이 filter_log 에 함께 기록한다.
@@ -38,30 +38,50 @@ def clean(body: str) -> str:
     return b.strip()
 
 
-def pick_tone(item: dict, recent: dict) -> str:
-    """슬롯별 허용 톤 중, 최근 같은 종목에 쓴 톤은 제외."""
-    pool = SLOT_TONES.get(item["kind"], ["calm"])
-    used = set(recent.get(item.get("stock_code") or "_theme", []))
-    return random.choice([t for t in pool if t not in used] or pool)
+def pick_style(item: dict, recent: dict, used_now: set) -> tuple[str, str]:
+    """(톤, 구조) 조합 선택.
+
+    페르소나만 늘려도 글은 비슷해진다. 실측에서 모든 글이
+    '사실 → 정보없음 → 열린 질문' 하나의 구조로 수렴했다.
+    구조를 따로 뽑아 조합하고, 같은 실행 안에서도 조합 중복을 피한다.
+    """
+    kind = item["kind"]
+    tones = SLOT_TONES.get(kind, ["calm"])
+    fmts = SLOT_FORMATS.get(kind, ["fact_then_read"])
+    seen = set(recent.get(item.get("stock_code") or "_theme", []))
+
+    combos = [(t, f) for t in tones for f in fmts]
+    fresh = [c for c in combos if f"{c[0]}:{c[1]}" not in seen and c not in used_now]
+    if not fresh:                       # 이번 실행 안에서 겹치는 것만이라도 피한다
+        fresh = [c for c in combos if c not in used_now] or combos
+    choice = random.choice(fresh)
+    used_now.add(choice)
+    return choice
 
 
-def _run(provider_name: str, items: list[dict], tones: list[str]) -> list[dict]:
+def pick_tone(item: dict, recent: dict) -> str:      # 하위 호환
+    return pick_style(item, recent, set())[0]
+
+
+def _run(provider_name: str, items: list[dict], tones: list[str],
+         fmts: list[str] = None) -> list[dict]:
     if not items:
         return []
+    fmts = fmts or ["fact_then_read"] * len(items)
     p = router.writers()[provider_name]
     # temperature 가 다른 항목은 배치를 나눈다 (배치는 파라미터가 요청별로 고정되므로)
     groups = {}
-    for i, (it, tn) in enumerate(zip(items, tones)):
-        groups.setdefault(temperature_for(it), []).append((i, it, tn))
+    for i, (it, tn, fm) in enumerate(zip(items, tones, fmts)):
+        groups.setdefault(temperature_for(it), []).append((i, it, tn, fm))
 
     results = [None] * len(items)
     for temp, grp in groups.items():
-        jobs = [build_messages(it, tn) for _, it, tn in grp]
-        for (idx, _, _), r in zip(grp, p.generate_many(jobs, temperature=temp)):
+        jobs = [build_messages(it, tn, fm) for _, it, tn, fm in grp]
+        for (idx, _, _, _), r in zip(grp, p.generate_many(jobs, temperature=temp)):
             results[idx] = r
 
     out = []
-    for it, tn, r in zip(items, tones, results):
+    for it, tn, fm, r in zip(items, tones, fmts, results):
         if not r.ok or not r.text:
             # 원인을 삼키면 '0건 생성'만 보이고 왜인지 알 수 없다
             print(f"[gen] ⚠ {provider_name} 실패 {it['id']}: "
@@ -71,18 +91,21 @@ def _run(provider_name: str, items: list[dict], tones: list[str]) -> list[dict]:
         if not body:
             print(f"[gen] ⚠ {provider_name} 후처리 후 빈 본문 {it['id']}")
             continue
-        out.append({**it, "tone": tn, "body": body,
+        out.append({**it, "tone": tn, "fmt": fm, "body": body,
                     "provider": r.provider, "model": r.model})
     return out
 
 
 def generate(items: list[dict], recent: dict) -> list[dict]:
-    tones = {id(it): pick_tone(it, recent) for it in items}
+    used_now: set = set()
+    styles = {id(it): pick_style(it, recent, used_now) for it in items}
     buckets = router.split_by_ratio(items)
 
     posts, retry = [], []
     for name, chunk in buckets.items():
-        made = _run(name, chunk, [tones[id(x)] for x in chunk])
+        made = _run(name, chunk,
+                    [styles[id(x)][0] for x in chunk],
+                    [styles[id(x)][1] for x in chunk])
         print(f"[gen] {name}: {len(made)}/{len(chunk)}건 생성")
         for p in made:
             errs = filters.check(p["body"], p["facts"])
@@ -101,7 +124,7 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
         names = list(router.writers().keys())
         for p in retry:
             alt = next((n for n in names if n != p["provider"]), p["provider"])
-            made = _run(alt, [p], [p["tone"]])
+            made = _run(alt, [p], [p["tone"]], [p.get("fmt", "fact_then_read")])
             if made and not filters.check(made[0]["body"], p["facts"]):
                 posts.append(made[0])
 
