@@ -15,13 +15,15 @@
   "pol-원주의료기기기업15곳현장채용구직자와해피데이": "2026-09-04",
   "dart-20260903000316": "2026-09-04",
   "pol-듀켐바이오정읍에343억원규모투자전북도등과협약": "2026-09-04",
-  "hk-652142": "2026-09-04"
+  "hk-652142": "2026-09-04",
+  "ID::pol-강원도신한은행강원주민들에밀착형복합금융지원제공": "2026-09-04",
+  "pol-강원도신한은행강원주민들에밀착형복합금융지원제공": "2026-09-04"
  },
  "recent_tone": {
   "_theme": [
-   "explainer:duration:check_points:long",
    "data_focus:duration:data_focus:data_focus",
-   "light:duration:timeline:short"
+   "light:duration:timeline:short",
+   "fact_note:duration:fact_note:fact_note"
   ],
   "007460": [
    "explainer:context:fact_read",
