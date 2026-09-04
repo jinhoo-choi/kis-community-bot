@@ -1,4 +1,5 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 [dart] corp_code 3988종목 매핑
 [dart] 상세 보강 2/12건
 [crawl] dart 12건
@@ -12,39 +13,36 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
 [crawl] telegram_ch 0건 (정상 0건)
 [main] 수집 총 27건
 [enrich] 17/27건 배경 보강 완료
-[gate] 차단 12건 {'tier4': 6, 'tier5': 5, 'tier1': 1}
+[gate] 차단 11건 {'tier4': 6, 'tier5': 4, 'tier1': 1}
+[theme] 테마글 1건에 게시 종목 배정
 [main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
-[main] 생성 대상 15건 {'disclosure': 5, 'research': 1, 'flow': 6, 'policy': 2, 'poll': 1}
+[main] 생성 대상 16건 {'disclosure': 6, 'research': 1, 'flow': 6, 'policy': 2, 'poll': 1}
 [claude] SDK 1.3.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] claude: 12/12건 생성
-[gen] 정규식 리젝 dart-20260903000316 ['너무김(121자/quick_memo)']
-       └ '에이프로젠바이오로직스가 유상증자를 결정했어요. 12,706,481주를 제3자배정으로 발행해 200억원을 모을 예정입니다. 제3자배정증자는 기존 주주가 아닌 특정 투자자에게만 새 주식을 팔아 자금을 조달하는 방식이에요.'
-[gen] 정규식 리젝 dart-20260903000285 ['수치과다(4개/timeline_note)']
-       └ '9월 3일 에이프로젠이 전환사채 발행을 결정했어요. 200억원 규모의 무기명이권부무보증사모전환사채로, 전환가액은 2,396원입니다. 표면이자율은 0%이고 만기는 2031년 9월 11일이에요. 이는 회사가 자금을 조달하면서 투자자에게 일정 시점 이후 주식으로 전환할 수 있는 기회를 주는 구조네요.'
-[gen] 정규식 리젝 dart-20260903800469 ['미확인표현(공개되지 않)']
-       └ '화장품 제조 및 판매를 주력으로 하는 토니모리가 최대주주 변경을 공시했습니다. 어제 공식 공시로 올라온 내용인데요. 상세 수치는 아직 공개되지 않았네요. 최대주주 변경이 어떤 배경에서 나왔는지, 지분 구조가 어떻게 재편되는지는 추가 공시나 정정 공시를 통해 확인할 수 있을 듯합니다.'
-[gen] 정규식 리젝 flow-2026-09-03-386380 ['방향오용(낙폭)']
-       └ '스카이랩스가 전일 대비 135.00% 올랐네요. 종가는 23,500원이고 거래대금은 234억원이었습니다. 이 정도 낙폭은 상당한 수준인데, 무엇 때문에 이런 움직임이 나왔는지 아시는 분 계신가요?'
-[gen] 정규식 리젝 flow-2026-09-03-234340 ['미확인표현(확인되지 않)']
-       └ '25,250원에서 마감한 헥토파이낸셜이 전날 대비 13.48% 올랐습니다. 거래대금은 252억원을 기록했습니다. 구체적인 상승 요인은 확인되지 않았습니다.'
-[gen] 정규식 리젝 flow-2026-09-03-336260 ['너무짧음(39자/quick_memo)']
-       └ '두산퓨얼셀이 어제 12.44% 올랐어요. 거래대금은 438억원이었네요.'
-[gen] 정규식 리젝 flow-2026-09-03-058610 ['너무짧음(72자/timeline_note)']
-       └ '에스피지가 12.41% 올랐어요. 종가는 94,200원이고 거래대금은 942억원을 기록했습니다. 장중 매매가 활발하게 이뤄졌네요.'
+[gen] claude: 13/13건 생성
+[gen] 정규식 리젝 dart-20260903000285 ['수치과다(6개/fact_note)']
+       └ '에이프로젠이 전환가액 2,396원으로 200억원 규모의 전환사채를 발행하기로 결정했습니다. 전환사채는 정해진 가격으로 주식으로 바꿀 수 있는 채권인데요, 이번 발행의 전환가액이 그 기준을 정합니다. 표면이자율은 0%이며, 만기일은 2031년 09월 11일입니다. 이는 무기명이권부무보증사모전환사채 형태로 발행되는 35회차 전환사채입니다.'
+[gen] 정규식 리젝 dart-20260903800469 ['미확인표현(확인되지 않)']
+       └ '화장품 제조·판매 회사 토니모리에서 최대주주 변경이 공시됐어요. 구체적 지분 규모는 아직 확인되지 않았네요.'
+[gen] 정규식 리젝 kind-20260904000786 ['stock_ending']
+       └ '거래소가 디에이치엑스컴퍼니에\n풍문 관련 답변을 요구했어요.\n회사 답변은 원문 확인이 필요합니다.'
 [gen] gemini: 3/3건 생성
-[gen] 정규식 리젝 pol-듀켐바이오정읍에343억원규모투자전북도등과협약 ['너무짧음(36자/two_view)']
-       └ '343억원은 듀켐바이오가 전북도 등과 협약을 맺고 정읍에 투자하기'
-[gen] 정규식 리젝 pol-원주의료기기기업15곳현장채용구직자와해피데이 ['너무짧음(40자/check_list)']
-       └ '의료기기전시회를 개최합니다. (44자)\n    이 전시회는 지역 의료기기'
-[gen] 정규식 리젝 poll-flow-2026-09-03-386380 ['너무짧음(44자/open_talk)']
-       └ '구체적인 찬반 질문)*: "스카이랩스의 이번 급등이 반지형 웨어러블 기기 시장의'
-[gen] 정규식 통과 7건 / 시도 15건
+[gen] 정규식 리젝 pol-듀켐바이오정읍에343억원규모투자전북도등과협약 ['너무짧음(35자/fact_note)']
+       └ '듀켐바이오가 전북 정읍에 투자하기로 결정한 금액입니다. (숫자:'
+[gen] 정규식 리젝 pol-원주의료기기기업15곳현장채용구직자와해피데이 ['format', 'meta_output', '너무짧음(42자/open_talk)']
+       └ '*   입력 정보:\n        *   원주 의료기기 기업 15곳 현장채용'
+[gen] 정규식 리젝 poll-flow-2026-09-03-386380 ['format', '너무짧음(40자/brief_report)']
+       └ '135.00% 상승. (첫 문장은 숫자 하나 단독)\n  - 문장 2: 코'
+[gen] 정규식 통과 13건 / 시도 16건
 [claude] SDK 1.3.0
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 5건 / 보류 2건
+[main] 배포 5건 / 보류 8건
+   보류 dart-20260903800625 (claude) - fatal:상세 수치가 없는 상황에서 일반론으로 분량을 채움
    보류 dart-20260903800579 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반,유상증자는 일반적으로~ 같은 사전식 일반론으로 분량을 채움
-   보류 kind-20260904000786 (claude) - fatal:자기소개나 작성 과정·체크리스트가 본문에 노출됨
+   보류 flow-2026-09-03-234340 (claude) - fatal:사실관계 오류
+   보류 flow-2026-09-03-336260 (claude) - fatal:상투적 마무리 문구로 글을 닫음 (지켜봐야/확인이 필요/주목됩니다 류)
+   보류 dart-20260903800469 (gemini) - 저점수 13/20 내용 부족, 분석 없음
 [tg] 테스트 채널 suffix 매칭: ...2744 (private)
-[main] filter_log data/filter_log_20260904_2342.json
-[main] stats {"ts": "2026-09-04T23:41:59+09:00", "persona_mode": "v2", "collected": 27, "gate_blocked": 12, "gate_reasons": {"tier4": 6, "tier5": 5, "tier1": 1}, "enrich_ok": 17, "generated": 7, "sent": 5, "held": 2, "hold_reasons": {"fatal": 2}, "avg_score": 16.6, "by_provider": {"claude": {"generated": 7, "sent": 5, "avg_score": 15.86}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 12, "expected": 12, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 6, "expected": 6, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+[main] filter_log data/filter_log_20260904_2357.json
+[main] stats {"ts": "2026-09-04T23:57:32+09:00", "persona_mode": "v2", "collected": 27, "gate_blocked": 11, "gate_reasons": {"tier4": 6, "tier5": 4, "tier1": 1}, "enrich_ok": 17, "generated": 13, "sent": 5, "held": 8, "hold_reasons": {"fatal": 5, "저점수 13/20 내용 부족, 분석 없음": 1, "유형상한": 2}, "avg_score": 16.6, "by_provider": {"gemini": {"generated": 2, "sent": 0, "avg_score": 10.0}, "claude": {"generated": 11, "sent": 5, "avg_score": 15.09}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 12, "expected": 12, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 6, "expected": 6, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
