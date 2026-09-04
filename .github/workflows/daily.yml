@@ -6,6 +6,11 @@ on:
     - cron: '0 21 * * 0-4'
   workflow_dispatch:
     inputs:
+      persona_mode:
+        description: '페르소나 설계 (v1=4축 / v2=10페르소나)'
+        type: choice
+        options: ['v1', 'v2']
+        default: 'v1'
       target_posts:
         description: '배포 건수 (비우면 50)'
         type: string
@@ -55,6 +60,7 @@ jobs:
           MIN_JUDGE_SCORE:   ${{ vars.MIN_JUDGE_SCORE || '14' }}
           MAX_PER_STOCK:     ${{ vars.MAX_PER_STOCK || '2' }}
           TARGET_POSTS:      ${{ inputs.target_posts || vars.TARGET_POSTS || '50' }}
+          PERSONA_MODE:      ${{ inputs.persona_mode || vars.PERSONA_MODE || 'v1' }}
           TZ: Asia/Seoul
         id: pipeline
         continue-on-error: true

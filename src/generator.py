@@ -12,6 +12,7 @@ from src import filters
 from src.llm import router
 from src.decide import temperature_for
 from src import angles
+from src import personas as P
 from src.personas import VOICE_W, FORMAT_W, LENGTH_W, build_messages
 
 
@@ -67,6 +68,10 @@ def _weighted(weights: dict, penalize: set) -> str:
 UNCERTAINTY_QUOTA = 0.10
 
 
+def hist_v2(recent: dict, item: dict) -> list:
+    return recent.get(item.get("stock_code") or "_theme", [])
+
+
 def pick_style(item: dict, recent: dict, used_now: set,
                allow_uncertainty: bool = False) -> tuple[str, str, str, str]:
     """(voice, angle, format) 선택.
@@ -77,6 +82,19 @@ def pick_style(item: dict, recent: dict, used_now: set,
     그래서 voice/angle/format 을 각각 따로 억제한다.
     """
     kind = item["kind"]
+    if P.is_v2():
+        # v2: 페르소나 하나가 말투·구조·길이를 모두 갖는다. 축은 Persona × Angle.
+        pw = P.style_ids().get(kind, {})
+        used_p = {h.split(":")[0] for h in hist_v2(recent, item)} | {u[0] for u in used_now}
+        used_a2 = {h.split(":")[1] for h in hist_v2(recent, item) if ":" in h} | {u[1] for u in used_now}
+        persona = _weighted(pw, used_p)
+        cand2 = angles.available(item)
+        if not allow_uncertainty:
+            cand2 = [a for a in cand2 if a != "uncertainty"] or cand2
+        ang2 = _weighted({a: 3 for a in cand2}, used_a2) if cand2 else ""
+        used_now.add((persona, ang2, persona, persona))
+        return persona, ang2, persona, persona
+
     vw = VOICE_W.get(kind, {"calm": 3, "dry": 2, "explainer": 2, "light": 1})
     fw = FORMAT_W.get(kind, {"fact_read": 3, "question": 2, "check_points": 2})
     lw = LENGTH_W.get(kind, {"short": 2, "medium": 3, "long": 2})
@@ -121,7 +139,9 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
 
     results = [None] * len(items)
     for temp, grp in groups.items():
-        jobs = [build_messages(it, tn, fm, ag, ln) for _, it, tn, fm, ag, ln in grp]
+        jobs = [(P.build_messages_v2(it, tn, ag) if P.is_v2()
+                 else build_messages(it, tn, fm, ag, ln))
+                for _, it, tn, fm, ag, ln in grp]
         for g, r in zip(grp, p.generate_many(jobs, temperature=temp)):
             results[g[0]] = r
 

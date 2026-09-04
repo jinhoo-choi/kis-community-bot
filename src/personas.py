@@ -5,7 +5,9 @@
 1인칭 투자경험(샀다/물렸다/보유중)은 모든 톤에서 금지 — AI는 거래 주체가 아니므로
 뱃지가 있어도 허위 진술이 된다.
 """
+import config
 from src import angles, rules
+from src import personas_v2 as v2
 
 # ── Voice (말투) 4종 ───────────────────────────────────────────
 # 외부 검토 반영: 기존 10종에 말투/관점/구조가 뒤섞여 있었다.
@@ -24,8 +26,9 @@ VOICES = {
         "name": "차분",
         "desc": "종결어미는 '~습니다' 와 '~인데요' 를 섞어 씁니다.\n"
                 "반드시 한 문장은 '폭'이나 '흐름'에 대한 사실을 담습니다.\n"
-                "예: 장중 고가와 저가의 차이가 컸다 / 거래가 특정 구간에 몰렸다 / "
+                "예: 장중 고저 차이가 컸다 / 거래가 특정 구간에 몰렸다 / "
                 "며칠째 같은 방향이 이어졌다.\n"
+                "이때 쓰는 값은 입력에 적힌 것만 씁니다. 직접 계산하지 않습니다.\n"
                 "이때도 등락 방향 어휘는 입력의 부호를 그대로 따릅니다. "
                 "상승 건에 '낙폭', 하락 건에 '급등' 같은 반대 어휘를 쓰지 않습니다.\n"
                 "전망이나 반대 시나리오를 넣지 않습니다.",
@@ -170,6 +173,8 @@ SYSTEM_PROMPT = """당신은 한국투자증권 앱 커뮤니티에 게시될 �
 - 문장 어미를 섞으세요. "~네요"만 네 번 반복하면 바로 티가 납니다.
 - 숫자를 적을 때마다 해석을 붙이지 마세요. 숫자만 놓고 넘어가도 됩니다.
 - 쓰기로 한 숫자는 입력에 적힌 그대로 옮기세요. 단위를 바꾸거나 반올림하면 값이 틀어집니다.
+- 숫자를 더하거나 빼거나 나누지 마세요. 차이·비율이 필요하면 입력에 이미 계산되어 있습니다.
+  입력에 없으면 그 값은 쓰지 않는 것이 맞습니다.
 - 등락 방향 어휘는 입력의 부호를 그대로 따르세요.
   등락률이 양수면 상승·상승폭, 음수면 하락·낙폭입니다. 반대로 쓰면 사실 오류입니다.
 - 용어 풀이는 글의 목적이 그것일 때만 하세요. 습관적으로 괄호를 열지 마세요.
@@ -231,6 +236,62 @@ def build_messages(item: dict, tone: str, fmt: str = "fact_read",
             "\n[직전 시도에서 이런 문제가 있었습니다 — 이번엔 반드시 고치세요]\n"
             + item["retry_hint"]
         )
+    user = USER_PROMPT.format(
+        kind=item.get("kind", ""),
+        stock=item.get("stock_name") or "해당 종목 없음(테마)",
+        title=item.get("title", ""),
+        facts=item.get("facts", "").strip()[:4000],
+    )
+    return system, user
+
+
+# ── 모드 공통 접근자 ──────────────────────────────────────────
+# filters/generator 가 v1/v2 를 몰라도 되도록 여기서 흡수한다.
+
+def is_v2() -> bool:
+    return config.PERSONA_MODE == "v2"
+
+
+def style_ids() -> dict:
+    """가중치 테이블. v1 은 Format, v2 는 Persona."""
+    return v2.SLOT_W if is_v2() else FORMAT_W
+
+
+def no_question(style: str) -> bool:
+    if style in v2.PERSONAS:
+        return v2.PERSONAS[style]["no_question"]
+    return FORMATS.get(style, {}).get("no_question", False)
+
+
+def len_bounds(style_or_len: str) -> tuple[int, int]:
+    """(min, max) 글자 수. v2 는 페르소나가 길이를 갖는다."""
+    if style_or_len in v2.PERSONAS:
+        p = v2.PERSONAS[style_or_len]
+        return p["min"], p["max"]
+    spec = LENGTHS.get(style_or_len)
+    return (spec["min"], spec["max"]) if spec else (50, 300)
+
+
+def num_cap(style_or_len: str) -> int:
+    if style_or_len in v2.PERSONAS:
+        return v2.PERSONAS[style_or_len]["num_cap"]
+    return {"short": 3, "medium": 4, "long": 5}.get(style_or_len, 4)
+
+
+def build_messages_v2(item: dict, persona: str, angle: str = "") -> tuple[str, str]:
+    p = v2.PERSONAS[persona]
+    system = (v2.SYSTEM_PROMPT
+              .replace("{persona_name}", p["name"])
+              .replace("{persona_desc}", p["desc"])
+              .replace("{sentences}", p["sentences"])
+              .replace("{num_cap}", str(p["num_cap"]))
+              .replace("{angle_desc}", angles.contract(angle))
+              .replace("{rule_block}", rules.writer_block()))
+    if item.get("thin_facts"):
+        system += "\n" + rules.THIN_FACTS_WARNING
+    if item.get("retry_hint"):
+        system += ("\n[직전 시도에서 이런 문제가 있었습니다 — 이번엔 반드시 고치세요]\n"
+                   + item["retry_hint"])
     user = USER_PROMPT.format(
         kind=item.get("kind", ""),
         stock=item.get("stock_name") or "해당 종목 없음(테마)",

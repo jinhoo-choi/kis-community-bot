@@ -483,6 +483,28 @@ def main():
     ok.append(run("calm 계약에 방향 규칙", "낙폭" in _V["calm"]["desc"]))
     ok.append(run("전역 규칙에 방향 어휘", "등락 방향 어휘" in _SP))
 
+
+    # ── 페르소나 v2 (캐릭터 통합형) — 되돌릴 수 있게 v1 과 공존
+    from src.personas_v2 import PERSONAS as _P2, SLOT_W as _SW2
+    from src import personas as _PM
+    ok.append(run("v2 페르소나 10종", len(_P2) == 10, str(len(_P2))))
+    ok.append(run("v2 슬롯 가중치 전건 10종",
+                  all(len(v) == 10 for v in _SW2.values())))
+    ok.append(run("v2 조합 110가지", len(_P2) * len(_ang.ANGLES) == 110))
+    ok.append(run("페르소나마다 길이·숫자상한 보유",
+                  all({"min", "max", "num_cap", "no_question", "sentences"} <= set(v)
+                      for v in _P2.values())))
+    # 모드 공통 접근자가 v1/v2 를 모두 흡수하는가
+    ok.append(run("접근자 v1 호환", _PM.len_bounds("short") == (40, 160)))
+    ok.append(run("접근자 v2 호환", _PM.len_bounds("quick_memo") == (40, 120)))
+    ok.append(run("접근자 숫자상한", _PM.num_cap("quick_memo") == 2))
+    _s2, _ = _PM.build_messages_v2({"kind": "flow", "title": "t", "facts": "등락률: 20.32%"},
+                                   "brief_report", "reaction")
+    ok.append(run("v2 프롬프트 미치환 없음",
+                  not any(x in _s2 for x in ("{persona_name}", "{angle_desc}",
+                                             "{rule_block}", "{num_cap}"))))
+    ok.append(run("v2 프롬프트에 공통규칙 주입", "1인칭" in _s2 and "당신" in _s2))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 

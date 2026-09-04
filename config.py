@@ -71,6 +71,12 @@ WRITER_RATIO = {"claude": 8, "gemini": 2}
 
 TEMPERATURE = float(os.environ.get("TEMPERATURE", "1.0"))
 
+# 페르소나 설계 전환 스위치. 되돌릴 수 있게 둔다.
+#   v1 = Voice 4 x Angle 11 x Format 6 x Length 3  (축 분해형)
+#   v2 = Persona 10 x Angle 11                     (캐릭터 통합형)
+# 어느 쪽이 나은지는 실측으로 판단한다. run_stats 에 mode 가 기록된다.
+PERSONA_MODE = os.environ.get("PERSONA_MODE", "v1")
+
 # 슬롯별 temperature 차등.
 # 수치가 본문에 직접 등장하는 슬롯은 낮춰 숫자 창작을 억제하고,
 # 서술 위주 슬롯은 높게 유지해 문체 다양성을 지킨다.

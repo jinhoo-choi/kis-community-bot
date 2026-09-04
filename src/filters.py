@@ -62,7 +62,8 @@ _NUM_CAP = {"short": 3, "medium": 4, "long": 5}
 def _number_overuse(body: str, length: str = None) -> list[str]:
     """숫자 나열 제한. 제공된 수치를 전부 소비하면 표지 나열이 된다."""
     nums = {n.replace(",", "") for n in NUM_RE.findall(body) if len(n.replace(",", "")) >= 2}
-    cap = _NUM_CAP.get(length or "medium", 4)
+    from src import personas as _P
+    cap = _P.num_cap(length) if length else 4
     return [f"수치과다({len(nums)}개/{length or '-'})"] if len(nums) > cap else []
 
 
@@ -81,10 +82,8 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
     n = len(body.strip())
     lo, hi = 50, 300
     if length:
-        from src.personas import LENGTHS
-        spec = LENGTHS.get(length)
-        if spec:
-            lo, hi = spec["min"], spec["max"]
+        from src import personas as _P
+        lo, hi = _P.len_bounds(length)
     if n < lo:
         errs.append(f"너무짧음({n}자/{length or '-'})")
     if n > hi:
@@ -117,8 +116,8 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
     # 구조가 질문 마무리를 요구하지 않는데 물음표로 끝나면 리젝.
     # 실측: 프롬프트에서 질문 강제를 뺐는데도 4건 전부 물음표로 끝났다.
     if fmt:
-        from src.personas import FORMATS
-        if FORMATS.get(fmt, {}).get("no_question") and body.rstrip().endswith("?"):
+        from src import personas as _P
+        if _P.no_question(fmt) and body.rstrip().endswith("?"):
             errs.append(f"질문마무리금지({fmt})")
 
     return errs
