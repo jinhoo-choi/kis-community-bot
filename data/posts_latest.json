@@ -1,1 +1,24 @@
-[]
+[
+ {
+  "id": "pol-IBK증권中메모리약진현지장비밸류체인수혜확산",
+  "kind": "policy",
+  "stock_code": null,
+  "stock_name": null,
+  "title": "IBK증권 \"中메모리 약진…현지 장비 밸류체인 수혜 확산\"",
+  "facts": "출처: 연합뉴스 경제\n제목: IBK증권 \"中메모리 약진…현지 장비 밸류체인 수혜 확산\"\n요지: (서울=연합뉴스) 황철환 기자 = IBK투자증권은 4일 중국 메모리 반도체 기업들의 증설 사이클이 본격화하고 있다면서 현지 장비 밸류체인 전반으...\n※ 수혜 종목을 특정하거나 추천하지 말 것. 산업/테마 수준으로만 언급.\n※ 언론 보도이며 정부 확정 발표가 아닐 수 있음. 단정하지 말 것.",
+  "src": "https://www.yna.co.kr/view/AKR20260904028000008",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "board": "free",
+  "enriched": false,
+  "thin_facts": true,
+  "tone": "calm",
+  "body": "증권사 전망은 늘 변수가 존재합니다. 이번 중국 메모리 반도체 기업들의 증설 사이클과 현지",
+  "provider": "gemini",
+  "model": "gemini-3.5-flash",
+  "score": null,
+  "judged_by": "claude",
+  "assignee": ""
+ }
+]

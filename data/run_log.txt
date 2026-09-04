@@ -1,19 +1,31 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-[crawl] dart 3건
-[crawl] naver_research 1건 (정상 0건)
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+[crawl] dart 6건
+[crawl] naver_research 2건
 [crawl] hankyung 1건
 [crawl] market 0건 (정상 0건)
-[crawl] policy_rss 1건
-[main] 수집 총 6건
-[gate] 차단 2건 {'tier4': 2}
-[tickers] ⚠ 상장리스트 로드 실패: 403 Client Error: Forbidden for url: https://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13
-[main] 생성 대상 4건 {'disclosure': 1, 'research': 1, 'flow': 0, 'policy': 1, 'poll': 1}
-[enrich] 3/4건 배경 보강 완료
-[gen] claude: 0/2건 생성
-[gen] gemini: 2/2건 생성
-[gen] 정규식 리젝 pol-IBK증권中메모리약진현지장비밸류체인수혜확산 ['너무짧음(54자)', "미확인수치['300', '150']"]
-[gen] 정규식 리젝 poll-pol-IBK증권中메모리약진현지장비밸류체인수혜확산 ['너무짧음(53자)']
-[gen] 정규식 통과 0건 / 시도 4건
-[main] 배포 0건 / 보류 0건
-[main] filter_log data/filter_log_20260904_0858.json
-[main] stats {"ts": "2026-09-04T08:58:53+09:00", "collected": 6, "gate_blocked": 2, "gate_reasons": {"tier4": 2}, "enrich_ok": 3, "generated": 0, "sent": 0, "held": 0, "hold_reasons": {}, "avg_score": null, "by_provider": {}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 3, "expected": 3, "degraded": false}, "naver_research": {"got": 1, "expected": 0, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 0, "expected": 0, "degraded": false}, "policy_rss": {"got": 1, "expected": 1, "degraded": false}}}
+[crawl] policy_rss 3건
+[main] 수집 총 13건
+[gate] 차단 3건 {'tier4': 3}
+[tickers] 상장 2632종목 로드 (lxml)
+[main] 생성 대상 10건 {'disclosure': 3, 'research': 3, 'flow': 0, 'policy': 3, 'poll': 1}
+[enrich] 7/10건 배경 보강 완료
+[gen] ⚠ claude 실패 dart-20260903800625: Messages.create() got an unexpected keyword argument 'temperature'
+[gen] ⚠ claude 실패 dart-20260903800579: Messages.create() got an unexpected keyword argument 'temperature'
+[gen] ⚠ claude 실패 dart-20260903000316: Messages.create() got an unexpected keyword argument 'temperature'
+[gen] ⚠ claude 실패 naver-y_readnavernid96009page1: Messages.create() got an unexpected keyword argument 'temperature'
+[gen] ⚠ claude 실패 naver-y_readnavernid96008page1: Messages.create() got an unexpected keyword argument 'temperature'
+[gen] claude: 0/5건 생성
+[gen] gemini: 5/5건 생성
+[gen] 정규식 리젝 hk-652124 ['너무짧음(47자)']
+[gen] 정규식 리젝 pol-NH증권원달러환율단기1천300원대초반까지하락 ['너무짧음(47자)']
+[gen] 정규식 리젝 poll-pol-IBK증권中메모리약진현지장비밸류체인수혜확산 ['너무짧음(48자)']
+[gen] ⚠ claude 실패 hk-652124: Messages.create() got an unexpected keyword argument 'temperature'
+[gen] ⚠ claude 실패 pol-NH증권원달러환율단기1천300원대초반까지하락: Messages.create() got an unexpected keyword argument 'temperature'
+[gen] ⚠ claude 실패 poll-pol-IBK증권中메모리약진현지장비밸류체인수혜확산: Messages.create() got an unexpected keyword argument 'temperature'
+[gen] 정규식 통과 2건 / 시도 10건
+[assign] 담당자 명단 없음 → 전건 '미지정'
+[main] 배포 1건 / 보류 1건
+   보류 pol-신한증권25년만의에너지공기업재편관건은부담배분 (gemini) - 유형상한(policy)
+[main] filter_log data/filter_log_20260904_0907.json
+[main] stats {"ts": "2026-09-04T09:07:33+09:00", "collected": 13, "gate_blocked": 3, "gate_reasons": {"tier4": 3}, "enrich_ok": 7, "generated": 2, "sent": 1, "held": 1, "hold_reasons": {"유형상한": 1}, "avg_score": null, "by_provider": {"gemini": {"generated": 2, "sent": 1, "avg_score": null}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 6, "expected": 6, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 0, "expected": 0, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}}}
