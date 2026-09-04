@@ -92,11 +92,11 @@ VOICE_W = {
 }
 
 FORMAT_W = {
-    "disclosure": {"fact_read": 3, "short_note": 3, "check_points": 2,
+    "disclosure": {"fact_read": 3, "short_note": 2, "check_points": 3,
                    "timeline": 2, "plain_summary": 2, "two_sides": 1, "question": 1},
     "research":   {"fact_read": 3, "two_sides": 3, "check_points": 2,
                    "question": 2, "short_note": 2, "plain_summary": 1, "timeline": 1},
-    "flow":       {"short_note": 3, "fact_read": 3, "question": 2,
+    "flow":       {"short_note": 2, "fact_read": 3, "question": 3,
                    "check_points": 2, "two_sides": 1, "plain_summary": 1, "timeline": 1},
     "policy":     {"plain_summary": 3, "two_sides": 3, "check_points": 2,
                    "question": 2, "fact_read": 2, "timeline": 2, "short_note": 1},

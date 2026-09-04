@@ -44,9 +44,15 @@ def clean(body: str) -> str:
     return b.strip()
 
 
+# 이미 쓴 축의 억제 계수. 1.0 으로 낮추는 정도로는 편중이 남았다
+# (5건 중 short_note 3건, context 3건). 금지하지는 않되 확률을 크게 줄인다.
+PENALTY = 0.3
+
+
 def _weighted(weights: dict, penalize: set) -> str:
-    """가중 랜덤. 최근에 쓴 값은 가중치를 1로 낮춘다(금지가 아니라 억제)."""
-    items = [(k, 1 if k in penalize else w) for k, w in weights.items() if w > 0]
+    """가중 랜덤. 최근/이번 실행에 쓴 값은 확률을 크게 낮춘다(금지가 아니라 억제)."""
+    items = [(k, w * PENALTY if k in penalize else float(w))
+             for k, w in weights.items() if w > 0]
     total = sum(w for _, w in items)
     r = random.uniform(0, total)
     acc = 0
@@ -78,8 +84,11 @@ def pick_style(item: dict, recent: dict, used_now: set) -> tuple[str, str, str]:
     fmt = _weighted(fw, used_f)
 
     cand = angles.available(item)
-    fresh = [a for a in cand if a not in used_a] or cand
-    angle = random.choice(fresh) if fresh else ""
+    if cand:
+        # Angle 도 동일하게 가중 억제한다. 후보가 하나뿐이면 그대로 쓴다.
+        angle = _weighted({a: 3 for a in cand}, used_a)
+    else:
+        angle = ""
 
     used_now.add((voice, angle, fmt))
     return voice, angle, fmt

@@ -360,6 +360,24 @@ def main():
     ok.append(run("적정가격 있으면 통과", _hs2(
         {"kind": "research", "facts": "리포트 제목: 실적 반등\n제시 적정가격: 33,000원"})))
 
+
+    # ── 축 편중 억제 (실측: 5건 중 short_note 3, context 3)
+    from src.generator import PENALTY as _PEN
+    ok.append(run("억제 계수 0.5 미만", _PEN < 0.5, str(_PEN)))
+    _it2 = {"kind": "disclosure", "stock_code": "005930",
+            "facts": "발행 총액: 200억원\n전환가액: 2,396원\n만기: 2031-09-11\n"
+                     "운영자금: 100억원\n매출 대비 18%"}
+    import collections as _co
+    _u = set(); _cf = _co.Counter()
+    for _ in range(12):
+        _cf[_pick(_it2, {}, _u)[2]] += 1
+    ok.append(run("Format 4종 이상 등장", len(_cf) >= 4, str(dict(_cf))))
+    # context 는 배경 블록 존재가 아니라 업종 서술이 있을 때만
+    ok.append(run("배경블록만으로 context 미채택", "context" not in _ang.available(
+        {"facts": "발행 총액: 200억원\n\n[검색으로 확인된 배경]\n- 코스닥 상장사"})))
+    ok.append(run("업종 서술 있으면 context 채택", "context" in _ang.available(
+        {"facts": "발행 총액: 200억원\n- 바이오시밀러 기업으로 의약품 제조업 영위"})))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
