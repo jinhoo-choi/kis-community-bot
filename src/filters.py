@@ -31,7 +31,8 @@ def _direction_errors(body: str, facts: str) -> list[str]:
     return [f"방향오용({wrong.group()})"] if wrong else []
 
 
-def check(body: str, facts: str, fmt: str = None, angle: str = None) -> list[str]:
+def check(body: str, facts: str, fmt: str = None, angle: str = None,
+          length: str = None) -> list[str]:
     """위반 사유 리스트 반환. 빈 리스트면 통과."""
     errs = []
 
@@ -39,12 +40,20 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None) -> list[str
         if re.search(pat, body, re.MULTILINE):
             errs.append(name)
 
-    # 커뮤니티 글은 짧은 게 자연스럽다. 길면 오히려 AI 티가 난다.
+    # 길이 기준은 Length 축에 연동한다.
+    # Length 를 도입하면서 프롬프트 지시(3문장 120자 / 6~7문장 250자)와
+    # 고정 상하한(50~300)이 어긋나 멀쩡한 글 4건이 리젝됐다(실측).
     n = len(body.strip())
-    if n < 50:
-        errs.append(f"너무짧음({n}자)")
-    if n > 300:
-        errs.append(f"너무김({n}자)")
+    lo, hi = 50, 300
+    if length:
+        from src.personas import LENGTHS
+        spec = LENGTHS.get(length)
+        if spec:
+            lo, hi = spec["min"], spec["max"]
+    if n < lo:
+        errs.append(f"너무짧음({n}자/{length or '-'})")
+    if n > hi:
+        errs.append(f"너무김({n}자/{length or '-'})")
 
     # 환각 수치 탐지: 본문 숫자가 원본 facts 에 없으면 리젝
     # (연도/퍼센트 등 흔한 값은 화이트리스트)

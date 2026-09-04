@@ -158,7 +158,8 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
                     [styles[id(x)][3] for x in chunk])
         print(f"[gen] {name}: {len(made)}/{len(chunk)}건 생성")
         for p in made:
-            errs = filters.check(p["body"], p["facts"], p.get("fmt"), p.get("angle"))
+            errs = filters.check(p["body"], p["facts"], p.get("fmt"),
+                                 p.get("angle"), p.get("length"))
             if errs:
                 # 본문을 함께 남겨야 '이 리젝이 타당했는지' 사후 검토가 된다
                 print(f"[gen] 정규식 리젝 {p['id']} {errs}")
@@ -176,8 +177,8 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
             alt = next((n for n in names if n != p["provider"]), p["provider"])
             made = _run(alt, [p], [p["tone"]], [p.get("fmt", "fact_read")],
                         [p.get("angle", "")], [p.get("length", "medium")])
-            if made and not filters.check(made[0]["body"], p["facts"],
-                                          p.get("fmt"), p.get("angle")):
+            if made and not filters.check(made[0]["body"], p["facts"], p.get("fmt"),
+                                          p.get("angle"), p.get("length")):
                 posts.append(made[0])
 
     print(f"[gen] 정규식 통과 {len(posts)}건 / 시도 {len(items)}건")

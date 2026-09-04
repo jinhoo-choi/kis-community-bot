@@ -403,6 +403,18 @@ def main():
     ok.append(run("Angle 계약에 첫문장 규칙", "첫 문장" in _ang.contract("reaction")))
     ok.append(run("lead_number 구조 존재", "lead_number" in _F))
 
+
+    # ── Length 연동 길이 기준 (실측: 고정 50~300 과 어긋나 4건 과잉 리젝)
+    _len_cases = [("short", 34, True), ("short", 90, False),
+                  ("medium", 150, False), ("long", 260, False), ("long", 370, True)]
+    for _ln, _n, _should in _len_cases:
+        _e = [x for x in _f2.check("가" * _n, "", "fact_read", "reaction", _ln)
+              if "너무" in x]
+        ok.append(run(f"길이 {_ln}/{_n}자 {'리젝' if _should else '통과'}",
+                      bool(_e) == _should, str(_e)))
+    ok.append(run("Length spec 에 하한 명시", "이상" in _L["short"]["spec"]))
+    ok.append(run("프롬프트 상한 < 필터 상한", _L["long"]["max"] > 270))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
