@@ -14,6 +14,10 @@ on:
         description: '임시: 테스트 chat_id 뒤 4자리 (시크릿 미등록 시)'
         type: string
         default: ''
+      ignore_seen:
+        description: '반복 테스트: 과거 중복 이력 무시 (상태 저장 안 함)'
+        type: boolean
+        default: false
       use_batch:
         description: 'Batch API 사용 (50건 이상일 때만 권장)'
         type: choice
@@ -69,6 +73,7 @@ jobs:
           TELEGRAM_TEST_CHAT_SUFFIX: ${{ inputs.test_chat_suffix }}
           TEST_MODE:             ${{ inputs.test_mode && '1' || '0' }}
           USE_BATCH:             ${{ inputs.use_batch || 'auto' }}
+          IGNORE_SEEN:           ${{ inputs.ignore_seen && '1' || '0' }}
           CLAUDE_MODEL:      ${{ vars.CLAUDE_MODEL || 'claude-haiku-4-5-20251001' }}
           GEMINI_MODEL:      ${{ vars.GEMINI_MODEL || 'gemini-3.5-flash' }}
           GEMINI_JUDGE_MODEL: ${{ vars.GEMINI_JUDGE_MODEL || 'gemini-3.1-flash-lite' }}

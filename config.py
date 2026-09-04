@@ -19,6 +19,10 @@ TELEGRAM_TEST_CHAT_ID = os.environ.get("TELEGRAM_TEST_CHAT_ID", "")
 # getUpdates 는 24시간만 보관하므로 상시 운영에는 쓸 수 없다.
 # TELEGRAM_TEST_CHAT_ID 를 등록하면 이 경로는 쓰이지 않는다.
 TELEGRAM_TEST_CHAT_SUFFIX = os.environ.get("TELEGRAM_TEST_CHAT_SUFFIX", "")
+
+# 반복 테스트용. 같은 날 여러 번 돌리면 dedup 이력에 막혀 1~2건만 나온다.
+# 이력을 무시하고 생성하되, 상태 저장도 하지 않는다(운영 이력을 오염시키지 않는다).
+IGNORE_SEEN = os.environ.get("IGNORE_SEEN", "0") == "1"
 TEST_MODE = os.environ.get("TEST_MODE", "0") == "1"
 
 

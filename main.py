@@ -68,7 +68,10 @@ def main():
         resolved.append(it)
 
     # 다축 dedup — 같은 사건이 DART/리서치/수급으로 중복 유입되는 것을 잡는다
-    items, dup_reasons = dedup.filter_new(resolved, s["seen"])
+    # 반복 테스트에서는 과거 이력을 무시한다(배치 내부 중복은 그대로 잡는다)
+    items, dup_reasons = dedup.filter_new(resolved, {} if config.IGNORE_SEEN else s["seen"])
+    if config.IGNORE_SEEN:
+        print("[main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함")
 
     degraded = crawl.degraded_sources()
     if degraded:
@@ -131,8 +134,9 @@ def main():
 
     for p_ in sent_posts:
         dedup.mark(p_, s["seen"], __import__("datetime").datetime.now(config.KST).strftime("%Y-%m-%d"))
-    state.mark(s, sent_posts)
-    state.save(s)
+    if not config.IGNORE_SEEN:
+        state.mark(s, sent_posts)
+        state.save(s)
 
 
 if __name__ == "__main__":
