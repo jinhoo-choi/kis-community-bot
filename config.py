@@ -75,7 +75,12 @@ TEMPERATURE = float(os.environ.get("TEMPERATURE", "1.0"))
 #   v1 = Voice 4 x Angle 11 x Format 6 x Length 3  (축 분해형)
 #   v2 = Persona 10 x Angle 11                     (캐릭터 통합형)
 # 어느 쪽이 나은지는 실측으로 판단한다. run_stats 에 mode 가 기록된다.
-PERSONA_MODE = os.environ.get("PERSONA_MODE", "v1")
+# 기본값 v2. 같은 소재·같은 조건 비교에서 v2 가 우세했다(2026-09-04):
+#   배포 6 vs 5 / 다양성 5·4종 vs 3·3종 / 심사 16.7 vs 16.0
+#   특히 v1 은 길이 미달 4건, 어미반복 2건 — Length 를 별도 축으로 두면
+#   다른 축과 계속 충돌한다. v2 는 길이가 페르소나 안에 있어 1건뿐이었다.
+# v1 은 롤백용으로 유지한다.
+PERSONA_MODE = os.environ.get("PERSONA_MODE", "v2")
 
 # 슬롯별 temperature 차등.
 # 수치가 본문에 직접 등장하는 슬롯은 낮춰 숫자 창작을 억제하고,

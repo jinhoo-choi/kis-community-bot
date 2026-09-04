@@ -41,6 +41,9 @@ echo
 echo "=== 2. unit (decide / gate / entity / dedup / rules) ==="
 python3 tests/test_decide.py
 echo
+echo "=== 2b. 전수검사 (설정-코드 정합성) ==="
+python3 tools/audit.py
+echo
 echo "=== 3. E2E 시뮬레이션 ==="
 python3 tests/test_e2e.py
 echo

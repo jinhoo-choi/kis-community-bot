@@ -319,11 +319,22 @@ def main():
     _it = {"kind": "disclosure", "stock_code": "005930",
            "facts": "발행 총액: 200억원\n전환가액: 2,396원\n만기: 2031-09-11\n"
                     "운영자금: 100억원\n매출 대비 18%"}
+    # 억제는 금지가 아니라 확률 조정이므로 소수 시행으로는 판정할 수 없다.
+    # 난수를 고정하고 충분히 뽑아 '전 후보 커버 + 한쪽 쏠림 없음'으로 본다.
+    import random as _rnd
+    _rnd.seed(20260904)
+    _avail = set(_ang.available(_it))
+    _draws = [_pick(_it, {}, set())[1] for _ in range(60)]
+    _seen_a = set(_draws)
+    ok.append(run("가능한 Angle 전부 등장", _avail <= _seen_a,
+                  f"{sorted(_avail - _seen_a)} 미등장"))
+    from collections import Counter as _C2
+    _top = _C2(_draws).most_common(1)[0][1] / len(_draws)
+    ok.append(run("한 Angle 쏠림 없음(50% 미만)", _top < 0.5, f"{_top:.0%}"))
     _used = set()
-    _c = [_pick(_it, {}, _used) for _ in range(6)]
-    ok.append(run("같은 실행 내 축 반복 억제",
-                  len({x[1] for x in _c}) >= 4, str([x[1] for x in _c])))
-    ok.append(run("Length 도 분산", len({x[3] for x in _c}) >= 2, str([x[3] for x in _c])))
+    _c6 = [_pick(_it, {}, _used) for _ in range(6)]
+    ok.append(run("같은 실행 내 억제 동작", len({x[1] for x in _c6}) >= 3,
+                  str([x[1] for x in _c6])))
 
     # Angle 은 사실관계가 허용하는 것만
     ok.append(run("데이터에 없는 Angle 미생성",
