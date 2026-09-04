@@ -51,11 +51,22 @@ def _pick_names(text: str) -> list[str]:
     return FALLBACK
 
 
+# 종목방에 올리면 부자연스러운 유형. 지역 행사·채용·수상 같은 건
+# 어떤 종목방에 넣어도 맞지 않는다 (실측: 원주 의료기기 채용행사 -> 셀트리온).
+NOT_STOCK_RE = re.compile(
+    r"채용|취업|일자리|박람회|전시회|축제|행사|협약식|간담회|표창|수상|"
+    r"위촉|개소|착공|준공|봉사|캠페인|공모전|설명회"
+)
+
+
 def assign(item: dict) -> bool:
     """테마·정책 항목에 게시할 종목을 배정한다. 배정했으면 True."""
     from src import tickers
 
     if item.get("stock_code"):
+        return False
+    if NOT_STOCK_RE.search(item.get("title", "")):
+        item["no_stock_fit"] = True
         return False
     table = tickers.listed()
     if not table:

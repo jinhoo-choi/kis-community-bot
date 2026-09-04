@@ -144,6 +144,9 @@ def apply(items: list[dict]) -> tuple[list[dict], list[tuple[str, str]]]:
             blocked.append((it.get("id", "?"), why))
         elif not has_substance(it):
             blocked.append((it.get("id", "?"), "tier5:글감부족"))
+        elif it.get("no_stock_fit"):
+            # 커뮤니티에 종목방만 있는데 어떤 종목방에도 맞지 않는 소재다
+            blocked.append((it.get("id", "?"), "tier5:게시판없음"))
         elif not angles.available(it):
             # 강조할 각도가 하나도 없으면 어떤 페르소나를 줘도 글이 되지 않는다.
             blocked.append((it.get("id", "?"), "tier5:앵글없음"))

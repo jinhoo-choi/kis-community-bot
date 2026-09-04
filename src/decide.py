@@ -47,6 +47,9 @@ def decide_distribution(
         elif s.get("fatal"):
             p["hold_reason"] = "fatal:" + ",".join(s["fatal"])[:60]
             held.append(p)
+        elif s.get("fit") is not None and s["fit"] < config.MIN_FIT:
+            p["hold_reason"] = f"커뮤니티적합성 {s['fit']}/5 {s.get('reason','')}"
+            held.append(p)
         elif s.get("total", 0) < min_score:
             p["hold_reason"] = f"저점수 {s['total']}/20 {s.get('reason','')}"
             held.append(p)

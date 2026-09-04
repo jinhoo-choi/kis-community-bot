@@ -59,12 +59,25 @@ def _ending_variety(body: str) -> list[str]:
 _NUM_CAP = {"short": 3, "medium": 4, "long": 5}
 
 
-def _number_overuse(body: str, length: str = None) -> list[str]:
+def _number_overuse(body: str, length: str = None, slot_n: int = 0) -> list[str]:
     """숫자 나열 제한. 제공된 수치를 전부 소비하면 표지 나열이 된다."""
     nums = {n.replace(",", "") for n in NUM_RE.findall(body) if len(n.replace(",", "")) >= 2}
     from src import personas as _P
     cap = _P.num_cap(length) if length else 4
+    # 정량 데이터를 늘리면 모델이 더 많이 쓴다. 페르소나 상한만 고정하면
+    # 데이터 확대와 충돌한다(실측: data_focus 가 7개 사용).
+    # 입력 사실이 많으면 상한을 한 단계 올려 준다.
+    if slot_n and slot_n >= 6:
+        cap += 1
     return [f"수치과다({len(nums)}개/{length or '-'})"] if len(nums) > cap else []
+
+
+def _slot_n(facts: str) -> int:
+    try:
+        from src import facts as _f
+        return _f.count({"facts": facts})
+    except Exception:
+        return 0
 
 
 def check(body: str, facts: str, fmt: str = None, angle: str = None,
@@ -103,7 +116,7 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
         errs.append(f"테마글종목언급({theme_stock})")
 
     errs += _hedge_errors(body)
-    errs += _number_overuse(body, length)
+    errs += _number_overuse(body, length, _slot_n(facts))
     errs += _ending_variety(body)
 
     # 미확인 표현은 uncertainty 앵글에서만 허용한다.

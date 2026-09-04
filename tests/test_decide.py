@@ -291,8 +291,11 @@ def main():
     _good2 = _good.replace("기록했습니다", "였습니다")
     ok.append(run("정상 글은 통과", not _f2.check(_good2, "302,500 21.73 2,790"),
                   str(_f2.check(_good2, "302,500 21.73 2,790"))))
-    ok.append(run("금융기사 상투어 차단", any("news_cliche" in e for e in
-                  _f2.check("거래대금은 942억원을 기록했습니다. " * 3, ""))))
+    from src.generator import clean as _cl
+    ok.append(run("상투어 치환('기록했습니다')",
+                  "이었습니다" in _cl("거래대금은 942억원을 기록했습니다.")))
+    ok.append(run("상투어 리젝(치환불가)", any("news_cliche" in e for e in
+                  _f2.check("남은 과제입니다. " * 8, ""))))
     ok.append(run("주체없는 평가 차단", any("unsourced_eval" in e for e in
                   _f2.check("수익성이 개선되는 중이라는 평가네요. " * 3, ""))))
 

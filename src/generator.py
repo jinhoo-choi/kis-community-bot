@@ -36,10 +36,46 @@ _STRIP_PATTERNS = [
 ]
 
 
+# 리젝하기보다 고쳐 쓰는 편이 나은 표현들.
+# 의미가 그대로 보존되고 기사체만 빠진다.
+def _josa_was(word: str, polite: str = "습니다") -> str:
+    """앞말 받침에 따라 '이었/였' 을 고른다. 안 그러면 '942억원였습니다' 가 된다."""
+    if not word:
+        return "였" + polite
+    ch = word[-1]
+    if "가" <= ch <= "힣":
+        has_batchim = (ord(ch) - 0xAC00) % 28 != 0
+    else:
+        has_batchim = ch.isdigit() or ch.isalpha()
+    return ("이었" if has_batchim else "였") + polite
+
+
+def _fix_cliche(b: str) -> str:
+    """'~를 기록했습니다' 같은 금융기사 상투어를 자연스럽게 치환한다.
+
+    리젝하면 재생성해도 반복된다(실측: 11건 리젝 중 5건). 의미가 보존되는
+    표현은 고쳐 쓰는 편이 물량 손실 없이 기사체만 빼는 방법이다.
+    """
+    def _rep(m, polite):
+        # 앞말을 반드시 살려서 붙인다. 안 그러면 "942억원을 기록했습니다" 가
+        # "이었습니다" 로 통째로 사라진다.
+        return m.group(1) + _josa_was(m.group(1), polite)
+
+    b = re.sub(r"([가-힣A-Za-z0-9,\.%]+)\s*[을를]\s*기록했습니다",
+               lambda m: _rep(m, "습니다"), b)
+    b = re.sub(r"([가-힣A-Za-z0-9,\.%]+)\s*[을를]\s*기록했어요",
+               lambda m: _rep(m, "어요"), b)
+    b = re.sub(r"([가-힣A-Za-z0-9,\.%]+)\s*[으]?로\s*집계됐습니다",
+               lambda m: _rep(m, "습니다"), b)
+    b = re.sub(r"([가-힣A-Za-z0-9,\.%]+)\s*[을를]\s*기록하며", r"\1이었고", b)
+    return b
+
+
 def clean(body: str) -> str:
     b = body.strip()
     for pat in _STRIP_PATTERNS:
         b = re.sub(pat, "", b, flags=re.M)
+    b = _fix_cliche(b)
     # 따옴표로 통째로 감싼 출력
     if len(b) > 2 and b[0] in "\"'" and b[-1] == b[0]:
         b = b[1:-1]
