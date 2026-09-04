@@ -1,48 +1,54 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-[dart] corp_code 3988종목 매핑
-[dart] 상세 보강 2/12건
-[crawl] dart 12건
-[crawl] naver_research 2건
-[crawl] hankyung 1건
-[crawl] market 6건
+[dart] corp_code 3989종목 매핑
+[dart] 상세 보강 2/20건
+[crawl] dart 20건
+[crawl] naver_research 7건
+[crawl] hankyung 3건
+[crawl] market 21건
 [tickers] 상장 2632종목 로드 (lxml)
-[crawl] kind_inquiry 2건
-[crawl] policy_rss 3건
+[crawl] ⚠ kind_inquiry 2/8건 — 수집률 저조
+[crawl] policy_rss 6건
 [tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
 [crawl] telegram_ch 0건 (정상 0건)
-[main] 수집 총 27건
-[enrich] 17/27건 배경 보강 완료
-[gate] 차단 11건 {'tier4': 6, 'tier5': 4, 'tier1': 1}
+[main] 수집 총 62건
+[enrich] 44/62건 배경 보강 완료
+[gate] 차단 26건 {'tier5': 15, 'tier4': 10, 'tier1': 1}
 [theme] 테마글 1건에 게시 종목 배정
 [main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
-[main] 생성 대상 16건 {'disclosure': 6, 'research': 1, 'flow': 6, 'policy': 2, 'poll': 1}
+[main] ⚠ 수집 이상 소스: ['kind_inquiry']
+[main] 생성 대상 36건 {'disclosure': 7, 'research': 3, 'flow': 21, 'policy': 2, 'poll': 3}
 [claude] SDK 1.3.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] claude: 13/13건 생성
-[gen] 정규식 리젝 dart-20260903000285 ['수치과다(6개/fact_note)']
-       └ '에이프로젠이 전환가액 2,396원으로 200억원 규모의 전환사채를 발행하기로 결정했습니다. 전환사채는 정해진 가격으로 주식으로 바꿀 수 있는 채권인데요, 이번 발행의 전환가액이 그 기준을 정합니다. 표면이자율은 0%이며, 만기일은 2031년 09월 11일입니다. 이는 무기명이권부무보증사모전환사채 형태로 발행되는 35회차 전환사채입니다.'
-[gen] 정규식 리젝 dart-20260903800469 ['미확인표현(확인되지 않)']
-       └ '화장품 제조·판매 회사 토니모리에서 최대주주 변경이 공시됐어요. 구체적 지분 규모는 아직 확인되지 않았네요.'
-[gen] 정규식 리젝 kind-20260904000786 ['stock_ending']
-       └ '거래소가 디에이치엑스컴퍼니에\n풍문 관련 답변을 요구했어요.\n회사 답변은 원문 확인이 필요합니다.'
-[gen] gemini: 3/3건 생성
-[gen] 정규식 리젝 pol-듀켐바이오정읍에343억원규모투자전북도등과협약 ['너무짧음(35자/fact_note)']
-       └ '듀켐바이오가 전북 정읍에 투자하기로 결정한 금액입니다. (숫자:'
-[gen] 정규식 리젝 pol-원주의료기기기업15곳현장채용구직자와해피데이 ['format', 'meta_output', '너무짧음(42자/open_talk)']
-       └ '*   입력 정보:\n        *   원주 의료기기 기업 15곳 현장채용'
-[gen] 정규식 리젝 poll-flow-2026-09-03-386380 ['format', '너무짧음(40자/brief_report)']
-       └ '135.00% 상승. (첫 문장은 숫자 하나 단독)\n  - 문장 2: 코'
-[gen] 정규식 통과 13건 / 시도 16건
+[gen] claude: 29/29건 생성
+[gen] 정규식 리젝 dart-20260904000209 ['미확인표현(공개되지 않)']
+       └ '신라교역은 원양어업 회사예요. 타법인 주식과 출자증권을 사들이기로 결정했네요. 구체적인 규모는 아직 공개되지 않았어요.'
+[gen] 정규식 리젝 hk-652124 ['미확인표현(공개되지 않)']
+       └ '메리츠증권에서 세경하이테크에 대해 적정가격 6,500원을 제시했습니다. 양승수 애널리스트가 작성한 리포트 제목은 "세경하이테크 실적 반등 시작, 모멘텀도 대기 중"이며 투자의견은 Buy입니다. 리포트의 상세 수치는 공개되지 않았습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-234340 ['방향오용(낙폭)']
+       └ '13.48% 상승했습니다. 헥토파이낸셜이 어제 252억원의 거래대금을 기록하며 올린 낙폭입니다. 종가는 25,250원으로 마감했습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-347700 ['방향오용(낙폭)']
+       └ '5.06% 상승했습니다. 스피어가 어제 19,520원에 마감하면서 기록한 낙폭입니다. 거래대금은 195억원을 기록했습니다.'
+[gen] gemini: 7/7건 생성
+[gen] 정규식 리젝 flow-2026-09-04-002990 ['너무짧음(35자/brief_report)']
+       └ '16,090원.\n\n금호건설의 종가입니다.\n\n전일 대비 2.54%'
+[gen] 정규식 리젝 kind-20260904000786 ['format', 'meta_output']
+       └ "'~습니다')\n    *   세 번째 문장: `회사는 해당 사항에 대해 미확정이라고 답변하였"
+[gen] 정규식 리젝 pol-특징주보험주美금리동결가능성부각에줄줄이하락종합 ['너무짧음(32자/quick_memo)']
+       └ '" (2어절)\n더 자연스럽게:\n"지난 9월 4일 상황이네요'
+[gen] 정규식 리젝 poll-flow-2026-09-04-386380 ['너무짧음(32자/brief_report)']
+       └ '135.00% 상승.\n\n스카이랩스 주가가 23,500원으로'
+[gen] 정규식 리젝 poll-flow-2026-09-04-030530 ['너무짧음(37자/brief_report)']
+       └ '두 번째 문장: 그 숫자의 정체를 밝힘. (형용사, 부사 금지, 종'
+[gen] 정규식 통과 30건 / 시도 36건
 [claude] SDK 1.3.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 5건 / 보류 8건
-   보류 dart-20260903800625 (claude) - fatal:상세 수치가 없는 상황에서 일반론으로 분량을 채움
-   보류 dart-20260903800579 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반,유상증자는 일반적으로~ 같은 사전식 일반론으로 분량을 채움
-   보류 flow-2026-09-03-234340 (claude) - fatal:사실관계 오류
-   보류 flow-2026-09-03-336260 (claude) - fatal:상투적 마무리 문구로 글을 닫음 (지켜봐야/확인이 필요/주목됩니다 류)
-   보류 dart-20260903800469 (gemini) - 저점수 13/20 내용 부족, 분석 없음
+[main] 배포 19건 / 보류 11건
+   보류 dart-20260904000431 (claude) - fatal:상세 수치가 없는 상황에서 일반론으로 분량을 채움
+   보류 dart-20260904800546 (claude) - fatal:상세 수치 미공개 시 일반론으로 분량 채움
+   보류 dart-20260904000282 (claude) - fatal:useful 항목 감점: 제목을 풀어 쓴 수준의 내용
+   보류 flow-2026-09-04-386380 (claude) - fatal:사실관계에 없는 업황·수혜 일반론을 덧붙임
+   보류 flow-2026-09-04-319400 (claude) - fatal:상투적 마무리 문구로 글을 닫음 (지켜봐야/확인이 필요/주목됩니다 류)
 [tg] 테스트 채널 suffix 매칭: ...2744 (private)
-[main] filter_log data/filter_log_20260904_2357.json
-[main] stats {"ts": "2026-09-04T23:57:32+09:00", "persona_mode": "v2", "collected": 27, "gate_blocked": 11, "gate_reasons": {"tier4": 6, "tier5": 4, "tier1": 1}, "enrich_ok": 17, "generated": 13, "sent": 5, "held": 8, "hold_reasons": {"fatal": 5, "저점수 13/20 내용 부족, 분석 없음": 1, "유형상한": 2}, "avg_score": 16.6, "by_provider": {"gemini": {"generated": 2, "sent": 0, "avg_score": 10.0}, "claude": {"generated": 11, "sent": 5, "avg_score": 15.09}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 12, "expected": 12, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 6, "expected": 6, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+[main] filter_log data/filter_log_20260905_0626.json
+[main] stats {"ts": "2026-09-05T06:26:43+09:00", "persona_mode": "v2", "collected": 62, "gate_blocked": 26, "gate_reasons": {"tier5": 15, "tier4": 10, "tier1": 1}, "enrich_ok": 44, "generated": 30, "sent": 19, "held": 11, "hold_reasons": {"fatal": 8, "저점수 13/20 미완성 글. 내용 부족으로 평가 곤란": 1, "유형상한": 2}, "avg_score": 16.05, "by_provider": {"gemini": {"generated": 3, "sent": 0, "avg_score": 8.67}, "claude": {"generated": 27, "sent": 19, "avg_score": 15.41}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 20, "expected": 33, "degraded": false}, "naver_research": {"got": 7, "expected": 7, "degraded": false}, "hankyung": {"got": 3, "expected": 3, "degraded": false}, "market": {"got": 21, "expected": 21, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 8, "degraded": true}, "policy_rss": {"got": 6, "expected": 6, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
