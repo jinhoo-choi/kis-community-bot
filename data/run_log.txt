@@ -1,30 +1,37 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 [dart] corp_code 3988종목 매핑
-[dart] 상세 보강 2/9건
-[crawl] dart 9건
+[dart] 상세 보강 1/6건
+[crawl] dart 6건
 [crawl] naver_research 2건
 [crawl] hankyung 1건
-[crawl] market 6건
+[crawl] market 3건
 [crawl] policy_rss 3건
-[main] 수집 총 22건
-[enrich] 15/22건 배경 보강 완료
-[gate] 차단 7건 {'tier4': 4, 'tier5': 3}
+[main] 수집 총 16건
+[enrich] 11/16건 배경 보강 완료
+[gate] 차단 7건 {'tier4': 3, 'tier5': 4}
 [tickers] 상장 2632종목 로드 (lxml)
-[dedup] 제외 12건 {'ID': 12}
-[main] 생성 대상 3건 {'disclosure': 0, 'research': 0, 'flow': 1, 'policy': 2, 'poll': 0}
+[main] 생성 대상 9건 {'disclosure': 3, 'research': 1, 'flow': 3, 'policy': 1, 'poll': 1}
 [claude] SDK 1.3.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] claude: 2/2건 생성
-[gen] 정규식 리젝 pol-경남도1127일추석물가안정대책18개성수품현장 ['너무김(316자)']
-       └ '경남도가 추석 연휴 동안 물가안정 대책을 본격 추진한다고 나왔어요. 11일부터 27일까지 18개 성수품을 중심으로 현장 점검에 들어간다는 거예요. 추석 시즌에는 보관 식품과 생필품 수요가 몰리면서 가격 변동성이 커지는 시기거든요.\n\n정부 차원의 물가 관리가 강화되면 해당 업종들의 마진율 변화를 살펴볼 여지가 있어요. 선제적 점검으로 시장 안정성이 높아질 수'
-[gen] gemini: 1/1건 생성
-[gen] 정규식 리젝 pol-與박해철尹정부4년간청년일자리사업예산6천718 ['format', 'meta_output']
-       └ '의 업황 변화에 관심이 쏠리네요. (31 words/77 chars)\n    *   *Sentence'
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] 정규식 통과 1건 / 시도 3건
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[gen] claude: 7/7건 생성
+[gen] 정규식 리젝 flow-2026-09-03-386380 ['질문마무리금지(plain_summary)']
+       └ '스카이랩스가 어제 92.20% 올랐네요. 종가 기준 19,220원이고 거래대금이 224억원 규모였습니다. \n\n이 정도 수준의 등락이면 보통 공시나 뉴스 같은 호재가 있을 때 나타나는데, 정확한 이유가 뭔지는 확인이 필요할 것 같습니다. 혹시 어제 공시나 뉴스 보셨나요?'
+[gen] gemini: 2/2건 생성
+[gen] 정규식 리젝 pol-노사발전재단몽골서한국취업예정노동자교육지원점검 ['너무짧음(40자)']
+       └ '노사발전재단이 몽골을 방문해 한국 취업 예정자들을 위한 지원 상황을 점검'
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[gen] 정규식 통과 7건 / 시도 9건
 [claude] SDK 1.3.0
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 1건 / 보류 0건
-[main] filter_log data/filter_log_20260904_1032.json
-[main] stats {"ts": "2026-09-04T10:32:19+09:00", "collected": 22, "gate_blocked": 7, "gate_reasons": {"tier4": 4, "tier5": 3}, "enrich_ok": 15, "generated": 1, "sent": 1, "held": 0, "hold_reasons": {}, "avg_score": 16.0, "by_provider": {"claude": {"generated": 1, "sent": 1, "avg_score": 16.0}}, "model_fallbacks": [], "dedup": {"ID": 12}, "crawl_health": {"dart": {"got": 9, "expected": 9, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 6, "expected": 6, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}}}
+[main] 배포 5건 / 보류 2건
+   보류 poll-flow-2026-09-03-386380 (gemini) - fatal:게시글 본문이 작성되지 않음,평가 대상이 없음
+   보류 dart-20260903000316 (claude) - 정원초과
+[main] filter_log data/filter_log_20260904_1223.json
+[main] stats {"ts": "2026-09-04T12:23:02+09:00", "collected": 16, "gate_blocked": 7, "gate_reasons": {"tier4": 3, "tier5": 4}, "enrich_ok": 11, "generated": 7, "sent": 5, "held": 2, "hold_reasons": {"fatal": 1, "정원초과": 1}, "avg_score": 16.8, "by_provider": {"claude": {"generated": 6, "sent": 5, "avg_score": 16.5}, "gemini": {"generated": 1, "sent": 0, "avg_score": 4.0}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 6, "expected": 6, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 3, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}}}
