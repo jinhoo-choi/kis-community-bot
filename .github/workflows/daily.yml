@@ -10,6 +10,10 @@ on:
         description: '테스트 채널로 발송 (TELEGRAM_TEST_CHAT_ID)'
         type: boolean
         default: true
+      test_chat_suffix:
+        description: '임시: 테스트 chat_id 뒤 4자리 (시크릿 미등록 시)'
+        type: string
+        default: ''
       use_batch:
         description: 'Batch API 사용 (50건 이상일 때만 권장)'
         type: choice
@@ -62,6 +66,7 @@ jobs:
           TELEGRAM_TOKEN:    ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID:      ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_TEST_CHAT_ID: ${{ secrets.TELEGRAM_TEST_CHAT_ID }}
+          TELEGRAM_TEST_CHAT_SUFFIX: ${{ inputs.test_chat_suffix }}
           TEST_MODE:             ${{ inputs.test_mode && '1' || '0' }}
           USE_BATCH:             ${{ inputs.use_batch || 'auto' }}
           CLAUDE_MODEL:      ${{ vars.CLAUDE_MODEL || 'claude-haiku-4-5-20251001' }}

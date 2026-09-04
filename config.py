@@ -14,6 +14,11 @@ TELEGRAM_CHAT_ID  = os.environ.get("TELEGRAM_CHAT_ID", "")
 # 테스트 발송 채널. 운영 단톡방에는 사람이 있어 반복 테스트를 보낼 수 없다.
 # 수동 실행(workflow_dispatch)은 이쪽으로, 정기 cron 은 운영 채널로 보낸다.
 TELEGRAM_TEST_CHAT_ID = os.environ.get("TELEGRAM_TEST_CHAT_ID", "")
+
+# 임시 경로: 시크릿 등록 없이 뒤 4자리로 테스트 채널을 찾는다.
+# getUpdates 는 24시간만 보관하므로 상시 운영에는 쓸 수 없다.
+# TELEGRAM_TEST_CHAT_ID 를 등록하면 이 경로는 쓰이지 않는다.
+TELEGRAM_TEST_CHAT_SUFFIX = os.environ.get("TELEGRAM_TEST_CHAT_SUFFIX", "")
 TEST_MODE = os.environ.get("TEST_MODE", "0") == "1"
 
 

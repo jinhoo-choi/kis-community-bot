@@ -74,11 +74,45 @@ def _text(p: dict) -> str:
     return card(p)
 
 
+_resolved_suffix = None
+
+
+def _resolve_by_suffix() -> str:
+    """getUpdates 에서 뒤 4자리가 일치하는 chat 을 찾는다 (임시 경로).
+    실행당 1회만 조회하고 캐싱한다."""
+    global _resolved_suffix
+    if _resolved_suffix is not None:
+        return _resolved_suffix
+    _resolved_suffix = ""
+    sfx = config.TELEGRAM_TEST_CHAT_SUFFIX.strip()
+    if not sfx or not TELEGRAM_TOKEN:
+        return ""
+    try:
+        r = requests.get(API.format(TELEGRAM_TOKEN, "getUpdates"),
+                         params={"limit": 100, "timeout": 0}, timeout=20)
+        for u in r.json().get("result", []):
+            for k in ("message", "edited_message", "channel_post",
+                      "my_chat_member", "chat_member"):
+                c = (u.get(k) or {}).get("chat")
+                if c and str(c["id"]).endswith(sfx):
+                    _resolved_suffix = str(c["id"])
+                    print(f"[tg] 테스트 채널 suffix 매칭: ...{sfx} ({c.get('type')})")
+                    return _resolved_suffix
+        print(f"[tg] ⚠ suffix ...{sfx} 매칭 실패 "
+              "(getUpdates 24시간 보관 한계). 봇에게 아무 메시지나 보낸 뒤 재실행하세요.")
+    except Exception as e:
+        print(f"[tg] suffix 조회 실패: {e}")
+    return _resolved_suffix
+
+
 def _post(method: str, payload: dict):
     chat, is_test = config.target_chat()
+    if is_test and not chat:
+        chat = _resolve_by_suffix()
     if not chat:
         if is_test:
-            print("[tg] ⚠ TEST_MODE 인데 TELEGRAM_TEST_CHAT_ID 미등록 → 발송 안 함")
+            print("[tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 "
+                  "(TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)")
         return None
     payload = {**payload, "chat_id": chat}
     return requests.post(API.format(TELEGRAM_TOKEN, method), json=payload, timeout=20)
