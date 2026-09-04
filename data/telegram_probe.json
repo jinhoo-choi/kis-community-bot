@@ -1,0 +1,110 @@
+[
+ {
+  "handle": "activeetf",
+  "status": 200,
+  "url": "https://t.me/s/activeetf",
+  "preview": true,
+  "title": "TIME ACT!VE ETF",
+  "desc": "TIME ACT!VE ETF 공식채널 ※해당 채널의 게시물은 단순한 의견 및 정보 제공을 목적으로 하며 매수·매도 등 투자권유를 의미하지 않습니",
+  "counters": {
+   "subscribers": "9.62K",
+   "photos": "851",
+   "videos": "37",
+   "files": "3",
+   "links": "403"
+  },
+  "posts_on_page": 20,
+  "latest": "2026-09-04T01:53",
+  "sample": "GPT-6 Astra, 코딩 효율 개선 but 범용은 가격 부담 코딩은 비용 효율 개선 Coding Agent Index 67점으로 Fable 5와 동점이지만 작업당 비용은 절반 ",
+  "company": "타임폴리오자산운용",
+  "note": "confirmed(시사저널e 2025-02)"
+ },
+ {
+  "handle": "tigeretf",
+  "status": 200,
+  "url": "https://t.me/tigeretf",
+  "preview": false,
+  "company": "미래에셋 TIGER ETF",
+  "note": "candidate"
+ },
+ {
+  "handle": "kodexetf",
+  "status": 200,
+  "url": "https://t.me/s/kodexetf",
+  "preview": true,
+  "title": "Kodex",
+  "desc": "Kodex ETF 정보공유방",
+  "counters": {
+   "links": "2"
+  },
+  "posts_on_page": 4,
+  "latest": "2023-12-28T08:19",
+  "sample": "❤️",
+  "company": "삼성 KODEX ETF",
+  "note": "candidate"
+ },
+ {
+  "handle": "aceetf",
+  "status": 200,
+  "url": "https://t.me/s/aceetf",
+  "preview": true,
+  "title": "ACE etf",
+  "desc": "",
+  "counters": {
+   "subscriber": "1",
+   "link": "1"
+  },
+  "posts_on_page": 2,
+  "latest": "2025-10-11T16:36",
+  "sample": "For Sell only 200 USDT Email address: saaarboland@gmail.com Plz subject title:buy channel",
+  "company": "한국투자신탁운용 ACE",
+  "note": "candidate"
+ },
+ {
+  "handle": "riseetf",
+  "status": 200,
+  "url": "https://t.me/riseetf",
+  "preview": false,
+  "company": "KB자산운용 RISE",
+  "note": "candidate"
+ },
+ {
+  "handle": "soletf",
+  "status": 200,
+  "url": "https://t.me/s/soletf",
+  "preview": true,
+  "title": "SOL ETF",
+  "desc": "말랑말랑한 ETF 시장 정보/ ETF 투자 아이디어",
+  "counters": {
+   "subscribers": "2.82K",
+   "photos": "1.23K",
+   "files": "192",
+   "links": "1.03K"
+  },
+  "posts_on_page": 20,
+  "latest": "2026-09-03T22:48",
+  "sample": "#금리안정 #미증시상승 전일 미 증시는 다우 +1.18%, 나스닥 +1.40%, S&P500 +1.06%로 상승세로 마감 했습니다. 미 증시는 연준의 윌러 이사가 물가 압력이 완화",
+  "company": "신한자산운용 SOL",
+  "note": "candidate"
+ },
+ {
+  "handle": "plusetf",
+  "status": 200,
+  "url": "https://t.me/s/plusetf",
+  "preview": true,
+  "title": "PLUS ETF 리서치룸",
+  "desc": "➕ PLUS ETF 텔레그램입니다 ETF 투자아이디어와 국내외 금융시장의 다양한 이슈들에 대해 전달드립니다. ➕ Disclaimer: 해당 채널",
+  "counters": {
+   "subscribers": "2.7K",
+   "photos": "1.37K",
+   "videos": "43",
+   "files": "27",
+   "links": "1.84K"
+  },
+  "posts_on_page": 19,
+  "latest": "2026-09-04T00:44",
+  "sample": "SK이터닉스, ESS 부활·태양광 PPA 확대 수혜 기대-하나 https://n.news.naver.com/mnews/article/018/0006362799",
+  "company": "한화자산운용 PLUS",
+  "note": "candidate"
+ }
+]

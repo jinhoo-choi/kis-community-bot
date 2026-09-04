@@ -15,45 +15,45 @@
 [KIND] 둘째 tr:
 '<tr>\r\n\t\t<td>스카이랩스</td>\r\n\t\t<td>\r\n\t\t\t\r\n\t\t\t\t\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t코스닥\r\n\t\t\t\t\t\r\n\t\t\t\t\t\r\n\t\t\t\t\t\t\r\n\t\t\t\r\n\t\t</td>\r\n\t\t<td style="mso-number-format:\'@\';text-align:center;">386380</td>\r\n\t\t<td>의료용 기기 제조업</td>\r\n\t\t<td>커프리스 연속혈압 모니터링 의료기기 (CART)</td>\r\n\t\t<td style="text-align:center;">2026-09-04</td>\r\n\t\t<td style="text-align:center;">12월</td>\r\n\t\t<td>이병환</td>\r\n\t\t<td>\r\n\t\t\thttp://www.skylabs.io/\r\n\t\t</td>\r\n\t\t<td >경기도</td>\r\n\t</tr>'
 [대안A] naver sise_market_sum p1: 50종목, 페이지링크 12개
-[대안B] entryJongmok HTTP 200 9348 bytes
+[대안B] entryJongmok HTTP 200 9346 bytes
 
 ==================================================================
 1. 한경컨센서스 테이블 구조
 ==================================================================
-HTTP 200 / 69259 bytes
+HTTP 200 / 30504 bytes
 
-[table 0] class=None rows=20
+[table 0] class=None rows=5
   헤더: ['작성일', '제목', '적정가격', '투자의견', '작성자', '제공출처', '기업정보', '차트', '첨부파일']
   ── row 0 (td 9개)
-     td[0] text='2026-09-03'
-     td[1] text='롯데지주(004990) 노이즈보다 다가올 호황에 조명롯데지주(004990) 노이즈보다 다가' href='/analysis/downpdf?report_idx=652107'
-     td[2] text='33,000'
-     td[3] text='매수'
-     td[4] text='이동주'
-     td[5] text='SK증권'
+     td[0] text='2026-09-04'
+     td[1] text='엔에프씨(265740) 화장품 ODM 고성장, 소재 턴어라운드 본격화엔에프씨(265740)' href='/analysis/downpdf?report_idx=652142'
+     td[2] text='0'
+     td[3] text='투자의견없음'
+     td[4] text='정수현,채윤석'
+     td[5] text='한국IR협의회'
      td[6] text='' href="javascript:_popup_open('https://comp.kisline.com/hi/HI0100M0"
-     td[7] text='' href='/chart/view_frame?report_type=CO&business_code=004990'
-     td[8] text='' href='/analysis/downpdf?report_idx=652107'
+     td[7] text='' href='/chart/view_frame?report_type=CO&business_code=265740'
+     td[8] text='' href='/analysis/downpdf?report_idx=652142'
   ── row 1 (td 9개)
-     td[0] text='2026-09-03'
-     td[1] text='산일전기(062040) 과도한 저평가 영역 + 8월 2개 Big Momentum → TP ' href='/analysis/downpdf?report_idx=652103'
-     td[2] text='290,000'
+     td[0] text='2026-09-04'
+     td[1] text='롯데이노베이트(286940) DBO 레퍼런스 확보, 수익성 개선, 남은 건 멀티플 정상화롯' href='/analysis/downpdf?report_idx=652137'
+     td[2] text='30,000'
      td[3] text='Buy'
-     td[4] text='성종화'
-     td[5] text='LS증권'
+     td[4] text='김소혜,김나우'
+     td[5] text='한화투자증권'
      td[6] text='' href="javascript:_popup_open('https://comp.kisline.com/hi/HI0100M0"
-     td[7] text='' href='/chart/view_frame?report_type=CO&business_code=062040'
-     td[8] text='' href='/analysis/downpdf?report_idx=652103'
+     td[7] text='' href='/chart/view_frame?report_type=CO&business_code=286940'
+     td[8] text='' href='/analysis/downpdf?report_idx=652137'
   ── row 2 (td 9개)
-     td[0] text='2026-09-03'
-     td[1] text='코리아써키트(007810) 시간을 주시면, 더 강해져 돌아옵니다코리아써키트(007810) ' href='/analysis/downpdf?report_idx=652096'
-     td[2] text='90,000'
+     td[0] text='2026-09-04'
+     td[1] text='세경하이테크(148150) 실적 반등 시작, 모멘텀도 대기 중세경하이테크(148150) 실' href='/analysis/downpdf?report_idx=652124'
+     td[2] text='6,500'
      td[3] text='Buy'
      td[4] text='양승수'
      td[5] text='메리츠증권'
      td[6] text='' href="javascript:_popup_open('https://comp.kisline.com/hi/HI0100M0"
-     td[7] text='' href='/chart/view_frame?report_type=CO&business_code=007810'
-     td[8] text='' href='/analysis/downpdf?report_idx=652096'
+     td[7] text='' href='/chart/view_frame?report_type=CO&business_code=148150'
+     td[8] text='' href='/analysis/downpdf?report_idx=652124'
 
 ==================================================================
 2. 전일 시세 소스 후보 (pykrx 대체)
@@ -69,21 +69,21 @@ HTTP 200 / 69259 bytes
 ["20260826", 256500, 266500, 255500, 261500, 19532523, 46.71],
 		
 ["20260827", 270000, 271000,
-[B] KODEX 200선물인버스2X 252670 종가=83 등락=0.00% 거래대금=82
-[B] KODEX 인버스 114800 종가=1,061 등락=-0.19% 거래대금=1,061
-[B] TIGER 200선물인버스2X 252710 종가=90 등락=0.00% 거래대금=89
-[B] naver sise_quant  HTTP 200  파싱 83건
+[B] KODEX 200선물인버스2X 252670 종가=79 등락=-4.82% 거래대금=78
+[B] KODEX 인버스 114800 종가=1,039 등락=-2.07% 거래대금=1,036
+[B] KODEX 코스닥150레버리지 233740 종가=6,720 등락=+8.04% 거래대금=6,735
+[B] naver sise_quant  HTTP 200  파싱 79건
 [C] KRX 상장법인목록  HTTP 200  1263782 bytes
-[C] 네이버 종목 시세 KOSPI  HTTP 200  102417 bytes
+[C] 네이버 종목 시세 KOSPI  HTTP 200  102434 bytes
 
 ==================================================================
 3. 정책 소스 후보 (korea.kr 대체)
 ==================================================================
-  korea.kr RSS         실패 ConnectTimeout
-  기재부 보도자료             실패 ConnectTimeout
-  금융위 보도자료             실패 ConnectTimeout
-  한국은행 보도자료            HTTP 200   393086 bytes  '                                          \t \t\t \t\t \t \t  \t \t\t \t\t \t \t  \t '
-  산업부 보도자료             실패 ConnectTimeout
-  금감원 보도자료             실패 ConnectionError
-  연합뉴스 경제 RSS          HTTP 200    94715 bytes  '<?xml version="1.0" encoding="UTF-8"?> <rss version="2.0" xmlns:conten'
+  korea.kr RSS         HTTP 404     1294 bytes  '\ufeff<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http:'
+  기재부 보도자료             HTTP 200        0 bytes  ''
+  금융위 보도자료             HTTP 200   121837 bytes  '<!DOCTYPE html>\r <html lang="ko" class="ko">\r <head>\r \t<title>\r \t\t보도자료'
+  한국은행 보도자료            HTTP 200   392734 bytes  '                                          \t \t\t \t\t \t \t  \t \t\t \t\t \t \t  \t '
+  산업부 보도자료             HTTP 404     2036 bytes  '\r \r \r <!DOCTYPE html>\r <html lang="ko">\r <head>\r     <meta http-equiv='
+  금감원 보도자료             실패 ConnectTimeout
+  연합뉴스 경제 RSS          HTTP 200    91091 bytes  '<?xml version="1.0" encoding="UTF-8"?> <rss version="2.0" xmlns:conten'
   한경 정책 RSS            HTTP 200    22761 bytes  '<!DOCTYPE html> <html lang="ko"> <head> <meta charset="UTF-8"> <title>'

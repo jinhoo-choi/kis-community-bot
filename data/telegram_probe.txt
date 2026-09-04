@@ -1,0 +1,58 @@
+==================================================================
+텔레그램 공개 채널 프리뷰 접근성 프로브
+==================================================================
+
+[타임폴리오자산운용] @activeetf  (confirmed(시사저널e 2025-02))
+  HTTP 200  preview=True
+  제목   : TIME ACT!VE ETF
+  소개   : TIME ACT!VE ETF 공식채널 ※해당 채널의 게시물은 단순한 의견 및 정보 제공을 목적으로 하며 매수·매도 등 투자권유를 의미하지 않습니
+  구독/글: {'subscribers': '9.62K', 'photos': '851', 'videos': '37', 'files': '3', 'links': '403'}
+  최근글 : 2026-09-04T01:53  (페이지 내 20건)
+  샘플   : GPT-6 Astra, 코딩 효율 개선 but 범용은 가격 부담 코딩은 비용 효율 개선 Coding Agent Index 67점으로 Fable 5와 동점이지만 작업당 비용은 절반 
+  ※ 제목·소개가 해당 회사와 일치하는지 사람이 반드시 확인할 것
+
+[미래에셋 TIGER ETF] @tigeretf  (candidate)
+  HTTP 200  preview=False
+
+[삼성 KODEX ETF] @kodexetf  (candidate)
+  HTTP 200  preview=True
+  제목   : Kodex
+  소개   : Kodex ETF 정보공유방
+  구독/글: {'links': '2'}
+  최근글 : 2023-12-28T08:19  (페이지 내 4건)
+  샘플   : ❤️
+  ※ 제목·소개가 해당 회사와 일치하는지 사람이 반드시 확인할 것
+
+[한국투자신탁운용 ACE] @aceetf  (candidate)
+  HTTP 200  preview=True
+  제목   : ACE etf
+  소개   : 
+  구독/글: {'subscriber': '1', 'link': '1'}
+  최근글 : 2025-10-11T16:36  (페이지 내 2건)
+  샘플   : For Sell only 200 USDT Email address: saaarboland@gmail.com Plz subject title:buy channel
+  ※ 제목·소개가 해당 회사와 일치하는지 사람이 반드시 확인할 것
+
+[KB자산운용 RISE] @riseetf  (candidate)
+  HTTP 200  preview=False
+
+[신한자산운용 SOL] @soletf  (candidate)
+  HTTP 200  preview=True
+  제목   : SOL ETF
+  소개   : 말랑말랑한 ETF 시장 정보/ ETF 투자 아이디어
+  구독/글: {'subscribers': '2.82K', 'photos': '1.23K', 'files': '192', 'links': '1.03K'}
+  최근글 : 2026-09-03T22:48  (페이지 내 20건)
+  샘플   : #금리안정 #미증시상승 전일 미 증시는 다우 +1.18%, 나스닥 +1.40%, S&P500 +1.06%로 상승세로 마감 했습니다. 미 증시는 연준의 윌러 이사가 물가 압력이 완화
+  ※ 제목·소개가 해당 회사와 일치하는지 사람이 반드시 확인할 것
+
+[한화자산운용 PLUS] @plusetf  (candidate)
+  HTTP 200  preview=True
+  제목   : PLUS ETF 리서치룸
+  소개   : ➕ PLUS ETF 텔레그램입니다 ETF 투자아이디어와 국내외 금융시장의 다양한 이슈들에 대해 전달드립니다. ➕ Disclaimer: 해당 채널
+  구독/글: {'subscribers': '2.7K', 'photos': '1.37K', 'videos': '43', 'files': '27', 'links': '1.84K'}
+  최근글 : 2026-09-04T00:44  (페이지 내 19건)
+  샘플   : SK이터닉스, ESS 부활·태양광 PPA 확대 수혜 기대-하나 https://n.news.naver.com/mnews/article/018/0006362799
+  ※ 제목·소개가 해당 회사와 일치하는지 사람이 반드시 확인할 것
+
+==================================================================
+프리뷰 접근 가능: 5/7
+접근 가능해도 자동 수집 여부는 별개다. 준법감시 검토 후 결정한다.
