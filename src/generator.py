@@ -93,7 +93,9 @@ def pick_style(item: dict, recent: dict, used_now: set,
             if pid not in pw:
                 continue
             # 사실관계 분량의 절반을 넘는 하한을 요구하는 페르소나는 제외한다
-            if spec["min"] > core * 0.6:
+            # 0.6 은 느슨했다. 연합뉴스 요지(2~3문장) 항목에 fact_note(하한 80자)가
+            # 계속 선택돼 35~42자가 나왔다(실측 2회 연속).
+            if spec["min"] > core * 0.45:
                 pw[pid] = 0
         if not any(pw.values()):        # 전부 막히면 가장 짧은 것으로
             shortest = min(P.style_ids().get(kind, {}) or {"quick_memo": 1},
