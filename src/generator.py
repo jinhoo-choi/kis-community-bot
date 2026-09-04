@@ -65,7 +65,7 @@ def _fix_cliche(b: str) -> str:
                lambda m: _rep(m, "습니다"), b)
     b = re.sub(r"([가-힣A-Za-z0-9,\.%]+)\s*[을를]\s*기록했어요",
                lambda m: _rep(m, "어요"), b)
-    b = re.sub(r"([가-힣A-Za-z0-9,\.%]+)\s*[으]?로\s*집계됐습니다",
+    b = re.sub(r"([가-힣A-Za-z0-9,\.%]+?)(?:으)?로\s*집계됐습니다",
                lambda m: _rep(m, "습니다"), b)
     b = re.sub(r"([가-힣A-Za-z0-9,\.%]+)\s*[을를]\s*기록하며", r"\1이었고", b)
     return b
