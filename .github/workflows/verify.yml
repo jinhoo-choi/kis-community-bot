@@ -12,6 +12,10 @@ on:
         description: 'TELEGRAM_CHAT_ID 로 테스트 메시지 발송'
         type: boolean
         default: false
+      voice_sample:
+        description: 'Voice 4종 비교 샘플 생성'
+        type: boolean
+        default: false
       chat_suffix:
         description: '테스트 발송할 chat_id 뒤 4자리 (시크릿 미등록 시 사용)'
         type: string
@@ -122,6 +126,16 @@ jobs:
           E=$(python3 -c "import json;d=json.load(open('/tmp/g.json'));print((d.get('error') or {}).get('message','')[:80])" 2>/dev/null)
           echo "GEMINI_KEY       : $([ "$C" = "200" ] && echo OK || echo "FAIL($C) $E")" | tee -a data/verify.txt
 
+      - name: Voice sample
+        if: ${{ inputs.voice_sample }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}
+          TZ: Asia/Seoul
+        run: |
+          pip install -q -r requirements.txt
+          python tools/voice_sample.py | tee -a data/verify.txt
+
       - name: Summary & commit
         if: always()
         run: |
@@ -133,6 +147,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -f data/verify.txt
+          git add -f data/voice_sample.txt || true
           git diff --staged --quiet || git commit -m "chore: verify keys $(date +%FT%H%M)"
           git pull --rebase -q origin main || true
           git push

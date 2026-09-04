@@ -49,6 +49,8 @@ class ClaudeProvider(Provider):
         """설치된 SDK 가 temperature 를 안 받는 경우가 있어(실측) 방어적으로 호출한다."""
         kw = dict(model=self.model, max_tokens=max_tokens, system=system,
                   messages=[{"role": "user", "content": user}])
+        if self._no_temp:                 # 한 번 확인했으면 매번 재시도하지 않는다
+            return self._client.messages.create(**kw)
         try:
             return self._client.messages.create(temperature=temperature, **kw)
         except TypeError as e:

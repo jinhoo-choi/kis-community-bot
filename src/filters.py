@@ -31,6 +31,26 @@ def _direction_errors(body: str, facts: str) -> list[str]:
     return [f"방향오용({wrong.group()})"] if wrong else []
 
 
+_HEDGE = re.compile(r"것 같|로 보입니다|인 듯|듯합니다|듯요|보이네요|것으로 보")
+_ENDING = re.compile(r"([가-힣]{1,4})[.!?]")
+
+
+def _hedge_errors(body: str) -> list[str]:
+    """완충 표현 남발. 개별로는 자연스러운데 반복되면 기계 티가 난다."""
+    n = len(_HEDGE.findall(body))
+    return [f"완충표현{n}회"] if n >= 3 else []
+
+
+def _ending_variety(body: str) -> list[str]:
+    """문장 어미 단조로움. 같은 어미가 4번 이상이면 리듬이 죽는다."""
+    ends = _ENDING.findall(body)
+    if len(ends) < 4:
+        return []
+    from collections import Counter
+    top, n = Counter(ends).most_common(1)[0]
+    return [f"어미반복({top}×{n})"] if n >= 4 else []
+
+
 def check(body: str, facts: str, fmt: str = None, angle: str = None,
           length: str = None) -> list[str]:
     """위반 사유 리스트 반환. 빈 리스트면 통과."""
@@ -63,6 +83,8 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
         errs.append(f"미확인수치{hallu[:3]}")
 
     errs += _direction_errors(body, facts)
+    errs += _hedge_errors(body)
+    errs += _ending_variety(body)
 
     # 미확인 표현은 uncertainty 앵글에서만 허용한다.
     # "정보가 없다"는 안전한 문장이라 모델이 습관적으로 쓰고, 그게 50건 중 20건에
