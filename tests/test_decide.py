@@ -467,6 +467,22 @@ def main():
     ok.append(run("Voice 계약에 어미 규칙", "종결어미" in _V["dry"]["desc"]))
     ok.append(run("Voice 계약에 문장 규칙", "5어절" in _V["light"]["desc"]))
 
+
+    # ── 재생성 힌트 (같은 프롬프트로 재시도하면 같은 실수를 반복한다)
+    from src.generator import _hint as _h
+    _hh = _h(["수치과다(6개/medium)", "방향오용(낙폭)"])
+    ok.append(run("힌트에 수치 지적", "숫자" in _hh))
+    ok.append(run("힌트에 방향 지적", "부호" in _hh))
+    ok.append(run("힌트 중복 제거", _h(["수치과다(5개)", "수치과다(6개)"]).count("\n") == 0))
+    from src.personas import build_messages as _bm
+    _sys, _ = _bm({"kind": "flow", "title": "t", "facts": "등락률: 20.32%",
+                   "retry_hint": "- 숫자를 줄이세요."}, "calm", "fact_read", "reaction", "medium")
+    ok.append(run("힌트가 프롬프트에 주입", "직전 시도에서" in _sys))
+
+    # calm 계약이 방향 오용을 유도하지 않는가
+    ok.append(run("calm 계약에 방향 규칙", "낙폭" in _V["calm"]["desc"]))
+    ok.append(run("전역 규칙에 방향 어휘", "등락 방향 어휘" in _SP))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 

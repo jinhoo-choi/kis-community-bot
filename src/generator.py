@@ -174,6 +174,7 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
     if retry:
         names = list(router.writers().keys())
         for p in retry:
+            p["retry_hint"] = _hint(p.get("reject_errs", []))
             alt = next((n for n in names if n != p["provider"]), p["provider"])
             made = _run(alt, [p], [p["tone"]], [p.get("fmt", "fact_read")],
                         [p.get("angle", "")], [p.get("length", "medium")])
@@ -183,6 +184,32 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
 
     print(f"[gen] 정규식 통과 {len(posts)}건 / 시도 {len(items)}건")
     return posts
+
+
+_HINTS = {
+    "수치과다": "숫자를 너무 많이 썼습니다. 숫자는 2~3개만 쓰고, "
+              "숫자가 하나도 없는 문장을 반드시 넣으세요.",
+    "미확인표현": "'확인되지 않았다' 류 표현을 썼습니다. 그 문장을 통째로 빼고, "
+                "확인된 사실만으로 글을 완성하세요.",
+    "방향오용": "등락 방향 어휘를 반대로 썼습니다. 입력의 등락률 부호를 다시 확인하세요.",
+    "너무김": "너무 깁니다. 문장 수를 줄이고 곁가지 내용을 버리세요.",
+    "너무짧음": "너무 짧습니다. 사실을 하나 더 넣되 숫자를 늘리지는 마세요.",
+    "질문마무리금지": "질문으로 끝냈습니다. 마지막 사실에서 그냥 끊으세요.",
+    "stock_ending": "'지켜봐야 한다' 류 상투적 마무리를 썼습니다. 그 문장을 빼세요.",
+    "완충표현": "'~것 같습니다', '~로 보입니다'를 너무 많이 썼습니다. 한 번까지만 쓰세요.",
+    "어미반복": "같은 종결어미가 반복됩니다. 어미를 섞으세요.",
+    "literary_style": "'~했다', '~이다' 같은 기사체를 썼습니다. 존댓말 구어체로 쓰세요.",
+    "미확인수치": "입력에 없는 숫자를 만들었습니다. 입력에 적힌 숫자만 그대로 쓰세요.",
+}
+
+
+def _hint(errs: list[str]) -> str:
+    out = []
+    for e in errs:
+        for k, msg in _HINTS.items():
+            if k in e and msg not in out:
+                out.append(msg)
+    return "\n".join(f"- {m}" for m in out) or "- 규칙을 다시 확인하고 작성하세요."
 
 
 def collect_fallbacks() -> list[str]:
