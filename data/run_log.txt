@@ -14,34 +14,38 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
 [tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
 [crawl] telegram_ch 0건 (정상 0건)
 [main] 수집 총 25건
-[enrich] 17/25건 배경 보강 완료
-[gate] 차단 16건 {'tier4': 9, 'tier5': 6, 'tier1': 1}
-[theme] 테마글 1건에 게시 종목 배정
+[enrich] 20/25건 배경 보강 완료
+[gate] 차단 14건 {'tier4': 9, 'tier5': 4, 'tier1': 1}
+[theme] 테마글 2건에 게시 종목 배정
 [main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
-[main] 생성 대상 9건 {'disclosure': 5, 'research': 0, 'flow': 2, 'policy': 1, 'poll': 1}
+[main] 생성 대상 11건 {'disclosure': 6, 'research': 0, 'flow': 2, 'policy': 2, 'poll': 1}
 [claude] SDK 1.4.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] claude: 7/7건 생성
+[gen] claude: 9/9건 생성
+[gen] 정규식 리젝 dart-20260904000355 ['너무김(156자/brief_report)']
+       └ '1.8702948배. 우성이 우성유통을 흡수합병하기로 결정했는데, 우성 보통주 1주에 우성유통 보통주 1.8702948주를 배정합니다. 우성유통이 영위하던 유통 사업이 우성으로 내재화되면서 사료-농장-유통으로 이어지는 축산 식품 사업 밸류체인이 단일 조직 내에서 통합 운영됩니다.'
+[gen] 정규식 리젝 dart-20260904000367 ["근거없는수치['6.45']"]
+       └ '자기주식 취득 신탁계약이 2026년 09월 04일 만기로 해지되네요. 발행주식의 6.45%를 차지했던 신탁계약이 기간만료에 따라 종료되는 것입니다.'
+[gen] 정규식 리젝 dart-20260904800462 ['미확인표현(밝혀지지 않)']
+       └ '9월 4일 SKC가 타법인주식 및 출자증권 취득을 결정했어요. 구체적인 규모나 대상사는 공시에서 밝혀지지 않았네요.'
 [gen] 정규식 리젝 dart-20260904000209 ["근거없는수치['823']"]
-       └ '823억원에 선민수산을 인수하기로 신라교역이 결정했어요. 원양어업과 수산물 유통 사업으로 포트폴리오를 늘리는 움직임이네요.'
-[gen] 정규식 리젝 flow-2026-09-04-030530 ['수치과다(4개/brief_report)']
-       └ '29.91% 상승했습니다. 원익홀딩스가 어제 이 정도 상승률이었습니다. 거래량은 20일 평균의 6.0배였고, 지난 5거래일 누적으로는 17.92% 올랐습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-108490 ['수치과다(5개/data_focus)']
-       └ '로보티즈가 거래량 20일 평균의 6.4배였습니다. 장중에는 저가 대비 18.9% 상승한 후 고가에서 3.3% 내려 마감했습니다. 5거래일 누적 수익률은 25.83%입니다.'
-[gen] 정규식 리젝 kind-20260904000786 ['stock_ending']
-       └ '디에이치엑스컴퍼니가 거래소 조회공시에 답변했습니다. 풍문이나 보도 관련 주권매매거래정지기간변경에 대한 답변인데요. 상세 내용은 원문 확인이 필요합니다. 오늘 종가는 6,930원으로 전날 대비 변동 없었으며, 5거래일 누적도 0.00%입니다.'
+       └ '823억원에 선민수산을 인수하기로 했어요. 원양어업과 수산물 도소매업을 하는 회사고, 양수 후 지분율은 100%가 돼요.'
+[gen] 정규식 리젝 flow-2026-09-04-108490 ['수치과다(4개/brief_report)']
+       └ '3,040억원. 어제 로보티즈 거래대금입니다. 거래량은 20일 평균의 6.4배였습니다. 장중 저가 대비 18.9% 변동폭을 보였습니다.'
 [gen] gemini: 2/2건 생성
 [gen] 정규식 리젝 pol-23개월만에최저환율에기업달러예금역대최대 ['미완성(종결부호 없음)']
-       └ '1,345원까지 원/달러 환율이 내려갔어요. 환율이 이처럼 낮은 수준으로 떨어지'
-[gen] 정규식 리젝 poll-flow-2026-09-04-030530 ['너무짧음(44자/open_talk)', '미완성(종결부호 없음)']
-       └ '225억원이 어제 하루 동안 원익홀딩스에서 거래된 대금인데요. 장중 고저차가 저'
-[gen] 정규식 통과 4건 / 시도 9건
+       └ '1,345원으로 원/달러 환율이 하락하며 최근 들어 가장 낮은 수준으로 내려갔어요. 환'
+[gen] 정규식 리젝 poll-flow-2026-09-04-030530 ['너무짧음(32자/open_talk)']
+       └ '29.91%나 급상승한 원익홀딩스의 움직임이 두드러졌네요.'
+[gen] 정규식 통과 5건 / 시도 11건
 [claude] SDK 1.4.0
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 1건 / 보류 3건
+[main] 배포 0건 / 보류 5건
    보류 dart-20260904000431 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
-   보류 dart-20260904000367 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
-   보류 pol-23개월만에최저환율에기업달러예금역대최대 (claude) - 커뮤니티적합성 2/5 정보량이 적고 논점이 부족함
+   보류 flow-2026-09-04-030530 (claude) - 커뮤니티적합성 2/5 정보량이 부족하고 분석적 가치가 낮음
+   보류 kind-20260904000786 (claude) - fatal:상투적 마무리 문구로 글을 닫음 (지켜봐야/확인이 필요/주목됩니다 류)
+   보류 pol-빚투속에50대이상보험계약대출카드론늘었다 (claude) - 커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함
+   보류 pol-23개월만에최저환율에기업달러예금역대최대 (claude) - 커뮤니티적합성 2/5 정보량이 적고 분석적 깊이가 부족함
 [tg] 테스트 채널 suffix 매칭: ...2744 (private)
-[main] filter_log data/filter_log_20260906_0800.json
-[main] stats {"ts": "2026-09-06T08:00:05+09:00", "persona_mode": "v2", "collected": 25, "gate_blocked": 16, "gate_reasons": {"tier4": 9, "tier5": 6, "tier1": 1}, "enrich_ok": 17, "generated": 4, "sent": 1, "held": 3, "hold_reasons": {"fatal": 2, "커뮤니티적합성 2/5 정보량이 적고 논점이 부족함": 1}, "avg_score": 18.0, "by_provider": {"claude": {"generated": 4, "sent": 1, "avg_score": 13.68}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 14, "expected": 18, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 2, "expected": 3, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 4, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+[main] filter_log data/filter_log_20260906_0815.json
+[main] stats {"ts": "2026-09-06T08:15:29+09:00", "persona_mode": "v2", "collected": 25, "gate_blocked": 14, "gate_reasons": {"tier4": 9, "tier5": 4, "tier1": 1}, "enrich_ok": 20, "generated": 5, "sent": 0, "held": 5, "hold_reasons": {"fatal": 2, "커뮤니티적합성 2/5 정보량이 부족하고 분석적 가치가 낮음": 1, "커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함": 1, "커뮤니티적합성 2/5 정보량이 적고 분석적 깊이가 부족함": 1}, "avg_score": null, "by_provider": {"claude": {"generated": 5, "sent": 0, "avg_score": 13.32}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 14, "expected": 18, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 2, "expected": 3, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 4, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
