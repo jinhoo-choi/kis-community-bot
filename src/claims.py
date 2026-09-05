@@ -129,6 +129,27 @@ def block(item: dict, use_n: int = 3, angle: str = "") -> str:
     )
 
 
+def facts_view(item: dict, n: int, angle: str = "") -> str:
+    """프롬프트에 넣을 사실관계. **고르지 않은 수치는 지운다.**
+
+    블록에서 4개만 고른다고 말해도 [사실관계]에 9개가 그대로 있으면 모델은
+    그걸 다 쓴다 (실측: 선정형 전환 후에도 주장과다 6건. 본문이 정확히
+    입력 순서대로 나열됐다). 지시는 데이터에 진다.
+
+    지우는 것은 '선정되지 않은 claim 에 해당하는 줄'뿐이다.
+    종목명·기준일·주의문·enrich 배경 서술은 그대로 남긴다.
+    """
+    facts = item.get("facts", "")
+    keep = {c["type"] for c in select(item, n, angle)}
+    drop_pats = [pat for cid, _l, pat, _f in CLAIM_SPECS if cid not in keep]
+    out = []
+    for line in facts.splitlines():
+        if any(re.search(pat, line) for pat in drop_pats) and re.search(r"\d", line):
+            continue
+        out.append(line)
+    return "\n".join(out)
+
+
 # ── Sentence-level Grounding ────────────────────────────────
 # 숫자 개수를 세는 방식은 claim 과 어긋난다. "1 대 1.8702948" 은 주장 1개인데
 # 숫자 2개로 계산돼 수치과다로 리젝됐다 (실측 8건).

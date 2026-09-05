@@ -605,6 +605,12 @@ def main():
     from src.personas import build_messages_v2 as _bm2
     _s3, _ = _bm2(_it3, "quick_memo", "reaction")
     ok.append(run("프롬프트에 claim 주입", "등락률: 12.41%" in _s3))
+    # 지시는 데이터에 진다 — 안 쓸 수치는 [사실관계]에서도 지워야 한다 (실측 오탐 6건)
+    _s4, _u4 = _bm2(_it3, "quick_memo", "reaction")
+    _keep = {c["value"].split()[0] for c in _cl2.select(_it3, 3, "reaction")}
+    ok.append(run("미선정 수치는 사실관계에도 없음",
+                  "3.2배" not in _u4, _u4[-160:]))
+    ok.append(run("종목·기준일 줄은 보존", "12.41%" in _u4))
     for _bad in ["기대감이 반영된 것으로 보입니다.",
                  "반도체 업황 수혜가 예상됩니다.",
                  "수익 구조를 안정화하려는 전략으로 보입니다."]:

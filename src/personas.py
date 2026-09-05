@@ -240,7 +240,8 @@ def build_messages(item: dict, tone: str, fmt: str = "fact_read",
         kind=item.get("kind", ""),
         stock=item.get("stock_name") or "해당 종목 없음(테마)",
         title=item.get("title", ""),
-        facts=item.get("facts", "").strip()[:4000],
+        # 고르지 않은 수치는 프롬프트에서 지운다. 보이면 쓴다.
+        facts=claims.facts_view(item, num_cap(length), angle).strip()[:4000],
     )
     return system, user
 
@@ -305,6 +306,7 @@ def build_messages_v2(item: dict, persona: str, angle: str = "") -> tuple[str, s
         kind=item.get("kind", ""),
         stock=item.get("stock_name") or "해당 종목 없음(테마)",
         title=item.get("title", ""),
-        facts=item.get("facts", "").strip()[:4000],
+        # 고르지 않은 수치는 프롬프트에서 지운다. 보이면 쓴다.
+        facts=claims.facts_view(item, v2.claim_cap(persona), angle).strip()[:4000],
     )
     return system, user

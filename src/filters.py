@@ -17,18 +17,30 @@ _UP = re.compile(r"낙폭|급락|하락(?!률)|떨어졌|빠졌|내렸")
 _DOWN = re.compile(r"급등|상승(?!률)|올랐|뛰었|치솟")
 
 
+# 하락 어휘가 정당한 문맥. 일간 등락률이 양수여도 이 값들은 음수일 수 있다.
+_DOWN_OK = re.compile(r"5거래일|누적|고가 (대비|에서)|장중|마감 위치|되돌|반납")
+
+
 def _direction_errors(body: str, facts: str) -> list[str]:
     """등락 방향 오용 검사.
 
     실측: +23.74% 상승 건에 "이 정도 낙폭이면" 이라고 써놓고 심사 19점을 받았다.
     facts 의 등락률 부호로 방향을 확정하고, 반대 방향 어휘가 나오면 리젝한다.
+
+    단 문장 단위로 본다. 글 전체를 한 방향으로 묶으면
+    "어제는 12.44% 올랐지만 5거래일 누적으로는 3.41% 내렸다"(둘 다 사실)가
+    리젝된다 — 실측 오탐 2건. 하락 어휘가 다른 지표를 가리키는 문맥은 통과시킨다.
     """
     m = re.search(r"등락률[:\s]*([-+]?\d+(?:\.\d+)?)\s*%", facts or "")
     if not m:
         return []
     up = float(m.group(1)) > 0
-    wrong = _UP.search(body) if up else _DOWN.search(body)
-    return [f"방향오용({wrong.group()})"] if wrong else []
+    pat = _UP if up else _DOWN
+    for sent in re.split(r"(?<=[.!?])\s+|\n", body):
+        w = pat.search(sent)
+        if w and not (up and _DOWN_OK.search(sent)):
+            return [f"방향오용({w.group()})"]
+    return []
 
 
 _HEDGE = re.compile(r"것 같|로 보입니다|인 듯|듯합니다|듯요|보이네요|것으로 보")
