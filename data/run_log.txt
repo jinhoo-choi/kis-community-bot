@@ -1,64 +1,72 @@
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-[dart] corp_code 3989종목 매핑
-[dart] 상세 보강 2/12건
-[crawl] dart 12건
-[crawl] naver_research 2건
-[crawl] hankyung 1건
-[market] ⚠ 등락률 이상치 135.0% — 스카이랩스 제외
-[crawl] market 9건
-[tickers] 상장 2632종목 로드 (lxml)
-[crawl] kind_inquiry 2건
-[crawl] policy_rss 3건
-[tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
-[crawl] telegram_ch 0건 (정상 0건)
-[main] 수집 총 30건
-[enrich] 21/30건 배경 보강 완료
-[gate] 차단 11건 {'tier5': 5, 'tier4': 5, 'tier1': 1}
-[theme] 테마글 2건에 게시 종목 배정
-[main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
-[main] 생성 대상 19건 {'disclosure': 6, 'research': 1, 'flow': 9, 'policy': 2, 'poll': 1}
-[claude] SDK 1.4.0
-[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] claude: 15/15건 생성
-[gen] 정규식 리젝 dart-20260904000355 ['unsourced_eval']
-       └ '1 : 1.8702948. 우성이 우성유통을 흡수합병하면서 정한 주식 배정 비율입니다. 우성 보통주 1주당 우성유통 보통주 1.8702948주씩 배정된다는 뜻입니다. 합병을 통해 사료-농장-유통으로 이어지는 축산 식품 사업 체인이 단일 조직 내에서 통합 운영될 습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-030530 ['주장과다(6개/4)', '어미반복(습니다×4)']
-       └ '종가 22,500원에서 29.91% 상승했습니다. 거래량은 20일 평균의 6.0배였습니다. 장중 저가 대비 28.6% 오른 후 마감했으며, 5거래일 누적으로는 17.92% 올랐습니다. 225억원이 거래됐습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-108490 ['주장과다(7개/5)']
-       └ '종가 304,500원으로 전일 대비 22.54% 상승한 로보티즈는 거래대금이 3,040억원이었습니다. 거래량은 20일 평균의 6.4배 수준인데요, 장중 움직임을 보면 저가 대비 18.9%의 변동폭을 나타냈습니다. 마감은 장중 고가로부터 3.3% 낮은 수준에서 정리됐으며, 지난 5거래일 누적 상승률은 25.83%였습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-234340 ['주장과다(6개/5)']
-       └ '어제 헥토파이낸셜이 종가 기준 13.48% 올랐고, 거래대금은 252억원이었어요. 거래량이 20일 평균의 3.6배 수준으로 나타났고, 장중에는 저가 대비 10.5%까지 움직였는데 마감은 장중 고가보다 5.8% 낮은 자리에서 마무리됐어요. 지난 5거래일 누적으로는 7.91% 올랐습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-336260 ['주장과다(6개/5)']
-       └ '종가 대비 장중 고저차가 14.4%에 달했습니다. 어제 두산퓨얼셀은 12.44% 올라 43,850원에 마감했는데요, 장중에는 저가에서 고가까지 14.4%의 변동폭을 보였습니다. 거래대금은 438억원, 거래량은 20일 평균의 1.4배였습니다. 다만 5거래일 기준으로는 -3.41% 내려 있는 상황입니다.'
-[gen] 정규식 리젝 flow-2026-09-04-058610 ['주장과다(7개/5)']
-       └ '거래대금 기준으로 보면 전일 에스피지는 942억원이 거래되며 평소보다 훨씬 활발했어요. 20일 평균 대비 2.3배의 거래량이 몰린 셈입니다. 종가는 94,200원으로 12.41% 올랐는데, 장중 움직임을 보면 저가 대비 12.4%의 폭이 있었어요. 다만 마감은 장중 고가에서 3.1% 낮은 수준에서 이뤄졌습니다. 5거래일 기준으로는 1.62% 올랐던 상태였습'
-[gen] 정규식 리젝 flow-2026-09-04-263750 ['주장과다(7개/5)', '어미반복(습니다×4)']
-       └ '어제 펄어비스는 11.47% 올랐으며 종가는 34,500원이었습니다. 거래대금 345억원에 거래량이 20일 평균의 2.1배를 기록했는데요, 장중에는 저가 대비 8.5% 변동폭을 보였습니다. 마감은 장중 고가보다 2.1% 낮은 수준에서 이루어졌습니다. 지난 5거래일 누적으로는 6.15% 올랐습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-090460 ['주장과다(6개/5)']
-       └ '218억원의 거래대금이 하루 사이 쌓였어요. 종가 기준 10.75% 올랐고, 20일 평균의 2.0배 규모 거래량이 나왔어요. 장중에는 저가 대비 11.4% 움직였는데 마감은 장중 고가 대비 1.6% 낮은 수준에서 정리됐습니다. 지난 5거래일을 보면 누적으로 27.78% 상승한 모습이에요. 하루 변동폭이 크긴 했지만, 한편으로는 고점 근처에서 마감했다고 볼 '
-[gen] 정규식 리젝 flow-2026-09-04-240810 ['주장과다(7개/5)']
-       └ '114,800원에서 마감한 원익IPS는 전일 대비 9.33% 올랐습니다. 거래대금은 1,147억원이었고, 거래량은 20일 평균의 1.1배 수준이었는데요. 장중에는 저가 대비 10.7% 범위에서 변동했으며, 마감은 장중 고가 대비 1.9% 낮은 수준에서 이뤄졌습니다. 5거래일 누적 기준으로는 3.33% 상승했습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-060250 ['주장과다(6개/5)']
-       └ '8.38% 올랐네요. 종가는 15,770원이고 거래대금은 158억원이었어요. 장중에는 저가 대비 7.0%의 변동폭이 있었고, 마감은 장중 고가보다 3.0% 낮은 수준에서 나왔습니다. 거래량은 20일 평균의 1.9배였어요.'
-[gen] gemini: 4/4건 생성
-[gen] 정규식 리젝 pol-인력재배치시파업가능에경영계우려누더기지침한계 ['literary_style']
-       └ '" - 기간이 없다. 그렇다면 "최근 고용노동부 발표에 따르면~"으로 시작'
-[gen] 정규식 리젝 poll-flow-2026-09-04-030530 ['너무짧음(53자/check_list)']
-       └ '그냥 숫자가 들어간 주장 중 3개만 숫자를 노출하고 나머지는 숫자를 생략하거나 다른 방식으로 표'
-[gen] 정규식 통과 8건 / 시도 19건
-[claude] SDK 1.4.0
-[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 0건 / 보류 8건
-   보류 dart-20260904000431 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반,사실관계에 없는 업황·수혜 일반론을 덧붙임
-   보류 dart-20260904800546 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반,유상증자는 일반적으로~ 같은 사전식 일반론으로 분량을 채움
-   보류 dart-20260904000367 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
-   보류 dart-20260904000282 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
-   보류 hk-652142 (claude) - fatal:상투적 마무리 문구로 글을 닫음 (지켜봐야/확인이 필요/주목됩니다 류)
-[tg] ⚠ suffix ...2744 매칭 실패 (getUpdates 24시간 보관 한계). 봇에게 아무 메시지나 보낸 뒤 재실행하세요.
-[tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 (TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)
-[main] filter_log data/filter_log_20260905_1223.json
-[main] stats {"ts": "2026-09-05T12:23:53+09:00", "persona_mode": "v2", "collected": 30, "gate_blocked": 11, "gate_reasons": {"tier5": 5, "tier4": 5, "tier1": 1}, "enrich_ok": 21, "generated": 8, "sent": 0, "held": 8, "hold_reasons": {"fatal": 7, "커뮤니티적합성 2/5 정보 요약은 충실하나 논점이 다소 평이함": 1}, "avg_score": null, "by_provider": {"gemini": {"generated": 2, "sent": 0, "avg_score": 10.0}, "claude": {"generated": 6, "sent": 0, "avg_score": 11.98}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 12, "expected": 12, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 9, "expected": 9, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/urllib3/connection.py", line 204, in _new_conn
+    sock = connection.create_connection(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/urllib3/util/connection.py", line 85, in create_connection
+    raise err
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/urllib3/util/connection.py", line 73, in create_connection
+    sock.connect(sa)
+TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/urllib3/connectionpool.py", line 788, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/urllib3/connectionpool.py", line 488, in _make_request
+    raise new_e
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/urllib3/connectionpool.py", line 464, in _make_request
+    self._validate_conn(conn)
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/urllib3/connectionpool.py", line 1106, in _validate_conn
+    conn.connect()
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/urllib3/connection.py", line 759, in connect
+    self.sock = sock = self._new_conn()
+                       ^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/urllib3/connection.py", line 213, in _new_conn
+    raise ConnectTimeoutError(
+urllib3.exceptions.ConnectTimeoutError: (<HTTPSConnection(host='opendart.fss.or.kr', port=443) at 0x7fe43be70ed0>, 'Connection to opendart.fss.or.kr timed out. (connect timeout=15)')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/requests/adapters.py", line 696, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/urllib3/connectionpool.py", line 842, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/urllib3/util/retry.py", line 543, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='opendart.fss.or.kr', port=443): Max retries exceeded with url: /api/list.json?crtfc_key=cf0792ba00cb2113a33030aa508679f3b719b346&bgn_de=20260904&end_de=20260904&corp_cls=Y&page_no=1&page_count=100 (Caused by ConnectTimeoutError(<HTTPSConnection(host='opendart.fss.or.kr', port=443) at 0x7fe43be70ed0>, 'Connection to opendart.fss.or.kr timed out. (connect timeout=15)'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/runner/work/kis-community-bot/kis-community-bot/main.py", line 147, in <module>
+    main()
+  File "/home/runner/work/kis-community-bot/kis-community-bot/main.py", line 51, in main
+    raw = collect()
+          ^^^^^^^^^
+  File "/home/runner/work/kis-community-bot/kis-community-bot/main.py", line 29, in collect
+    items += dart.fetch(int(q["disclosure"] * over))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/kis-community-bot/kis-community-bot/src/sources/dart.py", line 42, in fetch
+    r = requests.get(
+        ^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/requests/api.py", line 87, in get
+    return request("get", url, params=params, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/requests/api.py", line 71, in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/requests/sessions.py", line 651, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/requests/sessions.py", line 784, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/site-packages/requests/adapters.py", line 717, in send
+    raise ConnectTimeout(e, request=request)
+requests.exceptions.ConnectTimeout: HTTPSConnectionPool(host='opendart.fss.or.kr', port=443): Max retries exceeded with url: /api/list.json?crtfc_key=cf0792ba00cb2113a33030aa508679f3b719b346&bgn_de=20260904&end_de=20260904&corp_cls=Y&page_no=1&page_count=100 (Caused by ConnectTimeoutError(<HTTPSConnection(host='opendart.fss.or.kr', port=443) at 0x7fe43be70ed0>, 'Connection to opendart.fss.or.kr timed out. (connect timeout=15)'))
