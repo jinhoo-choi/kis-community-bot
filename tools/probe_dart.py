@@ -165,25 +165,27 @@ def main():
                     zf = zipfile.ZipFile(io.BytesIO(d.content))
                     log(f"  ZIP 내용: {zf.namelist()}")
                     raw = zf.read(zf.namelist()[0])
-                    txt = raw.decode("euc-kr", "ignore")
+                    # meta 는 euc-kr 이라고 하지만 실제 바이트는 UTF-8 이다.
+                    # euc-kr 로 읽으면 제목이 '⑥쇳留ㅳ怨듦怨쎌껜寃'로 깨진다 (실측).
+                    for enc in ("utf-8", "euc-kr", "cp949"):
+                        try:
+                            txt = raw.decode(enc)
+                            log(f"  디코딩: {enc}")
+                            break
+                        except UnicodeDecodeError:
+                            continue
+                    else:
+                        txt = raw.decode("utf-8", "ignore")
                     log(f"  본문 {len(txt):,}자")
-                    # 키워드가 없으면 구조 자체를 봐야 한다. 태그 목록부터 덤프한다.
-                    import re as _re
-                    tags = sorted(set(_re.findall(r"<([A-Za-z][\w-]*)", txt)))
-                    log(f"  태그 종류({len(tags)}): {tags[:40]}")
-                    # 서남(비정정) 원 공시도 '계약금액'이 없었다. 추측하지 말고 원문을 본다.
-                    log("  --- 원문 앞 1500자 ---")
-                    log("  " + _re.sub(r"\s+", " ", txt[:1500]))
-                    log("  --- 숫자+단위가 나오는 구간 ---")
-                    for m in list(_re.finditer(r"[\d,]{6,}\s*(원|백만원|천원)", txt))[:5]:
-                        log("   " + _re.sub(r"\s+", " ",
-                                            txt[max(0, m.start()-150):m.end()+80]))
-                    for kw in ("계약금액", "계약 금액", "계약상대", "매출액",
-                               "계약기간", "판매·공급", "공급계약"):
-                        i = txt.find(kw)
-                        log(f"  [{kw}] " + (
-                            _re.sub(r"\s+", " ", txt[max(0, i-80):i+320])
-                            if i >= 0 else "없음"))
+                    # HTML table 구조다. 라벨/값 쌍을 그대로 뽑아 필드명을 확인한다.
+                    from bs4 import BeautifulSoup
+                    soup = BeautifulSoup(txt, "html.parser")
+                    log("  --- 표 셀 (라벨 | 값) ---")
+                    for tr in soup.find_all("tr")[:40]:
+                        cells = [c.get_text(" ", strip=True) for c in tr.find_all("td")]
+                        cells = [c for c in cells if c]
+                        if cells:
+                            log("   " + " | ".join(c[:60] for c in cells))
             else:
                 log("  최근 30일 공급계약 공시 없음")
         except Exception as ex:
