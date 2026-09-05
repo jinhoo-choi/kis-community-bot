@@ -631,6 +631,17 @@ def main():
     ok.append(run("페르소나 num_cap 연동",
                   "2개만" in _cl2.block(_it3, 2)))
 
+
+    # ── 입력 정합성 / 소진 방지
+    from src.generator import clean as _cl3
+    ok.append(run("깨진 문자 제거",
+                  "ꤼ" not in _cl3("규모라면 ꤼ 의미 있는 움직임입니다.")))
+    ok.append(run("한글·기호는 보존",
+                  _cl3("종가는 8,600원(+12.41%)이었습니다.") ==
+                  "종가는 8,600원(+12.41%)이었습니다."))
+    ok.append(run("claim 사용 개수 명시", "3개만" in _cl2.block(_it3, 3)))
+    ok.append(run("페르소나별 개수 연동", "2개만" in _cl2.block(_it3, 2)))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
