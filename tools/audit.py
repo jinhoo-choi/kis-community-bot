@@ -150,7 +150,8 @@ cases = [
              "코스닥 거래대금 상위권에 이름을 올렸습니다. 장 초반부터 거래가 몰렸습니다.", False),
 ]
 for nm, body, should in cases:
-    errs = filters.check(body, "등락률: 20.32% 299,000 2,990", "fact_note", "reaction", "fact_note")
+    _facts = ("등락률: 20.32%\n종가: 299,000원\n거래대금: 2,990억원")
+    errs = filters.check(body, _facts, "fact_note", "reaction", "fact_note")
     if bool(errs) != should:
         fail(f"필터 {nm}: 기대 {should} 실제 {errs}")
     else:
