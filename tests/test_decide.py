@@ -773,6 +773,29 @@ def main():
                             _shadow.append(f"{_f}:{_n.lineno}")
     ok.append(run("함수 내 재import 로 전역 가림 없음", not _shadow, str(_shadow[:3])))
 
+    # 공급계약 원문 파서 (프로브로 확인한 실제 표 구조)
+    from src.sources import dart_contract as _dc
+    _html = ("<table>"
+             "<tr><td>2. 계약내역</td><td>조건부 계약여부</td><td>미해당</td></tr>"
+             "<tr><td>계약금액 총액(원)</td><td>662,348,400</td></tr>"
+             "<tr><td>최근 매출액(원)</td><td>3,386,486,863</td></tr>"
+             "<tr><td>매출액 대비(%)</td><td>19.56</td></tr>"
+             "<tr><td>3. 계약상대방</td><td>-</td></tr>"
+             "<tr><td>- 최근 매출액(원)</td><td>-</td></tr>"
+             "<tr><td>4. 판매ㆍ공급지역</td><td>미국</td></tr></table>")
+    _c = _dc._cells(_html)
+    ok.append(run("셀이 3개인 행도 라벨 정확",
+                  _c.get("조건부 계약여부") == "미해당"))
+    ok.append(run("계약금액 추출", _c.get("계약금액 총액(원)") == "662,348,400"))
+    ok.append(run("억원 반올림 안 함", _dc._won("662,348,400") == "6.6억원"))
+    ok.append(run("계약상대방 매출액과 혼동 없음",
+                  next((v for l, v in _c.items()
+                        if "최근 매출액" in l and not l.startswith("-")), "")
+                  == "3,386,486,863"))
+    ok.append(run("공급계약 제목만 처리",
+                  bool(_dc.TITLE_RE.search("[기재정정]단일판매ㆍ공급계약체결"))
+                  and not _dc.TITLE_RE.search("주요사항보고서(유상증자결정)")))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
