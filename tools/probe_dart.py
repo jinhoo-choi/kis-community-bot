@@ -171,6 +171,13 @@ def main():
                     import re as _re
                     tags = sorted(set(_re.findall(r"<([A-Za-z][\w-]*)", txt)))
                     log(f"  태그 종류({len(tags)}): {tags[:40]}")
+                    # 서남(비정정) 원 공시도 '계약금액'이 없었다. 추측하지 말고 원문을 본다.
+                    log("  --- 원문 앞 1500자 ---")
+                    log("  " + _re.sub(r"\s+", " ", txt[:1500]))
+                    log("  --- 숫자+단위가 나오는 구간 ---")
+                    for m in list(_re.finditer(r"[\d,]{6,}\s*(원|백만원|천원)", txt))[:5]:
+                        log("   " + _re.sub(r"\s+", " ",
+                                            txt[max(0, m.start()-150):m.end()+80]))
                     for kw in ("계약금액", "계약 금액", "계약상대", "매출액",
                                "계약기간", "판매·공급", "공급계약"):
                         i = txt.find(kw)
