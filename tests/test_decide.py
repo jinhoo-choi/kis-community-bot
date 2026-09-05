@@ -598,11 +598,13 @@ def main():
                                      "거래대금: 942억원\n거래량: 20일 평균의 3.2배"}
     _cs = _cl2.build(_it3)
     ok.append(run("claim 추출", len(_cs) == 4, str([c["type"] for c in _cs])))
-    ok.append(run("claim 블록 생성", "사용 가능한 주장" in _cl2.block(_it3)))
+    ok.append(run("claim 블록 생성", "이번 글에 쓸 사실" in _cl2.block(_it3)))
+    ok.append(run("미선정 주장은 블록에 없음",
+                  "3.2배" not in _cl2.block(_it3, 3, "reaction")))
     ok.append(run("금지 claim type 명시", "등락의 원인" in _cl2.block(_it3)))
     from src.personas import build_messages_v2 as _bm2
     _s3, _ = _bm2(_it3, "quick_memo", "reaction")
-    ok.append(run("프롬프트에 claim 주입", "C1. 등락률" in _s3))
+    ok.append(run("프롬프트에 claim 주입", "등락률: 12.41%" in _s3))
     for _bad in ["기대감이 반영된 것으로 보입니다.",
                  "반도체 업황 수혜가 예상됩니다.",
                  "수익 구조를 안정화하려는 전략으로 보입니다."]:
@@ -627,10 +629,12 @@ def main():
                   "ꤼ" not in _cl3("이 정도 규모라면 ꤼ 의미 있는 움직임입니다.")))
     ok.append(run("한글 본문은 보존",
                   "움직임입니다" in _cl3("이 정도 규모라면 ꤼ 의미 있는 움직임입니다.")))
-    _blk = _cl2.block(_it3, 3)
-    ok.append(run("claim 사용 개수 명시", "3개만" in _blk))
-    ok.append(run("페르소나 num_cap 연동",
-                  "2개만" in _cl2.block(_it3, 2)))
+    ok.append(run("선정된 주장만 제시", len(_cl2.select(_it3, 3)) == 3
+                  and len(_cl2.select(_it3, 2)) == 2))
+    ok.append(run("메뉴 제공 안 함", "골라" not in _cl2.block(_it3, 2)
+                  and "이 중" not in _cl2.block(_it3, 2)))
+    ok.append(run("선정 결과 재현 가능",
+                  _cl2.select(_it3, 3, "reaction") == _cl2.select(_it3, 3, "reaction")))
 
 
     # ── 입력 정합성 / 소진 방지
@@ -640,8 +644,7 @@ def main():
     ok.append(run("한글·기호는 보존",
                   _cl3("종가는 8,600원(+12.41%)이었습니다.") ==
                   "종가는 8,600원(+12.41%)이었습니다."))
-    ok.append(run("claim 사용 개수 명시", "3개만" in _cl2.block(_it3, 3)))
-    ok.append(run("페르소나별 개수 연동", "2개만" in _cl2.block(_it3, 2)))
+
 
 
     # ── 입력 정합성 / 사용 개수 명시
@@ -649,9 +652,7 @@ def main():
                   "ꤼ" not in _cl("이 정도 규모라면 ꤼ 의미 있는 움직임입니다.")))
     ok.append(run("한글·숫자는 보존",
                   "12.41%" in _cl("12.41% 상승했습니다.")))
-    ok.append(run("claim 사용 개수 명시", "3개만" in _cl2.block(_it3, 3)))
-    ok.append(run("페르소나 상한 연동",
-                  "2개만" in _cl2.block(_it3, 2)))
+
 
 
     # ── 주장 상한을 문장 수에 연동 (num_cap 은 숫자 개수, claim_cap 은 주장 수)
@@ -671,8 +672,16 @@ def main():
                           _f2.check(_bq, _fq, "fact_note", "reaction", "fact_note"))))
     # 등락률 이상치
     import re as _re3
-    ok.append(run("가격제한폭 검증 존재",
-                  "30.5" in pathlib.Path("src/sources/market.py").read_text(encoding="utf-8")))
+    from src import facts as _fx2
+    ok.append(run("가격제한폭 초과 차단", bool(_fx2.sanity_errors({"pct": 135.0}))))
+    ok.append(run("상한가는 통과", not _fx2.sanity_errors({"pct": 29.94})))
+    ok.append(run("종가 불일치 차단",
+                  bool(_fx2.sanity_errors({"pct": 5.0, "close": 1000, "close_hist": 10000}))))
+    # 종목코드는 근거없는수치가 아니다 (실측: 엔에프씨(265740) 리젝)
+    _itc = {"facts": "종목: 엔에프씨 (265740)\n등락률: 5.20%\n종가: 12,000원",
+            "stock_code": "265740"}
+    ok.append(run("종목코드 오탐 없음",
+                  not _cl2.grounding_errors("엔에프씨(265740)가 5.20% 올랐어요.", _itc, 4)))
 
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)

@@ -143,8 +143,14 @@ def fetch_hankyung(limit: int = 8) -> list[dict]:
             m = re.search(r"report_idx=(\d+)", pdf["href"])
             report_idx = m.group(1) if m else ""
 
+        # 한국IR협의회 등 비증권사 리포트는 적정가격 0 / 투자의견없음 으로 들어온다.
+        # 그대로 넣으면 "적정가격은 0원으로 제시했습니다" 가 생성된다 (실측).
         target = tds[2].get_text(strip=True)
         opinion = tds[3].get_text(strip=True)
+        if not re.sub(r"[^\d]", "", target).lstrip("0"):
+            target = ""
+        if opinion in ("투자의견없음", "NR", "N/R", "-", "없음"):
+            opinion = ""
         analyst = tds[4].get_text(strip=True)
         broker = tds[5].get_text(strip=True)
 

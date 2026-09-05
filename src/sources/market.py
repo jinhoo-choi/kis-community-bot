@@ -107,7 +107,8 @@ def _add_history(r: dict):
             r["ret5"] = (int(last[4]) - int(rows[-6][4])) / int(rows[-6][4]) * 100
         # 거래량 기준 배수 (거래대금 대신 거래량으로 계산 — siseJson 에 금액이 없다)
         r["open"] = int(last[1]) if last[1] else None
-        r["close"] = int(last[4]) if last[4] else None
+        # 목록 페이지 종가를 덮어쓰지 않고 따로 둔다. 두 값이 어긋나면 파싱 오류다.
+        r["close_hist"] = int(last[4]) if last[4] else None
         vols = [int(x[5]) for x in rows[-21:-1] if x[5]]
         if vols and int(last[5]):
             avg = sum(vols) / len(vols)
@@ -149,11 +150,6 @@ def fetch(limit: int = 12) -> list[dict]:
             turnover = _num(tds[7].get_text())      # 백만원 단위
             eok = turnover / 100
 
-            # 국내 주식 일일 가격제한폭은 ±30%다. 그 이상은 파싱 오류로 본다.
-            # (실측: 스카이랩스 135.00% 가 그대로 게시글에 들어갔다)
-            if abs(change_pct) > 30.5:
-                print(f"[market] ⚠ 등락률 이상치 {change_pct}% — {name} 제외")
-                continue
             if eok < MIN_TURNOVER_EOK or abs(change_pct) < MIN_ABS_CHANGE:
                 continue
 
@@ -179,6 +175,11 @@ def fetch(limit: int = 12) -> list[dict]:
 
     out = []
     for r in rows[:limit]:
+        # 불변식 위반은 게시 대상이 아니라 수집 버그다. 조용히 통과시키지 않는다.
+        bad = facts.sanity_errors(r)
+        if bad:
+            print(f"[market] ⚠ {r['name']} 제외 — {', '.join(bad)}")
+            continue
         direction = "상승" if r["pct"] > 0 else "하락"
         out.append({
             "id": f"flow-{day}-{r['code']}",

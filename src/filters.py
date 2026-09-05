@@ -120,7 +120,7 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
     # 개수 세기는 claim 과 어긋나 "1 대 1.8702948" 이 2개로 계산됐다.
     from src import claims as _cl, personas as _P2
     _cap = _P2.claim_cap(length) if length else 4
-    _g = _cl.grounding_errors(body, {"facts": facts}, _cap)
+    _g = _cl.grounding_errors(body, {"facts": facts, "angle": angle}, _cap)
     if _g:
         errs += _g
     else:

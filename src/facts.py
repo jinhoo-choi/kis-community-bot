@@ -12,6 +12,25 @@
 """
 import re
 
+# 국내 주식 일일 가격제한폭. 이보다 큰 등락률은 시장에서 나올 수 없는 값이므로
+# 파싱 오류로 확정한다 (실측: 스카이랩스 135.00% 가 그대로 게시글에 들어갔다).
+# LLM 검증으로는 잡히지 않는다 — 입력에 있으면 근거가 있다고 판정하기 때문이다.
+PRICE_LIMIT_PCT = 30.0
+
+
+def sanity_errors(r: dict) -> list[str]:
+    """시세 레코드의 물리적 불변식 검사. 위반 시 항목을 버린다."""
+    errs = []
+    pct = r.get("pct")
+    if pct is not None and abs(pct) > PRICE_LIMIT_PCT + 0.5:
+        errs.append(f"등락률 {pct}% > 가격제한폭")
+    # 목록 페이지 종가와 일별시세 종가가 다르면 둘 중 하나를 잘못 읽은 것이다.
+    a, b = r.get("close"), r.get("close_hist")
+    if a and b and abs(a - b) / b > 0.01:
+        errs.append(f"종가 불일치 {a} vs {b}")
+    return errs
+
+
 # 슬롯 = 독립적으로 한 문장을 만들 수 있는 사실 단위
 SLOT_PATTERNS = [
     ("change",    r"등락률[:\s]*[-+]?\d"),

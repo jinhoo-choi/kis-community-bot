@@ -12,6 +12,7 @@
 원인·수급주체 추정·업황수혜·기대감·전망은 claim type 자체를 두지 않는다.
 """
 import re
+import zlib as _zlib
 
 # (claim_id, 라벨, facts 에서 뽑는 정규식, 값 포맷)
 CLAIM_SPECS = [
@@ -72,25 +73,57 @@ def build(item: dict) -> list[dict]:
     return out
 
 
-def block(item: dict, use_n: int = 3) -> str:
-    """프롬프트에 넣을 허용 주장 블록.
+# 앵글별 우선 주장. "이 글이 알려줄 하나"에 직결되는 것부터 고른다.
+ANGLE_PREF = {
+    "reaction":    ["change", "close", "turnover"],
+    "compare":     ["vol_ratio", "ret5", "range", "close_pos"],
+    "ratio":       ["ratio_mg", "conv_prc", "vol_ratio", "rate", "change"],
+    "amount":      ["issue_amt", "turnover", "shares", "target"],
+    "terms":       ["conv_prc", "rate", "ratio_mg", "opinion", "maturity"],
+    "purpose":     ["purpose", "issue_amt", "event"],
+    "duration":    ["maturity", "ret5", "event"],
+    "decode":      ["event", "term_word", "sector"],
+    "inquiry":     ["inquiry", "event", "change"],
+    "uncertainty": ["event", "change"],
+    "context":     ["sector", "policy", "event"],
+}
 
-    목록을 주면 모델이 목록을 '소진'하려 든다 (실측: 리젝 15건 중 8건이 수치과다).
-    허용 목록과 사용 개수를 함께 못 박는다.
+
+def select(item: dict, n: int, angle: str = "") -> list[dict]:
+    """이번 글에서 쓸 주장을 **코드가 고른다**.
+
+    이전에는 전체 목록을 주고 "이 중 N개만 고르세요"라고 했다. 모델은 목록을
+    소진하려 든다 — 근거를 붙일수록 더 쓴다 (실측: 리젝 15건 중 8건이 주장과다).
+    고르는 일을 모델에게 맡기지 않는다.
+
+    순수 함수다. 같은 (facts, n, angle) 이면 프롬프트와 검수가 같은 집합을 본다.
     """
     cs = build(item)
+    if len(cs) <= n:
+        return cs
+    order = {c["type"]: i for i, c in enumerate(cs)}
+    pref = [t for t in ANGLE_PREF.get(angle, []) if t in order]
+    rest = [c["type"] for c in cs if c["type"] not in pref]
+    # 앵글 우선분 뒤는 항목마다 다른 지점에서 시작해 글마다 조합이 갈리게 한다.
+    # 고정 순서면 같은 유형 50건이 전부 등락률·종가·거래대금이 된다.
+    seed = _zlib.crc32(item.get("facts", "").encode())   # hash() 는 프로세스마다 달라진다
+    off = (seed % len(rest)) if rest else 0
+    picked = pref + rest[off:] + rest[:off]
+    keep = picked[:n]
+    return [c for c in cs if c["type"] in keep]
+
+
+def block(item: dict, use_n: int = 3, angle: str = "") -> str:
+    """프롬프트에 넣을 주장 블록. 고른 것만 보여준다."""
+    cs = select(item, use_n, angle)
     if not cs:
         return ""
-    lines = [f"{c['id']}. {c['label']}: {c['value']}" for c in cs]
-    pick = min(use_n, len(cs))
+    lines = [f"- {c['label']}: {c['value']}" for c in cs]
     return (
-        "[사용 가능한 주장 — 이 목록 밖의 내용은 쓸 수 없습니다]\n"
+        "[이번 글에 쓸 사실 — 아래 것만 씁니다]\n"
         + "\n".join(lines)
-        + f"\n\n이 중 **{pick}개만** 골라 쓰세요. 전부 쓰면 표지 나열이 됩니다.\n"
-        + "무엇을 고를지는 위 [이 글이 독자에게 알려줄 하나]가 정합니다.\n"
-        + "고르지 않은 주장은 언급하지 마세요.\n"
-        + "각 문장은 고른 주장 중 하나 이상에 근거해야 합니다.\n"
-        + "목록에 없는 주장은 사실이더라도 이번 글에는 쓰지 마세요.\n"
+        + "\n\n입력에 다른 수치가 있어도 이번 글에는 쓰지 마세요. 고르는 일은 이미 끝났습니다.\n"
+        + "각 문장은 위 사실 중 하나에 근거하거나, 숫자 없는 서술이어야 합니다.\n"
         + "특히 아래는 이 글에서 다룰 수 있는 종류의 주장이 아닙니다.\n"
         + "\n".join(f"- {t}" for t in FORBIDDEN_TYPES)
     )
@@ -109,7 +142,7 @@ def _nums(text: str) -> set[str]:
             if len(n.replace(",", "")) >= 2}
 
 
-def used(body: str, cs: list[dict]) -> tuple[set[str], set[str]]:
+def used(body: str, cs: list[dict], extra_allow: set = frozenset()) -> tuple[set[str], set[str]]:
     """(사용된 claim id, 근거 없는 숫자).
 
     본문 숫자가 어떤 claim 의 값에 포함되면 그 claim 을 인용한 것으로 본다.
@@ -124,8 +157,23 @@ def used(body: str, cs: list[dict]) -> tuple[set[str], set[str]]:
             hit.add(c["id"])
             matched |= inter
     # 연도·순번 등 흔한 값은 근거 없음으로 보지 않는다
-    allow = {"1", "2", "3", "4", "5", "10", "100", "2026", "2027"}
+    allow = {"1", "2", "3", "4", "5", "10", "100", "2026", "2027"} | set(extra_allow)
     return hit, {n for n in body_nums - matched if n not in allow}
+
+
+_CODE_RE = re.compile(r"종목코드[:\s]*(\d{6})|\((\d{6})[,)]")
+
+
+def _codes(item: dict) -> set[str]:
+    """종목코드는 주장이 아니라 식별자다.
+
+    실측: "엔에프씨(265740)" 가 근거없는수치로 리젝됐다. facts 에 종목코드가
+    있는데도 CLAIM_SPECS 에 대응 항목이 없어 어느 주장에도 매칭되지 않았다.
+    """
+    out = {item["stock_code"]} if item.get("stock_code") else set()
+    for m in _CODE_RE.finditer(item.get("facts", "")):
+        out.add(m.group(1) or m.group(2))
+    return out
 
 
 def grounding_errors(body: str, item: dict, cap: int) -> list[str]:
@@ -133,7 +181,7 @@ def grounding_errors(body: str, item: dict, cap: int) -> list[str]:
     cs = build(item)
     if not cs:
         return []
-    hit, ungrounded = used(body, cs)
+    hit, ungrounded = used(body, cs, _codes(item))
     errs = []
     if len(hit) > cap:
         errs.append(f"주장과다({len(hit)}개/{cap})")
