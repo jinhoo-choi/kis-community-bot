@@ -1,0 +1,307 @@
+=== 기간 20260805 ~ 20260904 ===
+
+── 1. 엔드포인트 존재 여부 (아무 corp_code 로 두드려 응답 형태만 본다) ──
+  O otcprStkInvscrInhDecsn       status=013 조회된 데이타가 없습니다.
+  O otcprStkInvscrTrfDecsn       status=013 조회된 데이타가 없습니다.
+  O tsstkAqTrctrCnsDecsn         status=013 조회된 데이타가 없습니다.
+  O tsstkAqTrctrCcDecsn          status=013 조회된 데이타가 없습니다.
+  O exbdIsDecsn                  status=013 조회된 데이타가 없습니다.
+  O cmpDvmgDecsn                 status=013 조회된 데이타가 없습니다.
+  O stkExtrDecsn                 status=013 조회된 데이타가 없습니다.
+  O bsnInhDecsn                  status=013 조회된 데이타가 없습니다.
+  O bsnTrfDecsn                  status=013 조회된 데이타가 없습니다.
+  O tgastInhDecsn                status=013 조회된 데이타가 없습니다.
+  O tgastTrfDecsn                status=013 조회된 데이타가 없습니다.
+  O crDecsn                      status=013 조회된 데이타가 없습니다.
+  O sglPrvsCntrCncln             status=101 잘못된 URL입니다. 확인해주세요(/api/sglPrvsCntrCncln
+  O cntrCncln                    status=101 잘못된 URL입니다. 확인해주세요(/api/cntrCncln.json)
+  O slcCntrCncln                 status=101 잘못된 URL입니다. 확인해주세요(/api/slcCntrCncln.jso
+
+살아있는 엔드포인트 15/15
+
+── 2. 실데이터로 필드 키 확인 ──
+  주요사항보고 100건 확보
+
+  [otcprStkInvscrInhDecsn] 샘플: 주요사항보고서(타법인주식및출자증권양수결정)
+      rcept_no                   = 20260904000209
+      corp_cls                   = Y
+      corp_code                  = 00135962
+      corp_name                  = 신라교역
+      bddd                       = 2026년 09월 04일
+      od_a_at_t                  = 1
+      od_a_at_b                  = 0
+      adt_a_atn                  = 참석
+      ftc_stt_atn                = 미해당
+      inh_pp                     = 사업다각화
+      dlptn_cmpnm                = "15. 기타 투자판단과 관련한 중요사항"  참조
+      dlptn_cpt                  = -
+      dlptn_mbsn                 = -
+      dlptn_hoadd                = -
+      dlptn_rl_cmpn              = -
+      exevl_atn                  = 예
+      exevl_bs_rs                = 1. 근거 : 자본시장과 금융투자업에 관한 법률제161조 및 동법시행령 제171조에 따라 금융위원회에 제출하
+      exevl_intn                 = 창의회계법인
+      exevl_pd                   = 2026년 07월 01일 ~ 2026년 09월 03일
+      exevl_op                   = 평가대상회사의 가치평가를 위하여 현금흐름할인법(DCF)을 적용한 결과, 평가기준일 현재 평가대상회사의 가치평
+      bdlst_atn                  = 아니오
+      n6m_tpai_plann             = 아니오
+      popt_ctr_atn               = 아니오
+      popt_ctr_cn                = -
+      inhdtl_inhprc              = 82,300,000,000
+      inhdtl_tast                = 722,434,235,404
+      inhdtl_tast_vs             = 11.39
+      dl_pym                     = 1) 지급형태: 현금(원화)
+2) 지급시기
+- 계약금 : 2026년 9월 4일 매매대금의 10%
+      
+      iscmp_cmpnm                = 선민수산(주)
+      iscmp_nt                   = 대한민국
+      iscmp_rp                   = 민일기
+      iscmp_cpt                  = 300,000,000
+      iscmp_rl_cmpn              = -
+      iscmp_tisstk               = 30,000
+      iscmp_mbsn                 = 원양어업 및 수산물 도소매업
+      l6m_tpa_nstkaq_atn         = 아니오
+      inhdtl_stkcnt              = 30,000
+      inhdtl_ecpt                = 603,073,107,870
+      inhdtl_ecpt_vs             = 13.65
+      atinh_owstkcnt             = 30,000
+      atinh_eqrt                 = 100.00
+      inh_prd                    = 2026년 10월 15일
+      iscmp_bdlst_sf_atn         = 아니오
+
+  [otcprStkInvscrTrfDecsn] 샘플: [기재정정]주요사항보고서(유상증자결정)
+      rcept_no                   = 20260826000664
+      corp_cls                   = K
+      corp_code                  = 01075126
+      corp_name                  = 사토시홀딩스
+      bddd                       = 2026년 08월 26일
+      od_a_at_t                  = 1
+      od_a_at_b                  = 0
+      adt_a_atn                  = 참석
+      ftc_stt_atn                = 미해당
+      dlptn_cmpnm                = 나카모토투자조합 외1인
+      dlptn_cpt                  = -
+      dlptn_mbsn                 = -
+      dlptn_hoadd                = -
+      dlptn_rl_cmpn              = 최대주주의 특수관계인
+      exevl_atn                  = 예
+      exevl_bs_rs                = 1) 근거 :「자본시장과 금융투자업에 관한 법률」제161조 및 동법 시행령 제171조의 규정에 따라 금융위원
+      exevl_intn                 = 대주회계법인
+      exevl_pd                   = 2026년 08월 10일 ~ 2026년 08월 25일
+      exevl_op                   = 적정(자세한 내용은 첨부된 평가의견서 참조)
+      popt_ctr_atn               = 아니오
+      popt_ctr_cn                = -
+      trf_pp                     = 관계기업 지분 매각을 통한 재무구조 개선
+      dl_pym                     = 1) 거래대금 지급방법 : 거래상대방 소유의 당사 발행 사채권과 상계 및 현금지급
+2) 지급시기: 2026.
+      trfdtl_trfprc              = 10,502,149,680
+      trfdtl_tast                = 69,196,205,413
+      trfdtl_tast_vs             = 15.18
+      iscmp_cmpnm                = (주)한국첨단소재 
+      iscmp_nt                   = 대한민국
+      iscmp_rp                   = 조헌정
+      iscmp_cpt                  = 28,544,307,000
+      iscmp_rl_cmpn              = 최대주주
+      iscmp_tisstk               = 28,544,307
+      iscmp_mbsn                 = 유선 통신장비 제조업
+      trfdtl_stkcnt              = 3,466,056
+      trfdtl_ecpt                = 17,264,605,310
+      trfdtl_ecpt_vs             = 60.83
+      attrf_owstkcnt             = -
+      attrf_eqrt                 = -
+      trf_prd                    = 2026년 08월 26일
+
+  [tsstkAqTrctrCnsDecsn] 샘플: 주요사항보고서(자기주식취득신탁계약체결결정)
+      rcept_no                   = 20260904000047
+      corp_cls                   = K
+      corp_code                  = 00152783
+      corp_name                  = 코메론
+      bddd                       = 2026년 09월 04일
+      od_a_at_t                  = 1
+      od_a_at_b                  = -
+      adt_a_atn                  = 불참
+      cs_iv_bk                   =                  SK 증권
+      aq_wtn_div_ostk            = 1,059,676
+      aq_wtn_div_ostk_rt         = 11.71
+      aq_wtn_div_estk            = -
+      aq_wtn_div_estk_rt         = -
+      eaq_ostk                   = -
+      eaq_ostk_rt                = -
+      eaq_estk                   = -
+      eaq_estk_rt                = -
+      ctr_prc                    = 10,000,000,000
+      ctr_pd_bgd                 = 2026년 09월 07일
+      ctr_pd_edd                 = 2027년 03월 08일
+      ctr_pp                     =      주가 안정 및 주주가치 제고
+      ctr_cns_int                =                  SK 증권
+      ctr_cns_prd                = 2026년 09월 07일
+
+  [tsstkAqTrctrCcDecsn] 샘플: 주요사항보고서(자기주식취득신탁계약해지결정)
+      rcept_no                   = 20260904000367
+      corp_cls                   = Y
+      corp_code                  = 00158316
+      corp_name                  = NICE
+      bddd                       = -
+      od_a_at_t                  = -
+      od_a_at_b                  = -
+      adt_a_atn                  = -
+      aq_wtn_div_ostk            = 2,370,305
+      aq_wtn_div_ostk_rt         = 6.45
+      aq_wtn_div_estk            = -
+      aq_wtn_div_estk_rt         = -
+      eaq_ostk                   = -
+      eaq_ostk_rt                = -
+      eaq_estk                   = -
+      eaq_estk_rt                = -
+      ctr_prc_bfcc               = 10,000,000,000
+      ctr_prc_atcc               = -
+      ctr_pd_bfcc_bgd            = 2025년 09월 05일
+      ctr_pd_bfcc_edd            = 2026년 09월 04일
+      cc_pp                      = 신탁계약 기간만료에 의한 해지
+      cc_int                     = 대신증권(Daishin Securities)
+      cc_prd                     = 2026년 09월 04일
+      tp_rm_atcc                 = -
+
+  [exbdIsDecsn] 최근 30일 실데이터 없음 — 엔드포인트는 유효
+
+  [cmpDvmgDecsn] 최근 30일 실데이터 없음 — 엔드포인트는 유효
+
+  [stkExtrDecsn] 샘플: 주요사항보고서(주식교환ㆍ이전결정)
+      rcept_no                   = 20260904000509
+      corp_cls                   = K
+      corp_code                  = 00876865
+      corp_name                  = 네오오토
+      bddd                       = 2026년 09월 04일
+      od_a_at_t                  = 2
+      od_a_at_b                  = -
+      adt_a_atn                  = 참석
+      rs_sm_atn                  = 예
+      ex_sm_r                    = -
+      exevl_atn                  = 예
+      exevl_bs_rs                = 자본시장과 금융투자업에 관한 법률 시행령 제176조의6 제4항에 따라, 본건 주식교환시 교환가액 및 교환비율
+      exevl_intn                 = 이촌회계법인
+      exevl_pd                   = 2026년 08월 19일 ~ 2026년 09월 03일
+      exevl_op                   = 적정
+      aprskh_plnprc              = 10,488
+      aprskh_pym_plpd_mth        = (1) 주식매수대금의 지급예정시기
+
+주식매수 청구기간이 종료하는 날로부터 1개월 이내(2027년 01월 08
+      aprskh_lmt                 = 주식매수청구권이 부여된 주주가 주식매수청구권 행사 이전에 해당 주식을 매각하는 경우 주식매수청구권이 상실되며
+      aprskh_ctref               = 제13조  계약의 변경 및 해제(1) 본 계약 체결 후 주식교환일까지 다음 각 호의 1에 해당하는 사유가 발
+      bdlst_atn                  = 해당사항없음
+      otcpr_bdlst_sf_atn         = 해당사항없음
+      popt_ctr_atn               = 아니오
+      popt_ctr_cn                = -
+      rbsnfdtl_tast              = 324,846,296,255
+      rbsnfdtl_tdbt              = 183,768,129,105
+      rbsnfdtl_teqt              = 141,078,167,150
+      rbsnfdtl_cpt               = 826,665,000
+      extr_sen                   = 주식교환
+      extr_stn                   = 해당사항 없음
+      extr_tgcmp_cmpnm           = 주식회사 오토인더스트리
+(
+OTO INDUSTRY CO.,LTD.)
+      extr_tgcmp_rp              = 이 진 규
+      extr_tgcmp_mbsn            = 자동차부품 가공 및 제조
+      extr_tgcmp_rl_cmpn         = 계열회사
+      extr_tgcmp_tisstk_ostk     = 165,333
+      extr_tgcmp_tisstk_cstk     = 53,334
+      extr_rt                    = (주)네오오토 : (주)오토인더스트리 = 1 : 91.3667379
+
+주식교환일 현재 (주)오토인더스트리의 
+      extr_rt_bs                 = (1) 완전모회사가 되는 (주)네오오토의 교환가액
+주권상장법인인 완전모회사가 되는 회사의 보통주 기준시가는「
+      extr_pp                    = 자본시장 제도 환경 변화에 대하여 선제적으로 대응하고, 밸류체인 통합을 통해 기업가치를 제고하며, 단일화된 
+      extrsc_extrctrd            = 2026년 09월 04일
+      extrsc_shddstd             = 2026년 09월 21일
+      extrsc_shclspd_bgd         = -
+      extrsc_shclspd_edd         = -
+      extrsc_extrop_rcpd_bgd     = 2026년 12월 01일
+      extrsc_extrop_rcpd_edd     = 2026년 12월 15일
+      extrsc_gmtsck_prd          = 2026년 12월 16일
+      extrsc_aprskh_expd_bgd     = 2026년 12월 16일
+      extrsc_aprskh_expd_edd     = 2027년 01월 05일
+      extrsc_osprpd_bgd          = -
+      extrsc_osprpd_edd          = -
+      extrsc_trspprpd            = -
+      extrsc_trspprpd_bgd        = -
+      extrsc_trspprpd_edd        = -
+      extrsc_extrdt              = 2027년 02월 01일
+      extrsc_nstkdlprd           = -
+      extrsc_nstklstprd          = 2027년 02월 25일
+      atextr_cpcmpnm             = 주식회사 네오오토
+(NEOOTO CO.,LTD.)
+
+  [bsnInhDecsn] 최근 30일 실데이터 없음 — 엔드포인트는 유효
+
+  [bsnTrfDecsn] 최근 30일 실데이터 없음 — 엔드포인트는 유효
+
+  [tgastInhDecsn] 샘플: 주요사항보고서(유형자산양수결정)
+      rcept_no                   = 20260904000476
+      corp_cls                   = K
+      corp_code                  = 00399694
+      corp_name                  = SOOP
+      bddd                       = 2026년 09월 04일
+      od_a_at_t                  = 3
+      od_a_at_b                  = 0
+      adt_a_atn                  = 참석
+      ftc_stt_atn                = 미해당
+      inh_pp                     = 사옥 및 R&D 센터 활용, 계열사 업무공간 집적 등
+      inh_af                     = 분산된 사업장 통합에 따른 경영 시너지 제고
+임차료 절감 및 장기적인 사업 기반 확보
+      inh_prd_ctr_cnsd           = 2026년 09월 04일
+      inh_prd_inh_std            = 2026년 09월 30일
+      dlptn_cmpnm                = 1. ㈜하나은행
+2. 이든자산운용㈜
+      dlptn_cpt                  = 5,359,578,585,000
+      dlptn_mbsn                 = 1. ㈜하나은행 : 은행업
+2. 이든자산운용㈜ : 전문사모집합투자업
+      dlptn_hoadd                = 1. ㈜하나은행 : 서울특별시 중구 을지로35
+                       (을지로 1가)
+2.
+      dlptn_rl_cmpn              = -
+      exevl_atn                  = 예
+      exevl_bs_rs                = 1) 근거 : 자본시장과 금융투자업에 관한 법률 제161조
+    제1항 제7호 및 동법 시행령 제171조 
+      exevl_intn                 = 신우회계법인
+      exevl_pd                   = 2026년 08월 27일 ~ 2026년 09월 04일
+      exevl_op                   = 적정
+      gmtsck_spd_atn             = 미해당
+      gmtsck_prd                 = -
+      aprskh_plnprc              = -
+      aprskh_pym_plpd_mth        = -
+      aprskh_lmt                 = -
+      aprskh_ctref               = -
+      popt_ctr_atn               = 아니오
+      popt_ctr_cn                = -
+      ast_sen                    = 토지 및 건물
+      ast_nm                     = 경기도 성남시 분당구 판교로 256번길 25 GB2-C동
+토지 및 건물
+      inhdtl_inhprc              = 131,500,000,000
+      inhdtl_tast                = 884,795,265,717
+      inhdtl_tast_vs             = 14.86
+      inh_prd_rgs_prd            = 2026년 09월 30일
+      dl_pym                     = 1. 지급형태 : 현금
+2. 지급시기
+    - 계약금 : 2026년 9월  4일
+    - 잔   금 : 
+      aprskh_exrq                = -
+      aprskh_ex_pc_mth_pd_pl     = -
+
+  [tgastTrfDecsn] 최근 30일 실데이터 없음 — 엔드포인트는 유효
+
+  [crDecsn] 최근 30일 실데이터 없음 — 엔드포인트는 유효
+
+  [sglPrvsCntrCncln] 최근 30일 실데이터 없음 — 엔드포인트는 유효
+
+  [cntrCncln] 최근 30일 실데이터 없음 — 엔드포인트는 유효
+
+  [slcCntrCncln] 최근 30일 실데이터 없음 — 엔드포인트는 유효
+
+── 3. 단일판매·공급계약 원문 접근 확인 ──
+  대상: 엑시콘 [기재정정]단일판매ㆍ공급계약체결               rcept_no=20260904900736
+  document.xml → HTTP 200 application/x-msdownload;chars 2,217바이트
+  ZIP 내용: ['20260904900736.xml']
+  본문 11,693자. 계약금액 주변 발췌:
+  '계약금액' 문자열 없음
