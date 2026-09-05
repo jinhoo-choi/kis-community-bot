@@ -1,5 +1,7 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 [dart] corp_code 3989종목 매핑
 [dart] 상세 보강 2/12건
 [crawl] dart 12건
@@ -15,54 +17,48 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
 [main] 수집 총 30건
 [enrich] 21/30건 배경 보강 완료
 [gate] 차단 11건 {'tier5': 5, 'tier4': 5, 'tier1': 1}
-[theme] 테마글 1건에 게시 종목 배정
+[theme] 테마글 2건에 게시 종목 배정
 [main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
-[main] 생성 대상 19건 {'disclosure': 7, 'research': 1, 'flow': 9, 'policy': 1, 'poll': 1}
+[main] 생성 대상 19건 {'disclosure': 6, 'research': 1, 'flow': 9, 'policy': 2, 'poll': 1}
 [claude] SDK 1.4.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [gen] claude: 15/15건 생성
-[gen] 정규식 리젝 dart-20260904800546 ['미확인표현(공개되지 않)']
-       └ '태영건설이 유상증자나 주식관련사채 발행을 완료했다는 공시를 냈어요. 유상증자는 회사가 새로운 주식을 발행해서 자금을 모으는 방식인데, 이번엔 그 구체적인 규모나 조건이 공개되지 않았네요.'
-[gen] 정규식 리젝 dart-20260904000355 ['너무김(174자/brief_report)']
-       └ '1 대 1.8702948입니다. 우성이 우성유통을 흡수합병하면서 우성 보통주 1주에 우성유통 보통주 1.8702948주를 배정하는 합병 비율입니다. 합병 후 우성유통이 영위하던 유통 사업이 우성으로 내재화되어 사료-농장-유통으로 이어지는 축산 식품 사업 Value Chain이 단일 조직 내에서 통합 운영됩니다.'
-[gen] 정규식 리젝 hk-652142 ["근거없는수치['265740']"]
-       └ '한국IR협의회에서 엔에프씨(265740)에 대해 "화장품 ODM 고성장, 소재 턴어라운드 본격화"라는 리포트를 발간했습니다. 리포트에선 화장품 ODM 부문의 성장세와 소재 사업의 구조적 개선을 함께 언급하는데요. 해당 증권사는 이 종목에 투자의견없음 의견을 제시했습니다. 적정가격은 0원으로 제시했습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-030530 ['주장과다(5개/3)']
-       └ '225억원이 거래된 원익홀딩스가 어제 29.91% 올랐네요. 종가 22,500원에서 장중 고가 대비 0.0% 낮은 수준으로 마감했으니 고가 근처에서 마감한 셈인데요. 거래량도 20일 평균의 6.0배를 기록했는데, 어제 매집 주체가 어디였는지 아시는 분 계신가요?'
-[gen] 정규식 리젝 flow-2026-09-04-108490 ['주장과다(7개/4)']
-       └ '로보티즈가 전날 20일 평균 거래량의 6.4배이었고 22.54% 올랐어요. 종가는 304,500원이었습니다. 장중에는 저가 대비 18.9%의 변동폭을 보였는데, 마감은 장중 고가 대비 3.3% 낮은 수준에서 이뤄졌어요. 거래대금은 3,040억원에 달했습니다. 최근 5거래일 누적으로도 25.83% 올랐습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-234340 ['주장과다(7개/3)']
-       └ '어제 헥토파이낸셜이 25,250원에 마감하며 13.48% 올랐어요. 거래대금 252억원에 거래량은 20일 평균의 3.6배였습니다. 장중에는 저가 대비 10.5% 올랐다가 고가 대비 5.8% 낮은 수준에서 마감한 모습이에요. 지난 5거래일 누적으로는 7.91% 올라와 있습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-336260 ['방향오용(하락)', '주장과다(6개/3)']
-       └ '12.44% 올랐던 두산퓨얼셀이 종가 43,850원에서 마감했는데요. 어제 거래대금이 438억원이었습니다. 장중에는 저가 대비 14.4%까지 움직였지만, 고가에서 2.3% 내려온 수준에서 마감했네요. 다만 5거래일 기준으로는 -3.41% 하락한 상태인데, 어제 상승을 견인한 구체적인 배경이 뭔가요?'
-[gen] 정규식 리젝 flow-2026-09-04-058610 ['주장과다(7개/4)', '어미반복(습니다×4)']
-       └ '거래량이 20일 평균의 2.3배였습니다. 종가는 94,200원으로 12.41% 상승했고, 거래대금은 942억원이었습니다. 장중에는 저가 대비 12.4%까지 움직였으며, 마감은 장중 고가보다 3.1% 낮은 수준이었습니다. 5거래일 누적으로는 1.62% 올랐습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-263750 ['주장과다(7개/3)']
-       └ '345억원의 거래대금이 쏠린 펄어비스가 11.47% 올랐네요. 종가는 34,500원으로 마감했고, 거래량은 20일 평균의 2.1배였습니다. 장중에는 저가 대비 8.5% 움직였는데 고가에서 2.1% 내려온 수준에서 문을 닫았고요. 이번 움직임까지 포함하면 최근 5거래일간 누적으로 6.15% 오른 상태인데, 이 급등세의 구체적인 계기가 뭔지 아시는 분 계신가요'
-[gen] 정규식 리젝 flow-2026-09-04-090460 ['주장과다(4개/3)']
-       └ '10.75% 상승했습니다. 비에이치가 어제 종가 21,850원에 마감했습니다. 거래대금 218억원으로 거래되며 20일 평균의 2.0배 규모였습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-240810 ['주장과다(7개/4)', '어미반복(습니다×4)']
-       └ '114,800원에서 9.33% 상승 마감했습니다. 거래대금은 1,147억원이었고, 거래량은 20일 평균의 1.1배였습니다. 장중에는 저가 대비 10.7%까지 올랐다가 고가 대비 1.9% 낮은 수준에서 장을 마감했습니다. 5거래일 누적으로는 3.33% 올랐습니다.'
+[gen] 정규식 리젝 dart-20260904000355 ['unsourced_eval']
+       └ '1 : 1.8702948. 우성이 우성유통을 흡수합병하면서 정한 주식 배정 비율입니다. 우성 보통주 1주당 우성유통 보통주 1.8702948주씩 배정된다는 뜻입니다. 합병을 통해 사료-농장-유통으로 이어지는 축산 식품 사업 체인이 단일 조직 내에서 통합 운영될 습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-030530 ['주장과다(6개/4)', '어미반복(습니다×4)']
+       └ '종가 22,500원에서 29.91% 상승했습니다. 거래량은 20일 평균의 6.0배였습니다. 장중 저가 대비 28.6% 오른 후 마감했으며, 5거래일 누적으로는 17.92% 올랐습니다. 225억원이 거래됐습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-108490 ['주장과다(7개/5)']
+       └ '종가 304,500원으로 전일 대비 22.54% 상승한 로보티즈는 거래대금이 3,040억원이었습니다. 거래량은 20일 평균의 6.4배 수준인데요, 장중 움직임을 보면 저가 대비 18.9%의 변동폭을 나타냈습니다. 마감은 장중 고가로부터 3.3% 낮은 수준에서 정리됐으며, 지난 5거래일 누적 상승률은 25.83%였습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-234340 ['주장과다(6개/5)']
+       └ '어제 헥토파이낸셜이 종가 기준 13.48% 올랐고, 거래대금은 252억원이었어요. 거래량이 20일 평균의 3.6배 수준으로 나타났고, 장중에는 저가 대비 10.5%까지 움직였는데 마감은 장중 고가보다 5.8% 낮은 자리에서 마무리됐어요. 지난 5거래일 누적으로는 7.91% 올랐습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-336260 ['주장과다(6개/5)']
+       └ '종가 대비 장중 고저차가 14.4%에 달했습니다. 어제 두산퓨얼셀은 12.44% 올라 43,850원에 마감했는데요, 장중에는 저가에서 고가까지 14.4%의 변동폭을 보였습니다. 거래대금은 438억원, 거래량은 20일 평균의 1.4배였습니다. 다만 5거래일 기준으로는 -3.41% 내려 있는 상황입니다.'
+[gen] 정규식 리젝 flow-2026-09-04-058610 ['주장과다(7개/5)']
+       └ '거래대금 기준으로 보면 전일 에스피지는 942억원이 거래되며 평소보다 훨씬 활발했어요. 20일 평균 대비 2.3배의 거래량이 몰린 셈입니다. 종가는 94,200원으로 12.41% 올랐는데, 장중 움직임을 보면 저가 대비 12.4%의 폭이 있었어요. 다만 마감은 장중 고가에서 3.1% 낮은 수준에서 이뤄졌습니다. 5거래일 기준으로는 1.62% 올랐던 상태였습'
+[gen] 정규식 리젝 flow-2026-09-04-263750 ['주장과다(7개/5)', '어미반복(습니다×4)']
+       └ '어제 펄어비스는 11.47% 올랐으며 종가는 34,500원이었습니다. 거래대금 345억원에 거래량이 20일 평균의 2.1배를 기록했는데요, 장중에는 저가 대비 8.5% 변동폭을 보였습니다. 마감은 장중 고가보다 2.1% 낮은 수준에서 이루어졌습니다. 지난 5거래일 누적으로는 6.15% 올랐습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-090460 ['주장과다(6개/5)']
+       └ '218억원의 거래대금이 하루 사이 쌓였어요. 종가 기준 10.75% 올랐고, 20일 평균의 2.0배 규모 거래량이 나왔어요. 장중에는 저가 대비 11.4% 움직였는데 마감은 장중 고가 대비 1.6% 낮은 수준에서 정리됐습니다. 지난 5거래일을 보면 누적으로 27.78% 상승한 모습이에요. 하루 변동폭이 크긴 했지만, 한편으로는 고점 근처에서 마감했다고 볼 '
+[gen] 정규식 리젝 flow-2026-09-04-240810 ['주장과다(7개/5)']
+       └ '114,800원에서 마감한 원익IPS는 전일 대비 9.33% 올랐습니다. 거래대금은 1,147억원이었고, 거래량은 20일 평균의 1.1배 수준이었는데요. 장중에는 저가 대비 10.7% 범위에서 변동했으며, 마감은 장중 고가 대비 1.9% 낮은 수준에서 이뤄졌습니다. 5거래일 누적 기준으로는 3.33% 상승했습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-060250 ['주장과다(6개/5)']
+       └ '8.38% 올랐네요. 종가는 15,770원이고 거래대금은 158억원이었어요. 장중에는 저가 대비 7.0%의 변동폭이 있었고, 마감은 장중 고가보다 3.0% 낮은 수준에서 나왔습니다. 거래량은 20일 평균의 1.9배였어요.'
 [gen] gemini: 4/4건 생성
-[gen] 정규식 리젝 flow-2026-09-04-060250 ['너무짧음(34자/data_focus)']
-       └ 'NHN KCP의 거래량이 20일 평균의 1.9배였습니다. 기준'
-[gen] 정규식 리젝 kind-20260904000786 ['너무짧음(36자/brief_report)', "근거없는수치['18', '32']"]
-       └ '18시 32분. 거래소가 디에이치엑스컴퍼니에 풍문 관련 조회공시를'
-[gen] 정규식 리젝 pol-울산시중소기업소상공인에760억경영안정자금지원 ['너무짧음(32자/quick_memo)']
-       └ '760억원은 울산시가 자금난을 겪는 지역 중소기업과 소상공'
-[gen] 정규식 리젝 poll-flow-2026-09-04-030530 ['너무짧음(37자/two_view)']
-       └ '22,500원입니다. 원익홀딩스의 전일 종가 수치인데요. 하루 만에'
-[gen] 정규식 통과 6건 / 시도 19건
+[gen] 정규식 리젝 pol-인력재배치시파업가능에경영계우려누더기지침한계 ['literary_style']
+       └ '" - 기간이 없다. 그렇다면 "최근 고용노동부 발표에 따르면~"으로 시작'
+[gen] 정규식 리젝 poll-flow-2026-09-04-030530 ['너무짧음(53자/check_list)']
+       └ '그냥 숫자가 들어간 주장 중 3개만 숫자를 노출하고 나머지는 숫자를 생략하거나 다른 방식으로 표'
+[gen] 정규식 통과 8건 / 시도 19건
 [claude] SDK 1.4.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 0건 / 보류 6건
-   보류 dart-20260904000431 (claude) - fatal:상투적 마무리 문구로 글을 닫음 (지켜봐야/확인이 필요/주목됩니다 류)
+[main] 배포 0건 / 보류 8건
+   보류 dart-20260904000431 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반,사실관계에 없는 업황·수혜 일반론을 덧붙임
+   보류 dart-20260904800546 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반,유상증자는 일반적으로~ 같은 사전식 일반론으로 분량을 채움
    보류 dart-20260904000367 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
-   보류 dart-20260904800462 (claude) - 커뮤니티적합성 2/5 정보량이 부족하고 내용이 빈약함
    보류 dart-20260904000282 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
-   보류 dart-20260904800546 (gemini) - fatal:제공된 사실관계에 없는 배경('토목 및 주택 건설업을') 미완성 상태로 포함,게시글 본문이 미완성 상태 (문
+   보류 hk-652142 (claude) - fatal:상투적 마무리 문구로 글을 닫음 (지켜봐야/확인이 필요/주목됩니다 류)
 [tg] ⚠ suffix ...2744 매칭 실패 (getUpdates 24시간 보관 한계). 봇에게 아무 메시지나 보낸 뒤 재실행하세요.
 [tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 (TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)
-[main] filter_log data/filter_log_20260905_1209.json
-[main] stats {"ts": "2026-09-05T12:09:55+09:00", "persona_mode": "v2", "collected": 30, "gate_blocked": 11, "gate_reasons": {"tier5": 5, "tier4": 5, "tier1": 1}, "enrich_ok": 21, "generated": 6, "sent": 0, "held": 6, "hold_reasons": {"fatal": 4, "커뮤니티적합성 2/5 정보량이 부족하고 내용이 빈약함": 1, "커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함": 1}, "avg_score": null, "by_provider": {"gemini": {"generated": 1, "sent": 0, "avg_score": 8.0}, "claude": {"generated": 5, "sent": 0, "avg_score": 12.9}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 12, "expected": 12, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 9, "expected": 9, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+[main] filter_log data/filter_log_20260905_1223.json
+[main] stats {"ts": "2026-09-05T12:23:53+09:00", "persona_mode": "v2", "collected": 30, "gate_blocked": 11, "gate_reasons": {"tier5": 5, "tier4": 5, "tier1": 1}, "enrich_ok": 21, "generated": 8, "sent": 0, "held": 8, "hold_reasons": {"fatal": 7, "커뮤니티적합성 2/5 정보 요약은 충실하나 논점이 다소 평이함": 1}, "avg_score": null, "by_provider": {"gemini": {"generated": 2, "sent": 0, "avg_score": 10.0}, "claude": {"generated": 6, "sent": 0, "avg_score": 11.98}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 12, "expected": 12, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 9, "expected": 9, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
