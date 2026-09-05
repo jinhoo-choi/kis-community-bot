@@ -79,11 +79,11 @@ HTTP 200 / 69323 bytes
 ==================================================================
 3. 정책 소스 후보 (korea.kr 대체)
 ==================================================================
-  korea.kr RSS         HTTP 404     1294 bytes  '\ufeff<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http:'
-  기재부 보도자료             HTTP 200        0 bytes  ''
-  금융위 보도자료             HTTP 200   122196 bytes  '<!DOCTYPE html>\r <html lang="ko" class="ko">\r <head>\r \t<title>\r \t\t보도자료'
+  korea.kr RSS         실패 ConnectTimeout
+  기재부 보도자료             실패 ConnectTimeout
+  금융위 보도자료             실패 ConnectTimeout
   한국은행 보도자료            HTTP 200   392734 bytes  '                                          \t \t\t \t\t \t \t  \t \t\t \t\t \t \t  \t '
-  산업부 보도자료             HTTP 404     2036 bytes  '\r \r \r <!DOCTYPE html>\r <html lang="ko">\r <head>\r     <meta http-equiv='
+  산업부 보도자료             실패 ConnectTimeout
   금감원 보도자료             실패 ConnectionError
   연합뉴스 경제 RSS          HTTP 200    97479 bytes  '<?xml version="1.0" encoding="UTF-8"?> <rss version="2.0" xmlns:conten'
   한경 정책 RSS            HTTP 200    22761 bytes  '<!DOCTYPE html> <html lang="ko"> <head> <meta charset="UTF-8"> <title>'
