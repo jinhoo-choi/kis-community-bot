@@ -94,3 +94,49 @@ def block(item: dict, use_n: int = 3) -> str:
         + "특히 아래는 이 글에서 다룰 수 있는 종류의 주장이 아닙니다.\n"
         + "\n".join(f"- {t}" for t in FORBIDDEN_TYPES)
     )
+
+
+# ── Sentence-level Grounding ────────────────────────────────
+# 숫자 개수를 세는 방식은 claim 과 어긋난다. "1 대 1.8702948" 은 주장 1개인데
+# 숫자 2개로 계산돼 수치과다로 리젝됐다 (실측 8건).
+# 본문의 숫자가 어느 claim 에서 왔는지 역추적해 '사용된 주장 수'를 센다.
+
+_NUM = re.compile(r"\d[\d,]*\.?\d*")
+
+
+def _nums(text: str) -> set[str]:
+    return {n.replace(",", "").rstrip(".") for n in _NUM.findall(text or "")
+            if len(n.replace(",", "")) >= 2}
+
+
+def used(body: str, cs: list[dict]) -> tuple[set[str], set[str]]:
+    """(사용된 claim id, 근거 없는 숫자).
+
+    본문 숫자가 어떤 claim 의 값에 포함되면 그 claim 을 인용한 것으로 본다.
+    어느 claim 에도 없는 숫자는 근거가 없다.
+    """
+    body_nums = _nums(body)
+    hit, matched = set(), set()
+    for c in cs:
+        cn = _nums(c["value"])
+        inter = body_nums & cn
+        if inter:
+            hit.add(c["id"])
+            matched |= inter
+    # 연도·순번 등 흔한 값은 근거 없음으로 보지 않는다
+    allow = {"1", "2", "3", "4", "5", "10", "100", "2026", "2027"}
+    return hit, {n for n in body_nums - matched if n not in allow}
+
+
+def grounding_errors(body: str, item: dict, cap: int) -> list[str]:
+    """근거 검사. 숫자 개수가 아니라 인용한 주장 수로 판정한다."""
+    cs = build(item)
+    if not cs:
+        return []
+    hit, ungrounded = used(body, cs)
+    errs = []
+    if len(hit) > cap:
+        errs.append(f"주장과다({len(hit)}개/{cap})")
+    if ungrounded:
+        errs.append(f"근거없는수치{sorted(ungrounded)[:3]}")
+    return errs

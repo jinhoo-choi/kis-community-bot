@@ -116,7 +116,15 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
         errs.append(f"테마글종목언급({theme_stock})")
 
     errs += _hedge_errors(body)
-    errs += _number_overuse(body, length, _slot_n(facts))
+    # 숫자 개수 대신 '인용한 주장 수' 로 판정한다 (claims.grounding_errors).
+    # 개수 세기는 claim 과 어긋나 "1 대 1.8702948" 이 2개로 계산됐다.
+    from src import claims as _cl, personas as _P2
+    _cap = _P2.num_cap(length) if length else 4
+    _g = _cl.grounding_errors(body, {"facts": facts}, _cap)
+    if _g:
+        errs += _g
+    else:
+        errs += _number_overuse(body, length, _slot_n(facts))
     errs += _ending_variety(body)
 
     # 미확인 표현은 uncertainty 앵글에서만 허용한다.

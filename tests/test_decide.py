@@ -482,9 +482,19 @@ def main():
     ok.append(run("어미 반복 차단", any("어미반복" in e for e in _f2.check(
         "올랐네요. 늘었네요. 컸네요. 많았네요. 재밌네요.",
         _f_ai, "fact_read", "reaction", "short"))))
-    ok.append(run("수치 과다 차단", any("수치과다" in e for e in _f2.check(
-        "20.32% 상승에 299,000원 마감. 거래대금 2,990억원, 5.8배, 34.10%, 305,000원, 251,000원입니다.",
-        _f_ai, "fact_read", "reaction", "medium"))))
+    # grounding 도입으로 '숫자 개수' 대신 '인용한 주장 수' 로 판정한다
+    _f_many = ("등락률: 20.32%\n종가: 299,000원\n거래대금: 2,990억원\n"
+               "거래량: 20일 평균의 5.8배\n5거래일 누적 등락률: +34.10%\n"
+               "장중 고저 차이: 저가 대비 21.5%")
+    ok.append(run("주장 과다 차단", any("주장과다" in e or "수치과다" in e for e in _f2.check(
+        "20.32% 상승에 299,000원 마감. 거래대금 2,990억원, 20일 평균 5.8배, "
+        "5거래일 34.10%, 장중 고저 21.5%였습니다.",
+        _f_many, "fact_read", "reaction", "quick_memo"))))
+    ok.append(run("근거없는 수치 차단", any("근거없는수치" in e for e in _f2.check(
+        "거래대금은 8,742억원이었습니다.", _f_many, "fact_read", "reaction", "quick_memo"))))
+    ok.append(run("한 주장의 복수 숫자는 1개로", not any("주장과다" in e for e in _f2.check(
+        "1 대 1.8702948. 우성이 우성유통을 흡수합병하기로 결정했습니다.",
+        "합병 비율: 1 대 1.8702948", "fact_read", "ratio", "quick_memo"))))
     ok.append(run("자연스러운 글 통과", not _f2.check(
         "20.32% 상승. 로보티즈 종가는 299,000원입니다. 거래대금은 2,990억원이었습니다.",
         _f_ai, "fact_read", "reaction", "short")))
