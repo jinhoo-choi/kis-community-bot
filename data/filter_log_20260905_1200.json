@@ -1,0 +1,249 @@
+[
+ {
+  "id": "hk-652142",
+  "result": "rejected",
+  "reason": "stock_ending",
+  "provider": "claude",
+  "tone": "check_list",
+  "len": 122,
+  "body": "한국IR협의회에서 엔에프씨 화장품 ODM 사업의 고성장과 소재 부문 턴어라운드 본격화를 짚은 리포트를 냈어요. 구체적인 성장 수치나 소재 턴어라운드의 상세 내용은 리포트에서 어떻게 다루고 있는지 확인이 필요해 보입니다."
+ },
+ {
+  "id": "flow-2026-09-04-030530",
+  "result": "rejected",
+  "reason": "수치과다(6개/open_talk)",
+  "provider": "claude",
+  "tone": "open_talk",
+  "len": 195,
+  "body": "29.91% 상승한 원익홀딩스, 종가는 22,500원이었네요. 거래량은 20일 평균의 6.0배로 나타났고, 장중에는 저가 대비 28.6%까지 올랐다가 고가 수준에서 마감했습니다. 이틀 이상 흔하지 않은 움직임이 이어지고 있는데, 지난 5거래일 누적으로는 17.92% 올랐는데요. 이번 상승을 견인한 구체적인 계약이나 공시 내용을 아시는 분 계신가요?"
+ },
+ {
+  "id": "flow-2026-09-04-108490",
+  "result": "rejected",
+  "reason": "수치과다(8개/data_focus)",
+  "provider": "claude",
+  "tone": "data_focus",
+  "len": 166,
+  "body": "로보티즈는 전일 22.54% 상승해 304,500원에 마감했습니다. 거래량은 20일 평균의 6.4배를 기록했고, 거래대금은 3,040억원에 달했습니다. 장중에는 저가 대비 18.9%의 변동폭을 보였으며, 종가는 장중 고가 대비 3.3% 낮은 수준입니다. 5거래일 누적으로는 25.83% 올랐습니다."
+ },
+ {
+  "id": "flow-2026-09-04-234340",
+  "result": "rejected",
+  "reason": "수치과다(8개/careful_note)",
+  "provider": "claude",
+  "tone": "careful_note",
+  "len": 166,
+  "body": "어제 헥토파이낸셜은 20일 평균의 3.6배 거래량이었고 252억원이 거래됐습니다. 종가 기준 13.48% 올랐고, 종일 저가 대비 10.5% 폭이 있었어요. 장중 고가에서 마감까지 5.8% 내려온 모습이었습니다. 최근 5거래일 누적으로는 7.91% 오른 상태이고, 어제 종가는 25,250원입니다."
+ },
+ {
+  "id": "flow-2026-09-04-336260",
+  "result": "rejected",
+  "reason": "방향오용(하락),수치과다(8개/fact_note)",
+  "provider": "claude",
+  "tone": "fact_note",
+  "len": 186,
+  "body": "두산퓨얼셀이 어제 12.44% 올랐습니다. 종가는 43,850원이고, 거래대금은 438억원을 기록했는데요. 거래량은 20일 평균의 1.4배 수준이었습니다. 장중에는 저가 대비 14.4% 상승폭을 보였으나 마감 때는 장중 고가 대비 2.3% 낮은 수준에서 마무리됐습니다. 다만 5거래일 누적 기준으로는 여전히 3.41% 하락 중입니다."
+ },
+ {
+  "id": "flow-2026-09-04-263750",
+  "result": "rejected",
+  "reason": "수치과다(4개/brief_report)",
+  "provider": "claude",
+  "tone": "brief_report",
+  "len": 77,
+  "body": "11.47% 상승했습니다. 펄어비스가 어제 종가 기준 이 정도 올랐습니다. 거래대금은 345억원, 거래량은 20일 평균의 2.1배였습니다."
+ },
+ {
+  "id": "flow-2026-09-04-090460",
+  "result": "rejected",
+  "reason": "수치과다(8개/fact_note)",
+  "provider": "claude",
+  "tone": "fact_note",
+  "len": 177,
+  "body": "어제 비에이에치는 21,850원에 마감해 전일 대비 10.75% 올랐습니다. 이는 지난 5거래일 누적 상승률 27.78%의 흐름 속에 있는데요. 거래대금 218억원에 거래량은 20일 평균의 2.0배였습니다. 장중에는 저가 대비 11.4% 변동폭을 보였으며, 마감은 장중 고가 대비 1.6% 낮은 수준에서 형성됐습니다."
+ },
+ {
+  "id": "flow-2026-09-04-240810",
+  "result": "rejected",
+  "reason": "수치과다(4개/quick_memo)",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "len": 89,
+  "body": "114,800원까지 오른 원익IPS가 어제 9.33% 상승했어요. 장중에는 저가 대비 10.7%까지 올랐다가 고가보다 1.9% 낮은 수준에서 마감한 모습이네요."
+ },
+ {
+  "id": "flow-2026-09-04-060250",
+  "result": "rejected",
+  "reason": "방향오용(하락),수치과다(6개/fact_note)",
+  "provider": "claude",
+  "tone": "fact_note",
+  "len": 150,
+  "body": "NHN KCP가 어제 8.38% 올랐습니다. 종가는 15,770원이었고, 거래대금은 158억원을 기록했는데요. 장중에는 저가 대비 7.0% 폭으로 변동했으며, 마감은 장중 고가보다 3.0% 낮은 수준에서 이뤄졌습니다. 5거래일 기준으로는 -2.35% 하락한 상태입니다."
+ },
+ {
+  "id": "kind-20260904000786",
+  "result": "rejected",
+  "reason": "너무짧음(37자/brief_report)",
+  "provider": "gemini",
+  "tone": "brief_report",
+  "len": 37,
+  "body": "18시 32분. 한국거래소가 디에이치엑스컴퍼니에 풍문 관련 조회공시"
+ },
+ {
+  "id": "pol-대구세관추석앞두고24시간수출입통관지원",
+  "result": "rejected",
+  "reason": "너무짧음(29자/quick_memo),미확인수치['250', '130']",
+  "provider": "gemini",
+  "tone": "quick_memo",
+  "len": 29,
+  "body": "량: 3문장, 약 130자 (250자 이내 만족) 종"
+ },
+ {
+  "id": "poll-flow-2026-09-04-030530",
+  "result": "rejected",
+  "reason": "너무짧음(37자/two_view)",
+  "provider": "gemini",
+  "tone": "two_view",
+  "len": 37,
+  "body": "22,500원은 원익홀딩스의 전일 종가입니다. 장중 고가 대비 0."
+ },
+ {
+  "id": "dart-20260904000355",
+  "kind": "disclosure",
+  "stock": "우성",
+  "title": "주요사항보고서(회사합병결정)",
+  "provider": "claude",
+  "tone": "brief_report",
+  "score": 15.3,
+  "result": "sent",
+  "reason": "",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 149,
+  "body": "1 대 1.8702948. 우성이 자회사 우성유통을 흡수합병하기로 결정했는데, 우성 보통주 1주당 우성유통 보통주 1.8702948주씩 배정됩니다. 사료와 농장, 유통 사업이 한 조직 안에서 통합 운영되면서 축산 식품 사업 Value Chain이 완성되는 구조입니다."
+ },
+ {
+  "id": "dart-20260904000431",
+  "kind": "disclosure",
+  "stock": "우성",
+  "title": "주요사항보고서(자기주식처분결정)",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "score": 10.0,
+  "result": "held",
+  "reason": "fatal:상세 수치는 공개되지 않았다가 내용의 절반",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 87,
+  "body": "우성이 자기주식 처분을 결정했어요. 합병 대가로 자기주식을 교부하는 건데, 이는 회사가 보유 중인 자사주를 합병 거래의 대금으로 상대방에게 넘기는 뜻이에요."
+ },
+ {
+  "id": "dart-20260904800546",
+  "kind": "disclosure",
+  "stock": "태영건설",
+  "title": "유상증자또는주식관련사채등의발행결과(자율공시)",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "score": 9.3,
+  "result": "held",
+  "reason": "fatal:상세 수치가 없는 상황에서 일반론으로 분량을 채움",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 98,
+  "body": "태영건설이 유상증자 또는 주식관련사채 발행을 마쳤다는 공시를 냈어요. 유상증자는 새로운 주식을 발행해서 자금을 모으는 건데, 회사가 필요한 자금을 외부에서 조달하는 방식이에요."
+ },
+ {
+  "id": "dart-20260904000367",
+  "kind": "disclosure",
+  "stock": "NICE",
+  "title": "주요사항보고서(자기주식취득신탁계약해지결정)",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "score": 11.3,
+  "result": "held",
+  "reason": "fatal:상세 수치는 공개되지 않았다가 내용의 절반",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 96,
+  "body": "나이스홀딩스가 자기주식취득신탁계약을 해지하기로 결정했어요. 자기주식취득신탁이란 회사가 신탁사를 통해 자신의 주식을 사들이는 방식인데, 이번에 그 계약을 끝내겠다는 공시네요."
+ },
+ {
+  "id": "dart-20260904000282",
+  "kind": "disclosure",
+  "stock": "교촌에프앤비",
+  "title": "자기주식처분결과보고서",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "score": 11.3,
+  "result": "held",
+  "reason": "fatal:상세 수치는 공개되지 않았다가 내용의 절반",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 79,
+  "body": "교촌에프앤비가 자기주식처분결과보고서를 공시했어요. 자기주식처분결과보고서는 회사가 보유 중이던 자사주를 팔아치운 후 그 결과를 알리는 문서네요."
+ },
+ {
+  "id": "flow-2026-09-04-058610",
+  "kind": "flow",
+  "stock": "에스피지",
+  "title": "에스피지 전일 12.41% 상승",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "score": 13.3,
+  "result": "held",
+  "reason": "커뮤니티적합성 2/5 정보량이 부족하고 단순 나열에 그침",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 61,
+  "body": "장중 저가 대비 12.4% 오른 수준에서 마감했어요. 94,200원으로 마감했고 거래대금은 942억원이었네요."
+ },
+ {
+  "id": "pol-울산시중소기업소상공인에760억경영안정자금지원",
+  "kind": "policy",
+  "stock": "삼성전자",
+  "title": "울산시, 중소기업·소상공인에 760억 경영안정자금 지원",
+  "provider": "gemini",
+  "tone": "quick_memo",
+  "score": 7.3,
+  "result": "held",
+  "reason": "fatal:본문이 완성되지 않음 (\"규모의...\" - 금액으로 시작하고 뒤에 무엇인지 밝힘. OK. 숫자 1개만 사용:",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "thin_facts": false,
+  "len": 48,
+  "body": "규모의...\" - 금액으로 시작하고 뒤에 무엇인지 밝힘. OK. 숫자 1개만 사용: \""
+ },
+ {
+  "id": "flow-2026-09-04-240810",
+  "kind": "flow",
+  "stock": "원익IPS",
+  "title": "원익IPS 전일 9.33% 상승",
+  "provider": "gemini",
+  "tone": "quick_memo",
+  "score": 6.7,
+  "result": "held",
+  "reason": "fatal:게시글이 불완전하게 제공됨 — '114,800원이라는 숫자로 시작, 그것이 원익IPS의 종가임을 뒤에' 이후",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 38,
+  "body": "114,800원이라는 숫자로 시작, 그것이 원익IPS의 종가임을 뒤에"
+ },
+ {
+  "id": "pol-대구세관추석앞두고24시간수출입통관지원",
+  "kind": "policy",
+  "stock": "CJ제일제당",
+  "title": "대구세관, 추석 앞두고 24시간 수출입 통관 지원",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "score": 15.3,
+  "result": "held",
+  "reason": "커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "thin_facts": false,
+  "len": 105,
+  "body": "추석 명절을 앞두고 대구본부세관이 수출입 통관 특별 지원에 나선대요. 5일 발표에 따르면 24시간 수출입 통관을 지원하는 방식으로 진행된다고 해요. 명절 수급 차질을 막기 위한 정책이네요."
+ }
+]
