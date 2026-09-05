@@ -173,16 +173,101 @@ def _fmt(val: str, unit: str) -> str:
     return f"{v}{unit}" if unit and not v.endswith(unit) else v
 
 
-def enrich_one(item: dict, day: str) -> bool:
-    """공시 항목의 facts 에 정형 수치를 덧붙인다. 보강했으면 True."""
-    code = item.get("stock_code")
-    corp = corp_codes().get(code or "")
-    if not corp:
+DOC_URL = "https://opendart.fss.or.kr/api/document.xml"
+
+# 공급계약 공시는 정형 API 가 없다 (프로브: 후보 3종 전부 status 101).
+# 대신 원문이 라벨 고정 HTML 표라 정형 API 보다 오히려 다루기 쉽다.
+# 라벨은 한글 고정 문자열이므로 필드 키를 추측할 일이 없다.
+CONTRACT_FIELDS = [
+    ("판매ㆍ공급계약 내용", "계약 내용", ""),
+    ("계약금액 총액",       "계약 금액", "원"),
+    ("매출액 대비",         "최근 매출액 대비", "%"),
+    ("계약상대방",          "계약 상대", ""),
+    ("판매ㆍ공급지역",      "공급 지역", ""),
+    ("종료일",              "계약 종료일", ""),
+]
+
+
+def _norm(t: str) -> str:
+    """앞 번호와 공백을 떼고 라벨만 남긴다 ('2. 계약내역' -> '계약내역')."""
+    return re.sub(r"\s+", "", re.sub(r"^[\-\d.\s]+", "", t or ""))
+
+
+def _doc_rows(rcept_no: str) -> dict:
+    """공시 원문(document.xml)의 표를 {라벨: 값} 으로 편다.
+
+    행마다 셀 수가 다르다 ('계약금액 총액(원)|662,348,400' 2칸,
+    '5. 계약기간|시작일|2026-09-04' 3칸). 값은 항상 마지막 칸,
+    라벨은 그 앞 칸이다.
+    정정 공시는 정정표가 먼저 오고 원 표가 뒤에 온다 — 뒤엣것이 이긴다.
+    """
+    from bs4 import BeautifulSoup
+
+    r = requests.get(DOC_URL, headers=_HEADERS, timeout=30,
+                     params={"crtfc_key": DART_API_KEY, "rcept_no": rcept_no})
+    if r.content[:2] != b"PK":
+        return {}
+    zf = zipfile.ZipFile(io.BytesIO(r.content))
+    raw = zf.read(zf.namelist()[0])
+    # meta 는 euc-kr 이라고 선언하지만 실제 바이트는 UTF-8 이다.
+    # euc-kr 로 읽으면 제목이 '⑥쇳留ㅳ怨듦怨쎌껜寃' 로 깨진다 (실측).
+    txt = raw.decode("utf-8", "ignore")
+    out = {}
+    for tr in BeautifulSoup(txt, "html.parser").find_all("tr"):
+        cells = [c.get_text(" ", strip=True) for c in tr.find_all("td")]
+        cells = [c for c in cells if c]
+        if len(cells) >= 2:
+            out[_norm(cells[-2])] = cells[-1].strip()
+    return out
+
+
+def _contract_detail(item: dict) -> bool:
+    """단일판매·공급계약 공시를 원문에서 보강한다."""
+    rcept = (item.get("id") or "").replace("dart-", "")
+    if not rcept.isdigit():
+        return False
+    try:
+        rows = _doc_rows(rcept)
+    except Exception as e:
+        print(f"[dart] 원문 파싱 실패 {rcept}: {type(e).__name__}")
         return False
 
+    lines = []
+    for label, disp, unit in CONTRACT_FIELDS:
+        key = _norm(label)
+        # 라벨에 단위가 붙어 온다 ('계약금액 총액(원)'). 부분일치로 찾고,
+        # 정정 공시는 원 표가 뒤에 오므로 마지막 일치를 쓴다.
+        hit = [k for k in rows if key in k]
+        v = _fmt(rows[hit[-1]], unit) if hit else ""
+        if v:
+            lines.append(f"- {disp}: {v}")
+    if not lines:
+        return False
+
+    item["facts"] = (
+        item["facts"].rstrip()
+        + "\n\n[단일판매·공급계약 상세 — 공시 원문]\n"
+        + "\n".join(lines)
+        + "\n※ 위 수치는 공시 원문 값이다. 그대로 쓰되 계산하거나 합산하지 말 것."
+        + "\n※ 계약금액이 매출에 언제 얼마나 반영될지는 공시에 없다. 추정하지 말 것."
+    )
+    item["dart_detail"] = "document"
+    return True
+
+
+def enrich_one(item: dict, day: str) -> bool:
+    """공시 항목의 facts 에 정형 수치를 덧붙인다. 보강했으면 True."""
     title = item.get("title", "")
+    code = item.get("stock_code")
     if NO_DETAIL_API.search(title):
         item["no_detail_api"] = True
+        return False
+    # 정형 API 가 없어 원문을 읽는 유일한 유형. 미보강 7건 중 5건이 이것이었다.
+    if re.search(r"단일판매|공급계약", title):
+        return _contract_detail(item)
+
+    corp = corp_codes().get(code or "")
+    if not corp:
         return False
     for pat, ep, label, fields in ENDPOINTS:
         if not re.search(pat, title):

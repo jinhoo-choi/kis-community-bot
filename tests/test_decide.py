@@ -751,6 +751,28 @@ def main():
                   _ep("주요사항보고서(자기주식취득신탁계약체결결정)") == "tsstkAqTrctrCnsDecsn"))
     ok.append(run("일반 취득은 그대로",
                   _ep("주요사항보고서(자기주식취득결정)") == "tsstkAqDecsn"))
+    # 공급계약은 정형 API 가 없어 원문 표를 읽는다 (프로브: 후보 3종 전부 101)
+    _rows = {"판매ㆍ공급계약내용": "CLT Interface Board",
+             "계약금액총액(원)": "9,686,300,000",
+             "최근매출액(원)": "66,026,746,277",
+             "매출액대비(%)": "14.7",
+             "계약상대방": "삼성전자",
+             "판매ㆍ공급지역": "대한민국",
+             "종료일": "2026-12-31"}
+    _orig_doc = _dd._doc_rows
+    _dd._doc_rows = lambda r: _rows
+    _ci = {"id": "dart-20260904900736", "facts": "공시일: 20260904",
+           "title": "단일판매ㆍ공급계약체결", "stock_code": "092870"}
+    _got = _dd.enrich_one(_ci, "20260904")
+    ok.append(run("공급계약 원문 보강", _got and _ci.get("dart_detail") == "document"))
+    ok.append(run("계약금액 억원 변환", "97억원" in _ci["facts"]))
+    ok.append(run("매출액 대비 추출", "14.7%" in _ci["facts"]))
+    ok.append(run("계약상대 추출", "삼성전자" in _ci["facts"]))
+    _dd._doc_rows = lambda r: {}
+    ok.append(run("표 비면 보강 안 함",
+                  not _dd.enrich_one({"id": "dart-1", "facts": "x",
+                                      "title": "단일판매ㆍ공급계약체결"}, "20260904")))
+    _dd._doc_rows = _orig_doc
     ok.append(run("타법인 양수 매칭",
                   _ep("주요사항보고서(타법인주식및출자증권양수결정)")
                   == "otcprStkInvscrInhDecsn"))
