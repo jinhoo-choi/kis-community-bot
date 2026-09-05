@@ -76,8 +76,17 @@ def _fix_cliche(b: str) -> str:
     return b
 
 
+# 한글·영숫자·기본 문장부호 외의 문자는 생성 오류다 (실측: "규모라면 ꤼ 의미")
+_JUNK = re.compile(
+    r"[^\uAC00-\uD7A3\u3131-\u318E0-9A-Za-z\s"
+    r".,!?%~·:;()\[\]{}'\"/\-+＋−–—…‘’“”]"
+)
+
+
 def clean(body: str) -> str:
     b = body.strip()
+    b = _JUNK.sub("", b)
+    b = re.sub(r"\s{2,}", " ", b)
     for pat in _STRIP_PATTERNS:
         b = re.sub(pat, "", b, flags=re.M)
     b = _fix_cliche(b)

@@ -286,7 +286,8 @@ def build_messages_v2(item: dict, persona: str, angle: str = "") -> tuple[str, s
               .replace("{sentences}", p["sentences"])
               .replace("{num_cap}", str(p["num_cap"]))
               .replace("{angle_desc}", angles.contract(angle))
-              .replace("{claim_block}", claims.block(item))
+              .replace("{claim_block}",
+                       claims.block(item, v2.PERSONAS[persona]["num_cap"]))
               .replace("{rule_block}", rules.writer_block()))
     if item.get("thin_facts"):
         system += "\n" + rules.THIN_FACTS_WARNING

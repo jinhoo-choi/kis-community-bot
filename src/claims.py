@@ -72,16 +72,24 @@ def build(item: dict) -> list[dict]:
     return out
 
 
-def block(item: dict) -> str:
-    """프롬프트에 넣을 허용 주장 블록."""
+def block(item: dict, use_n: int = 3) -> str:
+    """프롬프트에 넣을 허용 주장 블록.
+
+    목록을 주면 모델이 목록을 '소진'하려 든다 (실측: 리젝 15건 중 8건이 수치과다).
+    허용 목록과 사용 개수를 함께 못 박는다.
+    """
     cs = build(item)
     if not cs:
         return ""
     lines = [f"{c['id']}. {c['label']}: {c['value']}" for c in cs]
+    pick = min(use_n, len(cs))
     return (
         "[사용 가능한 주장 — 이 목록 밖의 내용은 쓸 수 없습니다]\n"
         + "\n".join(lines)
-        + "\n\n각 문장은 위 주장 중 하나 이상에 근거해야 합니다.\n"
+        + f"\n\n이 중 **{pick}개만** 골라 쓰세요. 전부 쓰면 표지 나열이 됩니다.\n"
+        + "무엇을 고를지는 위 [이 글이 독자에게 알려줄 하나]가 정합니다.\n"
+        + "고르지 않은 주장은 언급하지 마세요.\n"
+        + "각 문장은 고른 주장 중 하나 이상에 근거해야 합니다.\n"
         + "목록에 없는 주장은 사실이더라도 이번 글에는 쓰지 마세요.\n"
         + "특히 아래는 이 글에서 다룰 수 있는 종류의 주장이 아닙니다.\n"
         + "\n".join(f"- {t}" for t in FORBIDDEN_TYPES)
