@@ -143,5 +143,39 @@ def main():
         state.save(s)
 
 
+def _install_log_mask():
+    """표준출력에서 API 키를 가린다.
+
+    실측: opendart 예외 트레이스백에 crtfc_key 가 들어간 URL 이 그대로 찍혀
+    퍼블릭 레포의 run_log.txt 에 커밋됐다. 예외 메시지는 통제할 수 없으므로
+    출력 단계에서 막는다.
+    """
+    import re as _re
+    import sys as _sys
+
+    keys = [v for v in (config.DART_API_KEY, config.ANTHROPIC_API_KEY,
+                        config.GEMINI_API_KEY, config.TELEGRAM_TOKEN)
+            if v and len(v) >= 12]
+    pat = _re.compile("|".join(_re.escape(k) for k in keys)) if keys else None
+
+    class _Masked:
+        def __init__(self, s):
+            self._s = s
+
+        def write(self, t):
+            if pat:
+                t = pat.sub("***", t)
+            t = _re.sub(r"(crtfc_key|api[_-]?key|token)=[^&\s\'\")]+",
+                        r"\1=***", t, flags=_re.I)
+            self._s.write(t)
+
+        def flush(self):
+            self._s.flush()
+
+    _sys.stdout = _Masked(_sys.stdout)
+    _sys.stderr = _Masked(_sys.stderr)
+
+
 if __name__ == "__main__":
+    _install_log_mask()
     main()

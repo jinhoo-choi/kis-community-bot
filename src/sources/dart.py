@@ -39,20 +39,28 @@ def fetch(limit: int = 30) -> list[dict]:
     items, page = [], 1
 
     while len(items) < limit and page <= 5:
-        r = requests.get(
-            BASE,
-            params={
-                "crtfc_key": DART_API_KEY,
-                "bgn_de": day,
-                "end_de": day,
-                "corp_cls": "Y",        # Y=유가증권, K=코스닥 (둘 다 원하면 루프)
-                "page_no": page,
-                "page_count": 100,
-            },
-            headers={"User-Agent": USER_AGENT},
-            timeout=15,
-        )
-        data = r.json()
+        # 네트워크 예외가 파이프라인 전체를 죽이면 안 된다.
+        # 실측: opendart ConnectTimeout 으로 수집 단계에서 잡이 죽었고,
+        #      트레이스백에 API 키가 들어간 URL 이 로그에 그대로 찍혔다.
+        try:
+            r = requests.get(
+                BASE,
+                params={
+                    "crtfc_key": DART_API_KEY,
+                    "bgn_de": day,
+                    "end_de": day,
+                    "corp_cls": "Y",     # Y=유가증권, K=코스닥
+                    "page_no": page,
+                    "page_count": 100,
+                },
+                headers={"User-Agent": USER_AGENT},
+                timeout=15,
+            )
+            data = r.json()
+        except Exception as e:
+            # 예외 객체에 URL(=키 포함)이 들어 있으므로 타입명만 출력한다
+            print(f"[dart] 요청 실패 (page {page}): {type(e).__name__}")
+            break
         if data.get("status") != "000":
             print(f"[dart] status={data.get('status')} {data.get('message')}")
             break

@@ -683,6 +683,26 @@ def main():
     ok.append(run("종목코드 오탐 없음",
                   not _cl2.grounding_errors("엔에프씨(265740)가 5.20% 올랐어요.", _itc, 4)))
 
+
+    # ── 로그 키 마스킹 (퍼블릭 레포에 API 키가 커밋된 사고 회귀)
+    import io as _io, sys as _sys2, importlib as _il
+    import config as _cfg2, main as _mn
+    _bak_key = _cfg2.DART_API_KEY
+    _cfg2.DART_API_KEY = "cf0792ba00cb2113a33030aa508679f3b719b346"
+    _buf, _old = _io.StringIO(), _sys2.stdout
+    _mn._install_log_mask()
+    _sys2.stdout._s = _buf
+    print("url?crtfc_key=" + _cfg2.DART_API_KEY + "&x=1")
+    _sys2.stdout = _old
+    _out = _buf.getvalue()
+    ok.append(run("로그에서 키 마스킹", _cfg2.DART_API_KEY not in _out, _out.strip()[:60]))
+    _cfg2.DART_API_KEY = _bak_key
+
+    # DART 요청 실패가 파이프라인을 죽이지 않는가
+    _dsrc = pathlib.Path("src/sources/dart.py").read_text(encoding="utf-8")
+    ok.append(run("DART 요청 예외 처리", "except Exception as e:" in _dsrc))
+    ok.append(run("예외 메시지에 URL 미출력", "type(e).__name__" in _dsrc))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
