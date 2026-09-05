@@ -193,6 +193,24 @@ def main():
         except Exception as ex:
             log(f"  원문 확인 실패: {type(ex).__name__} {ex}")
 
+    log("\n── 4. 파서 실주행 ──")
+    # 구조는 확인됐는데 파이프라인에서 5건 전부 False 였다. 어디서 끊기는지 본다.
+    try:
+        import sys
+        sys.path.insert(0, ".")
+        from src.sources import dart_contract as DC
+        log(f"  DART_API_KEY set={bool(DC.DART_API_KEY)}")
+        for hit in picks:
+            it = {"id": f"dart-{hit['rcept_no']}", "title": hit["report_nm"],
+                  "facts": "공시일: x"}
+            r = DC.enrich_one(it)
+            log(f"  {hit['report_nm'][:34]} → {r}")
+            if r:
+                log("    " + it["facts"].replace("\n", " | "))
+    except Exception as ex:
+        import traceback
+        log("  파서 실주행 실패: " + traceback.format_exc()[-600:])
+
     with open("data/dart_probe.txt", "w", encoding="utf-8") as f:
         f.write("\n".join(OUT))
     print("\n[probe] data/dart_probe.txt 저장")
