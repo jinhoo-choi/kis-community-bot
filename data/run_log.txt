@@ -1,50 +1,13 @@
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-[dart] corp_code 3989종목 매핑
-[dart] 상세 보강 2/18건
-[crawl] dart 18건
-[crawl] naver_research 2건
-[crawl] hankyung 1건
-[market] ⚠ 스카이랩스 제외 — 등락률 135.0% > 가격제한폭
-[crawl] market 2건
-[tickers] 상장 2632종목 로드 (lxml)
-[crawl] kind_inquiry 2건
-[kind] 특징주→조회공시 0건 / 조회공시→시세 2건
-[crawl] policy_rss 3건
-[tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
-[crawl] telegram_ch 0건 (정상 0건)
-[main] 수집 총 29건
-[enrich] 22/29건 배경 보강 완료
-[gate] 차단 19건 {'tier5': 9, 'tier4': 9, 'tier1': 1}
-[theme] 테마글 2건에 게시 종목 배정
-[main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
-[main] 생성 대상 10건 {'disclosure': 5, 'research': 0, 'flow': 2, 'policy': 2, 'poll': 1}
-[claude] SDK 1.4.0
-[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] claude: 8/8건 생성
-[gen] 정규식 리젝 dart-20260904000431 ['너무김(129자/quick_memo)']
-       └ '우성이 자기주식처분을 결정했어요. 합병대가로 자기주식을 교부하기로 한 건데, 자기주식처분이란 회사가 자신의 주식을 다른 목적으로 쓰겠다고 정하는 거예요. 이번엔 합병 거래에서 대가 대신 자사주를 건네주는 방식을 쓰기로 한 셈이네요.'
-[gen] 정규식 리젝 dart-20260904000355 ['너무김(159자/brief_report)']
-       └ '1.8702948배. 우성이 우성유통을 흡수합병하기로 결정했으며, 우성유통 보통주 1주에 우성 보통주 1.8702948배를 배정합니다. 우성유통이 영위하던 유통 사업이 우성으로 통합되면서 사료-농장-유통으로 이어지는 축산 식품 사업 Value Chain이 단일 조직 내에서 운영됩니다.'
-[gen] 정규식 리젝 flow-2026-09-04-030530 ['수치과다(5개/data_focus)']
-       └ '225억원의 거래대금이 나왔습니다. 어제 원익홀딩스 거래량은 20일 평균의 6.0배였습니다. 장중에는 저가 대비 28.6% 올랐다가 종가 22,500원에 마감했습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-108490 ['수치과다(5개/open_talk)']
-       └ '3,040억원이 로보티즈에 몰렸네요. 어제 거래대금이 20일 평균의 6.4배를 기록했는데요. 장중에는 저가 대비 18.9%까지 오르다가 마감 때는 장중 고가에서 3.3% 낮은 수준에서 마감된 모양이네요. 이 정도 규모의 거래와 변동성이 나온 배경이 뭐길래 일어난 건가요?'
-[gen] 정규식 리젝 kind-20260904000786 ['stock_ending']
-       └ '디에이치엑스컴퍼니가 거래소로부터 주권매매거래정지기간변경 관련 조회공시를 받았습니다. 공시 제목은 풍문 또는 보도 관련이며, 답변 내용은 원문 확인이 필요한 상태입니다. 종가는 6,930원으로 변함이 없었고, 5거래일 누적 등락률도 0.00%였습니다. 오늘 거래에서도 특별한 변동성을 보이지 않았네요.'
-[gen] gemini: 2/2건 생성
-[gen] 정규식 리젝 pol-인력재배치시파업가능에경영계우려누더기지침한계 ['미완성(종결부호 없음)']
-       └ '고용노동부가 최근 기업의 공장 신설이나 인공지능 등 신기술 도입으로 직원을 배치전환할'
-[gen] 정규식 리젝 poll-flow-2026-09-04-030530 ['너무짧음(43자/fact_note)', '미완성(종결부호 없음)']
-       └ '225억원은 원익홀딩스의 전 거래일 거래대금입니다. 이와 함께 주가는 전날보다'
-[gen] 정규식 통과 5건 / 시도 10건
-[claude] SDK 1.4.0
-[assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 0건 / 보류 5건
-   보류 dart-20260904000367 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
-   보류 dart-20260904000282 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
-   보류 pol-울산시중소기업소상공인에760억경영안정자금지원 (claude) - 커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함
-   보류 pol-인력재배치시파업가능에경영계우려누더기지침한계 (claude) - 커뮤니티적합성 2/5 정보량이 적고 논점이 부족함
-   보류 poll-flow-2026-09-04-030530 (claude) - 커뮤니티적합성 2/5 정보량이 부족하고 질문으로 마무리되지 않음
-[tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 (TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)
-[main] filter_log data/filter_log_20260905_2041.json
-[main] stats {"ts": "2026-09-05T20:41:14+09:00", "persona_mode": "v2", "collected": 29, "gate_blocked": 19, "gate_reasons": {"tier5": 9, "tier4": 9, "tier1": 1}, "enrich_ok": 22, "generated": 5, "sent": 0, "held": 5, "hold_reasons": {"fatal": 2, "커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함": 1, "커뮤니티적합성 2/5 정보량이 적고 논점이 부족함": 1, "커뮤니티적합성 2/5 정보량이 부족하고 질문으로 마무리되지 않음": 1}, "avg_score": null, "by_provider": {"claude": {"generated": 5, "sent": 0, "avg_score": 12.68}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 18, "expected": 18, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 2, "expected": 3, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 4, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+Traceback (most recent call last):
+  File "/home/runner/work/kis-community-bot/kis-community-bot/main.py", line 184, in <module>
+    main()
+  File "/home/runner/work/kis-community-bot/kis-community-bot/main.py", line 54, in main
+    raw = collect()
+          ^^^^^^^^^
+  File "/home/runner/work/kis-community-bot/kis-community-bot/main.py", line 29, in collect
+    items += dart.fetch(int(q["disclosure"] * over))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/kis-community-bot/kis-community-bot/src/sources/dart.py", line 77, in fetch
+    if dart_detail.NO_DETAIL_API.search(row["report_nm"]):
+       ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'dart_detail' where it is not associated with a value
