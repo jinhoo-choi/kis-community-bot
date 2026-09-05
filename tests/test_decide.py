@@ -1,4 +1,5 @@
 """배포 판정 테스트. main() 이 아니라 decide.py 의 실제 함수를 호출한다."""
+import pathlib
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -651,6 +652,27 @@ def main():
     ok.append(run("claim 사용 개수 명시", "3개만" in _cl2.block(_it3, 3)))
     ok.append(run("페르소나 상한 연동",
                   "2개만" in _cl2.block(_it3, 2)))
+
+
+    # ── 주장 상한을 문장 수에 연동 (num_cap 은 숫자 개수, claim_cap 은 주장 수)
+    from src.personas_v2 import claim_cap as _cc
+    ok.append(run("claim_cap 문장수 연동", _cc("quick_memo") == 3 and _cc("fact_note") == 5,
+                  f"quick {_cc('quick_memo')} / fact {_cc('fact_note')}"))
+    ok.append(run("claim_cap 상한 5", max(_cc(k) for k in _P2) <= 5))
+    _fq = ("종가: 22,500원\n등락률: 29.91%\n거래대금: 225억원\n"
+           "거래량: 20일 평균의 6.0배\n장중 고저 차이: 저가 대비 28.6%")
+    _bq = ("225억원 거래대금 가운데 29.91% 올랐네요. 종가 22,500원이었고 "
+           "거래량은 20일 평균의 6.0배였습니다. 장중 저가 대비 28.6%까지 움직였는데요.")
+    ok.append(run("짧은 페르소나는 주장과다 리젝",
+                  any("주장과다" in e for e in
+                      _f2.check(_bq, _fq, "quick_memo", "reaction", "quick_memo"))))
+    ok.append(run("긴 페르소나는 통과",
+                  not any("주장과다" in e for e in
+                          _f2.check(_bq, _fq, "fact_note", "reaction", "fact_note"))))
+    # 등락률 이상치
+    import re as _re3
+    ok.append(run("가격제한폭 검증 존재",
+                  "30.5" in pathlib.Path("src/sources/market.py").read_text(encoding="utf-8")))
 
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)

@@ -196,3 +196,20 @@ COMPAT = {
 def compatible(persona: str, angle: str) -> bool:
     allowed = COMPAT.get(persona)
     return (not allowed) or (not angle) or (angle in allowed)
+
+
+import re as _re
+
+
+def claim_cap(persona: str) -> int:
+    """이 페르소나가 인용할 수 있는 주장 수.
+
+    num_cap(서로 다른 숫자 개수)을 그대로 쓰니 과도하게 좁았다
+    (실측: 리젝 15건 중 8건이 주장과다). 문장 수에 연동한다 —
+    N문장이면 문장당 최대 1개 새 주장까지가 자연스럽다.
+    """
+    p = PERSONAS.get(persona)
+    if not p:
+        return 4
+    nums = [int(x) for x in _re.findall(r"\d+", p["sentences"])]
+    return min(max(nums) if nums else 4, 5)

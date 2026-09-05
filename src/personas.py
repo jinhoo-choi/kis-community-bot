@@ -272,6 +272,13 @@ def len_bounds(style_or_len: str) -> tuple[int, int]:
     return (spec["min"], spec["max"]) if spec else (50, 300)
 
 
+def claim_cap(style: str) -> int:
+    """주장 상한. v1 은 길이축 기준으로 근사한다."""
+    if style in v2.PERSONAS:
+        return v2.claim_cap(style)
+    return {"short": 3, "medium": 4, "long": 5}.get(style, 4)
+
+
 def num_cap(style_or_len: str) -> int:
     if style_or_len in v2.PERSONAS:
         return v2.PERSONAS[style_or_len]["num_cap"]
@@ -287,7 +294,7 @@ def build_messages_v2(item: dict, persona: str, angle: str = "") -> tuple[str, s
               .replace("{num_cap}", str(p["num_cap"]))
               .replace("{angle_desc}", angles.contract(angle))
               .replace("{claim_block}",
-                       claims.block(item, v2.PERSONAS[persona]["num_cap"]))
+                       claims.block(item, v2.claim_cap(persona)))
               .replace("{rule_block}", rules.writer_block()))
     if item.get("thin_facts"):
         system += "\n" + rules.THIN_FACTS_WARNING
