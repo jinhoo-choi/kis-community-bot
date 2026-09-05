@@ -148,10 +148,12 @@ def main():
                     break
             log(f"  전체 공시 {len(rows)}건에서 탐색")
             # 정정 건은 본문이 짧아 구조를 못 본다 (실측 2,217바이트). 원 공시를 고른다.
-            hit = next((x for x in rows if "공급계약" in x.get("report_nm", "")
-                        and "정정" not in x.get("report_nm", "")), None) \
-                or next((x for x in rows if "공급계약" in x.get("report_nm", "")), None)
-            if hit:
+            a = next((x for x in rows if "공급계약" in x.get("report_nm", "")
+                      and "정정" not in x.get("report_nm", "")), None)
+            b = next((x for x in rows if "공급계약" in x.get("report_nm", "")
+                      and "정정" in x.get("report_nm", "")), None)
+            picks = [x for x in (a, b) if x]
+            for hit in picks:
                 log(f"  대상: {hit['corp_name']} {hit['report_nm'][:40]} "
                     f"rcept_no={hit['rcept_no']}")
                 d = requests.get("https://opendart.fss.or.kr/api/document.xml",
@@ -186,7 +188,7 @@ def main():
                         cells = [c for c in cells if c]
                         if cells:
                             log("   " + " | ".join(c[:60] for c in cells))
-            else:
+            if not picks:
                 log("  최근 30일 공급계약 공시 없음")
         except Exception as ex:
             log(f"  원문 확인 실패: {type(ex).__name__} {ex}")
