@@ -126,3 +126,39 @@ def attach_to_flow(flow_items: list[dict], inquiries: list[dict]) -> int:
         it["has_inquiry"] = True
         n += 1
     return n
+
+
+def enrich_with_market(inquiries: list[dict], flow_items: list[dict]) -> int:
+    """조회공시 항목에 같은 종목 시세를 붙인다.
+
+    attach_to_flow 는 반대 방향이라 놓치는 게 있었다 (실측 연결 2/3).
+    market.fetch 는 거래대금 상위 + 등락률 1.5% 이상만 담는데, 조회공시가 나온
+    종목이 그 명단에 없으면 조회공시 글은 시세 없이 "회사가 부인했다" 한 줄로 끝난다.
+    거꾸로 조회공시 쪽에서 시세를 끌어온다. 조회공시 + 시세는 flow 슬롯이
+    구조적으로 못 만드는 조합이다 — 등락과 그에 대한 회사의 공식 답변이 함께 있다.
+    """
+    from src import facts as _facts
+    from src.sources import market as _mk
+
+    have = {it.get("stock_code") for it in flow_items}
+    n = 0
+    for q in inquiries:
+        code = q.get("stock_code")
+        if not code or code in have or "종가" in q.get("facts", ""):
+            continue
+        r = {"code": code}
+        _mk._add_history(r)                     # 기존 함수 재사용
+        close, prev = r.get("close_hist"), r.get("prev_close")
+        if not close or not prev:
+            continue
+        r["pct"] = (close - prev) / prev * 100
+        r["close"] = close
+        if _facts.sanity_errors(r):             # 가격제한폭 등 불변식
+            continue
+        q["facts"] = (q["facts"].rstrip() + "\n\n[같은 날 시세]\n"
+                      + f"종가: {close:,}원\n등락률: {r['pct']:.2f}%\n"
+                      + "".join(f"{l}\n" for l in _facts.evaluate(r))
+                      + "※ 등락과 조회공시의 인과를 단정하지 말 것.")
+        n += 1
+        crawl.sleep_jitter(0.4, 0.9)
+    return n

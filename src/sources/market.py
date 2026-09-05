@@ -109,6 +109,7 @@ def _add_history(r: dict):
         r["open"] = int(last[1]) if last[1] else None
         # 목록 페이지 종가를 덮어쓰지 않고 따로 둔다. 두 값이 어긋나면 파싱 오류다.
         r["close_hist"] = int(last[4]) if last[4] else None
+        r["prev_close"] = int(rows[-2][4]) if len(rows) >= 2 and rows[-2][4] else None
         vols = [int(x[5]) for x in rows[-21:-1] if x[5]]
         if vols and int(last[5]):
             avg = sum(vols) / len(vols)

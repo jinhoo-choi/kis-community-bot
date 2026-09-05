@@ -113,6 +113,10 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
         errs.append(f"너무짧음({n}자/{length or '-'})")
     if n > hi:
         errs.append(f"너무김({n}자/{length or '-'})")
+    # 토큰 상한에 걸려 문장 중간에서 끊긴 글이 심사까지 올라갔다
+    # (실측: gemini 44자, "…나선다고 밝혔"). 종결부호로 끝나지 않으면 미완성이다.
+    if body.strip() and body.strip()[-1] not in ".!?\"')]”’":
+        errs.append("미완성(종결부호 없음)")
 
     # 환각 수치 탐지: 본문 숫자가 원본 facts 에 없으면 리젝
     # (연도/퍼센트 등 흔한 값은 화이트리스트)

@@ -709,6 +709,29 @@ def main():
     ok.append(run("DART 요청 예외 처리", "except Exception as e:" in _dsrc))
     ok.append(run("예외 메시지에 URL 미출력", "type(e).__name__" in _dsrc))
 
+    # ── 절단 방어 / 조회공시 역방향 연결
+    ok.append(run("미완성 본문 리젝",
+                  any("미완성" in e for e in
+                      _f2.check("통관 특별 지원에 나선다고 밝혔", "기준일: x",
+                                "", "", "quick_memo"))))
+    ok.append(run("정상 종결은 통과",
+                  not any("미완성" in e for e in
+                          _f2.check("통관 특별 지원에 나선다고 밝혔습니다.", "기준일: x",
+                                    "", "", "quick_memo"))))
+    from src.sources import kind_inquiry as _ki, market as _mk2
+    _orig = _mk2._add_history
+    _mk2._add_history = lambda r: r.update({"close_hist": 71000, "prev_close": 62000})
+    _q = [{"stock_code": "005930", "facts": "답변 성격: 회사는 미확정이라고 답변"}]
+    ok.append(run("조회공시→시세 연결", _ki.enrich_with_market(_q, []) == 1
+                  and "등락률: 14.52%" in _q[0]["facts"]))
+    _mk2._add_history = lambda r: r.update({"close_hist": 150000, "prev_close": 62000})
+    ok.append(run("가격제한폭 위반은 연결 안 함",
+                  _ki.enrich_with_market([{"stock_code": "000660", "facts": "x"}], []) == 0))
+    _mk2._add_history = _orig
+    ok.append(run("flow 슬롯 축소 반영",
+                  __import__("config").SLOT_QUOTA["disclosure"]
+                  > __import__("config").SLOT_QUOTA["flow"] * 3))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
