@@ -17,35 +17,34 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
 [crawl] telegram_ch 0건 (정상 0건)
 [main] 수집 총 25건
 [enrich] 17/25건 배경 보강 완료
-[gate] 차단 16건 {'tier4': 9, 'tier5': 6, 'tier1': 1}
-[theme] 테마글 1건에 게시 종목 배정
+[gate] 차단 15건 {'tier4': 9, 'tier5': 5, 'tier1': 1}
+[theme] 테마글 2건에 게시 종목 배정
 [main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
-[main] 생성 대상 9건 {'disclosure': 5, 'research': 0, 'flow': 2, 'policy': 1, 'poll': 1}
+[main] 생성 대상 10건 {'disclosure': 5, 'research': 0, 'flow': 2, 'policy': 2, 'poll': 1}
 [claude] SDK 1.4.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] claude: 7/7건 생성
-[gen] 정규식 리젝 dart-20260904000367 ['수치과다(4개/quick_memo)']
-       └ '100억원 규모의 자기주식취득신탁계약이 2026년 09월 04일 만기로 해지되네요. 신탁계약 기간만료에 따른 해지라고 해요.'
-[gen] 정규식 리젝 dart-20260904000209 ["근거없는수치['11.39', '823']"]
-       └ '신라교역이 자산총액의 11.39%에 해당하는 823억원을 들여 선민수산을 인수하기로 결정했어요. 원양어업과 수산물 유통 사업을 추가하면서 사업 다각화를 노리는 것 같네요.'
-[gen] 정규식 리젝 flow-2026-09-04-108490 ['수치과다(6개/fact_note)']
-       └ '어제 로보티즈는 22.54% 상승했는데요, 거래량이 20일 평균의 6.4배로 늘었습니다. 장중에는 저가 대비 18.9%까지 올랐다가 고가보다 3.3% 낮은 수준에서 마감했습니다. 지난 5거래일 동안 누적 상승률은 25.83%습니다.'
+[gen] claude: 8/8건 생성
+[gen] 정규식 리젝 dart-20260904000355 ['너무김(165자/brief_report)']
+       └ '1.8702948대 1입니다. 우성이 우성유통을 흡수합병하면서 우성유통 보통주 1주에 대해 우성 보통주 1.8702948주를 배정하기로 결정했습니다. 우성유통이 영위하던 유통 사업이 우성으로 내재화되면서 사료-농장-유통으로 이어지는 축산 식품 사업 밸류 체인이 단일 조직 내에서 통합 운영됩니다.'
+[gen] 정규식 리젝 dart-20260904000367 ["근거없는수치['6.45']"]
+       └ '100억원 규모의 자기주식취득신탁계약이 2026년 09월 04일 만기로 해지돼요. 신탁 기간 종료에 따른 정기 해지이고 발행주식 대비 6.45%에 해당하는 규모였어요.'
+[gen] 정규식 리젝 dart-20260904000209 ["근거없는수치['823']"]
+       └ '신라교역이 823억원에 선민수산을 인수하기로 결정했어요. 원양어업과 수산물 도소매업을 하는 회사를 완전 자회사로 편입하면서 사업 영역을 넓히는 거네요.'
+[gen] 정규식 리젝 kind-20260904000786 ['stock_ending']
+       └ '디에이치엑스컴퍼니가 거래소로부터 조회공시를 받았어요. 풍문 또는 보도와 관련해 주권매매거래정지기간변경에 대한 공시를 낸 건데, 거래소가 시황 변동이나 풍문에 대해 회사에 답변을 요구한 것으로 보입니다. 공시 내용은 원문 확인이 필요하고요. 어제 종가는 6,930원으로 변동이 없었습니다.'
 [gen] gemini: 2/2건 생성
 [gen] 정규식 리젝 pol-23개월만에최저환율에기업달러예금역대최대 ['미완성(종결부호 없음)']
-       └ '1,345원까지 원/달러 환율이 내려가자 기업의 달러 예금이 역'
-[gen] 정규식 리젝 poll-flow-2026-09-04-030530 ['너무짧음(31자/careful_note)', '미완성(종결부호 없음)']
-       └ '원익홀딩스의 거래량이 20일 평균의 6.0배였습니다. 종'
-[gen] 정규식 통과 5건 / 시도 9건
+       └ '1,345원은 최근 원/달러 환율이 내려앉은 최저 수준 가격이어요'
+[gen] 정규식 리젝 poll-flow-2026-09-04-030530 ['너무짧음(34자/careful_note)', '미완성(종결부호 없음)']
+       └ '원익홀딩스가 전일 장중 고가 대비 0.0% 낮은 수준으로 마감'
+[gen] 정규식 통과 5건 / 시도 10건
 [claude] SDK 1.4.0
 [assign] 담당자 명단 없음 → 전건 '미지정'
 [main] 배포 1건 / 보류 4건
    보류 dart-20260904000431 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
-   보류 flow-2026-09-04-030530 (claude) - fatal:상투적 마무리 문구로 글을 닫음 (지켜봐야/확인이 필요/주목됩니다 류)
-   보류 kind-20260904000786 (claude) - fatal:상세 내용은 공시 원문을 확인해야 합니다.
-   보류 pol-23개월만에최저환율에기업달러예금역대최대 (claude) - 커뮤니티적합성 2/5 정보량이 적고 논점이 부족함
-[tg] ⚠ suffix ...2744 매칭 실패 (getUpdates 24시간 보관 한계). 봇에게 아무 메시지나 보낸 뒤 재실행하세요.
-[tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 (TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)
-[tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 (TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)
-[tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 (TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)
-[main] filter_log data/filter_log_20260906_0702.json
-[main] stats {"ts": "2026-09-06T07:02:34+09:00", "persona_mode": "v2", "collected": 25, "gate_blocked": 16, "gate_reasons": {"tier4": 9, "tier5": 6, "tier1": 1}, "enrich_ok": 17, "generated": 5, "sent": 1, "held": 4, "hold_reasons": {"fatal": 3, "커뮤니티적합성 2/5 정보량이 적고 논점이 부족함": 1}, "avg_score": 15.3, "by_provider": {"claude": {"generated": 5, "sent": 1, "avg_score": 13.34}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 14, "expected": 18, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 2, "expected": 3, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 4, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+   보류 flow-2026-09-04-108490 (claude) - 커뮤니티적합성 2/5 정보량이 부족하고 분석적 가치가 낮음
+   보류 pol-빚투속에50대이상보험계약대출카드론늘었다 (claude) - 커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함
+   보류 pol-23개월만에최저환율에기업달러예금역대최대 (claude) - 커뮤니티적합성 2/5 정보량이 부족하고 단순 요약에 그침
+[tg] 테스트 채널 suffix 매칭: ...2744 (private)
+[main] filter_log data/filter_log_20260906_0729.json
+[main] stats {"ts": "2026-09-06T07:29:41+09:00", "persona_mode": "v2", "collected": 25, "gate_blocked": 15, "gate_reasons": {"tier4": 9, "tier5": 5, "tier1": 1}, "enrich_ok": 17, "generated": 5, "sent": 1, "held": 4, "hold_reasons": {"fatal": 1, "커뮤니티적합성 2/5 정보량이 부족하고 분석적 가치가 낮음": 1, "커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함": 1, "커뮤니티적합성 2/5 정보량이 부족하고 단순 요약에 그침": 1}, "avg_score": 18.0, "by_provider": {"claude": {"generated": 5, "sent": 1, "avg_score": 14.12}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 14, "expected": 18, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 2, "expected": 3, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 4, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
