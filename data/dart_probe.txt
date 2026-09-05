@@ -13,11 +13,11 @@
   O tgastInhDecsn                status=013 조회된 데이타가 없습니다.
   O tgastTrfDecsn                status=013 조회된 데이타가 없습니다.
   O crDecsn                      status=013 조회된 데이타가 없습니다.
-  O sglPrvsCntrCncln             status=101 잘못된 URL입니다. 확인해주세요(/api/sglPrvsCntrCncln
-  O cntrCncln                    status=101 잘못된 URL입니다. 확인해주세요(/api/cntrCncln.json)
-  O slcCntrCncln                 status=101 잘못된 URL입니다. 확인해주세요(/api/slcCntrCncln.jso
+  X sglPrvsCntrCncln             101 잘못된 URL입니다. 확인해주세요(/api/sglPrvsCntrCncln
+  X cntrCncln                    101 잘못된 URL입니다. 확인해주세요(/api/cntrCncln.json)
+  X slcCntrCncln                 101 잘못된 URL입니다. 확인해주세요(/api/slcCntrCncln.jso
 
-살아있는 엔드포인트 15/15
+살아있는 엔드포인트 12/15
 
 ── 2. 실데이터로 필드 키 확인 ──
   주요사항보고 100건 확보
@@ -293,15 +293,9 @@ OTO INDUSTRY CO.,LTD.)
 
   [crDecsn] 최근 30일 실데이터 없음 — 엔드포인트는 유효
 
-  [sglPrvsCntrCncln] 최근 30일 실데이터 없음 — 엔드포인트는 유효
-
-  [cntrCncln] 최근 30일 실데이터 없음 — 엔드포인트는 유효
-
-  [slcCntrCncln] 최근 30일 실데이터 없음 — 엔드포인트는 유효
-
 ── 3. 단일판매·공급계약 원문 접근 확인 ──
-  대상: 엑시콘 [기재정정]단일판매ㆍ공급계약체결               rcept_no=20260904900736
-  document.xml → HTTP 200 application/x-msdownload;chars 2,217바이트
-  ZIP 내용: ['20260904900736.xml']
-  본문 11,693자. 계약금액 주변 발췌:
+  대상: 서남 단일판매ㆍ공급계약체결               rcept_no=20260904900634
+  document.xml → HTTP 200 application/x-msdownload;chars 2,095바이트
+  ZIP 내용: ['20260904900634.xml']
+  본문 9,416자. 계약금액 주변 발췌:
   '계약금액' 문자열 없음
