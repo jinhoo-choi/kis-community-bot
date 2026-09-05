@@ -1,9 +1,9 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 [dart] corp_code 3989종목 매핑
-[dart] 상세 보강 3/16건
-[dart] 미보강 제목: ['정정명령부과( 2026.08.26. 제출 주요사항보고서(회사합', '[기재정정]주요사항보고서(유상증자결정)', '유상증자또는주식관련사채등의발행결과(자율공시)', '[기재정정]단일판매ㆍ공급계약체결', '타법인주식및출자증권취득결정', '[기재정정]단일판매ㆍ공급계약체결(자회사의 주요경영사항)', '[첨부정정]주요사항보고서(회사합병결정)(자회사의 주요경영사항)', '[기재정정]단일판매ㆍ공급계약체결']
-[crawl] dart 16건
+[dart] 상세 보강 5/15건
+[dart] 미보강 제목: ['[기재정정]주요사항보고서(유상증자결정)', '[기재정정]단일판매ㆍ공급계약체결', '타법인주식및출자증권취득결정', '[기재정정]단일판매ㆍ공급계약체결(자회사의 주요경영사항)', '[첨부정정]주요사항보고서(회사합병결정)(자회사의 주요경영사항)', '[기재정정]단일판매ㆍ공급계약체결', '[기재정정]주요사항보고서(유상증자결정)', '합병등종료보고서(자산양수도)']
+[crawl] dart 15건
 [crawl] naver_research 2건
 [crawl] hankyung 1건
 [market] ⚠ 스카이랩스 제외 — 등락률 135.0% > 가격제한폭
@@ -14,34 +14,37 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
 [crawl] policy_rss 3건
 [tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
 [crawl] telegram_ch 0건 (정상 0건)
-[main] 수집 총 27건
-[enrich] 19/27건 배경 보강 완료
-[gate] 차단 18건 {'tier5': 8, 'tier4': 9, 'tier1': 1}
-[theme] 테마글 2건에 게시 종목 배정
+[main] 수집 총 26건
+[enrich] 22/26건 배경 보강 완료
+[gate] 차단 14건 {'tier4': 9, 'tier5': 4, 'tier1': 1}
+[theme] 테마글 3건에 게시 종목 배정
 [main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
-[main] 생성 대상 9건 {'disclosure': 4, 'research': 0, 'flow': 2, 'policy': 2, 'poll': 1}
+[main] 생성 대상 12건 {'disclosure': 6, 'research': 0, 'flow': 2, 'policy': 3, 'poll': 1}
 [claude] SDK 1.4.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] claude: 7/7건 생성
-[gen] 정규식 리젝 dart-20260904000355 ['너무김(135자/quick_memo)']
-       └ "우성이 자회사 우성유통을 흡수합병하기로 결정했어요. 사료 생산에서 농장, 유통까지 축산 식품 사업을 한 조직 내에서 통합 운영하려는 것인데, 공시 용어로는 이렇게 여러 단계의 생산 과정을 한 회사가 직접 관리하는 걸 '수직계열화'라고 봅니다."
-[gen] 정규식 리젝 flow-2026-09-04-030530 ['수치과다(5개/data_focus)']
-       └ '29.91% 상승한 원익홀딩스 종가는 22,500원이었습니다. 거래대금은 225억원이었습니다. 거래량은 20일 평균의 6.0배로 평소보다 훨씬 많은 물량이 오갔습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-108490 ['수치과다(4개/open_talk)']
-       └ '3,040억원이 거래된 로보티즈는 어제 장중 저가에서 고가까지 18.9% 움직였는데요. 마감은 장중 고가보다 3.3% 낮은 수준에서 마무리됐네요. 이날 종가 기준으로 전날 대비 22.54% 오른 것으로 기록됐습니다. 이 정도의 변동성이 발생한 구체적인 배경이 뭔지 아시는 분 계신가요?'
+[gen] claude: 10/10건 생성
+[gen] 정규식 리젝 dart-20260904000355 ['너무김(152자/brief_report)']
+       └ '1.8702948 대 1입니다. 우성이 우성유통을 흡수합병하면서 우성유통 보통주 1.8702948주마다 우성 보통주 1주씩 배정받는 조건입니다. 우성유통이 하던 유통 사업이 우성으로 편입되면서 사료-농장-유통으로 이어지는 축산 식품 사업이 한 조직 안에서 통합 운영됩니다.'
+[gen] 정규식 리젝 dart-20260904000367 ["근거없는수치['6.45']"]
+       └ '자기주식 취득 신탁계약이 2026년 09월 04일 만기로 해지돼요. 신탁 기간 종료에 따른 것이고, 발행주식 대비 6.45%에 해당하는 규모네요.'
+[gen] 정규식 리젝 dart-20260904000209 ["근거없는수치['11.39', '823']"]
+       └ '신라교역이 자산 대비 11.39%에 해당하는 823억원을 들여 선민수산을 인수하기로 결정했어요. 원양어업과 수산물 유통 사업을 통한 사업다각화가 목적이라고 했네요.'
+[gen] 정규식 리젝 flow-2026-09-04-108490 ['수치과다(5개/data_focus)']
+       └ '거래량이 20일 평균의 6.4배였습니다. 장중에는 저가 대비 18.9%까지 올랐고, 마감은 장중 고가 대비 3.3% 낮은 수준에서 마감했습니다. 5거래일 누적으로는 25.83% 올랐습니다.'
 [gen] gemini: 2/2건 생성
-[gen] 정규식 리젝 pol-인력재배치시파업가능에경영계우려누더기지침한계 ['미완성(종결부호 없음)']
-       └ '고용노동부가 최근 기업의 공장 신설이나 인공지능 등 신기술 도입으로 직원을 배치전'
-[gen] 정규식 리젝 poll-flow-2026-09-04-030530 ['너무짧음(39자/open_talk)', '미완성(종결부호 없음)']
-       └ '무려 29.91% 상승하며 강세로 마감한 원익홀딩스인데요. 이날 종가는'
-[gen] 정규식 통과 4건 / 시도 9건
+[gen] 정규식 리젝 pol-대구세관추석앞두고24시간수출입통관지원 ['미완성(종결부호 없음)']
+       └ '대구본부세관이 추석 명절을 앞둔 5일부터 수출입 통관 특별 지원에'
+[gen] 정규식 리젝 poll-flow-2026-09-04-030530 ['너무짧음(38자/data_focus)']
+       └ '원익홀딩스 (030530, KOSDAQ). 첫 문장 비율 주인공: "'
+[gen] 정규식 통과 7건 / 시도 12건
 [claude] SDK 1.4.0
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 0건 / 보류 4건
-   보류 dart-20260904000431 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
-   보류 dart-20260904800546 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
-   보류 kind-20260904000786 (claude) - 커뮤니티적합성 2/5 정보량이 부족하고 커뮤니티 적합성이 낮음
-   보류 pol-울산시중소기업소상공인에760억경영안정자금지원 (claude) - 커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함
+[main] 배포 0건 / 보류 7건
+   보류 dart-20260904000431 (claude) - 커뮤니티적합성 2/5 정보량이 부족하고 일반론적 설명에 그침
+   보류 dart-20260904000214 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
+   보류 flow-2026-09-04-030530 (claude) - 커뮤니티적합성 2/5 정보량이 부족하고 단순 나열식임
+   보류 kind-20260904000786 (claude) - fatal:상투적 마무리 문구로 글을 닫음 (지켜봐야/확인이 필요/주목됩니다 류)
+   보류 pol-울산시중소기업소상공인에760억경영안정자금지원 (claude) - 커뮤니티적합성 2/5 정보량이 적고 종목방 맥락과 무관함
 [tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 (TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)
-[main] filter_log data/filter_log_20260905_2057.json
-[main] stats {"ts": "2026-09-05T20:57:00+09:00", "persona_mode": "v2", "collected": 27, "gate_blocked": 18, "gate_reasons": {"tier5": 8, "tier4": 9, "tier1": 1}, "enrich_ok": 19, "generated": 4, "sent": 0, "held": 4, "hold_reasons": {"fatal": 2, "커뮤니티적합성 2/5 정보량이 부족하고 커뮤니티 적합성이 낮음": 1, "커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함": 1}, "avg_score": null, "by_provider": {"claude": {"generated": 4, "sent": 0, "avg_score": 13.18}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 16, "expected": 18, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 2, "expected": 3, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 4, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+[main] filter_log data/filter_log_20260905_2130.json
+[main] stats {"ts": "2026-09-05T21:30:34+09:00", "persona_mode": "v2", "collected": 26, "gate_blocked": 14, "gate_reasons": {"tier4": 9, "tier5": 4, "tier1": 1}, "enrich_ok": 22, "generated": 7, "sent": 0, "held": 7, "hold_reasons": {"커뮤니티적합성 2/5 정보량이 부족하고 일반론적 설명에 그침": 1, "fatal": 3, "커뮤니티적합성 2/5 정보량이 부족하고 단순 나열식임": 1, "커뮤니티적합성 2/5 정보량이 적고 종목방 맥락과 무관함": 1, "커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함": 1}, "avg_score": null, "by_provider": {"claude": {"generated": 7, "sent": 0, "avg_score": 13.61}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 15, "expected": 18, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 2, "expected": 3, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 4, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}

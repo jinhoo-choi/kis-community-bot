@@ -1,0 +1,180 @@
+[
+ {
+  "id": "dart-20260904000355",
+  "result": "rejected",
+  "reason": "너무김(152자/brief_report)",
+  "provider": "claude",
+  "tone": "brief_report",
+  "angle": "terms",
+  "len": 152,
+  "body": "1.8702948 대 1입니다. 우성이 우성유통을 흡수합병하면서 우성유통 보통주 1.8702948주마다 우성 보통주 1주씩 배정받는 조건입니다. 우성유통이 하던 유통 사업이 우성으로 편입되면서 사료-농장-유통으로 이어지는 축산 식품 사업이 한 조직 안에서 통합 운영됩니다."
+ },
+ {
+  "id": "dart-20260904000367",
+  "result": "rejected",
+  "reason": "근거없는수치['6.45']",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "ratio",
+  "len": 81,
+  "body": "자기주식 취득 신탁계약이 2026년 09월 04일 만기로 해지돼요. 신탁 기간 종료에 따른 것이고, 발행주식 대비 6.45%에 해당하는 규모네요."
+ },
+ {
+  "id": "dart-20260904000209",
+  "result": "rejected",
+  "reason": "근거없는수치['11.39', '823']",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "ratio",
+  "len": 91,
+  "body": "신라교역이 자산 대비 11.39%에 해당하는 823억원을 들여 선민수산을 인수하기로 결정했어요. 원양어업과 수산물 유통 사업을 통한 사업다각화가 목적이라고 했네요."
+ },
+ {
+  "id": "flow-2026-09-04-108490",
+  "result": "rejected",
+  "reason": "수치과다(5개/data_focus)",
+  "provider": "claude",
+  "tone": "data_focus",
+  "angle": "compare",
+  "len": 105,
+  "body": "거래량이 20일 평균의 6.4배였습니다. 장중에는 저가 대비 18.9%까지 올랐고, 마감은 장중 고가 대비 3.3% 낮은 수준에서 마감했습니다. 5거래일 누적으로는 25.83% 올랐습니다."
+ },
+ {
+  "id": "pol-대구세관추석앞두고24시간수출입통관지원",
+  "result": "rejected",
+  "reason": "미완성(종결부호 없음)",
+  "provider": "gemini",
+  "tone": "quick_memo",
+  "angle": "duration",
+  "len": 36,
+  "body": "대구본부세관이 추석 명절을 앞둔 5일부터 수출입 통관 특별 지원에"
+ },
+ {
+  "id": "poll-flow-2026-09-04-030530",
+  "result": "rejected",
+  "reason": "너무짧음(38자/data_focus)",
+  "provider": "gemini",
+  "tone": "data_focus",
+  "angle": "ratio",
+  "len": 38,
+  "body": "원익홀딩스 (030530, KOSDAQ). 첫 문장 비율 주인공: \""
+ },
+ {
+  "id": "dart-20260904000431",
+  "kind": "disclosure",
+  "stock": "우성",
+  "title": "주요사항보고서(자기주식처분결정)",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "decode",
+  "score": 13.3,
+  "result": "held",
+  "reason": "커뮤니티적합성 2/5 정보량이 부족하고 일반론적 설명에 그침",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 88,
+  "body": "우성이 자기주식 처분을 결정했어요. 합병대가로 자기주식을 교부하겠다는 건데, 이는 합병할 때 상대방에게 줄 대금을 현금 대신 자기주식으로 지급하는 방식이네요."
+ },
+ {
+  "id": "dart-20260904000214",
+  "kind": "disclosure",
+  "stock": "영흥",
+  "title": "합병등종료보고서(자산양수도)",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "duration",
+  "score": 12.0,
+  "result": "held",
+  "reason": "fatal:상세 수치는 공개되지 않았다가 내용의 절반",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 58,
+  "body": "영흥이 9월 4일 자산양수도 종료를 보고했어요. 합병등종료보고서를 통해 절차가 마무리된 것으로 보이네요."
+ },
+ {
+  "id": "flow-2026-09-04-030530",
+  "kind": "flow",
+  "stock": "원익홀딩스",
+  "title": "원익홀딩스 전일 29.91% 상승",
+  "provider": "claude",
+  "tone": "brief_report",
+  "angle": "reaction",
+  "score": 13.3,
+  "result": "held",
+  "reason": "커뮤니티적합성 2/5 정보량이 부족하고 단순 나열식임",
+  "attr_reject": null,
+  "thin_facts": true,
+  "len": 72,
+  "body": "29.91% 상승. 원익홀딩스가 어제 이 정도 폭으로 올랐습니다. 종가는 22,500원이었습니다. 거래대금은 225억원이었습니다."
+ },
+ {
+  "id": "kind-20260904000786",
+  "kind": "disclosure",
+  "stock": "디에이치엑스컴퍼니",
+  "title": "주권매매거래정지기간변경(풍문 또는 보도 관련)",
+  "provider": "claude",
+  "tone": "check_list",
+  "angle": "amount",
+  "score": 12.0,
+  "result": "held",
+  "reason": "fatal:상투적 마무리 문구로 글을 닫음 (지켜봐야/확인이 필요/주목됩니다 류)",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 128,
+  "body": "디에이치엑스컴퍼니가 거래소 조회공시에 답변했어요. 주권매매거래정지기간변경과 관련된 내용인데, 풍문 또는 보도와 관련된 사항이라고 공시된 상태예요. 답변 내용은 원문을 직접 확인해야 하고요. 오늘 종가는 6,930원으로 마감했어요."
+ },
+ {
+  "id": "pol-울산시중소기업소상공인에760억경영안정자금지원",
+  "kind": "policy",
+  "stock": "삼성바이오로직스",
+  "title": "울산시, 중소기업·소상공인에 760억 경영안정자금 지원",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "amount",
+  "score": 16.0,
+  "result": "held",
+  "reason": "커뮤니티적합성 2/5 정보량이 적고 종목방 맥락과 무관함",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "thin_facts": true,
+  "len": 86,
+  "body": "760억원 규모 경영안정자금을 울산시가 지역 중소기업과 소상공인에 지원하기로 했어요. 경기 불확실성이 길어지면서 자금난을 겪는 기업들을 돕겠다는 취지네요."
+ },
+ {
+  "id": "pol-인력재배치시파업가능에경영계우려누더기지침한계",
+  "kind": "policy",
+  "stock": "NAVER",
+  "title": "'인력 재배치시 파업가능'에 경영계 우려↑…\"누더기 지침 한계\"",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "duration",
+  "score": 14.0,
+  "result": "held",
+  "reason": "fatal:상투적 마무리 문구로 글을 닫음 (지켜봐야/확인이 필요/주목됩니다 류)",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "thin_facts": false,
+  "len": 120,
+  "body": "고용노동부가 2026년 9월부터 AI 도입이나 공장 신설 같은 사유로 직원 배치전환이 있을 때 노조와 교섭하도록 지침을 내릴 예정이라고 해요. 기업 입장에선 경영 자율성이 제약될 수 있다는 우려가 나오는 상황이네요."
+ },
+ {
+  "id": "pol-대구세관추석앞두고24시간수출입통관지원",
+  "kind": "policy",
+  "stock": "CJ제일제당",
+  "title": "대구세관, 추석 앞두고 24시간 수출입 통관 지원",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "duration",
+  "score": 14.7,
+  "result": "held",
+  "reason": "커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "thin_facts": false,
+  "len": 67,
+  "body": "추석을 앞두고 대구본부세관이 수출입 통관 특별 지원에 나선다고 밝혔어요. 명절 시즌 물류 수요에 대응하기 위한 조치네요."
+ }
+]
