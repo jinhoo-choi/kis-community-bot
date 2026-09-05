@@ -85,5 +85,5 @@ HTTP 200 / 69323 bytes
   한국은행 보도자료            HTTP 200   392734 bytes  '                                          \t \t\t \t\t \t \t  \t \t\t \t\t \t \t  \t '
   산업부 보도자료             HTTP 404     2036 bytes  '\r \r \r <!DOCTYPE html>\r <html lang="ko">\r <head>\r     <meta http-equiv='
   금감원 보도자료             실패 ConnectionError
-  연합뉴스 경제 RSS          HTTP 200    92629 bytes  '<?xml version="1.0" encoding="UTF-8"?> <rss version="2.0" xmlns:conten'
+  연합뉴스 경제 RSS          HTTP 200    97479 bytes  '<?xml version="1.0" encoding="UTF-8"?> <rss version="2.0" xmlns:conten'
   한경 정책 RSS            HTTP 200    22761 bytes  '<!DOCTYPE html> <html lang="ko"> <head> <meta charset="UTF-8"> <title>'

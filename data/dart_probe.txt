@@ -1,4 +1,4 @@
-=== 기간 20260805 ~ 20260904 ===
+=== 기간 20260806 ~ 20260905 ===
 
 ── 1. 엔드포인트 존재 여부 (아무 corp_code 로 두드려 응답 형태만 본다) ──
   O otcprStkInvscrInhDecsn       status=013 조회된 데이타가 없습니다.
@@ -294,8 +294,19 @@ OTO INDUSTRY CO.,LTD.)
   [crDecsn] 최근 30일 실데이터 없음 — 엔드포인트는 유효
 
 ── 3. 단일판매·공급계약 원문 접근 확인 ──
+  전체 공시 500건에서 탐색
   대상: 서남 단일판매ㆍ공급계약체결               rcept_no=20260904900634
   document.xml → HTTP 200 application/x-msdownload;chars 2,095바이트
   ZIP 내용: ['20260904900634.xml']
-  본문 9,416자. 계약금액 주변 발췌:
-  '계약금액' 문자열 없음
+  본문 9,416자
+  태그 종류(13): ['STYLE', 'body', 'br', 'div', 'head', 'html', 'meta', 'span', 'table', 'tbody', 'td', 'title', 'tr']
+  --- 원문 앞 1500자 ---
+  <html> <head> <meta content="gdi" http-equiv="X-UA-TextLayoutMetrics"> <meta content="text/html; charset=euc-kr" http-equiv="Content-Type"> <STYLE> .xforms * { font-family: 泥;} .xforms_title * { font-size: 13pt; padding : 0 0 10 0;} .xforms table { font-size: 10px; padding:0px; border-collapse:collapse; color: #3D3D3D; } .xforms td { padding-left:0px; padding-top:0px; border-collapse:collapse; line-height:22px; color: #3D3D3D; /*text-align:right;*/ vertical-align:middle; border: 1px solid #7f7f7f; } .xforms span { /*display: inline-block;*/ padding-left:3px; padding-right: 1px; line-height:22px; padding-top:0px; padding-bottom:0px; text-align:left; vertical-align:middle; border: 0px solid #DBDBDB; } .xforms.img{ border : 0px; } .xforms a:link { color: #194866; text-decoration: none; } .xforms a:active { color: #194866; text-decoration: none; } .xforms a:visited { color: #194866; text-decoration: none; } .xforms A:hover { color:008BE3; text-decoration: none; } .xforms_input{ border: 0px solid #DBDBDB; padding-left:3px; padding-right: 1px; height:22px; padding-top:0px; padding-bottom:0px; text-align:left; } </STYLE> <title>/⑥쇳留ㅳ怨듦怨쎌껜寃/(2026.09.04)⑥쇳留ㅳ怨듦怨쎌껜寃</title> </head> <body> <div class="xforms"> <div> <span class="no
+  --- 숫자+단위가 나오는 구간 ---
+  [계약금액] 없음
+  [계약 금액] 없음
+  [계약상대] 없음
+  [매출액] 없음
+  [계약기간] 없음
+  [판매·공급] 없음
+  [공급계약] 없음
