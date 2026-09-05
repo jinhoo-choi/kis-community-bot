@@ -1,13 +1,47 @@
-Traceback (most recent call last):
-  File "/home/runner/work/kis-community-bot/kis-community-bot/main.py", line 184, in <module>
-    main()
-  File "/home/runner/work/kis-community-bot/kis-community-bot/main.py", line 54, in main
-    raw = collect()
-          ^^^^^^^^^
-  File "/home/runner/work/kis-community-bot/kis-community-bot/main.py", line 29, in collect
-    items += dart.fetch(int(q["disclosure"] * over))
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/kis-community-bot/kis-community-bot/src/sources/dart.py", line 77, in fetch
-    if dart_detail.NO_DETAIL_API.search(row["report_nm"]):
-       ^^^^^^^^^^^
-UnboundLocalError: cannot access local variable 'dart_detail' where it is not associated with a value
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+[dart] corp_code 3989종목 매핑
+[dart] 상세 보강 3/16건
+[dart] 미보강 제목: ['정정명령부과( 2026.08.26. 제출 주요사항보고서(회사합', '[기재정정]주요사항보고서(유상증자결정)', '유상증자또는주식관련사채등의발행결과(자율공시)', '[기재정정]단일판매ㆍ공급계약체결', '타법인주식및출자증권취득결정', '[기재정정]단일판매ㆍ공급계약체결(자회사의 주요경영사항)', '[첨부정정]주요사항보고서(회사합병결정)(자회사의 주요경영사항)', '[기재정정]단일판매ㆍ공급계약체결']
+[crawl] dart 16건
+[crawl] naver_research 2건
+[crawl] hankyung 1건
+[market] ⚠ 스카이랩스 제외 — 등락률 135.0% > 가격제한폭
+[crawl] market 2건
+[tickers] 상장 2632종목 로드 (lxml)
+[crawl] kind_inquiry 2건
+[kind] 특징주→조회공시 0건 / 조회공시→시세 2건
+[crawl] policy_rss 3건
+[tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
+[crawl] telegram_ch 0건 (정상 0건)
+[main] 수집 총 27건
+[enrich] 19/27건 배경 보강 완료
+[gate] 차단 18건 {'tier5': 8, 'tier4': 9, 'tier1': 1}
+[theme] 테마글 2건에 게시 종목 배정
+[main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
+[main] 생성 대상 9건 {'disclosure': 4, 'research': 0, 'flow': 2, 'policy': 2, 'poll': 1}
+[claude] SDK 1.4.0
+[claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
+[gen] claude: 7/7건 생성
+[gen] 정규식 리젝 dart-20260904000355 ['너무김(135자/quick_memo)']
+       └ "우성이 자회사 우성유통을 흡수합병하기로 결정했어요. 사료 생산에서 농장, 유통까지 축산 식품 사업을 한 조직 내에서 통합 운영하려는 것인데, 공시 용어로는 이렇게 여러 단계의 생산 과정을 한 회사가 직접 관리하는 걸 '수직계열화'라고 봅니다."
+[gen] 정규식 리젝 flow-2026-09-04-030530 ['수치과다(5개/data_focus)']
+       └ '29.91% 상승한 원익홀딩스 종가는 22,500원이었습니다. 거래대금은 225억원이었습니다. 거래량은 20일 평균의 6.0배로 평소보다 훨씬 많은 물량이 오갔습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-108490 ['수치과다(4개/open_talk)']
+       └ '3,040억원이 거래된 로보티즈는 어제 장중 저가에서 고가까지 18.9% 움직였는데요. 마감은 장중 고가보다 3.3% 낮은 수준에서 마무리됐네요. 이날 종가 기준으로 전날 대비 22.54% 오른 것으로 기록됐습니다. 이 정도의 변동성이 발생한 구체적인 배경이 뭔지 아시는 분 계신가요?'
+[gen] gemini: 2/2건 생성
+[gen] 정규식 리젝 pol-인력재배치시파업가능에경영계우려누더기지침한계 ['미완성(종결부호 없음)']
+       └ '고용노동부가 최근 기업의 공장 신설이나 인공지능 등 신기술 도입으로 직원을 배치전'
+[gen] 정규식 리젝 poll-flow-2026-09-04-030530 ['너무짧음(39자/open_talk)', '미완성(종결부호 없음)']
+       └ '무려 29.91% 상승하며 강세로 마감한 원익홀딩스인데요. 이날 종가는'
+[gen] 정규식 통과 4건 / 시도 9건
+[claude] SDK 1.4.0
+[assign] 담당자 명단 없음 → 전건 '미지정'
+[main] 배포 0건 / 보류 4건
+   보류 dart-20260904000431 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
+   보류 dart-20260904800546 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
+   보류 kind-20260904000786 (claude) - 커뮤니티적합성 2/5 정보량이 부족하고 커뮤니티 적합성이 낮음
+   보류 pol-울산시중소기업소상공인에760억경영안정자금지원 (claude) - 커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함
+[tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 (TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)
+[main] filter_log data/filter_log_20260905_2057.json
+[main] stats {"ts": "2026-09-05T20:57:00+09:00", "persona_mode": "v2", "collected": 27, "gate_blocked": 18, "gate_reasons": {"tier5": 8, "tier4": 9, "tier1": 1}, "enrich_ok": 19, "generated": 4, "sent": 0, "held": 4, "hold_reasons": {"fatal": 2, "커뮤니티적합성 2/5 정보량이 부족하고 커뮤니티 적합성이 낮음": 1, "커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함": 1}, "avg_score": null, "by_provider": {"claude": {"generated": 4, "sent": 0, "avg_score": 13.18}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 16, "expected": 18, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 2, "expected": 3, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 4, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
