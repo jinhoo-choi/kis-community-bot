@@ -1,4 +1,5 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 [dart] corp_code 3989종목 매핑
 [dart] 상세 보강 2/12건
 [crawl] dart 12건
@@ -12,45 +13,39 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
 [tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
 [crawl] telegram_ch 0건 (정상 0건)
 [main] 수집 총 29건
-[enrich] 21/29건 배경 보강 완료
-[gate] 차단 13건 {'tier5': 7, 'tier4': 5, 'tier1': 1}
+[enrich] 19/29건 배경 보강 완료
+[gate] 차단 12건 {'tier5': 6, 'tier4': 5, 'tier1': 1}
 [theme] 테마글 2건에 게시 종목 배정
 [main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
-[main] 생성 대상 16건 {'disclosure': 5, 'research': 0, 'flow': 8, 'policy': 2, 'poll': 1}
+[main] 생성 대상 17건 {'disclosure': 6, 'research': 0, 'flow': 8, 'policy': 2, 'poll': 1}
 [claude] SDK 1.4.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[gen] claude: 13/13건 생성
-[gen] 정규식 리젝 dart-20260904000367 ['unsourced_eval', '너무김(135자/quick_memo)']
-       └ 'NICE가 자기주식 취득 신탁계약을 해지하기로 결정했어요. 자기주식취득신탁계약해지는 회사가 중개자(신탁회사)를 통해 진행하던 자기주식 매입을 중단하겠다는 의미입니다. 회사가 미리 정해둔 신탁계약을 더 이상 진행하지 않기로 방향을 바꾼 거네요.'
-[gen] 정규식 리젝 flow-2026-09-04-030530 ['수치과다(6개/careful_note)']
-       └ '이 종목은 어제 거래량이 20일 평균의 6.0배에 달했어요. 종가 기준 29.91% 올랐고, 장중 고가와 마감가가 같은 수준이었어요. 장중 저가 대비 28.6%의 폭을 보였습니다. 지난 5거래일 누적으로는 17.92% 올랐네요. 22,500원에서 거래를 마감했습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-108490 ['주장과다(6개/5)']
-       └ '로보티즈가 어제 22.54% 올랐는데, 거래량은 20일 평균의 6.4배까지 불었어요. 장중에는 저가 대비 18.9% 오른 수준까지 갔다가 마감 때는 고가보다 3.3% 낮게 정리된 모습이에요. 긍정적으로 보면 5거래일 누적으로 25.83% 오른 추세가 이어지는 중입니다. 다만 장중 고가에서 마감까지 조정이 들어온 점과 거래대금 3,040억원 수준이 지속될지는'
-[gen] 정규식 리젝 flow-2026-09-04-234340 ['주장과다(5개/4)']
-       └ '13.48% 상승률로 마감한 헥토파이낸셜입니다. 종가는 25,250원이었고 거래대금은 252억원이었습니다. 거래량은 20일 평균의 3.6배였습니다. 장중 저가에서 고가까지 움직임이 있었으나 마감은 장중 고가 대비 5.8% 낮은 수준이었습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-336260 ['방향오용(내렸)', '주장과다(6개/4)']
-       └ '12.44% 상승했던 두산퓨얼셀이 어제 거래대금 438억원을 기록했는데요. 장중에는 저가 대비 14.4% 변동폭을 보이며 요동쳤는데도 마감에선 장중 고가 대비 2.3% 낮은 수준에서 마감했네요. 거래량은 20일 평균의 1.4배였습니다. 5거래일 누적으로는 3.41% 내렸는데, 어제 하루 사이에 그 낙폭을 거의 만회한 셈인데요, 이런 반등을 주도한 수급이 뭐'
-[gen] 정규식 리젝 flow-2026-09-04-058610 ['방향오용(낙폭)', '주장과다(6개/5)']
-       └ '장중 고가 대비 3.1% 낮은 수준에서 마감한 에스피지가 12.41% 상승했습니다. 종가는 94,200원이었는데요. 거래량은 20일 평균의 2.3배였습니다. 이날 장중 고가에서 저가까지는 12.4%의 낙폭이 있었습니다. 5거래일 기준으로는 1.62% 상승한 상태입니다.'
-[gen] 정규식 리젝 flow-2026-09-04-263750 ['주장과다(7개/4)', '어미반복(습니다×4)']
-       └ '11.47% 상승한 펄어비스는 종가 34,500원으로 마감했습니다. 거래대금이 345억원이었습니다. 장중에는 저가 대비 8.5% 범위에서 움직였고 고가보다 2.1% 낮은 수준에서 마감했습니다. 5거래일 누적으로는 6.15% 올랐습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-090460 ['주장과다(6개/5)']
-       └ '21,850원으로 종가한 비에이하는 전날 대비 10.75% 올랐습니다. 거래대금은 218억원이었고, 거래량은 20일 평균의 2.0배를 기록했는데요. 장중에는 저가 대비 11.4% 오르며 변동성을 보였습니다. 마감은 장중 고가보다 1.6% 낮은 수준에서 이루어졌습니다.'
+[gen] claude: 14/14건 생성
+[gen] 정규식 리젝 dart-20260904000431 ['너무김(135자/quick_memo)']
+       └ '우성이 자기주식을 처분하기로 결정했는데, 합병 거래에서 대가로 자사 주식을 건네주기 위함이에요. 자기주식처분결정은 회사가 보유 중인 자기주식을 처분할 계획을 공식화한다는 뜻이고, 이번에는 그 용도가 합병 대금 지급용이라는 걸 명시한 것이네요.'
+[gen] 정규식 리젝 dart-20260904000355 ['unsourced_eval', '너무김(162자/brief_report)']
+       └ '1 : 1.8702948입니다. 우성이 자회사 우성유통을 흡수합병하면서 우성 보통주 1주당 우성유통 보통주 1.8702948주 비율로 교환된다는 뜻입니다. 사료에서 농장, 유통까지 이어지는 축산 식품 사업이 단일 조직 내에서 통합 운영되며 사업간 시너지 창출과 경쟁력 강화를 목표로 합니다.'
+[gen] 정규식 리젝 flow-2026-09-04-336260 ['수치과다(4개/quick_memo)']
+       └ '어제 20일 평균 거래량의 1.4배가 몰렸어요. 장중 12.44% 올랐는데, 지난 5거래일 동안은 -3.41%였네요.'
+[gen] 정규식 리젝 flow-2026-09-04-090460 ['수치과다(5개/open_talk)']
+       └ '비에이하가 어제 10.75% 올랐네요. 종가는 21,850원이었습니다. 거래량이 20일 평균의 2.0배를 기록하면서 거래대금은 218억원에 달했습니다. 이 정도 규모의 거래량 변화가 나타난 계기가 뭘까요?'
+[gen] 정규식 리젝 flow-2026-09-04-240810 ['unsourced_eval', '수치과다(6개/check_list)']
+       └ '어제 원익IPS가 9.33% 올랐어요. 5거래일 누적으로 보면 3.33% 상승한 것 같은데, 어제 하루의 움직임이 꽤 컸다는 뜻이네요. 거래량은 20일 평균의 1.1배 수준이었고, 장중에는 저가 대비 10.7% 범위에서 오르락내리락하다가 고가보다 1.9% 낮은 곳에서 마감했어요.'
+[gen] 정규식 리젝 kind-20260904000786 ['stock_ending']
+       └ '거래소가 디에이치엑스컴퍼니에 풍문이나 보도 관련 조회공시를 보냈습니다. 공시 제목은 주권매매거래정지기간변경이며, 회사의 답변 내용은 공시 원문 확인이 필요합니다. 구체적인 내용은 공식 공시를 통해 확인하시기 바랍니다.'
 [gen] gemini: 3/3건 생성
-[gen] 정규식 리젝 poll-flow-2026-09-04-030530 ['너무짧음(36자/careful_note)']
-       └ '원익홀딩스의 거래량이 20일 평균의 6.0배이었고 평소 대비 크게'
-[gen] 정규식 통과 8건 / 시도 16건
+[gen] 정규식 리젝 poll-flow-2026-09-04-030530 ['너무짧음(37자/open_talk)']
+       └ '6%인데 숫자를 빼고 서술) - "장중에 저가와 고가 차이가 벌어지'
+[gen] 정규식 통과 11건 / 시도 17건
 [claude] SDK 1.4.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 1건 / 보류 7건
-   보류 dart-20260904000431 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
-   보류 dart-20260904000282 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반,앞 문장의 정의를 반복
-   보류 flow-2026-09-04-240810 (claude) - 커뮤니티적합성 2/5 정보량이 부족하고 단순 나열식임
-   보류 kind-20260904000786 (claude) - fatal:상세 수치는 공개되지 않았다/원문 확인 필요류의 filler 포함
-   보류 pol-울산시중소기업소상공인에760억경영안정자금지원 (gemini) - fatal:글이 미완성 상태로 끝남
+[main] 배포 0건 / 보류 11건
+   보류 dart-20260904800546 (claude) - fatal:상세 수치가 없는 상황에서 일반론으로 분량을 채움
+   보류 dart-20260904000367 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
+   보류 dart-20260904000282 (claude) - fatal:상세 수치는 공개되지 않았다가 내용의 절반
+   보류 flow-2026-09-04-030530 (claude) - 커뮤니티적합성 2/5 정보량이 부족하고 논점이 없음
+   보류 flow-2026-09-04-108490 (claude) - 커뮤니티적합성 2/5 정보량이 적고 논점이 부족함
 [tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 (TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)
-[tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 (TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)
-[tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 (TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)
-[main] filter_log data/filter_log_20260905_1857.json
-[main] stats {"ts": "2026-09-05T18:57:50+09:00", "persona_mode": "v2", "collected": 29, "gate_blocked": 13, "gate_reasons": {"tier5": 7, "tier4": 5, "tier1": 1}, "enrich_ok": 21, "generated": 8, "sent": 1, "held": 7, "hold_reasons": {"fatal": 6, "커뮤니티적합성 2/5 정보량이 부족하고 단순 나열식임": 1}, "avg_score": 15.3, "by_provider": {"gemini": {"generated": 3, "sent": 0, "avg_score": 7.77}, "claude": {"generated": 5, "sent": 1, "avg_score": 12.12}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 12, "expected": 12, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 8, "expected": 9, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+[main] filter_log data/filter_log_20260905_1904.json
+[main] stats {"ts": "2026-09-05T19:04:26+09:00", "persona_mode": "v2", "collected": 29, "gate_blocked": 12, "gate_reasons": {"tier5": 6, "tier4": 5, "tier1": 1}, "enrich_ok": 19, "generated": 11, "sent": 0, "held": 11, "hold_reasons": {"fatal": 6, "커뮤니티적합성 2/5 정보량이 부족하고 논점이 없음": 2, "커뮤니티적합성 2/5 정보량이 적고 논점이 부족함": 1, "커뮤니티적합성 2/5 데이터 나열에 그쳐 정보 가치가 낮음": 2}, "avg_score": null, "by_provider": {"gemini": {"generated": 3, "sent": 0, "avg_score": 9.53}, "claude": {"generated": 8, "sent": 0, "avg_score": 13.25}}, "model_fallbacks": [], "dedup": {}, "crawl_health": {"dart": {"got": 12, "expected": 12, "degraded": false}, "naver_research": {"got": 2, "expected": 2, "degraded": false}, "hankyung": {"got": 1, "expected": 1, "degraded": false}, "market": {"got": 8, "expected": 9, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 3, "degraded": false}, "policy_rss": {"got": 3, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
