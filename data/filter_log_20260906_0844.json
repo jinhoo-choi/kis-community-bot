@@ -1,0 +1,288 @@
+[
+ {
+  "id": "dart-20260904000367",
+  "result": "rejected",
+  "reason": "근거없는수치['6.45']",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "ratio",
+  "len": 91,
+  "body": "발행주식 대비 6.45%를 취득하기로 했던 자기주식 신탁계약이 2026년 09월 04일 만기로 종료돼요. 100억원 규모의 계약이 기간만료에 따라 해지되는 거네요."
+ },
+ {
+  "id": "dart-20260904000209",
+  "result": "rejected",
+  "reason": "근거없는수치['11.39']",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "ratio",
+  "len": 72,
+  "body": "신라교역이 자산의 11.39%를 투입해 선민수산을 인수하기로 결정했어요. 원양어업과 수산물 도소매업 사업을 전개하게 되는 거네요."
+ },
+ {
+  "id": "hk-652137",
+  "result": "rejected",
+  "reason": "news_cliche",
+  "provider": "claude",
+  "tone": "fact_note",
+  "angle": "amount",
+  "len": 133,
+  "body": "한화투자증권이 롯데이노베이트(286940)에 대해 30,000원의 적정가격을 제시하며 Buy 의견을 냈습니다. 이번 평가는 DBO 레퍼런스 확보와 수익성 개선을 주요 근거로 하고 있는데요. 남은 과제는 멀티플의 정상화로 지목되고 있습니다."
+ },
+ {
+  "id": "flow-2026-09-04-030530",
+  "result": "rejected",
+  "reason": "수치과다(4개/quick_memo)",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "ratio",
+  "len": 67,
+  "body": "어제 거래량이 20일 평균의 6.0배까지 늘었어요. 29.91% 오른 가운데 5거래일 누적으로도 17.92% 상승했네요."
+ },
+ {
+  "id": "flow-2026-09-04-108490",
+  "result": "rejected",
+  "reason": "수치과다(6개/careful_note)",
+  "provider": "claude",
+  "tone": "careful_note",
+  "angle": "ratio",
+  "len": 158,
+  "body": "종가 대비 거래량이 20일 평균의 6.4배까지 불어났습니다. 어제 304,500원에 마감한 로보티즈는 22.54% 올랐는데, 장중 고가 대비 3.3% 낮은 수준에서 마무리됐어요. 지난 5거래일 누적으로는 25.83% 상승 중입니다. 출발부터 상당한 폭의 움직임이 있었던 것 같습니다."
+ },
+ {
+  "id": "flow-2026-09-04-336260",
+  "result": "rejected",
+  "reason": "수치과다(4개/open_talk)",
+  "provider": "claude",
+  "tone": "open_talk",
+  "angle": "reaction",
+  "len": 107,
+  "body": "12.44% 올랐어요. 종가는 43,850원이고 거래대금이 438억원이었는데요. 장중에는 저가 대비 14.4%까지 변동폭을 보였네요. 이렇게 움직인 배경이 구체적으로 뭔지 아시는 분 계신가요?"
+ },
+ {
+  "id": "flow-2026-09-04-058610",
+  "result": "rejected",
+  "reason": "수치과다(5개/two_view)",
+  "provider": "claude",
+  "tone": "two_view",
+  "angle": "compare",
+  "len": 206,
+  "body": "어제 에스피지는 20일 평균의 2.3배에 이르는 거래량으로 942억원이 거래됐어요. 장중 저가 대비 12.4%가 오르내렸고, 마감은 장중 고가보다 3.1% 낮은 수준이었습니다. 양쪽으로 보면, 이 정도 거래량 집중은 시장 참여자들의 관심이 쏠렸음을 보여줍니다. 다만 장중 고점에서 조정된 마감이 나왔으므로, 상승 과정에서 차익 실현도 동시에 일어났을 가능성이 있습니다."
+ },
+ {
+  "id": "flow-2026-09-04-263750",
+  "result": "rejected",
+  "reason": "주장과다(6개/5)",
+  "provider": "claude",
+  "tone": "careful_note",
+  "angle": "ratio",
+  "len": 110,
+  "body": "거래대금 대비 거래량이 20일 평균의 2.1배로 늘었어요. 종가는 34,500원으로 11.47% 올랐습니다. 장중에는 저가 대비 8.5%까지 변동폭을 보였고, 345억원 규모의 거래가 이루어졌어요."
+ },
+ {
+  "id": "flow-2026-09-04-090460",
+  "result": "rejected",
+  "reason": "수치과다(5개/two_view)",
+  "provider": "claude",
+  "tone": "two_view",
+  "angle": "amount",
+  "len": 220,
+  "body": "218억원 규모의 거래가 이뤄진 가운데 비에이치가 10.75% 올랐습니다. 종가는 21,850원으로 장중 고가보다 1.6% 낮은 수준에서 마감했네요. 상승으로 보는 쪽은 5거래일 동안 27.78% 오른 흐름을 이으면서 모멘텀이 계속되는 것 아니냐고 봅니다. 조심할 부분은 고가에서 내려온 마감이라 매도 압력이 있을 수 있다는 점입니다. 오늘 오른 배경이 뭔지는 공개된 정보로는 알 수 없습니다."
+ },
+ {
+  "id": "flow-2026-09-04-240810",
+  "result": "rejected",
+  "reason": "수치과다(6개/check_list)",
+  "provider": "claude",
+  "tone": "check_list",
+  "angle": "duration",
+  "len": 136,
+  "body": "어제 원익IPS는 9.33% 올랐어요. 5거래일 기준으로는 3.33% 상승한 흐름이고요. 거래량은 20일 평균의 1.1배 수준으로 나왔네요. 장중에는 저가 대비 10.7%까지 움직였는데, 마감은 장중 고가보다 1.9% 낮은 위치에서 정리됐어요."
+ },
+ {
+  "id": "kind-20260904000786",
+  "result": "rejected",
+  "reason": "근거없는수치['18', '32']",
+  "provider": "claude",
+  "tone": "check_list",
+  "angle": "duration",
+  "len": 156,
+  "body": "디에이치엑스컴퍼니가 거래소로부터 풍문 또는 보도 관련 조회공시를 받았습니다. 오늘 18시 32분 공시된 내용으로, 주권매매거래정지기간이 변경됐어요. 구체적인 답변 내용은 원문을 확인해야 합니다. 오늘 종가는 6,930원으로 변동 없었고, 5거래일 누적 기준으로도 등락이 없습니다."
+ },
+ {
+  "id": "pol-집값안꺾이면2030년강북금천도봉뺀서울전역종부",
+  "result": "rejected",
+  "reason": "미완성(종결부호 없음),근거없는수치['2030']",
+  "provider": "gemini",
+  "tone": "quick_memo",
+  "angle": "duration",
+  "len": 45,
+  "body": "2026년부터 2030년까지 서울 집값 상승세가 이어지고 정부의 종합부동산세 개편"
+ },
+ {
+  "id": "poll-flow-2026-09-04-030530",
+  "result": "rejected",
+  "reason": "너무짧음(35자/fact_note)",
+  "provider": "gemini",
+  "tone": "fact_note",
+  "angle": "compare",
+  "len": 35,
+  "body": "원익홀딩스의 거래량이 20일 평균의 6.0배이었고 급증했습니다."
+ },
+ {
+  "id": "poll-flow-2026-09-04-108490",
+  "result": "rejected",
+  "reason": "너무짧음(34자/brief_report),미완성(종결부호 없음)",
+  "provider": "gemini",
+  "tone": "brief_report",
+  "angle": "compare",
+  "len": 34,
+  "body": "6.4배. 로보티즈의 전일 거래량이 20일 평균과 비교한 수치"
+ },
+ {
+  "id": "poll-flow-2026-09-04-234340",
+  "result": "rejected",
+  "reason": "너무짧음(39자/open_talk),미완성(종결부호 없음)",
+  "provider": "gemini",
+  "tone": "open_talk",
+  "angle": "amount",
+  "len": 39,
+  "body": "252억원의 거래대금이 헥토파이낸셜에서 발생했습니다. 이날 거래량은 2"
+ },
+ {
+  "id": "dart-20260904000355",
+  "kind": "disclosure",
+  "stock": "우성",
+  "title": "주요사항보고서(회사합병결정)",
+  "provider": "claude",
+  "tone": "brief_report",
+  "angle": "ratio",
+  "score": 15.3,
+  "result": "sent",
+  "reason": "",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 137,
+  "body": "1.8702948배입니다. (주)우성 보통주 1주당 (주)우성유통 보통주 1.8702948주를 배정받는 합병 비율입니다. 우성이 우성유통을 흡수합병하면서 사료-농장-유통으로 이어지는 축산 식품 사업 밸류 체인이 단일 조직 내에서 통합 운영됩니다."
+ },
+ {
+  "id": "dart-20260904000431",
+  "kind": "disclosure",
+  "stock": "우성",
+  "title": "주요사항보고서(자기주식처분결정)",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "decode",
+  "score": 11.3,
+  "result": "held",
+  "reason": "fatal:상세 수치는 공개되지 않았다가 내용의 절반,사전식 일반론으로 분량을 채움",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 120,
+  "body": "우성이 자기주식 처분을 결정했어요. 합병대가로 자기주식을 교부하겠다는 건데, 자기주식 처분이란 회사가 보유 중인 자신의 주식을 팔거나 없애는 걸 말합니다. 이 경우 다른 회사와의 합병 과정에서 대가로 쓰려는 거네요."
+ },
+ {
+  "id": "hk-652124",
+  "kind": "research",
+  "stock": "세경하이테크",
+  "title": "세경하이테크 실적 반등 시작, 모멘텀도 대기 중",
+  "provider": "claude",
+  "tone": "careful_note",
+  "angle": "terms",
+  "score": 10.0,
+  "result": "held",
+  "reason": "fatal:상투적 마무리 문구로 글을 닫음 (지켜봐야/확인이 필요/주목됩니다 류)",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 220,
+  "body": "메리츠증권에서 세경하이테크에 적정가격 6,500원을 제시하고 투자의견 Buy를 내놨습니다. 이 평가는 회사의 실적 반등이 시작되고 있다는 판단에 근거합니다. 현재 모멘텀이 대기 중인 상황이지만, 실적 개선의 흐름이 이어질 수 있다는 점을 반영한 것으로 보입니다. 메리츠증권 양승수 애널리스트가 이 리포트를 작성했습니다. 세경하이테크의 향후 추이를 주시하는 투자자들에게는 참고할 만한 평가입니다."
+ },
+ {
+  "id": "flow-2026-09-04-234340",
+  "kind": "flow",
+  "stock": "헥토파이낸셜",
+  "title": "헥토파이낸셜 전일 13.48% 상승",
+  "provider": "claude",
+  "tone": "data_focus",
+  "angle": "reaction",
+  "score": 12.7,
+  "result": "held",
+  "reason": "커뮤니티적합성 2/5 정보량이 부족하고 단순 나열에 그침",
+  "attr_reject": null,
+  "thin_facts": true,
+  "len": 82,
+  "body": "13.48% 오른 헥토파이낸셜의 종가는 25,250원입니다. 거래대금은 252억원이었습니다. 장중에는 저가 대비 10.5%까지 변동폭을 보였습니다."
+ },
+ {
+  "id": "pol-빚투속에50대이상보험계약대출카드론늘었다",
+  "kind": "policy",
+  "stock": "KB금융",
+  "title": "'빚투' 속에 50대 이상 보험계약대출·카드론 늘었다",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "duration",
+  "score": 14.0,
+  "result": "held",
+  "reason": "커뮤니티적합성 2/5 정보의 깊이가 얕고 커뮤니티 논점이 부족함",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "thin_facts": false,
+  "len": 107,
+  "body": "올해 상반기 증시 활황 속에서 2금융권의 보험계약대출과 카드론이 50·60대를 중심으로 늘어났어요. 빚을 내서 투자하는 '빚투'가 확산되면서 고령층의 금융거래 패턴도 함께 변화하는 모습이네요."
+ },
+ {
+  "id": "pol-23개월만에최저환율에기업달러예금역대최대",
+  "kind": "policy",
+  "stock": "삼성바이오로직스",
+  "title": "23개월 만에 최저 환율에…기업 달러예금 역대 최대",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "amount",
+  "score": 14.0,
+  "result": "held",
+  "reason": "커뮤니티적합성 2/5 정보의 깊이가 얕고 일반론적 서술에 그침",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "thin_facts": false,
+  "len": 110,
+  "body": "1,345원이 23개월 만의 최저 수준이라는 환율 뉴스네요. 환율이 내려가면서 기업들의 달러 예금이 역대 최대 규모로 늘었다고 해요. 수출 기업들이 환헤지 차원에서 달러를 쌓아두는 모습이 보이네요."
+ },
+ {
+  "id": "pol-하후상박개편기초연금2030년지출30조원돌파전",
+  "kind": "policy",
+  "stock": "기아",
+  "title": "'하후상박' 개편 기초연금, 2030년 지출 30조원 돌파 전망",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "amount",
+  "score": 14.0,
+  "result": "held",
+  "reason": "커뮤니티적합성 2/5 정보량이 적고 논점이 다소 모호함",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "thin_facts": false,
+  "len": 84,
+  "body": "30조원을 넘을 것으로 전망되는 2030년 기초연금 의무 지출액이에요. 정부가 '하후상박' 방식으로 개편한 기초연금 제도의 영향이 본격화될 시점이네요."
+ },
+ {
+  "id": "pol-울산시중소기업소상공인에760억경영안정자금지원",
+  "kind": "policy",
+  "stock": "삼성바이오로직스",
+  "title": "울산시, 중소기업·소상공인에 760억 경영안정자금 지원",
+  "provider": "gemini",
+  "tone": "quick_memo",
+  "angle": "amount",
+  "score": 9.3,
+  "result": "held",
+  "reason": "fatal:본문이 제공되지 않음,평가 불가능",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "thin_facts": true,
+  "len": 50,
+  "body": "바랍니다 도 괜찮지만 '~어요', '~네요' 위주로). \"도움이 되면 좋겠어요.\"로 수정."
+ }
+]
