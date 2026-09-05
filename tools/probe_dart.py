@@ -69,6 +69,8 @@ def probe(ep: str, corp: str, bgn: str, end: str) -> dict:
         return {"exists": False, "note": f"파싱 실패 HTTP {r.status_code}"}
     if "status" not in d:
         return {"exists": False, "note": "status 필드 없음"}
+    if d["status"] == "101":        # 잘못된 URL = 엔드포인트 자체가 없다
+        return {"exists": False, "note": f"101 {d.get('message','')[:40]}"}
     return {"exists": True, "status": d["status"], "msg": d.get("message", "")[:40],
             "rows": d.get("list") or []}
 

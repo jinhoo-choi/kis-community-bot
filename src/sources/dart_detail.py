@@ -55,6 +55,49 @@ ENDPOINTS = [
         ("ex_prc", "행사가액", "원"),
         ("bd_intr_ex", "표면이자율", "%"),
     ]),
+    # 순서 주의: '자기주식취득신탁계약체결결정'은 아래 '자기주식취득' 패턴에도 걸린다.
+    (r"자기주식취득신탁계약\s*체결", "tsstkAqTrctrCnsDecsn", "자기주식 취득 신탁계약 체결", [
+        ("ctr_prc", "계약 금액", "원"),
+        ("ctr_pd_bgd", "계약 시작일", ""),
+        ("ctr_pd_edd", "계약 종료일", ""),
+        ("ctr_pp", "계약 목적", ""),
+        ("ctr_cns_int", "계약 기관", ""),
+        ("aq_wtn_div_ostk_rt", "발행주식 대비", "%"),
+    ]),
+    (r"자기주식취득신탁계약\s*해지", "tsstkAqTrctrCcDecsn", "자기주식 취득 신탁계약 해지", [
+        ("ctr_prc_bfcc", "해지 전 계약 금액", "원"),
+        ("ctr_pd_bfcc_edd", "해지 전 계약 종료일", ""),
+        ("cc_pp", "해지 목적", ""),
+        ("cc_prd", "해지 예정일", ""),
+        ("aq_wtn_div_ostk_rt", "발행주식 대비", "%"),
+    ]),
+    (r"타법인주식.*양수|출자증권양수", "otcprStkInvscrInhDecsn", "타법인 주식 양수 결정", [
+        ("iscmp_cmpnm", "대상 회사", ""),
+        ("iscmp_mbsn", "대상 회사 사업", ""),
+        ("inhdtl_inhprc", "양수 금액", "원"),
+        ("inhdtl_tast_vs", "자산총액 대비", "%"),
+        ("atinh_eqrt", "양수 후 지분율", "%"),
+        ("inh_pp", "양수 목적", ""),
+    ]),
+    (r"타법인주식.*양도|출자증권양도", "otcprStkInvscrTrfDecsn", "타법인 주식 양도 결정", [
+        ("iscmp_cmpnm", "대상 회사", ""),
+        ("trfdtl_trfprc", "양도 금액", "원"),
+        ("trfdtl_tast_vs", "자산총액 대비", "%"),
+        ("trf_pp", "양도 목적", ""),
+    ]),
+    (r"유형자산\s*양수", "tgastInhDecsn", "유형자산 양수 결정", [
+        ("ast_sen", "자산 종류", ""),
+        ("inhdtl_inhprc", "양수 금액", "원"),
+        ("inhdtl_tast_vs", "자산총액 대비", "%"),
+        ("inh_pp", "양수 목적", ""),
+    ]),
+    (r"주식교환|주식이전", "stkExtrDecsn", "주식교환·이전 결정", [
+        ("extr_sen", "거래 종류", ""),
+        ("extr_tgcmp_cmpnm", "상대 회사", ""),
+        ("extr_rt", "교환 비율", ""),
+        ("aprskh_plnprc", "주식매수청구가", "원"),
+        ("extr_pp", "거래 목적", ""),
+    ]),
     (r"자기주식\s*취득|자기주식취득", "tsstkAqDecsn", "자기주식 취득 결정", [
         ("aq_pp", "취득 목적", ""),
         ("aq_wtn_div_ostk", "취득 예정 보통주", "주"),
@@ -80,9 +123,10 @@ ENDPOINTS = [
 # 수치 없이 제목만 남아 심사에서 전건 fatal 이 된다
 # (실측: "자기주식취득신탁계약 해지결정", "자기주식처분결과보고서" 2회 연속 재현).
 # 제목 매칭보다 먼저 판정한다 — '자기주식처분결과보고서'는 '자기주식처분' 패턴에 걸린다.
-NO_DETAIL_API = re.compile(
-    r"결과보고서|해지\s*결정|해지결정|정정신고|철회|취소"
-    r"|발행결과|정정명령")     # 미보강 로그에서 확인된 유형
+# 프로브로 확인: status 101(잘못된 URL)이 오는 유형만 여기 둔다.
+# '해지결정'을 넣었던 건 오판이었다 — tsstkAqTrctrCcDecsn 이 실재하고
+# NICE 건에 계약금액 100억·해지사유가 들어 있었다. 그게 fatal 2건의 정체다.
+NO_DETAIL_API = re.compile(r"결과보고서|정정신고|철회|취소|발행결과|정정명령")
 
 _HEADERS = {"User-Agent": USER_AGENT}
 
@@ -113,9 +157,13 @@ def corp_codes() -> dict[str, str]:
 
 
 def _fmt(val: str, unit: str) -> str:
-    v = (val or "").strip()
+    # 원문 값에 줄바꿈과 들여쓰기가 섞여 온다 (실측: ast_nm, ctr_cns_int, dl_pym).
+    # 한 줄 형식이 깨지므로 공백을 접는다. 긴 서술형은 잘라 쓴다.
+    v = re.sub(r"\s+", " ", (val or "")).strip()
     if not v or v == "-":
         return ""
+    if len(v) > 90:
+        v = v[:90].rstrip() + "…"
     # 숫자면 천 단위 구분, 억/조 단위로 읽기 쉽게
     if unit == "원" and re.fullmatch(r"[\d,]+", v):
         n = int(v.replace(",", ""))

@@ -735,10 +735,27 @@ def main():
     from src.sources import dart_detail as _dd
     ok.append(run("무수치 공시유형 차단",
                   all(_dd.NO_DETAIL_API.search(t) for t in
-                      ["자기주식취득신탁계약 해지결정", "자기주식처분결과보고서"])))
+                      ["자기주식처분결과보고서", "유상증자또는사채등의발행결과"])))
+    ok.append(run("해지결정은 차단하지 않음",     # 프로브로 정형 API 실재 확인
+                  not _dd.NO_DETAIL_API.search("자기주식취득신탁계약 해지결정")))
     ok.append(run("정상 공시는 통과",
                   not any(_dd.NO_DETAIL_API.search(t) for t in
                           ["자기주식취득 결정", "전환사채권 발행결정", "회사합병 결정"])))
+    # 신탁계약은 '자기주식취득' 패턴에도 걸린다 — 순서가 뒤집히면 조용히 0건이 된다
+    def _ep(t):
+        import re as _r
+        return next((e for p_, e, _l, _f in _dd.ENDPOINTS if _r.search(p_, t)), None)
+    ok.append(run("신탁 해지가 취득보다 먼저 매칭",
+                  _ep("주요사항보고서(자기주식취득신탁계약해지결정)") == "tsstkAqTrctrCcDecsn"))
+    ok.append(run("신탁 체결이 취득보다 먼저 매칭",
+                  _ep("주요사항보고서(자기주식취득신탁계약체결결정)") == "tsstkAqTrctrCnsDecsn"))
+    ok.append(run("일반 취득은 그대로",
+                  _ep("주요사항보고서(자기주식취득결정)") == "tsstkAqDecsn"))
+    ok.append(run("타법인 양수 매칭",
+                  _ep("주요사항보고서(타법인주식및출자증권양수결정)")
+                  == "otcprStkInvscrInhDecsn"))
+    # 원문 값의 줄바꿈이 한 줄 형식을 깨뜨린다
+    ok.append(run("줄바꿈 접힘", "\n" not in _dd._fmt("토지 및 건물\n경기도 성남시", "")))
 
     # 함수 안 재import 가 모듈 전역을 가려 UnboundLocalError 를 냈다 (실측: 워크플로 실패).
     # 유닛테스트로는 안 잡힌다 — 네트워크 함수라 호출되지 않기 때문이다. 정적으로 잡는다.
