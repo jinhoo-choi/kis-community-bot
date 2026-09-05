@@ -16,16 +16,19 @@ jobs:
         with: { python-version: '3.11', cache: pip }
       - run: pip install requests beautifulsoup4 lxml
       - name: Diagnose
-        env: { TZ: Asia/Seoul }
+        env:
+          TZ: Asia/Seoul
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
         run: |
           mkdir -p data
           python tools/diagnose.py || true
           python tools/probe_telegram.py || true
           python tools/probe_kind.py || true
+          python tools/probe_dart.py || true
       - name: Commit
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f data/diagnose.txt data/telegram_probe.txt data/telegram_probe.json data/kind_probe.txt
+          git add -f data/diagnose.txt data/telegram_probe.txt data/telegram_probe.json data/kind_probe.txt data/dart_probe.txt
           git diff --staged --quiet || git commit -m "chore: diagnose $(date +%FT%H%M)"
           git push
