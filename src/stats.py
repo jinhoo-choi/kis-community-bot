@@ -73,12 +73,14 @@ def detail_log(items: list[dict], sent: list[dict], held: list[dict]) -> str:
         rows.append({"id": p.get("id"), "result": "rejected",
                      "reason": ",".join(p.get("reject_errs", [])),
                      "provider": p.get("provider"), "tone": p.get("tone"),
+                     "angle": p.get("angle"),
                      "len": len(p.get("body", "")), "body": p.get("body", "")})
     for p in sent + held:
         rows.append({
             "id": p["id"], "kind": p.get("kind"), "stock": p.get("stock_name"),
             "title": p.get("title", "")[:60], "provider": p.get("provider"),
-            "tone": p.get("tone"), "score": (p.get("score") or {}).get("total"),
+            "tone": p.get("tone"), "angle": p.get("angle"),
+            "score": (p.get("score") or {}).get("total"),
             "result": "sent" if p["id"] in sent_ids else "held",
             "reason": p.get("hold_reason", ""),
             "attr_reject": p.get("attr_reject"),

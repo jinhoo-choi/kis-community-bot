@@ -732,6 +732,14 @@ def main():
                   __import__("config").SLOT_QUOTA["disclosure"]
                   > __import__("config").SLOT_QUOTA["flow"] * 3))
 
+    from src.sources import dart_detail as _dd
+    ok.append(run("무수치 공시유형 차단",
+                  all(_dd.NO_DETAIL_API.search(t) for t in
+                      ["자기주식취득신탁계약 해지결정", "자기주식처분결과보고서"])))
+    ok.append(run("정상 공시는 통과",
+                  not any(_dd.NO_DETAIL_API.search(t) for t in
+                          ["자기주식취득 결정", "전환사채권 발행결정", "회사합병 결정"])))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 

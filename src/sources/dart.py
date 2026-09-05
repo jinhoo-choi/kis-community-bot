@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 
 from config import DART_API_KEY, KST, USER_AGENT
 from src import crawl
+from src.sources import dart_detail
 
 BASE = "https://opendart.fss.or.kr/api/list.json"
 
@@ -69,6 +70,11 @@ def fetch(limit: int = 30) -> list[dict]:
             if not row.get("stock_code"):
                 continue
             if not any(k in row["report_nm"] for k in KEYWORDS):
+                continue
+            # 정형 API 가 없는 유형은 제목만 남아 심사에서 전건 fatal 이 된다
+            # (실측 2회 연속: "상세 수치는 공개되지 않았다가 내용의 절반").
+            # 게이트까지 끌고 가면 생성·심사 호출만 낭비한다. 여기서 버린다.
+            if dart_detail.NO_DETAIL_API.search(row["report_nm"]):
                 continue
             items.append({
                 "id": f"dart-{row['rcept_no']}",

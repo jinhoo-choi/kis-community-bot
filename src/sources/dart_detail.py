@@ -17,6 +17,8 @@ from xml.etree import ElementTree as ET
 
 import requests
 
+from datetime import datetime as _dt, timedelta as _td
+
 from config import DART_API_KEY, USER_AGENT
 
 BASE = "https://opendart.fss.or.kr/api/{}.json"
@@ -74,6 +76,12 @@ ENDPOINTS = [
     ]),
 ]
 
+# 정형 API 가 없는 유형. 발행결정 API 를 쏘면 status 013(데이터 없음)이 오고,
+# 수치 없이 제목만 남아 심사에서 전건 fatal 이 된다
+# (실측: "자기주식취득신탁계약 해지결정", "자기주식처분결과보고서" 2회 연속 재현).
+# 제목 매칭보다 먼저 판정한다 — '자기주식처분결과보고서'는 '자기주식처분' 패턴에 걸린다.
+NO_DETAIL_API = re.compile(r"결과보고서|해지\s*결정|해지결정|정정신고|철회|취소")
+
 _HEADERS = {"User-Agent": USER_AGENT}
 
 
@@ -123,19 +131,26 @@ def enrich_one(item: dict, day: str) -> bool:
         return False
 
     title = item.get("title", "")
+    if NO_DETAIL_API.search(title):
+        item["no_detail_api"] = True
+        return False
     for pat, ep, label, fields in ENDPOINTS:
         if not re.search(pat, title):
             continue
         try:
+            # bgn_de=end_de=전일 로 못 박으면 이사회 결의일과 접수일이 다른 건이
+            # 전부 0건으로 돌아온다. 주요사항보고서는 결의 후 며칠 뒤 접수되기도 한다.
+            # 범위를 일주일로 넓히고 가장 최근 행을 쓴다.
+            bgn = (_dt.strptime(day, "%Y%m%d") - _td(days=7)).strftime("%Y%m%d")
             r = requests.get(BASE.format(ep), headers=_HEADERS, timeout=20, params={
                 "crtfc_key": DART_API_KEY, "corp_code": corp,
-                "bgn_de": day, "end_de": day,
+                "bgn_de": bgn, "end_de": day,
             })
             d = r.json()
             if d.get("status") != "000" or not d.get("list"):
                 return False
 
-            row = d["list"][0]
+            row = d["list"][-1]
             lines = []
             for key, lab, unit in fields:
                 v = _fmt(row.get(key, ""), unit)
@@ -163,5 +178,8 @@ def enrich_all(items: list[dict], day: str) -> int:
     if not targets or not DART_API_KEY:
         return 0
     n = sum(1 for i in targets if enrich_one(i, day))
+    miss = [i.get("title", "")[:34] for i in targets if not i.get("dart_detail")]
     print(f"[dart] 상세 보강 {n}/{len(targets)}건")
+    if miss:
+        print(f"[dart] 미보강 제목: {miss[:8]}")
     return n
