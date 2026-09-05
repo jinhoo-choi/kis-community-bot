@@ -71,7 +71,7 @@ ENDPOINTS = [
         ("cc_prd", "해지 예정일", ""),
         ("aq_wtn_div_ostk_rt", "발행주식 대비", "%"),
     ]),
-    (r"타법인주식.*양수|출자증권양수", "otcprStkInvscrInhDecsn", "타법인 주식 양수 결정", [
+    (r"타법인주식.*(양수|취득)|출자증권(양수|취득)", "otcprStkInvscrInhDecsn", "타법인 주식 양수 결정", [
         ("iscmp_cmpnm", "대상 회사", ""),
         ("iscmp_mbsn", "대상 회사 사업", ""),
         ("inhdtl_inhprc", "양수 금액", "원"),
@@ -79,7 +79,7 @@ ENDPOINTS = [
         ("atinh_eqrt", "양수 후 지분율", "%"),
         ("inh_pp", "양수 목적", ""),
     ]),
-    (r"타법인주식.*양도|출자증권양도", "otcprStkInvscrTrfDecsn", "타법인 주식 양도 결정", [
+    (r"타법인주식.*(양도|처분)|출자증권(양도|처분)", "otcprStkInvscrTrfDecsn", "타법인 주식 양도 결정", [
         ("iscmp_cmpnm", "대상 회사", ""),
         ("trfdtl_trfprc", "양도 금액", "원"),
         ("trfdtl_tast_vs", "자산총액 대비", "%"),
@@ -126,7 +126,7 @@ ENDPOINTS = [
 # 프로브로 확인: status 101(잘못된 URL)이 오는 유형만 여기 둔다.
 # '해지결정'을 넣었던 건 오판이었다 — tsstkAqTrctrCcDecsn 이 실재하고
 # NICE 건에 계약금액 100억·해지사유가 들어 있었다. 그게 fatal 2건의 정체다.
-NO_DETAIL_API = re.compile(r"결과보고서|정정신고|철회|취소|발행결과|정정명령")
+NO_DETAIL_API = re.compile(r"결과보고서|종료보고서|정정신고|철회|취소|발행결과|정정명령")
 
 _HEADERS = {"User-Agent": USER_AGENT}
 
@@ -191,7 +191,9 @@ def enrich_one(item: dict, day: str) -> bool:
             # bgn_de=end_de=전일 로 못 박으면 이사회 결의일과 접수일이 다른 건이
             # 전부 0건으로 돌아온다. 주요사항보고서는 결의 후 며칠 뒤 접수되기도 한다.
             # 범위를 일주일로 넓히고 가장 최근 행을 쓴다.
-            bgn = (_dt.strptime(day, "%Y%m%d") - _td(days=7)).strftime("%Y%m%d")
+            # 정정공시는 원 결의일이 몇 달 전일 수 있다. 창을 넓게 잡는다.
+            back = 180 if re.search(r"정정", title) else 7
+            bgn = (_dt.strptime(day, "%Y%m%d") - _td(days=back)).strftime("%Y%m%d")
             r = requests.get(BASE.format(ep), headers=_HEADERS, timeout=20, params={
                 "crtfc_key": DART_API_KEY, "corp_code": corp,
                 "bgn_de": bgn, "end_de": day,

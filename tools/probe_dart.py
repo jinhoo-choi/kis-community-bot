@@ -140,7 +140,10 @@ def main():
             r = requests.get(LIST, headers=H, timeout=20, params={
                 "crtfc_key": KEY, "bgn_de": b, "end_de": e, "page_count": "100"})
             rows = r.json().get("list") or []
-            hit = next((x for x in rows if "공급계약" in x.get("report_nm", "")), None)
+            # 정정 건은 본문이 짧아 구조를 못 본다 (실측 2,217바이트). 원 공시를 고른다.
+            hit = next((x for x in rows if "공급계약" in x.get("report_nm", "")
+                        and "정정" not in x.get("report_nm", "")), None) \
+                or next((x for x in rows if "공급계약" in x.get("report_nm", "")), None)
             if hit:
                 log(f"  대상: {hit['corp_name']} {hit['report_nm'][:40]} "
                     f"rcept_no={hit['rcept_no']}")
