@@ -137,9 +137,16 @@ def main():
     tgt = next((c for c in corps if "공급계약" in c[1]), None)
     if not tgt:
         try:
-            r = requests.get(LIST, headers=H, timeout=20, params={
-                "crtfc_key": KEY, "bgn_de": b, "end_de": e, "page_count": "100"})
-            rows = r.json().get("list") or []
+            rows = []
+            for pg in range(1, 6):        # 100건 1페이지로는 원 공시가 안 잡혔다
+                rr = requests.get(LIST, headers=H, timeout=20, params={
+                    "crtfc_key": KEY, "bgn_de": b, "end_de": e,
+                    "page_count": "100", "page_no": str(pg)})
+                got = rr.json().get("list") or []
+                rows += got
+                if len(got) < 100:
+                    break
+            log(f"  전체 공시 {len(rows)}건에서 탐색")
             # 정정 건은 본문이 짧아 구조를 못 본다 (실측 2,217바이트). 원 공시를 고른다.
             hit = next((x for x in rows if "공급계약" in x.get("report_nm", "")
                         and "정정" not in x.get("report_nm", "")), None) \
@@ -159,10 +166,17 @@ def main():
                     log(f"  ZIP 내용: {zf.namelist()}")
                     raw = zf.read(zf.namelist()[0])
                     txt = raw.decode("euc-kr", "ignore")
-                    log(f"  본문 {len(txt):,}자. 계약금액 주변 발췌:")
-                    i = txt.find("계약금액")
-                    log("  " + (txt[max(0, i-100):i+400].replace("\n", " ")
-                                if i >= 0 else "'계약금액' 문자열 없음"))
+                    log(f"  본문 {len(txt):,}자")
+                    # 키워드가 없으면 구조 자체를 봐야 한다. 태그 목록부터 덤프한다.
+                    import re as _re
+                    tags = sorted(set(_re.findall(r"<([A-Za-z][\w-]*)", txt)))
+                    log(f"  태그 종류({len(tags)}): {tags[:40]}")
+                    for kw in ("계약금액", "계약 금액", "계약상대", "매출액",
+                               "계약기간", "판매·공급", "공급계약"):
+                        i = txt.find(kw)
+                        log(f"  [{kw}] " + (
+                            _re.sub(r"\s+", " ", txt[max(0, i-80):i+320])
+                            if i >= 0 else "없음"))
             else:
                 log("  최근 30일 공급계약 공시 없음")
         except Exception as ex:
