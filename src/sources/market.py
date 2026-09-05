@@ -88,7 +88,7 @@ def _add_history(r: dict):
     """네이버 siseJson 으로 20일 평균 거래대금·5일 수익률·장중 고저를 붙인다.
     원인 추정이 아니라 정형 수치라 안전하면서 콘텐츠 variation 을 크게 늘린다."""
     import json
-    from datetime import datetime, timedelta
+
     try:
         end = datetime.now(KST)
         beg = end - timedelta(days=45)

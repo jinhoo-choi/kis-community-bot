@@ -740,6 +740,22 @@ def main():
                   not any(_dd.NO_DETAIL_API.search(t) for t in
                           ["자기주식취득 결정", "전환사채권 발행결정", "회사합병 결정"])))
 
+    # 함수 안 재import 가 모듈 전역을 가려 UnboundLocalError 를 냈다 (실측: 워크플로 실패).
+    # 유닛테스트로는 안 잡힌다 — 네트워크 함수라 호출되지 않기 때문이다. 정적으로 잡는다.
+    import ast as _ast
+    _shadow = []
+    for _f in pathlib.Path("src").rglob("*.py"):
+        _t = _ast.parse(_f.read_text(encoding="utf-8"))
+        _top = {a.asname or a.name.split(".")[0] for n in _t.body
+                if isinstance(n, (_ast.Import, _ast.ImportFrom)) for a in n.names}
+        for _fn in [n for n in _ast.walk(_t) if isinstance(n, _ast.FunctionDef)]:
+            for _n in _ast.walk(_fn):
+                if isinstance(_n, (_ast.Import, _ast.ImportFrom)):
+                    for _a in _n.names:
+                        if (_a.asname or _a.name.split(".")[0]) in _top:
+                            _shadow.append(f"{_f}:{_n.lineno}")
+    ok.append(run("함수 내 재import 로 전역 가림 없음", not _shadow, str(_shadow[:3])))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
