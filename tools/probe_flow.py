@@ -26,6 +26,23 @@ CANDIDATES = [
      "https://finance.naver.com/sise/investorDealTrendDay.naver"),
     ("외국인 매매 상위",
      "https://finance.naver.com/sise/sise_deal_rank.naver"),
+    # 위 프로브에서 확보한 실제 iframe 주소. investor_gubun 값은 미확인이라
+    # 외국인(9000)과 그 옆 값을 같이 때려 기관 코드를 찾는다.
+    ("외국인 순매수 KOSPI",
+     "https://finance.naver.com/sise/sise_deal_rank_iframe.naver"
+     "?sosok=01&investor_gubun=9000&type=buy"),
+    ("외국인 순매도 KOSPI",
+     "https://finance.naver.com/sise/sise_deal_rank_iframe.naver"
+     "?sosok=01&investor_gubun=9000&type=sell"),
+    ("기관 추정 1000 KOSPI",
+     "https://finance.naver.com/sise/sise_deal_rank_iframe.naver"
+     "?sosok=01&investor_gubun=1000&type=buy"),
+    ("기관 추정 8000 KOSPI",
+     "https://finance.naver.com/sise/sise_deal_rank_iframe.naver"
+     "?sosok=01&investor_gubun=8000&type=buy"),
+    ("외국인 순매수 KOSDAQ",
+     "https://finance.naver.com/sise/sise_deal_rank_iframe.naver"
+     "?sosok=02&investor_gubun=9000&type=buy"),
     ("시가총액 상위 KOSPI",
      "https://finance.naver.com/sise/sise_market_sum.naver?sosok=0"),
     ("거래상위 KOSPI(기준 확인용)",
