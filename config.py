@@ -5,8 +5,14 @@ from zoneinfo import ZoneInfo
 KST = ZoneInfo("Asia/Seoul")
 
 # --- Secrets (GitHub Actions Secrets 로 주입) ---
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-GEMINI_API_KEY    = os.environ.get("GEMINI_API_KEY", "")
+ANTHROPIC_API_KEY = (os.environ.get("ANTHROPIC_API_KEY_TEST")
+                     if os.environ.get("TEST_MODE", "0") == "1" else "") \
+    or os.environ.get("ANTHROPIC_API_KEY", "")   # 테스트 키 우선, 없으면 운영 키
+# 테스트는 계정 잔액을 공유하지 않도록 별도 키를 쓸 수 있다.
+# 시크릿이 없으면 기존 키로 떨어진다 (동작은 그대로).
+GEMINI_API_KEY = (os.environ.get("GEMINI_API_KEY_TEST")
+                  if os.environ.get("TEST_MODE", "0") == "1" else "") \
+    or os.environ.get("GEMINI_API_KEY", "")
 DART_API_KEY      = os.environ.get("DART_API_KEY", "")
 TELEGRAM_TOKEN    = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID  = os.environ.get("TELEGRAM_CHAT_ID", "")
@@ -158,7 +164,8 @@ MAX_PER_STOCK = int(os.environ.get("MAX_PER_STOCK", "2"))
 ENABLE_ENRICH = os.environ.get("ENABLE_ENRICH", "1") == "1"
 # enrich 는 Gemini 검색 그라운딩이라 항목당 단가가 높다.
 # 실측: 2일간 1,376회 호출로 유료 청구 5만원이 발생했다. 폭주 방지용 상한.
-ENRICH_MAX = int(os.environ.get("ENRICH_MAX", "60"))
+# 테스트에서는 더 조인다. 캐시가 채워지면 실호출은 여기서 다시 줄어든다.
+ENRICH_MAX = int(os.environ.get("ENRICH_MAX", "15" if TEST_MODE else "60"))
 
 ENABLE_JUDGE  = os.environ.get("ENABLE_JUDGE", "1") == "1"
 MIN_JUDGE_SCORE = int(os.environ.get("MIN_JUDGE_SCORE", "14"))   # 20점 환산

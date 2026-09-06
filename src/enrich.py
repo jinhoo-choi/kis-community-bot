@@ -7,8 +7,36 @@
       여기서는 문체를 만들지 않는다. 오직 사실만.
 """
 import concurrent.futures as cf
+import json
+import os
+import time
 
 from src.llm.router import enricher
+
+# 같은 공시/리포트를 반복 실행마다 다시 그라운딩하고 있었다.
+# 09-05~06 이틀간 22회 실행에서 대상은 거의 동일한 항목들이었다.
+# 항목 id 로 캐시하면 재실행 비용이 0 이 된다. 원문이 바뀌지 않는 자료라 안전하다.
+CACHE_PATH = "data/enrich_cache.json"
+CACHE_TTL = 3 * 86400        # 자료는 며칠이면 낡는다
+
+
+def _load_cache() -> dict:
+    try:
+        with open(CACHE_PATH, encoding="utf-8") as f:
+            c = json.load(f)
+    except Exception:
+        return {}
+    now = time.time()
+    return {k: v for k, v in c.items() if now - v.get("ts", 0) < CACHE_TTL}
+
+
+def _save_cache(c: dict) -> None:
+    try:
+        os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
+        with open(CACHE_PATH, "w", encoding="utf-8") as f:
+            json.dump(c, f, ensure_ascii=False)
+    except Exception as e:
+        print(f"[enrich] 캐시 저장 실패: {e}")
 
 SYSTEM = """당신은 금융 데이터 리서처입니다. 글을 쓰지 말고 사실만 추출하세요.
 
@@ -53,6 +81,7 @@ def _one(item: dict) -> dict:
         item["_enrich_error"] = r.error[:200]
     if r.ok and txt and txt.upper() != "NONE" and len(txt) > 15:
         item["facts"] = item["facts"] + "\n\n[검색으로 확인된 배경]\n" + txt
+        item["_enrich_text"] = txt        # 캐시 저장용
         item["enriched"] = True
     else:
         # 리스크봇의 _body_failed 와 같은 역할.
@@ -66,15 +95,40 @@ CALLS = [0]   # 실행당 그라운딩 호출 수. 청구액 역산에 필요하
 
 
 def enrich_all(items: list[dict], workers: int = 5) -> list[dict]:
-    if enricher() is None:
-        print("[enrich] GEMINI_API_KEY 없음 → 보강 스킵")
-        for it in items:
+    cache = _load_cache()
+    hits, miss = [], []
+    for it in items:
+        c = cache.get(it.get("id", ""))
+        if c and c.get("text"):
+            it["facts"] = it["facts"] + "\n\n[검색으로 확인된 배경]\n" + c["text"]
+            it["enriched"] = True
+            hits.append(it)
+        elif c:                      # 이전에 '배경 없음'으로 확인된 항목
+            it["enriched"] = False
             it["thin_facts"] = True
-        return items
+            hits.append(it)
+        else:
+            miss.append(it)
 
-    CALLS[0] += len(items)
+    # 키가 없어도 캐시분은 살린다 (로컬/무료 테스트에서 유용)
+    if enricher() is None:
+        print(f"[enrich] GEMINI_API_KEY 없음 → 캐시 {len(hits)}건만 사용, "
+              f"{len(miss)}건 스킵")
+        for it in miss:
+            it["thin_facts"] = True
+        return hits + miss
+
+    CALLS[0] += len(miss)
+    if hits:
+        print(f"[enrich] 캐시 적중 {len(hits)}건 → 그라운딩 {len(miss)}건만 호출")
     with cf.ThreadPoolExecutor(max_workers=workers) as ex:
-        items = list(ex.map(_one, items))
+        miss = list(ex.map(_one, miss))
+
+    now = time.time()
+    for it in miss:
+        cache[it.get("id", "")] = {"ts": now, "text": it.get("_enrich_text", "")}
+    _save_cache(cache)
+    items = hits + miss
 
     n = sum(1 for x in items if x.get("enriched"))
     print(f"[enrich] {n}/{len(items)}건 배경 보강 완료")
