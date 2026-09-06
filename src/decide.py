@@ -60,7 +60,14 @@ def decide_distribution(
 
     pool.sort(key=lambda x: (x.get("score") or {}).get("total", 0), reverse=True)
 
-    sent, per_s, per_k = [], Counter(), Counter()
+    # 한 페르소나가 배포를 독식하면 피드가 단조로워진다.
+    # 실측: brief_report 계약이 전역 규칙과 충돌해 통째로 리젝되자
+    # open_talk 만 살아남아 배포 23건 중 17건이 질문형이 됐다.
+    # 계약 충돌은 고쳤지만, 같은 일이 다시 생겨도 배포까지 가지 않게 상한을 둔다.
+    per_tone_cap = max(2, round(target * 0.3))
+    # 같은 페르소나 안에서도 마무리 문구가 복제된다.
+    # 실측: '아시는 분 계신가요?' 로 끝나는 글이 7건이었다.
+    sent, per_s, per_k, per_t, per_e = [], Counter(), Counter(), Counter(), Counter()
     for p in pool:
         if len(sent) >= target:
             p["hold_reason"] = "정원초과"
@@ -79,8 +86,24 @@ def decide_distribution(
             held.append(p)
             continue
 
+        tone = p.get("tone", "")
+        if per_t[tone] >= per_tone_cap:
+            p["hold_reason"] = f"문체상한({tone})"
+            held.append(p)
+            continue
+
+        body = p.get("body", "").strip()
+        ending = body[-20:] if len(body) >= 20 else ""
+        if ending and per_e[ending] >= 2:
+            p["hold_reason"] = "말미중복"
+            held.append(p)
+            continue
+
         per_s[code] += 1
         per_k[kind] += 1
+        per_t[tone] += 1
+        if ending:
+            per_e[ending] += 1
         sent.append(p)
 
     return sent, held
