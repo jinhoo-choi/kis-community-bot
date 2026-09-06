@@ -1,128 +1,179 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 [dart] corp_code 3989종목 매핑
 [dart] 상세 보강 12/16건
 [dart] 미보강 제목: ['타법인주식및출자증권취득결정', '[첨부정정]주요사항보고서(회사합병결정)(자회사의 주요경영사항)', '[기재정정]유형자산처분결정(종속회사의주요경영사항)', '신탁계약에의한취득상황보고서']
-[crawl] ⚠ dart 16/142건 — 수집률 저조
+[crawl] dart 16건
 [crawl] naver_research 30건
 [crawl] hankyung 20건
-[market] ⚠ 컬럼 구조 인식 실패 — https://finance.naver.com/sise/sise_rise.naver?sosok=0
-[market] ⚠ 컬럼 구조 인식 실패 — https://finance.naver.com/sise/sise_rise.naver?sosok=1
-[market] ⚠ 컬럼 구조 인식 실패 — https://finance.naver.com/sise/sise_fall.naver?sosok=0
-[market] ⚠ 컬럼 구조 인식 실패 — https://finance.naver.com/sise/sise_fall.naver?sosok=1
-[market] 후보 63종목 (중복 제거 후)
+[market] 후보 186종목 (중복 제거 후)
 [market] ⚠ 스카이랩스 제외 — 등락률 135.0% > 가격제한폭
-[crawl] ⚠ market 62/857건 — 수집률 저조
+[crawl] market 185건
 [tickers] 상장 2632종목 로드 (lxml)
-[crawl] ⚠ kind_inquiry 2/35건 — 수집률 저조
+[crawl] kind_inquiry 2건
 [kind] 특징주→조회공시 0건 / 조회공시→시세 2건
-[crawl] policy_rss 23건
+[crawl] policy_rss 26건
 [tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
 [crawl] telegram_ch 0건 (정상 0건)
-[main] 수집 총 163건
-[enrich] 122/163건 배경 보강 완료
+[main] 수집 총 289건
+[enrich] 116/289건 배경 보강 완료
 [main] 발송 목표 50건 / 수율 14% → 생성 대상 170건 → 기대 발송 24건
 [main] ⚠ 공급 상한에 걸려 목표 미달 예상 (24 < 50). 필터가 아니라 물량 문제다.
-[gate] 차단 52건 {'tier5': 50, 'tier4': 1, 'tier1': 1}
-[theme] 테마글 11건에 게시 종목 배정
-[dedup] 제외 9건 {'SIM': 6, 'EVT': 1, 'ID': 2}
+[gate] 차단 60건 {'tier5': 58, 'tier4': 1, 'tier1': 1}
+[theme] 테마글 5건에 게시 종목 배정
+[dedup] 제외 9건 {'SIM': 7, 'EVT': 1, 'ID': 1}
 [main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
-[main] ⚠ 수집 이상 소스: ['dart', 'market', 'kind_inquiry']
-[main] 생성 대상 102건 {'disclosure': 9, 'research': 13, 'flow': 61, 'policy': 9, 'poll': 10}
+[main] 생성 대상 220건 {'disclosure': 10, 'research': 13, 'flow': 183, 'policy': 4, 'poll': 10}
 [claude] SDK 1.4.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[claude] batch msgbatch_01NHpt2rsSgRNM95NBmSvWES 제출 (61건)
-[gen] claude: 82/82건 생성
-[gen] 정규식 리젝 dart-20260904000518 ["미확인수치['200']", "근거없는수치['200']"]
-       └ '에넥스가 200만 주 규모의 제3자배정증자를 결정했습니다. 이번 유상증자로 조달할 자금은 50억원이며, 운영자금으로 쓸 예정입니다. 제3자배정은 기존 주주들의 지분 희석 없이 특정 투자자에게 신주를 배정하는 방식입니다. 공시 제목에 기재정정이 붙은 만큼 이전 공시 내용 중 일부가 수정된 것으로 보입니다. 상장 예정일은 확정되지 않았습니다.'
-[gen] 정규식 리젝 dart-20260904000355 ['너무김(151자>150/brief_report)']
-       └ '1.8702948배. 우성이 우성유통을 흡수합병하면서 배정 비율을 우성 보통주 1에 대해 우성유통 보통주 1.8702948로 정했습니다. 우성유통이 영위하던 유통 사업이 우성으로 넘어가면서 사료-농장-유통으로 이어지는 축산 식품 사업이 단일 조직 내에서 통합 운영됩니다.'
-[gen] 정규식 리젝 dart-20260904800327 ['너무김(121자>120/quick_memo)']
-       └ 'SNT홀딩스가 자회사 주요경영사항과 관련해 회사합병결정 공시를 정정 제출했어요. 정정공시는 이전에 제출한 공시 내용에 오류나 누락이 있을 때 다시 제출하는 거라 투자자들이 정확한 정보로 판단할 수 있게 하는 절차예요.'
+[claude] batch msgbatch_019D5cAXAUzJDPVFVULDcN4q 제출 (154건)
+[gen] claude: 176/176건 생성
+[gen] 정규식 리젝 dart-20260904000367 ['너무김(124자>120/quick_memo)']
+       └ 'NICE가 자기주식 취득 신탁계약을 해지하기로 결정했어요. 자기주식취득신탁계약이란 회사가 앞으로 주식을 살 목적으로 금융기관과 맺는 약속인데, NICE는 2026년 09월 04일 계약 만료에 따라 이를 종료하기로 한 거죠.'
+[gen] 정규식 리젝 dart-20260904800462 ['미확인표현(확인되지 않)']
+       └ '9월 4일 SKC가 타법인 주식 및 출자증권 취득을 결정했어요. 상세 내용은 공시에서 아직 확인되지 않았네요.'
+[gen] 정규식 리젝 hk-652137 ['news_cliche', 'unsourced_eval', '너무김(275자>260/careful_note)']
+       └ '한화투자증권이 DBO 레퍼런스 확보를 롯데이노베이트의 실적 개선 신호로 봤네요. DBO는 대형 고객사와의 계약 기반으로 매출이 확정되는 조건이어서 사업 안정성을 높이는 요소라고 봅니다. 수익성 개선이 진행 중이라는 평가는 그동안 지적돼온 채산성 문제가 개선되고 있다는 의미인 듯합니다. 남은 과제로는 밸류에이션 정상화를 꼽는데, 이는 현재 주가 수준이 개선되'
+[gen] 정규식 리젝 hk-652123 ['stock_ending']
+       └ "대신증권 이지니 애널리스트가 팬오션(028670)에 대해 '하이 앤 드라이'라는 제목의 리포트를 발간했습니다. 적정가격으로 8,000원을 제시했는데요. 투자의견은 N/A로 표기했습니다. 리포트의 구체적인 내용은 별도로 확인이 필요합니다."
+[gen] 정규식 리젝 hk-652094 ['너무김(293자>240/check_list)']
+       └ '대신증권 홍가혜 애널리스트가 알테오젠(196170)에 대해 적정가격 450,000원, Buy 의견을 제시했어요. 리포트는 반복되는 기술수출과 ALT-B4의 가치 재평가를 축으로 삼고 있습니다. ALT-B4는 회사의 주요 파이프라인 중 하나인데, 이번 기술수출 계약들이 해당 후보물질의 시장 잠재력을 어떻게 재평가하는지가 투자 판단의 포인트가 될 수 있습니다.'
+[gen] 정규식 리젝 hk-652090 ["미확인수치['200']", "근거없는수치['200']"]
+       └ "200만 원대 적정가격을 제시한 iM증권 리포트가 나왔네요. 삼성전기의 MLCC 수주 공시에 관한 코멘트인데, 플랫폼 단위로 LTA가 확대됐다는 내용이었는데요. 같은 증권사는 투자의견으로 Buy를 함께 제시했습니다. iM증권 고의영·박정하 애널리스트 리포트에서 '플랫폼 단위로 확대된 LTA'라는 표현이 의미하는 게 정확히 뭔지 아시는 분 계신가요?"
 [gen] 정규식 리젝 hk-652041 ['미확인표현(공개되지 않)']
-       └ 'SK증권 허선재 애널리스트가 적정가격 14,500원을 제시했어요. 이는 현재 시점에서 해당 증권사의 평가 의견입니다. 투자의견은 매수로 나왔습니다. 다만 제목 외 상세 근거 수치는 공개되지 않았으니 리포트 전문을 통해 판단 기준을 확인하시는 게 좋을 것 같습니다. 증권사마다 평가 기준과 시점이 다르므로 여러 의견을 함께 참고하면 도움이 될 거예요.'
-[gen] 정규식 리젝 hk-652036 ['unsourced_eval', '너무김(266자>240/check_list)']
-       └ '메리츠증권 양승수 애널리스트가 대덕전자를 적정가 180,000원으로 제시하며 Buy 의견을 내놨어요. 리포트 제목이 "환율보다 중요한 건 업황"인 만큼, 환율 변동성보다는 실제 사업 실적이 주목 포인트라는 신호로 읽힙니다. 앞으로는 분기별 수주 규모나 제품 출하량 같은 업황 지표를 보면서 실적 추정치와 비교하는 게 핵심이 될 것 같아요. 환율 헤지 효과나 '
-[gen] 정규식 리젝 hk-652019 ["근거없는수치['80']"]
-       └ '80만원. SK증권이 제시한 적정가격입니다. 실적개선에 따른 주주환원을 재평가하면서 나온 수치입니다. 투자의견은 매수습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-336260 ['주장과다(4개/3)']
-       └ '43,850원으로 마감했습니다. 어제보다 12.44% 올랐을 때 두산퓨얼셀의 종가입니다. 거래대금은 605억원이었고 거래량은 20일 평균의 1.4배였습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-067290 ['어미반복(습니다×4)']
-       └ '4.81% 내린 JW신약이 3,265원에 마감했습니다. 거래대금은 760억원이었습니다. 장중 저가 대비 고가가 11.3% 높았던 만큼 등락폭이 컸습니다. 5거래일 만에 하락세로 돌아섰습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-105560 ['방향오용(올랐)']
-       └ '거래량은 20일 평균의 1.2배였습니다. 장중 저가 대비 고가가 4.4% 올랐으나, 마감은 장중 고가에서 3.5% 낮은 수준이었습니다. 상승 후 낙폭을 회수하지 못한 형태입니다.'
-[gen] 정규식 리젝 flow-2026-09-04-088350 ['주장과다(6개/5)']
-       └ '어제 한화생명은 전일 대비 6.06% 내려 5,740원에서 마감했습니다. 거래량은 20일 평균의 1.3배 수준이었습니다. 장중에는 저가 대비 6.7%의 변동폭을 보였고, 마감가는 장중 고가보다 5.6% 낮은 위치에서 형성됐습니다. 5거래일 누적으로는 -3.53%를 기록 중입니다.'
-[gen] 정규식 리젝 flow-2026-09-04-387690 ['주장과다(5개/4)']
-       └ '682억원 규모의 거래가 어제 이뤄졌는데요. 레메디가 3.01% 오르며 15,750원으로 마감한 날입니다. 거래량은 20일 평균의 1.5배였고, 장중에는 저가 대비 21.4% 오르내렸네요. 이날 거래 규모나 변동폭이 평소보다 컸던 건데, 이런 움직임이 나온 배경이 뭔지 아시는 분 계신가요?'
-[gen] 정규식 리젝 flow-2026-09-04-033340 ['방향오용(올랐)']
-       └ '11.84% 하락했습니다. 9월 4일 좋은사람들의 낙폭입니다. 거래량은 20일 평균의 2.5배였습니다. 장중에는 저가 대비 28.9%까지 올랐다가 마감을 맞이했습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-002990 ['방향오용(상승)']
-       └ '거래량이 20일 평균의 0.2배 수준으로 일관되게 적었습니다. 장중에는 저가 대비 8.0% 상승한 지점까지 올랐다가 마감 때 장중 고가 대비 5.7% 낮은 수준에서 마감했네요. 결국 전일 2.54% 하락으로 마감. 지난 5거래일 누적으로는 5.46% 내렸습니다. 거래가 활발하지 않은 상황에서 가격 움직임만 있었던 모습입니다.'
-[gen] 정규식 리젝 flow-2026-09-04-008290 ['방향오용(올랐)']
-       └ '30.00% 하락했습니다. 원풍물산이 전일 이 정도 낙폭이었습니다. 거래량은 20일 평균의 2.5배로 늘었고, 장중 저가 대비 고가는 74.5% 올랐습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-347700 ["근거없는수치['520']"]
-       └ '168억원의 거래대금이었습니다. 거래량은 20일 평균의 0.8배 수준이었는데요, 장중에는 저가 대비 7.5%까지 오르내렸습니다. 마감가는 장중 고가보다 5.0% 낮은 520원에서 형성됐습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-234690 ['방향오용(올랐)']
-       └ '20일 평균 대비 거래량이 2.8배에 달했어요. 종가는 10,340원으로 3.81% 내렸습니다. 장중 고가 대비 마감이 6.6% 낮은 수준이었네요. 5거래일 기준으로는 11.18% 올랐던 흐름 속에서 어제는 낙폭을 기록한 셈입니다.'
-[gen] 정규식 리젝 flow-2026-09-04-300120 ['미확인표현(확인되지 않)']
-       └ '20일 평균의 18.4배 규모로 거래량이 몰렸어요. 종가 3,325원에 3.26% 올랐고, 거래대금은 169억원이었습니다. 5거래일 누적으로는 28.38% 올라온 상황이네요. 장중 흐름이나 구간별 거래 집중도에 대한 추가 정보는 확인되지 않았습니다.'
-[gen] 정규식 리젝 flow-2026-09-04-465770 ['방향오용(올랐)']
-       └ '196억원을 거래한 STX그린로지스는 어제 장중 저가 대비 19.2%를 오르내렸네요. 마감은 장중 고가보다 16.1% 낮은 수준에서 마감한 것으로 보이는데요. 5거래일 누적으로는 26.48% 올랐습니다. 거래 과정에서 변동폭이 컸던 이유가 무엇일까요?'
-[gen] 정규식 리젝 flow-2026-09-04-452260 ['stock_ending']
-       └ '20일 평균 대비 1.8배의 거래량이었고 전일 6.73% 올랐어요. 종가는 2,300원이었고 거래대금은 44억원이었습니다. 지난 5거래일 누적으로는 13.02% 상승했네요. 거래량이 평상시보다 늘어난 가운데 상승 흐름이 이어지고 있는 모습입니다. 한편 단일 거래일 등락만으로는 배경이 명확하지 않습니다. 개별 뉴스나 공시 같은 구체적인 계기가 있었는지 확인이'
-[gen] ⚠ gemini 실패 pol-빚투속에50대이상보험계약대출카드론늘었다: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 pol-23개월만에최저환율에기업달러예금역대최대: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 pol-하후상박개편기초연금2030년지출30조원돌파전: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 pol-울산시중소기업소상공인에760억경영안정자금지원: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 pol-인력재배치시파업가능에경영계우려누더기지침한계: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 pol-대구세관추석앞두고24시간수출입통관지원: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 pol-듀켐바이오정읍에343억원규모투자전북도등과협약: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 pol-게시판부동산원금융기관대상ESG금융지원서비스설: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 poll-flow-2026-09-04-030530: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 poll-flow-2026-09-04-108490: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 poll-flow-2026-09-04-032940: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 poll-flow-2026-09-04-058610: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 poll-flow-2026-09-04-014950: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 poll-flow-2026-09-04-234340: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 poll-flow-2026-09-04-240810: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 poll-flow-2026-09-04-033790: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 poll-flow-2026-09-04-041190: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 poll-flow-2026-09-04-336260: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] gemini: 2/20건 생성
-[gen] 정규식 리젝 kind-20260904000786 ['너무짧음(44자<80/fact_note)', '미완성(종결부호 없음)']
-       └ '한국거래소는 디에이치엑스컴퍼니에 풍문 또는 보도와 관련한 조회공시를 요구했습니다'
-[gen] 정규식 리젝 pol-집값안꺾이면2030년강북금천도봉뺀서울전역종부 ['너무짧음(34자<45/brief_report)', '미완성(종결부호 없음)', "근거없는수치['2030']"]
-       └ '2030년.\n서울 집값 상승과 정부의 종합부동산세 개편이 맞물'
-[gen] ⚠ gemini 실패 dart-20260904000518: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 dart-20260904000355: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 dart-20260904800327: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 hk-652041: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 hk-652036: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 hk-652019: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 flow-2026-09-04-336260: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 flow-2026-09-04-067290: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 flow-2026-09-04-105560: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 flow-2026-09-04-088350: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 flow-2026-09-04-387690: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 flow-2026-09-04-033340: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 flow-2026-09-04-002990: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 flow-2026-09-04-008290: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 flow-2026-09-04-347700: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 flow-2026-09-04-234690: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 flow-2026-09-04-300120: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 flow-2026-09-04-465770: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] ⚠ gemini 실패 flow-2026-09-04-452260: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': "You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Ple
-[gen] 정규식 통과 63건 / 시도 102건
+       └ 'SK증권이 14,500원의 적정가격을 제시하며 매수 의견을 냈어요. 다만 제목에 드러난 것 외에는 본문 수치가 공개되지 않아서, 구체적으로 어떤 근거인지는 리포트 전문을 직접 확인할 필요가 있겠네요. 어떤 비즈니스 모델이나 실적 지표가 이 평가의 바탕이 됐는지 궁금하신 분들이라면 해당 리포트를 찾아보시길 추천합니다.'
+[gen] 정규식 리젝 flow-2026-09-04-036930 ['주장과다(4개/3)']
+       └ '6.13% 상승했습니다. 어제 주성엔지니어링의 주가 변동폭을 나타낸 수치입니다. 거래대금은 1,526억원이었고, 거래량은 20일 평균의 0.7배 수준이었으며, 장중 저가 대비 고가는 6.0% 올랐습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-096770 ["미확인수치['1500']", "근거없는수치['1500']"]
+       └ '거래대금 1,764억원 중 1,500억원 이상이 특정 가격대에 몰린 건 아닐까 싶은데, 장중 저가 대비 6.8%까지 오르내린 흐름을 보면 구간별로 거래 성격이 달랐던 것 같습니다. 종가 138,300원에서 5.73% 올랐고요. 거래량도 20일 평균 대비 1.2배 수준이었어요.'
+[gen] 정규식 리젝 flow-2026-09-04-417030 ['방향오용(낙폭)']
+       └ '31,450원에 마감한 니어스랩이 전날 대비 16.05% 올랐네요. 장중에는 저가 대비 21.1%까지 움직이며 변동성을 보였는데요. 다만 거래량은 20일 평균의 0.4배 수준으로 저조했습니다. 이 정도 낙폭에서 거래량이 저조한 이유가 뭘까요?'
+[gen] 정규식 리젝 flow-2026-09-04-003530 ['어미반복(습니다×4)']
+       └ '한화투자증권이 8.97% 올랐습니다. 종가는 5,100원으로 마감했습니다. 거래대금은 376억원이었습니다. 지난 5거래일 누적으로는 2.00% 상승했습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-035420 ['주장과다(5개/4)']
+       └ '2.89% 상승한 NAVER의 어제 장중 움직임입니다. 저가 대비 고가의 폭은 2.4%였습니다. 마감은 장중 고가보다 0.7% 낮은 수준에서 이뤄졌습니다. 5거래일 누적으로는 3.17% 하락한 상태입니다.'
+[gen] 정규식 리젝 flow-2026-09-04-034730 ['어미반복(습니다×4)']
+       └ 'SK가 5.14% 올랐습니다. 거래량은 20일 평균의 0.6배 수준이었습니다. 장중 저가 대비 고가는 5.3% 차이를 보였습니다. 마감가는 장중 고가 대비 0.2% 낮은 위치에서 거래를 마감했습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-278470 ['어미반복(습니다×4)']
+       └ '394,000원에서 마감했습니다. 전일 대비 2.96% 하락했습니다. 거래량은 20일 평균의 0.8배 수준이었습니다. 장중에는 저가 대비 5.0% 변동폭을 보였습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-199430 ['방향오용(낙폭)']
+       └ '어제 케이엔알시스템이 16.08% 올랐어요. 20일 평균의 3.0배 거래량이 나왔고요. 장중에는 저가 대비 12.5%까지 오르다가 마감에는 장중 고가보다 1.2% 낮은 수준에서 마감했네요. 5거래일 기준으로는 37.09% 올랐습니다. 최근 흐름이 상승세인 가운데 어제 낙폭이 어느 정도 컸던 셈이에요. 거래량도 평소보다 많이 나왔고요.'
+[gen] 정규식 리젝 flow-2026-09-04-048770 ["근거없는수치['30']"]
+       └ '30%를 올린 TPC로보틱스가 어제 70억원대 거래대금을 기록했네요. 장중 고가에서 마감한 셈인데, 5거래일 누적으로는 37.44% 올랐습니다. 이 정도 상승폭이 공시나 뉴스 같은 특정 계기 때문인지, 아니면 다른 배경이 있는지 알고 계신 분 계신가요?'
+[gen] 정규식 리젝 flow-2026-09-04-180640 ['어미반복(습니다×4)']
+       └ '9.12% 올랐습니다. 146,000원에서 마감했습니다. 거래량은 20일 평균의 1.2배였습니다. 5거래일 동안 누적으로 11.20% 상승했습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-062040 ['방향오용(낙폭)']
+       └ '산일전기는 어제 2.79% 올랐는데, 지난 5거래일 누적으로는 5.33% 내린 상태입니다. 어제 장중에는 저가 대비 4.3%의 등락폭을 보였고, 마감은 장중 고가보다 3.0% 낮은 수준에서 이루어졌습니다. 거래량은 20일 평균의 0.9배 수준이었는데요. 최근 며칠간의 낙폭을 부분적으로 회수한 형국입니다.'
+[gen] 정규식 리젝 flow-2026-09-04-036460 ['어미반복(습니다×4)']
+       └ '35,100원으로 내렸습니다. 어제 종가 기준 낙폭이 6.90%였습니다. 거래량은 20일 평균의 3.7배였습니다. 5거래일 누적으로는 5.39% 하락했습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-008290 ["근거없는수치['30']"]
+       └ '30% 하락했습니다. 원풍물산이 전일 종가 기준 이 폭으로 내렸습니다. 종가는 427원이었고 거래대금은 39억원이었습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-064260 ['방향오용(낙폭)']
+       └ '다날이 어제 6.01% 올랐네요. 종가는 5,200원이었습니다. 거래대금은 195억원이었는데 거래량 자체는 20일 평균의 0.8배 수준이었는데요. 이 정도 낙폭과 거래대금의 조합을 경험하신 분 계신가요?'
+[gen] 정규식 리젝 flow-2026-09-04-000500 ['어미반복(습니다×4)']
+       └ '1.68% 올랐습니다. 종가는 212,000원이었습니다. 장중 고가에서 7.0% 내려온 수준에서 마감했습니다. 5거래일 누적으로는 3.92% 상승했습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-181710 ['방향오용(낙폭)']
+       └ '71,500원 종가 기준으로 어제 8.50% 올랐어요. 장중 고가에서 마감했으니 상승 흐름이 이어진 셈인데, 거래량은 20일 평균의 0.5배 수준으로 제한적이었습니다. 한편 5거래일 누적으로는 2.58% 오른 상황이라 단기 상승세를 이어가는 것으로 볼 여지가 있습니다. 다만 어제의 큰 낙폭에도 불구하고 거래량이 평소의 절반 정도에 그친 만큼, 참여 강도가 '
+[gen] 정규식 리젝 flow-2026-09-04-437730 ['어미반복(습니다×4)']
+       └ '어제 삼현은 10.34% 올랐습니다. 종가는 32,550원이었습니다. 거래량은 20일 평균의 1.9배로 나타났습니다. 지난 5거래일 동안 누적으로는 1.24% 상승했습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-426030 ['수치과다(6개/open_talk)']
+       └ '44,770원에서 마감한 TIME 미국나스닥100액티브가 전날보다 2.67% 올랐네요. 장중에는 저가 대비 1.2% 정도의 움직임이 있었는데요. 거래량은 20일 평균의 0.9배 수준으로 나타났습니다. 이번 상승을 주도한 요인이 뭔지 아시는 분 계신가요?'
+[gen] 정규식 리젝 flow-2026-09-04-100790 ['방향오용(낙폭)']
+       └ '미래에셋벤처투자가 8.00% 올랐네요. 종가는 14,980원을 기록했는데요, 장중 고가 대비 1.3% 낮은 수준에서 마감했습니다. 다만 이번 상승에도 5거래일 누적으로는 6.38% 내렸습니다. 이 정도 낙폭에서 반등한 건지, 아니면 더 깊은 배경이 있는 건지 아시는 분 계신가요?'
+[gen] 정규식 리젝 flow-2026-09-04-003160 ['방향오용(낙폭)']
+       └ '2.63% 올랐습니다. 종가는 31,250원으로 장중 고가 대비 2.8% 낮은 수준입니다. 5거래일 누적으로는 28.34% 상승했습니다. 마감 직전 일부 낙폭이 있었던 것으로 보입니다.'
+[gen] 정규식 리젝 flow-2026-09-04-056080 ['어미반복(습니다×4)']
+       └ '유진로봇이 7.70% 올랐습니다. 종가는 11,890원이었습니다. 장중 고가에서 6.7% 내려온 수준에서 마감했습니다. 5거래일 누적으로는 2.14% 내렸습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-448900 ['방향오용(낙폭)']
+       └ '10.21% 상승했습니다. 한국피아이엠이 어제 이 정도의 낙폭이었습니다. 거래량은 20일 평균의 1.2배였고, 장중 저가 대비 고가는 9.9% 차이를 보였습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-086280 ['어미반복(습니다×4)']
+       └ '현대글로비스가 1.98% 올랐습니다. 종가는 206,000원이었는데요. 장중에는 저가 대비 3.7% 폭으로 움직였습니다. 거래량은 20일 평균의 0.8배 수준이었습니다. 5거래일 누적으로는 0.49% 올랐습니다.'
+[gen] 정규식 리젝 flow-2026-09-04-000150 ['어미반복(습니다×4)']
+       └ '두산이 어제 1.51% 올랐습니다. 종가는 1,142,000원이었는데요. 장중에는 저가 대비 3.4% 범위에서 움직였습니다. 거래량은 20일 평균의 0.5배 수준이었습니다. 5거래일 누적으로는 -7.75% 하락했습니다.'
+[gen] ⚠ gemini 실패 flow-2026-09-04-071280: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-019210: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-028300: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-053690: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-476830: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-389500: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-008930: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-189330: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-108230: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-198440: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-085620: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-465770: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-089030: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-158430: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-001440: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-053260: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-051160: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-452260: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-294400: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-204320: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-035510: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-005950: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-027360: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-397030: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-457370: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-174900: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-065350: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-356680: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-419050: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 kind-20260904000786: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 pol-23개월만에최저환율에기업달러예금역대최대: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 pol-하후상박개편기초연금2030년지출30조원돌파전: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 pol-울산시중소기업소상공인에760억경영안정자금지원: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 pol-듀켐바이오정읍에343억원규모투자전북도등과협약: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 poll-flow-2026-09-04-030530: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 poll-flow-2026-09-04-108490: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 poll-flow-2026-09-04-032940: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 poll-flow-2026-09-04-058610: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 poll-flow-2026-09-04-014950: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 poll-flow-2026-09-04-234340: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 poll-flow-2026-09-04-240810: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 poll-flow-2026-09-04-042700: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 poll-flow-2026-09-04-033790: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 poll-flow-2026-09-04-041190: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] gemini: 0/44건 생성
+[gen] ⚠ gemini 실패 dart-20260904000367: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 dart-20260904800462: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 hk-652137: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 hk-652123: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 hk-652094: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 hk-652090: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 hk-652041: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-036930: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-096770: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-417030: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-003530: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-035420: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-034730: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-278470: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-199430: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-048770: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-180640: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-062040: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-036460: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-008290: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-064260: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-000500: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-181710: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-437730: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-426030: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-100790: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-003160: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-056080: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-448900: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-086280: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 flow-2026-09-04-000150: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] 정규식 통과 145건 / 시도 220건
 [claude] SDK 1.4.0
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 50건 / 보류 13건
-   보류 dart-20260904800540 (claude) - 커뮤니티적합성 2/5 정보량이 부족하고 논점이 없음
-   보류 dart-20260904000367 (claude) - 커뮤니티적합성 2/5 정보량이 적고 단순 공시 요약에 그침
-   보류 dart-20260904800342 (claude) - 커뮤니티적합성 2/5 정보량이 부족하고 단순 요약에 그침
-   보류 hk-652090 (claude) - fatal:목표주가를 단정하는 표현
-   보류 hk-652050 (claude) - fatal:외부 기관으로 문의 안내
+[main] 배포 50건 / 보류 95건
+   보류 flow-2026-09-04-088350 (claude) - 정원초과
+   보류 flow-2026-09-04-294570 (claude) - 정원초과
+   보류 flow-2026-09-04-018260 (claude) - 정원초과
+   보류 flow-2026-09-04-090360 (claude) - 정원초과
+   보류 flow-2026-09-04-125490 (claude) - 정원초과
 [tg] 테스트 채널 suffix 매칭: ...2744 (private)
-[main] filter_log data/filter_log_20260906_1143.json
-[main] stats {"ts": "2026-09-06T11:43:30+09:00", "persona_mode": "v2", "collected": 163, "gate_blocked": 52, "gate_reasons": {"tier5": 50, "tier4": 1, "tier1": 1}, "gate_detail": {"tier5:글감부족": 45, "tier5:앵글없음": 5, "tier4:제목부족": 1, "tier1:법적사안(횡령)": 1}, "enrich_ok": 122, "generated": 63, "sent": 50, "held": 13, "hold_reasons": {"커뮤니티적합성 2/5 정보량이 부족하고 논점이 없음": 1, "커뮤니티적합성 2/5 정보량이 적고 단순 공시 요약에 그침": 1, "커뮤니티적합성 2/5 정보량이 부족하고 단순 요약에 그침": 1, "fatal": 3, "커뮤니티적합성 2/5 정보의 나열일 뿐 새로운 통찰이 부족함": 1, "커뮤니티적합성 2/5 데이터 나열에 그쳐 정보 가치가 낮음": 3, "커뮤니티적합성 2/5 정보 나열에 그쳐 가치가 낮음": 1, "커뮤니티적합성 2/5 정보 나열에 그쳐 커뮤니티 적합성이 낮음": 1, "정원초과": 1}, "avg_score": 16.74, "by_provider": {"claude": {"generated": 63, "sent": 50, "avg_score": 14.53}}, "model_fallbacks": [], "dedup": {"SIM": 6, "EVT": 1, "ID": 2}, "crawl_health": {"dart": {"got": 16, "expected": 142, "degraded": true}, "naver_research": {"got": 30, "expected": 59, "degraded": false}, "hankyung": {"got": 20, "expected": 26, "degraded": false}, "market": {"got": 62, "expected": 857, "degraded": true}, "kind_inquiry": {"got": 2, "expected": 35, "degraded": true}, "policy_rss": {"got": 23, "expected": 57, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+[main] filter_log data/filter_log_20260906_1255.json
+[main] stats {"ts": "2026-09-06T12:55:22+09:00", "persona_mode": "v2", "collected": 289, "gate_blocked": 60, "gate_reasons": {"tier5": 58, "tier4": 1, "tier1": 1}, "gate_detail": {"tier5:글감부족": 57, "tier5:앵글없음": 1, "tier4:제목부족": 1, "tier1:법적사안(횡령)": 1}, "enrich_ok": 116, "generated": 145, "sent": 50, "held": 95, "hold_reasons": {"정원초과": 95}, "avg_score": null, "by_provider": {"claude": {"generated": 145, "sent": 50, "avg_score": null}}, "model_fallbacks": [], "dedup": {"SIM": 7, "EVT": 1, "ID": 1}, "crawl_health": {"dart": {"got": 16, "expected": 8, "degraded": false}, "naver_research": {"got": 30, "expected": 5, "degraded": false}, "hankyung": {"got": 20, "expected": 2, "degraded": false}, "market": {"got": 185, "expected": 20, "degraded": false}, "kind_inquiry": {"got": 2, "expected": 1, "degraded": false}, "policy_rss": {"got": 26, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
