@@ -52,6 +52,21 @@ def _axis_avg(posts: list[dict]) -> dict:
     return {k: round(acc[k] / n[k], 2) for k in acc}
 
 
+def _fail_samples(held: list[dict]) -> dict:
+    """사유별 실제 문장 꼬리 1건. 정규식을 고치려면 걸린 문장이 필요하다."""
+    from src.generator import REJECTED
+    out = {}
+    for p in held:
+        for f in ((p.get("score") or {}).get("fatal") or []):
+            k = "fatal:" + f.split("(")[0].strip()[:20]
+            out.setdefault(k, p.get("body", "").strip()[-40:])
+    for p in REJECTED:
+        for e in p.get("reject_errs", []):
+            k = e.split("(")[0]
+            out.setdefault(k, p.get("body", "").strip()[-40:])
+    return dict(list(out.items())[:18])
+
+
 def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) -> dict:
     def avg_score(ps):
         v = [(p.get("score") or {}).get("total") for p in ps]
@@ -85,6 +100,9 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) ->
             for f in ((p.get("score") or {}).get("fatal") or [])).most_common(20)),
         # 어느 항목이 점수를 깎는지. fit 이 범인이면 소재 문제, natural 이면 문체 문제다.
         "score_axis_avg": _axis_avg(generated),
+        # 사유 이름만으로는 정규식을 못 고친다. 어떤 문장이 걸렸는지 꼬리만 본다.
+        # 본문 전체는 아티팩트에 두고 여기엔 30자만 남긴다.
+        "fail_samples": _fail_samples(held),
         "hold_kinds": dict(Counter(f"{p.get('kind')}:"
                                    f"{(p.get('hold_reason') or '?').split('(')[0].split(' ')[0]}"
                                    for p in held).most_common(20)),
