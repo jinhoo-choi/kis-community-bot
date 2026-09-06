@@ -50,6 +50,8 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) ->
         # 통과율을 역산하려면 tier 합계가 아니라 사유별 분포가 필요하다
         "gate_detail": dict(Counter(w for _, w in blocked).most_common(25)),
         "enrich_ok": enriched,
+        # 유료 청구는 보강 성공 건수가 아니라 호출 건수에 붙는다
+        "enrich_calls": __import__("src.enrich", fromlist=["CALLS"]).CALLS[0],
         "generated": len(generated),
         "sent": len(sent),
         "held": len(held),

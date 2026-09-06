@@ -62,6 +62,9 @@ def _one(item: dict) -> dict:
     return item
 
 
+CALLS = [0]   # 실행당 그라운딩 호출 수. 청구액 역산에 필요하다.
+
+
 def enrich_all(items: list[dict], workers: int = 5) -> list[dict]:
     if enricher() is None:
         print("[enrich] GEMINI_API_KEY 없음 → 보강 스킵")
@@ -69,6 +72,7 @@ def enrich_all(items: list[dict], workers: int = 5) -> list[dict]:
             it["thin_facts"] = True
         return items
 
+    CALLS[0] += len(items)
     with cf.ThreadPoolExecutor(max_workers=workers) as ex:
         items = list(ex.map(_one, items))
 

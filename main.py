@@ -61,9 +61,16 @@ def main():
     # (실측: 게이트 차단 60건 중 flow 는 0건). 수집 287건 중 185건이 flow 이므로
     # 전건 보강은 검색 그라운딩 호출을 3배 가까이 낭비한다.
     # dry-run 은 '수집만 실행'이라고 안내하면서 보강을 돌리고 있었다 — 스킵한다.
+    # 나아가 '보강 없이도 글감이 되는' 항목은 그라운딩해도 얻는 게 없다.
+    # 실제로 필요한 건 지금 글감부족으로 잘릴 항목뿐이다.
     if config.ENABLE_ENRICH and not dry:
-        targets = [x for x in raw if x.get("kind") != "flow"]
-        skipped = [x for x in raw if x.get("kind") == "flow"]
+        targets = [x for x in raw
+                   if x.get("kind") != "flow" and not gate.has_substance(x)]
+        targets = targets[:config.ENRICH_MAX]
+        _ids = {id(x) for x in targets}
+        skipped = [x for x in raw if id(x) not in _ids]
+        print(f"[enrich] 그라운딩 대상 {len(targets)}건 "
+              f"(수집 {len(raw)}건 중, 상한 {config.ENRICH_MAX})")
         raw = enrich.enrich_all(targets) + skipped
     elif dry:
         print("[enrich] dry-run — 보강 스킵 (그라운딩 호출 없음)")

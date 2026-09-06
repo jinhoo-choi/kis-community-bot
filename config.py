@@ -156,6 +156,10 @@ MAX_PER_STOCK = int(os.environ.get("MAX_PER_STOCK", "2"))
 
 # 교차 심사
 ENABLE_ENRICH = os.environ.get("ENABLE_ENRICH", "1") == "1"
+# enrich 는 Gemini 검색 그라운딩이라 항목당 단가가 높다.
+# 실측: 2일간 1,376회 호출로 유료 청구 5만원이 발생했다. 폭주 방지용 상한.
+ENRICH_MAX = int(os.environ.get("ENRICH_MAX", "60"))
+
 ENABLE_JUDGE  = os.environ.get("ENABLE_JUDGE", "1") == "1"
 MIN_JUDGE_SCORE = int(os.environ.get("MIN_JUDGE_SCORE", "14"))   # 20점 환산
 # community_fit 하한. 심사가 '이 종목을 보는 사람이 새로 얻는 게 없다'고 판정했는데
