@@ -33,11 +33,15 @@ def target_chat() -> tuple[str, bool]:
         return TELEGRAM_TEST_CHAT_ID, True
     return TELEGRAM_CHAT_ID, False
 
-# --- 생성 목표 ---
+# --- 발송 목표 ---
+# TARGET_POSTS 는 '최종 발송' 기준이다. 생성 목표가 아니다.
+# 이전에는 생성 목표여서 50 을 줘도 실제 발송은 1~3건이었다.
 TARGET_POSTS = int(os.environ.get("TARGET_POSTS", "50"))
-# 정규식 리젝 + 심사 탈락 대비 초과 생성.
-# 소량 실행은 후보가 몇 건뿐이라 한두 건만 리젝돼도 0건이 된다. 배율을 올린다.
-OVERGEN_RATE = 1.5 if TARGET_POSTS >= 30 else 3.0
+
+# 발송 1건을 만들려면 몇 건을 생성해야 하는가. 실측 누적으로 갱신한다.
+# 09-06 기준 생성 대비 발송 33%(3/9), 정규식 통과 41% -> 생성 대상 대비 약 14%.
+YIELD = float(os.environ.get("PIPELINE_YIELD", "0.14"))
+OVERGEN_RATE = max(1.5, 1.0 / max(YIELD, 0.02))
 
 # 50건 기준 슬롯 배분.
 # 리포트는 목표가·투자의견이 있는 건만 쓸 수 있어(한경 위주) 물량이 적다.
@@ -48,19 +52,34 @@ OVERGEN_RATE = 1.5 if TARGET_POSTS >= 30 else 3.0
 # 종가·등락률·거래대금은 새 정보가 아니다 — 그 사람은 이미 시세를 봤다.
 # 주장 수를 줄이면 나열은 사라지지만 남는 게 없다. 두 요구가 반대로 당긴다.
 # 해석할 거리가 있는 공시로 물량을 옮긴다.
+# 슬롯은 '공급 가능량'에 맞춰야 한다. 하루치 공급은 이렇게 정해져 있다:
+#   DART 주요공시 16건 / 리서치 10건 / 정책 6건 / 조회공시 2~3건 (실측)
+# 이 셋은 아무리 슬롯을 열어도 그 이상 나오지 않는다.
+# 유일하게 탄력적인 소스가 특징주다 — 등락률 상·하위까지 보면 수십 건이 된다.
+# 발송 50건이 목표라면 flow 를 주력으로 삼는 수밖에 없다.
 _BASE_QUOTA = {
-    "disclosure": 30,       # DART 공시 (정형 API 로 수치 확보)
+    "disclosure": 14,       # DART 공시 — 공급 한계 16건
     "research":    7,       # 증권사 리포트 (적정가격·투자의견 있는 건만)
-    "flow":        6,       # 특징주/수급 — 조회공시가 붙는 건 위주
-    "policy":      4,       # 정책/거시
+    "flow":       22,       # 특징주 — 유일하게 탄력적인 소스
+    "policy":      4,       # 정책/거시 — 공급 한계 6건
     "poll":        3,       # 토론 발제
 }
 
 # TARGET_POSTS 를 줄이면 슬롯도 비례 축소한다.
 # 축소하지 않으면 소량 실행 시 disclosure 하나가 정원을 다 먹어
 # 다른 톤·유형을 확인할 수 없다. 각 슬롯 최소 1건은 보장한다.
-_scale = TARGET_POSTS / sum(_BASE_QUOTA.values())
-SLOT_QUOTA = {k: max(1, round(v * _scale)) for k, v in _BASE_QUOTA.items()}
+# 슬롯별 하루 공급 상한 (실측). 이보다 크게 잡아도 그만큼 들어오지 않는다.
+# 상한을 두지 않으면 TARGET=50 일 때 생성 대상이 357건으로 부풀어
+# LLM 호출 714회가 되고 워크플로가 타임아웃된다.
+SUPPLY_CAP = {"disclosure": 20, "research": 12, "flow": 120, "policy": 8, "poll": 10}
+
+_need = TARGET_POSTS / max(YIELD, 0.02)          # 발송 목표를 위한 생성 필요량
+_scale = _need / sum(_BASE_QUOTA.values())
+SLOT_QUOTA = {k: min(SUPPLY_CAP[k], max(1, round(v * _scale)))
+              for k, v in _BASE_QUOTA.items()}
+
+# 목표에 못 미치는 이유가 필터인지 공급인지 즉시 판별할 수 있어야 한다.
+EXPECTED_SENT = sum(SLOT_QUOTA.values()) * YIELD
 
 # --- 모델 (멀티 프로바이더) ---
 # Claude: 대량 저비용 haiku / 문체 품질 우선 sonnet

@@ -733,9 +733,10 @@ def main():
     ok.append(run("가격제한폭 위반은 연결 안 함",
                   _ki.enrich_with_market([{"stock_code": "000660", "facts": "x"}], []) == 0))
     _mk2._add_history = _orig
-    ok.append(run("flow 슬롯 축소 반영",
-                  __import__("config").SLOT_QUOTA["disclosure"]
-                  > __import__("config").SLOT_QUOTA["flow"] * 3))
+    _cfg = __import__("config")
+    ok.append(run("슬롯이 공급 상한을 넘지 않음",
+                  all(_cfg.SLOT_QUOTA[k] <= _cfg.SUPPLY_CAP[k] for k in _cfg.SLOT_QUOTA)))
+    ok.append(run("기대 발송 산출됨", _cfg.EXPECTED_SENT > 0))
 
     from src.sources import dart_detail as _dd
     ok.append(run("무수치 공시유형 차단",

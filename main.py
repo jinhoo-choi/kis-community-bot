@@ -62,6 +62,13 @@ def main():
     enriched_n = sum(1 for x in raw if x.get("enriched"))
 
     # 하드 게이트 — AI 호출 이전에 구조적으로 배제
+    print(f"[main] 발송 목표 {config.TARGET_POSTS}건 / 수율 {config.YIELD:.0%} "
+          f"→ 생성 대상 {sum(config.SLOT_QUOTA.values())}건 "
+          f"→ 기대 발송 {config.EXPECTED_SENT:.0f}건")
+    if config.EXPECTED_SENT < config.TARGET_POSTS * 0.8:
+        print(f"[main] ⚠ 공급 상한에 걸려 목표 미달 예상 "
+              f"({config.EXPECTED_SENT:.0f} < {config.TARGET_POSTS}). "
+              "필터가 아니라 물량 문제다.")
     gated, blocked = gate.apply(raw)
 
     resolved = []

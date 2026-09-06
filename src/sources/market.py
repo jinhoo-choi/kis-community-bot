@@ -16,9 +16,16 @@ from datetime import datetime, timedelta
 from config import KST
 from src import crawl, facts
 
+# 거래대금 상위만 보면 하루 8건이 한계다 (실측). 발송 목표를 맞추려면
+# 유일하게 탄력적인 소스가 특징주다. 등락률 상·하위를 함께 본다.
+# 물량보다 선별에서 이득이 크다 — 공급 8건에 슬롯 6건이면 고를 여지가 없다.
 URLS = [
     ("KOSPI",  "https://finance.naver.com/sise/sise_quant.naver?sosok=0"),
     ("KOSDAQ", "https://finance.naver.com/sise/sise_quant.naver?sosok=1"),
+    ("KOSPI",  "https://finance.naver.com/sise/sise_rise.naver?sosok=0"),
+    ("KOSDAQ", "https://finance.naver.com/sise/sise_rise.naver?sosok=1"),
+    ("KOSPI",  "https://finance.naver.com/sise/sise_fall.naver?sosok=0"),
+    ("KOSDAQ", "https://finance.naver.com/sise/sise_fall.naver?sosok=1"),
 ]
 
 ROW_SELECTORS = ["table.type_2 tr", "table.type_2 tbody tr", "div.box_type_l table tr"]
@@ -31,6 +38,11 @@ _EXCLUDE = re.compile(
 
 MIN_TURNOVER_EOK = 150      # 실측 결과 300억 기준에서 6건만 통과해 완화
 MIN_ABS_CHANGE = 1.5        # 실측 결과 2.0% 기준에서 물량 부족
+
+# 큰 등락은 거래대금이 작아도 커뮤니티가 이야기한다. 다만 유동성이 너무 얕으면
+# 글감으로도 위험하므로 하한은 둔다.
+BIG_MOVE_PCT = 5.0
+BIG_MOVE_MIN_EOK = 30
 
 
 def _last_trading_day() -> str:
@@ -119,6 +131,21 @@ def _add_history(r: dict):
         pass
 
 
+def _col_map(soup) -> dict:
+    """헤더 텍스트 -> 컬럼 인덱스.
+
+    sise_quant 와 sise_rise/fall 은 컬럼이 다르다. 인덱스를 고정하면
+    KIND 때처럼 조용히 틀린 값을 읽는다 (td[2]를 td[1]로 잡아
+    2743종목 중 3개만 파싱됐다). 이름으로 잡으면 페이지가 달라도 안전하고,
+    네이버가 컬럼을 바꿔도 0건으로 즉시 드러난다.
+    """
+    for tbl in soup.find_all("table"):
+        heads = [th.get_text(strip=True) for th in tbl.find_all("th")]
+        if "종목명" in heads and "등락률" in heads:
+            return {h: i for i, h in enumerate(heads) if h}
+    return {}
+
+
 def fetch(limit: int = 12) -> list[dict]:
     day = _last_trading_day()
     rows, ok = [], 0
@@ -129,11 +156,21 @@ def fetch(limit: int = 12) -> list[dict]:
             continue
         ok += 1
 
+        col = _col_map(soup)
+        if not {"종목명", "현재가", "등락률", "거래대금"} <= set(col):
+            print(f"[market] ⚠ 컬럼 구조 인식 실패 — {url}")
+            continue
+
+        n_page = 0
         for tr in crawl.select_rows(soup, ROW_SELECTORS):
             tds = tr.find_all("td")
-            if len(tds) < 10:
+            if len(tds) <= max(col.values()):
                 continue
-            a = tds[1].find("a")
+
+            def cell(name: str) -> str:
+                return tds[col[name]].get_text(strip=True)
+
+            a = tds[col["종목명"]].find("a")
             if not a:
                 continue
             m = re.search(r"code=(\d{6})", a.get("href", ""))
@@ -144,27 +181,42 @@ def fetch(limit: int = 12) -> list[dict]:
             if _EXCLUDE.search(name):
                 continue
 
-            close = _num(tds[2].get_text())
-            change_pct = _num(tds[4].get_text(strip=True).replace("%", ""))
-            if "하락" in tds[3].get_text() or tds[3].find("span", class_="tah p11 nv01"):
+            close = _num(cell("현재가"))
+            raw_pct = cell("등락률")
+            change_pct = _num(raw_pct.replace("%", ""))
+            # 등락률 셀에 부호가 없는 페이지가 있어 전일비로 방향을 확인한다
+            if raw_pct.startswith("-") or (
+                    "전일비" in col and "하락" in tds[col["전일비"]].get_text()):
                 change_pct = -abs(change_pct)
-            turnover = _num(tds[7].get_text())      # 백만원 단위
-            eok = turnover / 100
+            eok = _num(cell("거래대금")) / 100      # 백만원 -> 억원
 
-            if eok < MIN_TURNOVER_EOK or abs(change_pct) < MIN_ABS_CHANGE:
+            if close is None or change_pct is None or eok is None:
+                continue
+            big = abs(change_pct) >= BIG_MOVE_PCT and eok >= BIG_MOVE_MIN_EOK
+            usual = eok >= MIN_TURNOVER_EOK and abs(change_pct) >= MIN_ABS_CHANGE
+            if not (big or usual):
                 continue
 
             rows.append({
                 "code": m.group(1), "name": name, "market": market,
                 "close": close, "pct": change_pct, "eok": eok,
             })
+            n_page += 1
+        if n_page == 0:
+            print(f"[market] ⚠ 0건 파싱 — {url}")
         crawl.sleep_jitter()
 
     if ok == 0:
         crawl.report("market", 0, limit, "네이버 시세 페이지 로드 실패")
         return []
 
-    rows.sort(key=lambda r: abs(r["pct"]), reverse=True)
+    dedup = {}
+    for r in rows:                       # 거래대금 상위와 등락률 상위에 같은 종목이 겹친다
+        dedup[r["code"]] = r
+    rows = list(dedup.values())
+    # 등락 크기만으로 고르면 저유동 소형주가 앞을 채운다. 거래대금을 함께 본다.
+    rows.sort(key=lambda r: (abs(r["pct"]) * min(r["eok"], 1000)), reverse=True)
+    print(f"[market] 후보 {len(rows)}종목 (중복 제거 후)")
 
     # 입력이 종가·등락률·거래대금 3개뿐이면 아무리 축을 늘려도
     # 표현법만 30가지지 콘텐츠는 3가지다 (외부 검토 지적).
