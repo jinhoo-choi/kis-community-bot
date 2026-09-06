@@ -143,6 +143,11 @@ def _col_map(soup) -> dict:
         heads = [th.get_text(strip=True) for th in tbl.find_all("th")]
         if "종목명" in heads and "등락률" in heads:
             return {h: i for i, h in enumerate(heads) if h}
+    # 실패하면 무엇을 봤는지 남긴다. 별도 프로브를 돌려 구조를 알아내는 것보다
+    # 실행 로그가 바로 알려주는 편이 빠르다 (프로브가 세 번 밀렸다).
+    seen = [[th.get_text(strip=True) for th in t.find_all("th")]
+            for t in soup.find_all("table")]
+    print(f"[market] 발견된 헤더: {[h for h in seen if h][:3]}")
     return {}
 
 

@@ -842,6 +842,18 @@ def main():
     ok.append(run("진짜 수집 실패는 경보", _cw.health()["market"]["degraded"]))
     _cw._health.clear()
 
+    # 방향 예외는 상승·하락 양쪽 대칭이어야 한다 (실측: 하락일 5건 오탐)
+    from src.filters import _direction_errors as _de
+    ok.append(run("하락일 5거래일 상승 언급 통과",
+                  not _de("3.2% 하락했습니다. 5거래일 누적으로는 12.4% 올랐는데요.",
+                          "등락률: -3.20%")))
+    ok.append(run("상승일 5거래일 하락 언급 통과",
+                  not _de("3.2% 상승했습니다. 5거래일 누적으로는 12.4% 내렸는데요.",
+                          "등락률: 3.20%")))
+    ok.append(run("진짜 방향오용은 잡음",
+                  bool(_de("로보티즈가 올랐네요. 이 정도 낙폭이면 뭔가 있는데요.",
+                           "등락률: 12.44%"))))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 

@@ -17,8 +17,11 @@ _UP = re.compile(r"낙폭|급락|하락(?!률)|떨어졌|빠졌|내렸")
 _DOWN = re.compile(r"급등|상승(?!률)|올랐|뛰었|치솟")
 
 
-# 하락 어휘가 정당한 문맥. 일간 등락률이 양수여도 이 값들은 음수일 수 있다.
-_DOWN_OK = re.compile(r"5거래일|누적|고가 (대비|에서)|장중|마감 위치|되돌|반납")
+# 반대 방향 어휘가 정당한 문맥. 일간 등락률과 부호가 다를 수 있는 지표들이다.
+# 상승·하락 양쪽에 똑같이 적용해야 한다 — 상승일 예외만 두었더니
+# 하락일에 '5거래일 누적으로는 올랐다'가 리젝됐다 (실측 5건, 그 회차 리젝 1위).
+_CONTEXT_OK = re.compile(r"5거래일|누적|고가 (대비|에서)|저가 (대비|에서)"
+                         r"|장중|마감 위치|되돌|반납|낙폭 만회")
 
 
 def _direction_errors(body: str, facts: str) -> list[str]:
@@ -38,7 +41,7 @@ def _direction_errors(body: str, facts: str) -> list[str]:
     pat = _UP if up else _DOWN
     for sent in re.split(r"(?<=[.!?])\s+|\n", body):
         w = pat.search(sent)
-        if w and not (up and _DOWN_OK.search(sent)):
+        if w and not _CONTEXT_OK.search(sent):
             return [f"방향오용({w.group()})"]
     return []
 
