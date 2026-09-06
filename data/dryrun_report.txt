@@ -1,61 +1,119 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-[crawl] dart 6건
-[crawl] naver_research 2건
-[crawl] hankyung 1건
-[crawl] market 3건
-[crawl] policy_rss 3건
-[main] 수집 총 16건
-[enrich] 10/16건 배경 보강 완료
-[gate] 차단 6건 {'tier4': 3, 'tier5': 3}
+[dart] corp_code 3989종목 매핑
+[dart] 상세 보강 12/16건
+[dart] 미보강 제목: ['타법인주식및출자증권취득결정', '[첨부정정]주요사항보고서(회사합병결정)(자회사의 주요경영사항)', '[기재정정]유형자산처분결정(종속회사의주요경영사항)', '신탁계약에의한취득상황보고서']
+[crawl] ⚠ dart 16/71건 — 수집률 저조
+[crawl] naver_research 24건
+[crawl] hankyung 11건
+[market] ⚠ 컬럼 구조 인식 실패 — https://finance.naver.com/sise/sise_rise.naver?sosok=0
+[market] ⚠ 컬럼 구조 인식 실패 — https://finance.naver.com/sise/sise_rise.naver?sosok=1
+[market] ⚠ 컬럼 구조 인식 실패 — https://finance.naver.com/sise/sise_fall.naver?sosok=0
+[market] ⚠ 컬럼 구조 인식 실패 — https://finance.naver.com/sise/sise_fall.naver?sosok=1
+[market] 후보 63종목 (중복 제거 후)
+[market] ⚠ 스카이랩스 제외 — 등락률 135.0% > 가격제한폭
+[crawl] market 62건
 [tickers] 상장 2632종목 로드 (lxml)
-[dedup] 제외 8건 {'ID': 8}
-[main] 생성 대상 2건 {'disclosure': 0, 'research': 1, 'flow': 0, 'policy': 1, 'poll': 0}
+[crawl] ⚠ kind_inquiry 2/17건 — 수집률 저조
+[kind] 특징주→조회공시 0건 / 조회공시→시세 2건
+[crawl] policy_rss 21건
+[tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
+[crawl] telegram_ch 0건 (정상 0건)
+[main] 수집 총 138건
+[enrich] 97/138건 배경 보강 완료
+[main] 발송 목표 5건 / 수율 14% → 생성 대상 36건 → 기대 발송 5건
+[gate] 차단 39건 {'tier5': 37, 'tier4': 1, 'tier1': 1}
+[theme] 테마글 11건에 게시 종목 배정
+[dedup] 제외 7건 {'SIM': 6, 'ID': 1}
+[main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
+[main] ⚠ 수집 이상 소스: ['dart', 'kind_inquiry']
+[main] 생성 대상 92건 {'disclosure': 8, 'research': 9, 'flow': 61, 'policy': 12, 'poll': 2}
 
 ───── 수집 표본 ─────
-  [research  ] 팬오션               028670  High & Dry
-  [policy    ] 테마                     -  "중소기업 지원"…대전시, 지식재산 진흥 최우수 기관 표창
+  [disclosure] 에넥스               011090  [기재정정]주요사항보고서(유상증자결정)
+  [disclosure] 우성                006980  주요사항보고서(자기주식처분결정)
+  [disclosure] LS                006260  [기재정정]단일판매ㆍ공급계약체결
+  [disclosure] 우성                006980  주요사항보고서(회사합병결정)
+  [disclosure] NICE              034310  주요사항보고서(자기주식취득신탁계약해지결정)
+  [disclosure] 코오롱               002020  [기재정정]단일판매ㆍ공급계약체결(자회사의 주요경영사항)
+  [disclosure] 신라교역              004970  주요사항보고서(타법인주식및출자증권양수결정)
+  [research  ] 롯데이노베이트           286940  롯데이노베이트 DBO 레퍼런스 확보, 수익성 개선, 남은 건 멀티플 정상화
+  [research  ] 세경하이테크            148150  세경하이테크 실적 반등 시작, 모멘텀도 대기 중
+  [research  ] 팬오션               028670  팬오션 High & Dry
+  [research  ] DB손해보험            005830  DB손해보험 새로운 밸류업 정책으로 확대되는 배당총액
+  [research  ] 롯데지주              004990  롯데지주 노이즈보다 다가올 호황에 조명
+  [research  ] 산일전기              062040  산일전기 과도한 저평가 영역 + 8월 2개 Big Momentum → TP 상향
+  [research  ] 코리아써키트            007810  코리아써키트 시간을 주시면, 더 강해져 돌아옵니다
+  [research  ] 알테오젠              196170  알테오젠 반복되는 기술수출, ALT-B4 가치 재평가
 
 ───── 게이트 차단 ─────
-  dart-20260903000384        tier4:정보없음(기재정정)
-  dart-20260903800541        tier4:정보없음(기재정정)
-  dart-20260903800538        tier4:정보없음(기재정정)
+  dart-20260904800462        tier5:앵글없음
+  dart-20260904800327        tier5:글감부족
+  dart-20260904800215        tier5:앵글없음
+  dart-20260904000149        tier5:앵글없음
   naver-y_readnavernid96014page1 tier5:글감부족
-  pol-IBK증권中메모리약진현지장비밸류체인수혜확산 tier5:글감부족
-  pol-신한증권25년만의에너지공기업재편관건은부담배분 tier5:글감부족
+  naver-y_readnavernid96013page1 tier5:글감부족
+  naver-y_readnavernid96012page1 tier5:글감부족
+  naver-y_readnavernid96011page1 tier5:글감부족
+  naver-y_readnavernid96010page1 tier5:글감부족
+  naver-y_readnavernid96009page1 tier5:글감부족
+  naver-y_readnavernid96008page1 tier5:글감부족
+  naver-y_readnavernid96007page1 tier5:글감부족
+  naver-y_readnavernid96006page1 tier5:글감부족
+  naver-y_readnavernid96005page1 tier5:글감부족
+  naver-y_readnavernid96004page1 tier5:글감부족
 
 ───── 귀속 강등 ─────
-  pol-중소기업지원대전시지식재산진흥최우수기관표창 ['종목명미검출'] → free
+  pol-하나금융소진공소공연과착한계란물가안정화업무협약 ['종목명미검출'] → stock
+  pol-23개월만에최저환율에기업달러예금역대최대  ['종목명미검출'] → stock
+  pol-하후상박개편기초연금2030년지출30조원돌파전 ['종목명미검출'] → stock
+  pol-울산시중소기업소상공인에760억경영안정자금지원 ['종목명미검출'] → stock
+  pol-인력재배치시파업가능에경영계우려누더기지침한계 ['종목명미검출'] → stock
+  pol-강원도신한은행강원주민들에밀착형복합금융지원제공 ['종목명미검출'] → stock
+  pol-원주의료기기기업15곳현장채용구직자와해피데이 ['종목명미검출'] → free
+  pol-사천시민생지원금지급보류미래성장인프라투자우선 ['종목명미검출'] → stock
+  pol-특징주보험주美금리동결가능성부각에줄줄이하락종합 ['종목명미검출'] → stock
+  pol-전북농협기보전북중소기업에200억원대출지원 ['종목명미검출'] → stock
+  pol-충남도동남아서농산물관광자원홍보수출확대기대 ['종목명미검출'] → stock
+  pol-울산시중소기업소상공인에760억경영안정자금지원 ['종목명미검출'] → stock
 
 ───── 크롤링 헬스 ─────
 {
  "dart": {
-  "got": 6,
-  "expected": 6,
-  "degraded": false
+  "got": 16,
+  "expected": 71,
+  "degraded": true
  },
  "naver_research": {
-  "got": 2,
-  "expected": 2,
+  "got": 24,
+  "expected": 24,
   "degraded": false
  },
  "hankyung": {
-  "got": 1,
-  "expected": 1,
+  "got": 11,
+  "expected": 11,
   "degraded": false
  },
  "market": {
-  "got": 3,
-  "expected": 3,
+  "got": 62,
+  "expected": 114,
   "degraded": false
  },
+ "kind_inquiry": {
+  "got": 2,
+  "expected": 17,
+  "degraded": true
+ },
  "policy_rss": {
-  "got": 3,
-  "expected": 3,
+  "got": 21,
+  "expected": 21,
+  "degraded": false
+ },
+ "telegram_ch": {
+  "got": 0,
+  "expected": 0,
   "degraded": false
  }
 }
 
 ───── dedup ─────
- {'ID': 8}
+ {'SIM': 6, 'ID': 1}

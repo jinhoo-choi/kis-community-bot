@@ -218,7 +218,8 @@ ok
   OK    정상 종결은 통과
   OK    조회공시→시세 연결
   OK    가격제한폭 위반은 연결 안 함
-  OK    flow 슬롯 축소 반영
+  OK    슬롯이 공급 상한을 넘지 않음
+  OK    기대 발송 산출됨
   OK    무수치 공시유형 차단
   OK    해지결정은 차단하지 않음
   OK    정상 공시는 통과
@@ -240,9 +241,9 @@ ok
   OK    공급계약 제목만 처리
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'check_list', 'open_talk', 'brief_report', 'fact_note', 'careful_note', 'data_focus'})
+  OK    flow 에서 quick_memo 미선택  ({'fact_note', 'brief_report', 'careful_note', 'data_focus', 'check_list', 'open_talk'})
 
-225/225 passed
+226/226 passed
 
 === 2b. 전수검사 (설정-코드 정합성) ===
 
@@ -277,7 +278,7 @@ ok
 
 === 설정 ===
   OK    PERSONA_MODE=v2
-  OK    TARGET=50 QUOTA={'disclosure': 30, 'research': 7, 'flow': 6, 'policy': 4, 'poll': 3} OVERGEN=1.5
+  OK    TARGET=50 QUOTA={'disclosure': 20, 'research': 12, 'flow': 120, 'policy': 8, 'poll': 10} OVERGEN=7.142857142857142
 
 ==================================================
 FAIL 0 / WARN 0
