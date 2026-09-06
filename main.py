@@ -105,8 +105,23 @@ def main():
             print(f"  [{it['kind']:10s}] {it.get('stock_name') or '테마':16s} "
                   f"{(it.get('stock_code') or '-'):>7s}  {it['title'][:44]}")
         print("\n───── 게이트 차단 ─────")
-        for bid, why in blocked[:15]:
-            print(f"  {bid:26s} {why}")
+        # 15건만 찍으면 어느 소스가 죽는지 안 보인다. 소스별로 센다.
+        _src = lambda i: i.split("-")[0]
+        _bycnt = {}
+        for bid, why in blocked:
+            _bycnt.setdefault((_src(bid), why), 0)
+            _bycnt[(_src(bid), why)] += 1
+        for (sc, why), n in sorted(_bycnt.items(), key=lambda x: -x[1]):
+            print(f"  {sc:10s} {why:20s} {n}건")
+        # 소스별 표본 1건의 facts 를 그대로 본다 — 판정식이 뭘 못 본 건지 확인용
+        _seen = set()
+        _bmap = {b: w for b, w in blocked}
+        for it in raw:
+            sc = _src(it["id"])
+            if it["id"] in _bmap and sc not in _seen:
+                _seen.add(sc)
+                print(f"\n  --- {sc} 차단 표본 ({_bmap[it['id']]}) {it['id']} ---")
+                print("  " + it.get("facts", "")[:400].replace("\n", "\n  "))
         print("\n───── 귀속 강등 ─────")
         for it in resolved:
             if it.get("attr_reject"):
