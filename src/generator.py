@@ -7,7 +7,6 @@
 import random
 import re
 
-import config
 from src import filters
 from src.llm import router
 from src.decide import temperature_for

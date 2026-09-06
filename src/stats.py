@@ -82,7 +82,6 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) ->
             "avg_score": avg_score(grp),
         }
 
-    import config as _c
     return {
         "collected": len(collected),
         "gate_blocked": len(blocked),

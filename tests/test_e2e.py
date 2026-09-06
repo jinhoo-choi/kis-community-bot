@@ -4,7 +4,6 @@
 gate → tickers → entity → dedup → generator → filters → judge → decide
 전 구간은 프로덕션 코드가 그대로 실행된다.
 """
-import json
 import os
 import sys
 

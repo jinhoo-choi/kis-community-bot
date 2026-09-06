@@ -3,7 +3,6 @@
 API 키 발급: https://opendart.fss.or.kr (무료)
 list.json 은 종목코드(stock_code)를 직접 제공하므로 매핑 환각이 없다.
 """
-import time
 import requests
 from datetime import datetime, timedelta
 

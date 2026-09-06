@@ -24,7 +24,7 @@ import time
 import requests
 
 import config
-from config import TELEGRAM_TOKEN, FOOTER
+from config import TELEGRAM_TOKEN
 
 API = "https://api.telegram.org/bot{}/{}"
 
@@ -158,7 +158,6 @@ def send_brief(posts: list[dict], stats_row: dict = None):
     if not TELEGRAM_TOKEN or not posts:
         return
     from collections import Counter
-    from src import assign
 
     by_person = Counter(p.get("assignee") or "미지정" for p in posts)
     by_board = Counter(BOARD_LABEL.get(p.get("board", "stock"), "종목방") for p in posts)

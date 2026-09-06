@@ -3,7 +3,6 @@
 페르소나가 실제로 문체를 바꾸는지는 조합을 통제하지 않으면 알 수 없다.
 Angle 을 고정하고 Persona 만 바꿔 나란히 뽑는다.
 """
-import json
 import os
 import sys
 

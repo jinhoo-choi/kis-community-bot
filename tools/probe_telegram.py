@@ -10,7 +10,6 @@ t.me/s/{handle} 웹 프리뷰가 실제로 읽히는지, 그 채널이 정말 �
 """
 import json
 import re
-import sys
 
 import requests
 from bs4 import BeautifulSoup

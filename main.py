@@ -72,7 +72,7 @@ def main():
         _byk = {}
         for x in targets:
             _byk.setdefault(x.get("kind"), []).append(x)
-        targets, _i = [], 0
+        targets = []
         while len(targets) < config.ENRICH_MAX and any(_byk.values()):
             for k in sorted(_byk, key=lambda k: -config.DIST_CAP.get(k, 0)):
                 if _byk[k] and len(targets) < config.ENRICH_MAX:

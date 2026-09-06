@@ -71,7 +71,6 @@ PROXY_UNFIT_RE = re.compile(
 def classify(item: dict, table: dict) -> tuple[str, str]:
     """(mapping_type, 종목명). 종목과 사건의 직접 연결성으로 판정한다."""
     title = item.get("title", "")
-    facts = item.get("facts", "")[:600]
 
     # 상장사 본인이 당사자로 제목에 등장하면 DIRECT
     for name in sorted(table, key=len, reverse=True):

@@ -14,7 +14,6 @@
   - HTML 이거나 파싱 실패면 → 엔드포인트 없음
 status 000 인 경우 첫 행의 키를 전부 덤프한다. 필드명도 추측하지 않는다.
 """
-import json
 import os
 from datetime import datetime, timedelta
 

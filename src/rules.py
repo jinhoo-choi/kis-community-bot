@@ -6,7 +6,7 @@
 
 규칙을 추가할 때 여기만 고치면 3곳에 동시 반영된다.
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)

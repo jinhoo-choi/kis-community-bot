@@ -5,9 +5,7 @@ dry-run 에서 드러난 문제를 실제 HTML/응답으로 확인하기 위한 
   2. pykrx 대체 후보 (KRX 계정 없이 전일 시세 확보)
   3. 정책 소스 대체 후보 (korea.kr 해외 IP 타임아웃)
 """
-import json
 import re
-import sys
 import traceback
 
 import requests

@@ -14,7 +14,7 @@ sys.path.insert(0, ".")
 import config
 from src import angles, filters, rules
 from src import personas as P
-from src.personas_v2 import PERSONAS, SLOT_W, SYSTEM_PROMPT as SP2
+from src.personas_v2 import PERSONAS, SLOT_W
 
 FAIL = []
 WARN = []

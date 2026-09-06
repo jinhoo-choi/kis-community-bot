@@ -53,11 +53,6 @@ SLOT_PATTERNS = [
     ("missing",   r"미제공|명시되지 않|공개되지 않"),
 ]
 
-# 방향성 슬롯 — two_view 는 양방향 근거가 있어야 쓸 수 있다
-POSITIVE = {"change_up", "five_day_up", "amount", "purpose", "inquiry"}
-NEGATIVE = {"change_down", "five_day_down", "intraday", "missing", "short"}
-
-
 def slots(item: dict) -> set[str]:
     """이 항목이 제공하는 독립 사실 슬롯."""
     facts = item.get("facts", "")
@@ -72,11 +67,6 @@ def slots(item: dict) -> set[str]:
     if m:
         out.add("five_day_up" if float(m.group(1)) > 0 else "five_day_down")
     return out
-
-
-def has_both_sides(item: dict) -> bool:
-    s = slots(item)
-    return bool(s & POSITIVE) and bool(s & NEGATIVE)
 
 
 # 슬롯을 그대로 세면 왜곡된다. change/price/turnover/intraday/vs_avg 는
