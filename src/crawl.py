@@ -80,20 +80,32 @@ def first_text(node, selectors: list[str], attr: str = None) -> str:
     return ""
 
 
+# 하루치 실측 공급량. 요청량이 아니라 '이만큼은 나와야 정상'인 값이다.
+# 요청량으로 판정하면 슬롯을 키울 때마다 기대치가 따라 올라 전 소스가 경보를 낸다
+# (실측: market 기대 857건 vs 실제 62건 — 수집이 아니라 기준이 망가진 것이었다).
+# 하루치 주요공시는 원래 16건이고 조회공시는 전국 2~3건이다. 더 나올 수 없다.
+FLOOR = {
+    "dart": 8, "naver_research": 5, "hankyung": 2,
+    "market": 20, "kind_inquiry": 1, "policy_rss": 3, "telegram_ch": 0,
+}
+
+
 def report(source: str, got: int, expected: int, reason: str = ""):
-    """소스별 수집 결과 기록. 0건 또는 기대의 30% 미만이면 경고.
+    """소스별 수집 결과 기록. 실측 하한(FLOOR) 미만이면 경고.
 
     expected=0 은 '정상적인 0건'(휴장 등)을 뜻하며 경고하지 않는다.
     reason 은 왜 0건인지를 담는다. HTML 소스는 셀렉터 개편, API 소스는 키·응답 문제로
     원인이 다르므로 같은 문구를 쓰면 오진한다.
     """
-    _health[source] = (got, expected)
-    if expected == 0:
+    # 기대치는 min(요청량, 실측 하한)으로 잡는다. 요청을 적게 했으면 그만큼만 기대한다.
+    floor = min(FLOOR.get(source, 1), expected) if expected else 0
+    _health[source] = (got, floor)
+    if floor == 0:
         print(f"[crawl] {source} {got}건 (정상 0건)")
     elif got == 0:
         print(f"[crawl] ⚠ {source} 수집 0건 — {reason or '원인 미상'}")
-    elif got < expected * 0.3:
-        print(f"[crawl] ⚠ {source} {got}/{expected}건 — 수집률 저조")
+    elif got < floor:
+        print(f"[crawl] ⚠ {source} {got}건 (하한 {floor}) — {reason or '수집률 저조'}")
     else:
         print(f"[crawl] {source} {got}건")
 

@@ -829,6 +829,19 @@ def main():
     ok.append(run("num_cap 이 claim_cap 이상",
                   all(_pn.num_cap(p_) > _cc(p_) for p_ in _PV)))
 
+    # 슬롯을 키우면 기대치가 따라 올라 전 소스가 오탐 경보를 냈다
+    # (실측: market 기대 857 vs 실제 62 — 수집이 아니라 기준이 망가진 것)
+    from src import crawl as _cw
+    _cw._health.clear()
+    _cw.report("market", 62, 857)
+    _cw.report("kind_inquiry", 2, 35)
+    ok.append(run("정상 공급을 경보하지 않음",
+                  not any(v["degraded"] for v in _cw.health().values())))
+    _cw._health.clear()
+    _cw.report("market", 5, 857)
+    ok.append(run("진짜 수집 실패는 경보", _cw.health()["market"]["degraded"]))
+    _cw._health.clear()
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
