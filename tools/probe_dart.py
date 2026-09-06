@@ -211,6 +211,8 @@ def main():
         import traceback
         log("  파서 실주행 실패: " + traceback.format_exc()[-600:])
 
+    probe_market_pages()
+
     with open("data/dart_probe.txt", "w", encoding="utf-8") as f:
         f.write("\n".join(OUT))
     print("\n[probe] data/dart_probe.txt 저장")
@@ -218,3 +220,43 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def probe_market_pages():
+    """네이버 상승률/하락률 페이지 컬럼 구조 확인.
+
+    sise_quant(거래대금 상위)와 컬럼이 다르다. 인덱스를 추측하면
+    KIND 때처럼 조용히 틀린 값을 읽는다 (td[2]를 td[1]로 잡아 2743종목 중 3개만 파싱).
+    헤더 텍스트를 그대로 덤프해 이름 기반 매핑을 짤 근거를 만든다.
+    """
+    from bs4 import BeautifulSoup
+    H2 = {"User-Agent": "Mozilla/5.0", "Referer": "https://finance.naver.com/"}
+    pages = [
+        ("거래대금 KOSPI", "https://finance.naver.com/sise/sise_quant.naver?sosok=0"),
+        ("상승률 KOSPI", "https://finance.naver.com/sise/sise_rise.naver?sosok=0"),
+        ("하락률 KOSPI", "https://finance.naver.com/sise/sise_fall.naver?sosok=0"),
+        ("상승률 KOSDAQ", "https://finance.naver.com/sise/sise_rise.naver?sosok=1"),
+    ]
+    log("\n── 4. 네이버 시세 페이지 컬럼 구조 ──")
+    for label, url in pages:
+        try:
+            r = requests.get(url, headers=H2, timeout=20)
+            r.encoding = "euc-kr"
+            soup = BeautifulSoup(r.text, "html.parser")
+            th = [t.get_text(strip=True) for t in soup.find_all("th")]
+            log(f"\n  [{label}] HTTP {r.status_code}")
+            log(f"    헤더: {[x for x in th if x][:15]}")
+            n = 0
+            for tr in soup.find_all("tr"):
+                tds = tr.find_all("td")
+                if len(tds) < 8:
+                    continue
+                cells = [c.get_text(strip=True) for c in tds]
+                if not any(cells):
+                    continue
+                log(f"    행: {cells[:12]}")
+                n += 1
+                if n >= 2:
+                    break
+        except Exception as ex:
+            log(f"  [{label}] 실패 {type(ex).__name__} {ex}")
