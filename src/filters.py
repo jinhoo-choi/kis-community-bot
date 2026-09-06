@@ -118,7 +118,9 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
         errs.append(f"너무김({n}자>{hi}/{length or '-'})")
     # 토큰 상한에 걸려 문장 중간에서 끊긴 글이 심사까지 올라갔다
     # (실측: gemini 44자, "…나선다고 밝혔"). 종결부호로 끝나지 않으면 미완성이다.
-    if body.strip() and body.strip()[-1] not in ".!?\"')]”’":
+    # 커뮤니티 말투는 말줄임표와 물결로도 끝난다. 이걸 빼두면 멀쩡한 글이
+    # 미완성으로 잘린다 (실측: "삼성전자가 3% 올랐습니다…" 가 리젝됐다).
+    if body.strip() and body.strip()[-1] not in ".!?\"')]”’…~":
         errs.append("미완성(종결부호 없음)")
 
     # 첫 문장이 수치로 시작하면 주어 없이 툭 던지는 글이 된다
