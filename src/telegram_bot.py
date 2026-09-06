@@ -114,7 +114,17 @@ def _post(method: str, payload: dict):
                   "(TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)")
         return None
     payload = {**payload, "chat_id": chat}
-    return requests.post(API.format(TELEGRAM_TOKEN, method), json=payload, timeout=20)
+    # 50건을 연속 발송하면 중간에 연결이 끊긴다 (실측: #67 이 26건째에서
+    # ConnectionResetError 로 파이프라인 전체가 죽었다). 발송 실패로 실행을
+    # 통째로 잃지 않도록 재시도하고, 끝내 실패하면 None 을 돌려 다음 건으로 넘어간다.
+    for attempt in range(3):
+        try:
+            return requests.post(API.format(TELEGRAM_TOKEN, method),
+                                 json=payload, timeout=20)
+        except requests.exceptions.RequestException as e:
+            print(f"[tg] 전송 실패({attempt + 1}/3): {type(e).__name__}")
+            time.sleep(1.5 * (attempt + 1))
+    return None
 
 
 def send_all(posts: list[dict]) -> int:
@@ -131,7 +141,10 @@ def send_all(posts: list[dict]) -> int:
             "disable_web_page_preview": True,
         })
         if r is None:
-            return sent
+            # 연결 실패는 그 건만 건너뛴다. 채널 미특정이면 이후도 무의미하니 중단한다.
+            if not config.target_chat()[0] and not _resolve_by_suffix():
+                return sent
+            continue
         if r.ok:
             sent += 1
         else:
