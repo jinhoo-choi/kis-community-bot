@@ -151,6 +151,12 @@ def pick_style(item: dict, recent: dict, used_now: set,
         for pid in list(pw):
             if n_fact < need.get(pid, 2):
                 pw[pid] = 0
+        # quick_memo 는 표본 9건에서 전멸했다 (sent 0 / held 5 / reject 4,
+        # 사유가 전부 '정보량 부족'). 2~3문장으로는 fit 을 구조적으로 못 넘는다.
+        # 다만 공시는 사실 하나로도 글이 된다("A사가 B사를 흡수합병"). 거기만 남긴다.
+        if kind != "disclosure":
+            pw["quick_memo"] = 0
+
         # 구조적 전제 조건
         if not both:
             pw["two_view"] = 0                     # 양방향 근거가 있어야 성립
@@ -165,7 +171,8 @@ def pick_style(item: dict, recent: dict, used_now: set,
         if not (sl & {"vs_avg", "five_day", "intraday", "flow_inv", "short"}):
             pw["data_focus"] = 0                   # 비교값이 있어야 성립
         if not any(pw.values()):
-            pw = {"quick_memo": 1}
+            # 최후 폴백도 공시가 아니면 quick_memo 를 쓰지 않는다.
+            pw = {"quick_memo": 1} if kind == "disclosure" else {"brief_report": 1}
 
         hist = hist_v2(recent, item)
         used_p = {h.split(":")[0] for h in hist} | {u[0] for u in used_now}

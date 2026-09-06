@@ -818,6 +818,25 @@ def main():
                   bool(_dc.TITLE_RE.search("[기재정정]단일판매ㆍ공급계약체결"))
                   and not _dc.TITLE_RE.search("주요사항보고서(유상증자결정)")))
 
+    # 보강 필드를 claim 에 등록하지 않아 '근거없는수치'로 리젝됐다 (실측 50건 회차)
+    _cf = ("공시명: 단일판매ㆍ공급계약체결\n- 계약 내용: CLT Interface Board\n"
+           "- 계약 금액: 97억원\n- 최근 매출액 대비: 14.7%\n- 계약 상대: 삼성전자")
+    ok.append(run("공급계약 수치가 근거로 인정됨",
+                  not _cl2.grounding_errors(
+                      "삼성전자와 97억원 규모 공급계약입니다. 최근 매출액 대비 14.7%입니다.",
+                      {"facts": _cf}, 4)))
+    _af = "공시명: 타법인주식취득\n- 양수 금액: 823억원\n- 자산총액 대비: 11.39%"
+    ok.append(run("양수 수치가 근거로 인정됨",
+                  not _cl2.grounding_errors(
+                      "823억원에 취득했고 자산총액 대비 11.39%입니다.", {"facts": _af}, 4)))
+    # quick_memo 는 표본 9건 전멸. 공시 외 슬롯에서 뽑히면 안 된다.
+    from src import generator as _g2
+    _fl = {"kind": "flow", "stock_code": "005930", "facts":
+           "종가: 12,000원\n등락률: 5.20%\n거래대금: 300억원\n"
+           "거래량: 20일 평균의 3.2배\n5거래일 누적 등락률: +8.10%"}
+    _picks = {_g2.pick_style(_fl, {}, set())[0] for _ in range(30)}
+    ok.append(run("flow 에서 quick_memo 미선택", "quick_memo" not in _picks, str(_picks)))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
