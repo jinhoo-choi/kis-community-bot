@@ -314,10 +314,7 @@ def enrich_all(items: list[dict], day: str) -> int:
     targets = [i for i in items if i.get("kind") == "disclosure"]
     if not targets or not DART_API_KEY:
         return 0
-    from src.sources import dart_contract
-    # 정형 API 가 없는 유형(공급계약)은 원문 파서로 넘긴다. 미보강 7건 중 5건이 이것이다.
-    n = sum(1 for i in targets
-            if enrich_one(i, day) or dart_contract.enrich_one(i))
+    n = sum(1 for i in targets if enrich_one(i, day))
     miss = [i.get("title", "")[:34] for i in targets if not i.get("dart_detail")]
     print(f"[dart] 상세 보강 {n}/{len(targets)}건")
     if miss:

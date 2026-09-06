@@ -801,29 +801,6 @@ def main():
                             _shadow.append(f"{_f}:{_n.lineno}")
     ok.append(run("함수 내 재import 로 전역 가림 없음", not _shadow, str(_shadow[:3])))
 
-    # 공급계약 원문 파서 (프로브로 확인한 실제 표 구조)
-    from src.sources import dart_contract as _dc
-    _html = ("<table>"
-             "<tr><td>2. 계약내역</td><td>조건부 계약여부</td><td>미해당</td></tr>"
-             "<tr><td>계약금액 총액(원)</td><td>662,348,400</td></tr>"
-             "<tr><td>최근 매출액(원)</td><td>3,386,486,863</td></tr>"
-             "<tr><td>매출액 대비(%)</td><td>19.56</td></tr>"
-             "<tr><td>3. 계약상대방</td><td>-</td></tr>"
-             "<tr><td>- 최근 매출액(원)</td><td>-</td></tr>"
-             "<tr><td>4. 판매ㆍ공급지역</td><td>미국</td></tr></table>")
-    _c = _dc._cells(_html)
-    ok.append(run("셀이 3개인 행도 라벨 정확",
-                  _c.get("조건부 계약여부") == "미해당"))
-    ok.append(run("계약금액 추출", _c.get("계약금액 총액(원)") == "662,348,400"))
-    ok.append(run("억원 반올림 안 함", _dc._won("662,348,400") == "6.6억원"))
-    ok.append(run("계약상대방 매출액과 혼동 없음",
-                  next((v for l, v in _c.items()
-                        if "최근 매출액" in l and not l.startswith("-")), "")
-                  == "3,386,486,863"))
-    ok.append(run("공급계약 제목만 처리",
-                  bool(_dc.TITLE_RE.search("[기재정정]단일판매ㆍ공급계약체결"))
-                  and not _dc.TITLE_RE.search("주요사항보고서(유상증자결정)")))
-
     # 보강 필드를 claim 에 등록하지 않아 '근거없는수치'로 리젝됐다 (실측 50건 회차)
     _cf = ("공시명: 단일판매ㆍ공급계약체결\n- 계약 내용: CLT Interface Board\n"
            "- 계약 금액: 97억원\n- 최근 매출액 대비: 14.7%\n- 계약 상대: 삼성전자")
@@ -842,6 +819,15 @@ def main():
            "거래량: 20일 평균의 3.2배\n5거래일 누적 등락률: +8.10%"}
     _picks = {_g2.pick_style(_fl, {}, set())[0] for _ in range(30)}
     ok.append(run("flow 에서 quick_memo 미선택", "quick_memo" not in _picks, str(_picks)))
+
+    # 관문 기준 역산 (계측 결과: 게이트 51% / 정규식 41% / 심사 33%)
+    from src import gate as _gt, personas as _pn
+    from src.personas_v2 import PERSONAS as _PV, claim_cap as _cc
+    ok.append(run("정정 공시 일괄차단 해제",
+                  not _gt.is_hard_excluded(
+                      {"title": "[기재정정]주요사항보고서(유상증자결정)"})[0]))
+    ok.append(run("num_cap 이 claim_cap 이상",
+                  all(_pn.num_cap(p_) > _cc(p_) for p_ in _PV)))
 
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
