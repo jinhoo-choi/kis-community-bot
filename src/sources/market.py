@@ -33,7 +33,10 @@ ROW_SELECTORS = ["table.type_2 tr", "table.type_2 tbody tr", "div.box_type_l tab
 # ETF/ETN/스팩/리츠 제외 — 커뮤니티 종목글 대상이 아니다
 _EXCLUDE = re.compile(
     r"KODEX|TIGER|KBSTAR|ARIRANG|HANARO|KOSEF|SOL |ACE |PLUS |RISE |TIMEFOLIO|"
-    r"파워|스팩|리츠$|제\d+호|인버스|레버리지"
+    r"파워|스팩|리츠$|제\d+호|인버스|레버리지|ETN|ETF|"
+    # 우선주: 서울식품우가 상승률 1위(+29.86%)로 올라온다. 종목방 대상이 아니다.
+    # (?<!대) 는 '미래에셋대우' 류 보통주 오제외 방지.
+    r"(?<!대)우[A-C]?$"
 )
 
 MIN_TURNOVER_EOK = 150      # 실측 결과 300억 기준에서 6건만 통과해 완화
@@ -203,9 +206,13 @@ def fetch(limit: int = 12) -> list[dict]:
                 change_pct = -abs(change_pct)
             if "거래대금" in col:
                 eok = _num(cell("거래대금")) / 100          # 백만원 -> 억원
+                approx = False
             else:
+                # 종가 x 거래량. 당일 평균단가가 아니라 종가 기준이라 실제와 다르다.
+                # 상한가 종목일수록 과대 계상된다. 판정용으로만 쓰고 게시글엔 넣지 않는다.
                 vol = _num(cell("거래량"))
                 eok = (close * vol / 1e8) if (close and vol) else None
+                approx = True
 
             if close is None or change_pct is None or eok is None:
                 continue
@@ -217,6 +224,7 @@ def fetch(limit: int = 12) -> list[dict]:
             rows.append({
                 "code": m.group(1), "name": name, "market": market,
                 "close": close, "pct": change_pct, "eok": eok,
+                "eok_approx": approx,
             })
             n_page += 1
         if n_page == 0:
@@ -229,7 +237,9 @@ def fetch(limit: int = 12) -> list[dict]:
 
     dedup = {}
     for r in rows:                       # 거래대금 상위와 등락률 상위에 같은 종목이 겹친다
-        dedup[r["code"]] = r
+        old = dedup.get(r["code"])       # 정확한 거래대금을 근사치로 덮어쓰지 않는다
+        if old is None or (old.get("eok_approx") and not r.get("eok_approx")):
+            dedup[r["code"]] = r
     rows = list(dedup.values())
     # 등락 크기만으로 고르면 저유동 소형주가 앞을 채운다. 거래대금을 함께 본다.
     rows.sort(key=lambda r: (abs(r["pct"]) * min(r["eok"], 1000)), reverse=True)
@@ -262,7 +272,8 @@ def fetch(limit: int = 12) -> list[dict]:
                 f"종목: {r['name']} ({r['code']}, {r['market']})\n"
                 f"종가: {int(r['close']):,}원\n"
                 f"등락률: {r['pct']:.2f}%\n"
-                f"거래대금: {r['eok']:,.0f}억원\n"
+                + ("" if r.get("eok_approx")
+                   else f"거래대금: {r['eok']:,.0f}억원\n")
                 + "".join(f"{lbl}\n" for lbl in facts.evaluate(r))
                 + "※ '평가' 항목은 코드가 계산한 관찰 결과다. 그대로 인용하되 원인으로 해석하지 말 것.\n"
                 + "※ 등락 사유는 데이터에 없음. 원인을 추측해 단정하지 말 것."
