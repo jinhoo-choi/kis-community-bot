@@ -5,27 +5,23 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
 [crawl] dart 16건
 [crawl] naver_research 24건
 [crawl] hankyung 11건
-[market] ⚠ 컬럼 부족 ['거래대금'] / 발견 ['N', 'PER', 'ROE', '거래량', '등락률', '매도총잔량', '매도호가', '매수총잔량', '매수호가', '전일비', '종목명', '현재가'] — https://finance.naver.com/sise/sise_rise.naver?sosok=0
-[market] ⚠ 컬럼 부족 ['거래대금'] / 발견 ['N', 'PER', 'ROE', '거래량', '등락률', '매도총잔량', '매도호가', '매수총잔량', '매수호가', '전일비', '종목명', '현재가'] — https://finance.naver.com/sise/sise_rise.naver?sosok=1
-[market] ⚠ 컬럼 부족 ['거래대금'] / 발견 ['N', 'PER', 'ROE', '거래량', '등락률', '매도총잔량', '매도호가', '매수총잔량', '매수호가', '전일비', '종목명', '현재가'] — https://finance.naver.com/sise/sise_fall.naver?sosok=0
-[market] ⚠ 컬럼 부족 ['거래대금'] / 발견 ['N', 'PER', 'ROE', '거래량', '등락률', '매도총잔량', '매도호가', '매수총잔량', '매수호가', '전일비', '종목명', '현재가'] — https://finance.naver.com/sise/sise_fall.naver?sosok=1
-[market] 후보 63종목 (중복 제거 후)
+[market] 후보 187종목 (중복 제거 후)
 [market] ⚠ 스카이랩스 제외 — 등락률 135.0% > 가격제한폭
-[crawl] market 62건
+[crawl] market 113건
 [tickers] 상장 2632종목 로드 (lxml)
 [crawl] kind_inquiry 2건
 [kind] 특징주→조회공시 0건 / 조회공시→시세 2건
 [crawl] policy_rss 21건
 [tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
 [crawl] telegram_ch 0건 (정상 0건)
-[main] 수집 총 138건
-[enrich] 0/138건 배경 보강 완료
+[main] 수집 총 189건
+[enrich] 0/189건 배경 보강 완료
 [main] 발송 목표 5건 / 수율 14% → 생성 대상 36건 → 기대 발송 5건
 [gate] 차단 48건 {'tier5': 46, 'tier4': 1, 'tier1': 1}
 [theme] 테마글 3건에 게시 종목 배정
-[dedup] 제외 6건 {'SIM': 6}
+[dedup] 제외 7건 {'SIM': 7}
 [main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
-[main] 생성 대상 84건 {'disclosure': 8, 'research': 9, 'flow': 61, 'policy': 4, 'poll': 2}
+[main] 생성 대상 134건 {'disclosure': 8, 'research': 9, 'flow': 111, 'policy': 4, 'poll': 2}
 
 ───── 수집 표본 ─────
   [disclosure] 에넥스               011090  [기재정정]주요사항보고서(유상증자결정)
@@ -84,7 +80,7 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
   "degraded": false
  },
  "market": {
-  "got": 62,
+  "got": 113,
   "expected": 20,
   "degraded": false
  },
@@ -106,4 +102,4 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
 }
 
 ───── dedup ─────
- {'SIM': 6}
+ {'SIM': 7}
