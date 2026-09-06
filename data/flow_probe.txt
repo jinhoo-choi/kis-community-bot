@@ -2,10 +2,14 @@
 ── [외인기관 순매매 상위 KOSPI] ──
   https://finance.naver.com/sise/sise_deal_rank.naver?sosok=01
   HTTP 200 / 43,101bytes
+  프레임: ['/sise/sise_deal_rank_iframe.naver?sosok=01&investor_gubun=9000&type=buy', '/sise/sise_deal_rank_iframe.naver?sosok=01&investor_gubun=9000&type=sell', '/template/right_item.naver?code=&width=200']
+  th 없음 — 본문 앞부분: 외국인 매매 상위 : Npay 증권 메인 메뉴로 바로가기 본문으로 바로가기 네이버 페이 증권 증권 종목명·지수명 검색 검색 자동완성 @code@ @txt@ @market@ @full_txt@ @in_code@ @in_name@ @in_link@ @in_market@ 공모주와 해외 종목은 모바일 페이지로 이동합니다. 현재 자동완성 기능을 사용하고 계십니다. 
 
 ── [외인기관 순매매 상위 KOSDAQ] ──
   https://finance.naver.com/sise/sise_deal_rank.naver?sosok=02
   HTTP 200 / 43,104bytes
+  프레임: ['/sise/sise_deal_rank_iframe.naver?sosok=02&investor_gubun=9000&type=buy', '/sise/sise_deal_rank_iframe.naver?sosok=02&investor_gubun=9000&type=sell', '/template/right_item.naver?code=&width=200']
+  th 없음 — 본문 앞부분: 외국인 매매 상위 : Npay 증권 메인 메뉴로 바로가기 본문으로 바로가기 네이버 페이 증권 증권 종목명·지수명 검색 검색 자동완성 @code@ @txt@ @market@ @full_txt@ @in_code@ @in_name@ @in_link@ @in_market@ 공모주와 해외 종목은 모바일 페이지로 이동합니다. 현재 자동완성 기능을 사용하고 계십니다. 
 
 ── [투자자별 매매동향] ──
   https://finance.naver.com/sise/investorDealTrendDay.naver
@@ -15,6 +19,8 @@
 ── [외국인 매매 상위] ──
   https://finance.naver.com/sise/sise_deal_rank.naver
   HTTP 200 / 43,101bytes
+  프레임: ['/sise/sise_deal_rank_iframe.naver?sosok=01&investor_gubun=9000&type=buy', '/sise/sise_deal_rank_iframe.naver?sosok=01&investor_gubun=9000&type=sell', '/template/right_item.naver?code=&width=200']
+  th 없음 — 본문 앞부분: 외국인 매매 상위 : Npay 증권 메인 메뉴로 바로가기 본문으로 바로가기 네이버 페이 증권 증권 종목명·지수명 검색 검색 자동완성 @code@ @txt@ @market@ @full_txt@ @in_code@ @in_name@ @in_link@ @in_market@ 공모주와 해외 종목은 모바일 페이지로 이동합니다. 현재 자동완성 기능을 사용하고 계십니다. 
 
 ── [시가총액 상위 KOSPI] ──
   https://finance.naver.com/sise/sise_market_sum.naver?sosok=0
