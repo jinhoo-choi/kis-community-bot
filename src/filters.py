@@ -110,9 +110,9 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
         from src import personas as _P
         lo, hi = _P.len_bounds(length)
     if n < lo:
-        errs.append(f"너무짧음({n}자/{length or '-'})")
+        errs.append(f"너무짧음({n}자<{lo}/{length or '-'})")
     if n > hi:
-        errs.append(f"너무김({n}자/{length or '-'})")
+        errs.append(f"너무김({n}자>{hi}/{length or '-'})")
     # 토큰 상한에 걸려 문장 중간에서 끊긴 글이 심사까지 올라갔다
     # (실측: gemini 44자, "…나선다고 밝혔"). 종결부호로 끝나지 않으면 미완성이다.
     if body.strip() and body.strip()[-1] not in ".!?\"')]”’":

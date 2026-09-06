@@ -48,6 +48,8 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) ->
         "collected": len(collected),
         "gate_blocked": len(blocked),
         "gate_reasons": dict(Counter(w.split(":")[0] for _, w in blocked)),
+        # 통과율을 역산하려면 tier 합계가 아니라 사유별 분포가 필요하다
+        "gate_detail": dict(Counter(w for _, w in blocked).most_common(25)),
         "enrich_ok": enriched,
         "generated": len(generated),
         "sent": len(sent),
@@ -81,6 +83,8 @@ def detail_log(items: list[dict], sent: list[dict], held: list[dict]) -> str:
             "title": p.get("title", "")[:60], "provider": p.get("provider"),
             "tone": p.get("tone"), "angle": p.get("angle"),
             "score": (p.get("score") or {}).get("total"),
+            "score_parts": {k: (p.get("score") or {}).get(k) for k in
+                            ("factual", "useful", "natural", "compliant", "gain", "fit")},
             "result": "sent" if p["id"] in sent_ids else "held",
             "reason": p.get("hold_reason", ""),
             "attr_reject": p.get("attr_reject"),
