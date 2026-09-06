@@ -66,7 +66,17 @@ def main():
     if config.ENABLE_ENRICH and not dry:
         targets = [x for x in raw
                    if x.get("kind") != "flow" and not gate.has_substance(x)]
-        targets = targets[:config.ENRICH_MAX]
+        # 상한을 앞에서부터 자르면 수집 순서상 한 유형이 예산을 독식한다
+        # (naver_research 30건이 먼저 오면 공시·정책은 한 건도 못 받는다).
+        # 배포 상한이 있는 유형끼리 번갈아 뽑아 예산을 나눈다.
+        _byk = {}
+        for x in targets:
+            _byk.setdefault(x.get("kind"), []).append(x)
+        targets, _i = [], 0
+        while len(targets) < config.ENRICH_MAX and any(_byk.values()):
+            for k in sorted(_byk, key=lambda k: -config.DIST_CAP.get(k, 0)):
+                if _byk[k] and len(targets) < config.ENRICH_MAX:
+                    targets.append(_byk[k].pop(0))
         _ids = {id(x) for x in targets}
         skipped = [x for x in raw if id(x) not in _ids]
         print(f"[enrich] 그라운딩 대상 {len(targets)}건 "

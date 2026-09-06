@@ -165,7 +165,10 @@ ENABLE_ENRICH = os.environ.get("ENABLE_ENRICH", "1") == "1"
 # enrich 는 Gemini 검색 그라운딩이라 항목당 단가가 높다.
 # 실측: 2일간 1,376회 호출로 유료 청구 5만원이 발생했다. 폭주 방지용 상한.
 # 테스트에서는 더 조인다. 캐시가 채워지면 실호출은 여기서 다시 줄어든다.
-ENRICH_MAX = int(os.environ.get("ENRICH_MAX", "15" if TEST_MODE else "60"))
+# 실청구 역산: 그라운딩 1회 약 35원. 월 22영업일 기준
+#   40건/일 -> 3.3만원 / 30건 -> 2.5만원 / 20건 -> 1.7만원
+# 목표가 월 2만원 미만이므로 운영 상한을 20 으로 둔다.
+ENRICH_MAX = int(os.environ.get("ENRICH_MAX", "10" if TEST_MODE else "20"))
 
 ENABLE_JUDGE  = os.environ.get("ENABLE_JUDGE", "1") == "1"
 MIN_JUDGE_SCORE = int(os.environ.get("MIN_JUDGE_SCORE", "14"))   # 20점 환산
