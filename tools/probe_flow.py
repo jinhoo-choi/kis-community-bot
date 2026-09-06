@@ -49,6 +49,15 @@ def probe(label: str, url: str) -> None:
             return
         soup = BeautifulSoup(r.text, "html.parser")
 
+        # 200 인데 표가 안 잡히면 프레임 안에 있는 경우다. 실제로 sise_deal_rank
+        # 가 그랬다. 프레임 주소를 먼저 찍어 다음 프로브 대상을 만든다.
+        frames = [f.get("src") for f in soup.find_all(["frame", "iframe"])
+                  if f.get("src")]
+        if frames:
+            log(f"  프레임: {frames[:6]}")
+        if not soup.find_all("th"):
+            log(f"  th 없음 — 본문 앞부분: {soup.get_text(' ', strip=True)[:200]}")
+
         # 표가 여러 개일 수 있다. 표별로 헤더와 첫 행을 각각 본다.
         for ti, table in enumerate(soup.find_all("table")[:4]):
             th = [t.get_text(strip=True) for t in table.find_all("th")]
