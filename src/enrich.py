@@ -49,6 +49,8 @@ def _one(item: dict) -> dict:
         max_tokens=400,
     )
     txt = (r.text or "").strip()
+    if not r.ok:
+        item["_enrich_error"] = r.error[:200]
     if r.ok and txt and txt.upper() != "NONE" and len(txt) > 15:
         item["facts"] = item["facts"] + "\n\n[검색으로 확인된 배경]\n" + txt
         item["enriched"] = True
@@ -72,4 +74,10 @@ def enrich_all(items: list[dict], workers: int = 5) -> list[dict]:
 
     n = sum(1 for x in items if x.get("enriched"))
     print(f"[enrich] {n}/{len(items)}건 배경 보강 완료")
+    # 보강이 전멸하면 게이트의 '글감부족'이 폭증한다 (실측: enrich 116건일 때 발송 50건,
+    # 0건일 때 31건). 조용히 지나가면 원인을 필터에서 찾게 되므로 크게 알린다.
+    if items and n == 0:
+        errs = [x["_enrich_error"] for x in items if x.get("_enrich_error")]
+        print(f"[enrich] ⚠ 전건 실패 — 게이트 글감부족이 급증한다. "
+              f"오류 표본: {errs[0] if errs else '(응답은 왔으나 내용 없음)'}")
     return items
