@@ -281,8 +281,16 @@ def claim_cap(style: str) -> int:
 
 
 def num_cap(style_or_len: str) -> int:
+    """본문에 허용할 서로 다른 숫자 개수.
+
+    claim_cap 보다 작으면 모순이다. 주장 하나가 숫자 두 개를 데려오기 때문이다
+    ('20일 평균의 3.2배' = 주장 1개, 숫자 2개). 실측에서 그대로 나타났다:
+    timeline_note 는 주장 5개까지 허용하는데 숫자는 3개로 막혀 리젝됐고,
+    수치과다 6건 중 5건이 이 불일치에서 왔다.
+    claim_cap 에 여유 1을 더해 파생시킨다 — 별도 상수로 두면 또 어긋난다.
+    """
     if style_or_len in v2.PERSONAS:
-        return v2.PERSONAS[style_or_len]["num_cap"]
+        return min(v2.claim_cap(style_or_len) + 1, 6)
     return {"short": 3, "medium": 4, "long": 5}.get(style_or_len, 4)
 
 
@@ -292,7 +300,7 @@ def build_messages_v2(item: dict, persona: str, angle: str = "") -> tuple[str, s
               .replace("{persona_name}", p["name"])
               .replace("{persona_desc}", p["desc"])
               .replace("{sentences}", p["sentences"])
-              .replace("{num_cap}", str(p["num_cap"]))
+              .replace("{num_cap}", str(num_cap(persona)))
               .replace("{angle_desc}", angles.contract(angle))
               .replace("{claim_block}",
                        claims.block(item, v2.claim_cap(persona), angle))

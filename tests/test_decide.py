@@ -534,7 +534,12 @@ def main():
     # 모드 공통 접근자가 v1/v2 를 모두 흡수하는가
     ok.append(run("접근자 v1 호환", _PM.len_bounds("short") == (40, 160)))
     ok.append(run("접근자 v2 호환", _PM.len_bounds("quick_memo") == (35, 120)))
-    ok.append(run("접근자 숫자상한", _PM.num_cap("quick_memo") == 3))
+    from src import personas_v2 as _P2v
+    # num_cap 은 claim_cap 에서 파생된다. 주장 하나가 숫자 둘을 데려오므로
+    # claim_cap 보다 작으면 모순이다 (실측: 수치과다 6건 중 5건이 이 불일치)
+    ok.append(run("숫자상한 ≥ 주장상한",
+                  all(_PM.num_cap(k) > _P2v.claim_cap(k) for k in _P2v.PERSONAS)))
+    ok.append(run("접근자 숫자상한", _PM.num_cap("quick_memo") == 4))
     ok.append(run("v2 슬롯 가중치 0 허용(정책×수치중심)", _SW2["policy"]["data_focus"] == 0))
     _s2, _ = _PM.build_messages_v2({"kind": "flow", "title": "t", "facts": "등락률: 20.32%"},
                                    "brief_report", "reaction")
