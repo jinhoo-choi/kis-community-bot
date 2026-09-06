@@ -1,4 +1,5 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
+Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 [dart] corp_code 3989종목 매핑
 [dart] 상세 보강 12/16건
 [dart] 미보강 제목: ['타법인주식및출자증권취득결정', '[첨부정정]주요사항보고서(회사합병결정)(자회사의 주요경영사항)', '[기재정정]유형자산처분결정(종속회사의주요경영사항)', '신탁계약에의한취득상황보고서']
@@ -11,16 +12,16 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
 [tickers] 상장 2632종목 로드 (lxml)
 [crawl] kind_inquiry 2건
 [kind] 특징주→조회공시 0건 / 조회공시→시세 2건
-[crawl] policy_rss 24건
+[crawl] policy_rss 22건
 [tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
 [crawl] telegram_ch 0건 (정상 0건)
-[main] 수집 총 287건
-[enrich] 0/287건 배경 보강 완료
+[main] 수집 총 285건
+[enrich] 0/285건 배경 보강 완료
 [main] 발송 목표 50건 / 수율 14% → 생성 대상 114건 → 기대 발송 16건
 [main] ⚠ 공급 상한에 걸려 목표 미달 예상 (16 < 50). 필터가 아니라 물량 문제다.
-[gate] 차단 60건 {'tier5': 58, 'tier4': 1, 'tier1': 1}
-[theme] 테마글 5건에 게시 종목 배정
-[dedup] 제외 9건 {'SIM': 7, 'EVT': 1, 'ID': 1}
+[gate] 차단 59건 {'tier5': 57, 'tier4': 1, 'tier1': 1}
+[theme] 테마글 4건에 게시 종목 배정
+[dedup] 제외 8건 {'SIM': 7, 'EVT': 1}
 [main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
 [main] 생성 대상 218건 {'disclosure': 8, 'research': 13, 'flow': 183, 'policy': 4, 'poll': 10}
 
@@ -42,27 +43,58 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
   [research  ] 알테오젠              196170  알테오젠 반복되는 기술수출, ALT-B4 가치 재평가
 
 ───── 게이트 차단 ─────
-  dart-20260904800462        tier5:글감부족
-  dart-20260904800327        tier5:글감부족
-  dart-20260904800215        tier5:글감부족
-  dart-20260904000149        tier5:글감부족
-  naver-y_readnavernid96014page1 tier5:글감부족
-  naver-y_readnavernid96013page1 tier5:글감부족
-  naver-y_readnavernid96012page1 tier5:글감부족
-  naver-y_readnavernid96011page1 tier5:글감부족
-  naver-y_readnavernid96010page1 tier5:글감부족
-  naver-y_readnavernid96009page1 tier5:글감부족
-  naver-y_readnavernid96008page1 tier5:글감부족
-  naver-y_readnavernid96007page1 tier5:글감부족
-  naver-y_readnavernid96006page1 tier5:글감부족
-  naver-y_readnavernid96005page1 tier5:글감부족
-  naver-y_readnavernid96004page1 tier5:글감부족
+  naver      tier5:글감부족           30건
+  pol        tier5:글감부족           18건
+  hk         tier5:글감부족           5건
+  dart       tier5:글감부족           4건
+  hk         tier4:제목부족           1건
+  kind       tier1:법적사안(횡령)       1건
+
+  --- dart 차단 표본 (tier5:글감부족) dart-20260904800462 ---
+  공시일: 20260904
+  회사: SKC (011790)
+  공시명: 타법인주식및출자증권취득결정
+  제출인: SKC
+  ※ 공시 제목 외 상세 수치는 제공되지 않음. 수치를 추정하지 말 것.
+
+  --- naver 차단 표본 (tier5:글감부족) naver-y_readnavernid96014page1 ---
+  종목: 롯데이노베이트 (286940)
+  리포트 제목: DBO 레퍼런스 확보, 수익성 개선, 남은 건 멀..
+  발간: 한화투자증권 / 26.09.04
+  ※ 제목 외 본문 수치는 미제공. 목표주가·투자의견을 추정하지 말 것.
+
+  --- hk 차단 표본 (tier5:글감부족) hk-652142 ---
+  리포트 제목: 엔에프씨 화장품 ODM 고성장, 소재 턴어라운드 본격화
+  종목코드: 265740
+  작성: 한국IR협의회 정수현,채윤석
+  ※ 제목 외 본문 수치는 미제공. 위 수치는 증권사 제시치이며 단정하지 말 것.
+
+  --- kind 차단 표본 (tier1:법적사안(횡령)) kind-20260904000759 ---
+  거래소 조회공시
+  종목: 디에이치엑스컴퍼니 (031860)
+  공시 시각: 18:19
+  공시 제목: 조회공시요구(풍문또는보도)(현직 임원의 횡령·배임혐의설)
+  답변 성격: 답변 내용은 원문 확인 필요
+  ※ 거래소가 시황 변동이나 풍문에 대해 회사에 답변을 요구한 건이다.
+  ※ 답변 성격 이상을 추측하지 말 것. 주가 방향을 예단하지 말 것.
+  
+  [같은 날 시세]
+  종가: 6,930원
+  등락률: 0.00%
+  5거래일 누적 등락률: +0.00%
+  ※ 등락과 조회공시의 인과를 단정하지 말 것.
+
+  --- pol 차단 표본 (tier5:글감부족) pol-대구경북신공항건설장기화에의성주민불만확산 ---
+  출처: 연합뉴스 경제
+  제목: 대구경북신공항 건설 장기화에 의성 주민 불만 확산
+  요지: (의성=연합뉴스) 김선형 기자 = 대구경북신공항 건설 사업이 장기화하며 이전 예정지 주민들이 보상 절차 지연과 각종 규제로 인한 피해를 호소했다...
+  ※ 수혜 종목을 특정하거나 추천하지 말 것. 산업/테마 수준으로만 언급.
+  ※ 언론 보도이며 정부 확정 발표가 아닐 수 있음. 단정하지 말 것.
 
 ───── 귀속 강등 ─────
   hk-652041                  ['종목명미검출'] → stock
   pol-23개월만에최저환율에기업달러예금역대최대  ['종목명미검출'] → stock
   pol-하후상박개편기초연금2030년지출30조원돌파전 ['종목명미검출'] → stock
-  pol-울산시중소기업소상공인에760억경영안정자금지원 ['종목명미검출'] → stock
   pol-울산시중소기업소상공인에760억경영안정자금지원 ['종목명미검출'] → stock
 
 ───── 크롤링 헬스 ─────
@@ -93,7 +125,7 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
   "degraded": false
  },
  "policy_rss": {
-  "got": 24,
+  "got": 22,
   "expected": 3,
   "degraded": false
  },
@@ -105,4 +137,4 @@ Direct use of automatic function calling (AFC) in Models.generate_content is not
 }
 
 ───── dedup ─────
- {'SIM': 7, 'EVT': 1, 'ID': 1}
+ {'SIM': 7, 'EVT': 1}
