@@ -27,6 +27,16 @@ def record(**kw) -> dict:
     return row
 
 
+def _reject_reasons() -> dict:
+    """정규식 필터에서 떨어진 건들의 사유 분포. 유형별로도 나눈다."""
+    from src.generator import REJECTED
+    c = Counter()
+    for p in REJECTED:
+        for e in p.get("reject_errs", []):
+            c[f"{p.get('kind', '?')}:{e.split('(')[0]}"] += 1
+    return dict(c.most_common(25))
+
+
 def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) -> dict:
     def avg_score(ps):
         v = [(p.get("score") or {}).get("total") for p in ps]
@@ -50,6 +60,12 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) ->
         # 통과율을 역산하려면 tier 합계가 아니라 사유별 분포가 필요하다
         "gate_detail": dict(Counter(w for _, w in blocked).most_common(25)),
         "enrich_ok": enriched,
+        # filter_log 를 아티팩트로 돌린 뒤 리젝 사유를 볼 수 없게 됐다.
+        # 튜닝에 필요한 건 사유 분포이므로 집계만이라도 여기 남긴다.
+        "reject_reasons": _reject_reasons(),
+        "hold_kinds": dict(Counter(f"{p.get('kind')}:"
+                                   f"{(p.get('hold_reason') or '?').split('(')[0].split(' ')[0]}"
+                                   for p in held).most_common(20)),
         # 유료 청구는 보강 성공 건수가 아니라 호출 건수에 붙는다
         "enrich_calls": __import__("src.enrich", fromlist=["CALLS"]).CALLS[0],
         "generated": len(generated),
