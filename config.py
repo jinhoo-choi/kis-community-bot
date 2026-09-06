@@ -100,7 +100,25 @@ DIST_CAP = {k: max(1, round(v * TARGET_POSTS / sum(_MIX.values())))
 DIST_CAP["theme"] = DIST_CAP["policy"]
 
 # 목표에 못 미치는 이유가 필터인지 공급인지 즉시 판별할 수 있어야 한다.
-EXPECTED_SENT = sum(SLOT_QUOTA.values()) * YIELD
+# 생성 상한. 기존엔 SLOT_QUOTA 를 main 에서 다시 OVERGEN_RATE 로 곱해
+# 이중 적용이었다 (flow 60 x 7.14 = 428). 상한이 사실상 없던 것이라
+# "flow 과생성 120->60" 조정이 아무 효과가 없었다.
+#
+# 전역 YIELD 로는 못 잡는다. 유형별 실측 수율이 크게 다르다.
+#   flow 183생성 -> 36발송 19.7% / research 17 -> 3 17.6% / policy 5 -> 0
+YIELD_BY_KIND = {"disclosure": 0.25, "research": 0.18, "flow": 0.20,
+                 "policy": 0.10, "poll": 0.50}
+
+# 품질 유형은 배포 상한을, flow 는 목표 전체를 덮을 만큼 만든다.
+# flow 가 2차 배분에서 모자란 자리를 메우는 역할이기 때문이다.
+GEN_CAP = {k: max(4, round((TARGET_POSTS if k == "flow" else DIST_CAP.get(k, 0))
+                           / YIELD_BY_KIND.get(k, 0.2)))
+           for k in SLOT_QUOTA}
+
+# 기대 발송은 유형별 수율로 계산한다. 기존엔 SLOT_QUOTA 합(114)에 전역
+# 수율을 곱해 16건이 나왔고, 실제 생성은 177~229건이라 매 실행 오탐 경보가 떴다.
+EXPECTED_SENT = min(TARGET_POSTS,
+                    sum(GEN_CAP[k] * YIELD_BY_KIND.get(k, 0.2) for k in GEN_CAP))
 
 # --- 모델 (멀티 프로바이더) ---
 # Claude: 대량 저비용 haiku / 문체 품질 우선 sonnet

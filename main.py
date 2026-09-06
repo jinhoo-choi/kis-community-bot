@@ -88,7 +88,7 @@ def main():
 
     # 하드 게이트 — AI 호출 이전에 구조적으로 배제
     print(f"[main] 발송 목표 {config.TARGET_POSTS}건 / 수율 {config.YIELD:.0%} "
-          f"→ 생성 대상 {sum(config.SLOT_QUOTA.values())}건 "
+          f"→ 생성 상한 {sum(config.GEN_CAP.values())}건 "
           f"→ 기대 발송 {config.EXPECTED_SENT:.0f}건")
     if config.EXPECTED_SENT < config.TARGET_POSTS * 0.8:
         print(f"[main] ⚠ 공급 상한에 걸려 목표 미달 예상 "
@@ -116,10 +116,11 @@ def main():
     if degraded:
         print(f"[main] ⚠ 수집 이상 소스: {degraded}")
 
-    picked, cnt = [], {k: 0 for k in config.SLOT_QUOTA}
+    picked, cnt = [], {k: 0 for k in config.GEN_CAP}
     for it in items:
-        k = it["kind"] if it["kind"] in config.SLOT_QUOTA else "research"
-        if cnt[k] < int(config.SLOT_QUOTA[k] * config.OVERGEN_RATE):
+        k = it["kind"] if it["kind"] in config.GEN_CAP else "research"
+        # OVERGEN_RATE 를 여기서 또 곱하면 이중 적용이 된다. GEN_CAP 이 최종값이다.
+        if cnt[k] < config.GEN_CAP[k]:
             cnt[k] += 1
             picked.append(it)
     print(f"[main] 생성 대상 {len(picked)}건 {cnt}")

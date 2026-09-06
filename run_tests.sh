@@ -38,6 +38,13 @@ for f in glob.glob('.github/workflows/*.yml'):
 sys.exit(1 if bad else 0)
 PYEOF
 echo
+echo "=== 1c. 정적검사 (중복 정의·미사용 심볼) ==="
+python3 -m pyflakes src tools main.py config.py 2>/dev/null \
+  | grep -v "f-string is missing" \
+  | grep -E "redefinition|imported but unused|assigned to but never used" \
+  && { echo "  위 항목 정리 필요"; } || echo "  OK    무경고"
+
+echo
 echo "=== 2. unit (decide / gate / entity / dedup / rules) ==="
 python3 tests/test_decide.py
 echo

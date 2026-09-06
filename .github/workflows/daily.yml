@@ -2,8 +2,9 @@ name: daily-posts
 
 on:
   schedule:
-    # UTC 21:00 = KST 익일 06:00 / 월~금 배포 (일~목 UTC 실행)
-    - cron: '0 21 * * 0-4'
+    # UTC 21:11 = KST 익일 06:11 / 월~금 배포 (일~목 UTC 실행)
+    # 정각은 GitHub 스케줄러 혼잡 구간이라 지연되거나 큐에서 드롭될 수 있다.
+    - cron: '11 21 * * 0-4'
   workflow_dispatch:
     inputs:
       test_mode:
