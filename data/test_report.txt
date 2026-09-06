@@ -4,6 +4,9 @@ ok
 === 1b. workflow YAML ===
   (pyyaml 미설치 - 스킵)
 
+=== 1c. 정적검사 (중복 정의·미사용 심볼) ===
+  OK    무경고
+
 === 2. unit (decide / gate / entity / dedup / rules) ===
   OK    종목상한 2건 적용
   OK    fatal 즉시 보류
@@ -234,7 +237,7 @@ ok
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'open_talk', 'data_focus', 'careful_note', 'fact_note', 'check_list', 'brief_report'})
+  OK    flow 에서 quick_memo 미선택  ({'check_list', 'data_focus', 'brief_report', 'open_talk', 'fact_note', 'careful_note'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
 [crawl] market 62건
