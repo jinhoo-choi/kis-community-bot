@@ -41,10 +41,27 @@ def main():
     sent, _ = decide_distribution(posts, per_stock=1, per_kind_cap={"policy": 4})
     ok.append(run("테마글 종목상한 면제", len(sent) == 4))
 
-    # 6) 유형 상한
+    # 6) 유형 상한 — 목표를 채운 뒤에는 상한이 지켜진다
     posts = [P(i, code=f"00000{i}") for i in range(9)]
-    sent, _ = decide_distribution(posts, per_kind_cap={"disclosure": 3})
+    sent, _ = decide_distribution(posts, per_kind_cap={"disclosure": 3}, target=3)
     ok.append(run("유형상한 적용", len(sent) == 3))
+
+    # 6b) 목표에 못 미치면 유형상한을 풀어 메운다.
+    # 공시/리포트/정책은 품질이 좋지만 공급이 적고, flow 는 그 반대다.
+    # 좋은 것부터 채우고 모자란 만큼만 flow 로 메운다.
+    posts = [P(i, code=f"00000{i}") for i in range(9)]
+    sent, _ = decide_distribution(posts, per_kind_cap={"disclosure": 3}, target=8)
+    ok.append(run("목표 미달 시 상한 완화", len(sent) == 8, str(len(sent))))
+
+    # 6c) 우선순위: 같은 점수면 공시가 flow 보다 먼저 들어간다
+    posts = ([P(f"f{i}", code=f"10000{i}", kind="flow", total=20) for i in range(5)]
+             + [P(f"d{i}", code=f"20000{i}", kind="disclosure", total=15)
+                for i in range(3)])
+    sent, _ = decide_distribution(
+        posts, per_kind_cap={"flow": 5, "disclosure": 5}, target=3)
+    ok.append(run("공시 우선 배치",
+                  all(p["kind"] == "disclosure" for p in sent),
+                  str([p["kind"] for p in sent])))
 
     # 7) 게이트: 자사 계열 배제
     ok.append(run("이해상충 차단", is_hard_excluded(

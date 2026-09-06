@@ -87,6 +87,9 @@ SLOT_QUOTA = {k: min(SUPPLY_CAP[k], max(1, round(v * _scale)))
               for k, v in _BASE_QUOTA.items()}
 
 # 최종 배포 구성비. SLOT_QUOTA(생성 대상)와 별개다.
+# 이건 '하한 보장' 이 아니라 1차 배분의 상한이다. 목표에 못 미치면
+# decide 가 우선순위(공시>리포트>정책>발제>특징주) 순으로 상한을 풀어 메운다.
+# 공시/리포트/정책은 품질이 좋지만 공급이 적고, 특징주는 그 반대이기 때문이다.
 # 실측: TARGET=50 실행에서 배포 50건 중 flow 가 35건(70%)을 차지했다.
 # decide 가 per_kind_cap 으로 SLOT_QUOTA(flow 120)를 쓰는 바람에
 # flow 혼자 정원을 채울 수 있었기 때문이다. 배포 상한은 공급량이 아니라

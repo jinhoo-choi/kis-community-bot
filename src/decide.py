@@ -9,6 +9,11 @@ from collections import Counter
 import config
 
 
+# 좋은 유형부터 채운다. 숫자가 작을수록 먼저.
+_PRIORITY = {"disclosure": 0, "research": 1, "policy": 2, "theme": 2,
+             "poll": 3, "flow": 4}
+
+
 def decide_distribution(
     posts: list[dict],
     target: int = None,
@@ -58,7 +63,11 @@ def decide_distribution(
         else:
             pool.append(p)
 
-    pool.sort(key=lambda x: (x.get("score") or {}).get("total", 0), reverse=True)
+    # 유형마다 공급량과 품질이 반대다. flow 는 양이 많지만 시세 나열이라
+    # 심사에서 '데이터 나열' 로 깎이고(실측 98건), 공시·리포트·정책은
+    # 품질이 좋지만 공급이 적다. 그래서 좋은 것부터 채우고 flow 로 메운다.
+    pool.sort(key=lambda x: (_PRIORITY.get(x.get("kind", ""), 9),
+                             -(x.get("score") or {}).get("total", 0)))
 
     # 한 페르소나가 배포를 독식하면 피드가 단조로워진다.
     # 실측: brief_report 계약이 전역 규칙과 충돌해 통째로 리젝되자
@@ -68,43 +77,59 @@ def decide_distribution(
     # 같은 페르소나 안에서도 마무리 문구가 복제된다.
     # 실측: '아시는 분 계신가요?' 로 끝나는 글이 7건이었다.
     sent, per_s, per_k, per_t, per_e = [], Counter(), Counter(), Counter(), Counter()
-    for p in pool:
+
+    def _place(p, cap_kind: bool) -> bool:
+        """상한을 지키며 배포에 넣는다. 넣었으면 True."""
         if len(sent) >= target:
             p["hold_reason"] = "정원초과"
-            held.append(p)
-            continue
-
+            return False
         code = p.get("stock_code") or "_theme"
         if code != "_theme" and per_s[code] >= per_stock:
             p["hold_reason"] = f"종목상한({per_stock})"
-            held.append(p)
-            continue
-
+            return False
         kind = p.get("kind", "")
-        if kind in per_kind_cap and per_k[kind] >= per_kind_cap[kind]:
+        if cap_kind and kind in per_kind_cap and per_k[kind] >= per_kind_cap[kind]:
             p["hold_reason"] = f"유형상한({kind})"
-            held.append(p)
-            continue
-
+            return False
+        # tone 이 비면 전부 한 묶음이 돼 상한에 걸린다. 미상은 상한에서 뺀다.
         tone = p.get("tone", "")
-        if per_t[tone] >= per_tone_cap:
+        if tone and per_t[tone] >= per_tone_cap:
             p["hold_reason"] = f"문체상한({tone})"
-            held.append(p)
-            continue
-
+            return False
         body = p.get("body", "").strip()
         ending = body[-20:] if len(body) >= 20 else ""
         if ending and per_e[ending] >= 2:
             p["hold_reason"] = "말미중복"
-            held.append(p)
-            continue
-
+            return False
         per_s[code] += 1
         per_k[kind] += 1
-        per_t[tone] += 1
+        if tone:
+            per_t[tone] += 1
         if ending:
             per_e[ending] += 1
         sent.append(p)
+        return True
+
+    # 1차: 유형 상한을 지켜 배분한다
+    rest = []
+    for p in pool:
+        if not _place(p, cap_kind=True):
+            rest.append(p)
+
+    # 2차: 목표에 못 미치면 유형 상한만 풀어 flow 로 메운다.
+    # 종목/문체/말미 상한은 그대로 둔다 — 그건 품질 장치다.
+    if len(sent) < target:
+        before = len(sent)
+        for p in [x for x in rest if x.get("hold_reason", "").startswith("유형상한")]:
+            if len(sent) >= target:
+                break
+            p.pop("hold_reason", None)
+            if not _place(p, cap_kind=False):
+                continue
+        if len(sent) > before:
+            print(f"[decide] 유형상한 완화로 {len(sent) - before}건 보충 "
+                  f"({before} → {len(sent)})")
+    held.extend(x for x in rest if x not in sent)
 
     return sent, held
 
