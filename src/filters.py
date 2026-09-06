@@ -123,6 +123,14 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
     if body.strip() and body.strip()[-1] not in ".!?\"')]”’…~":
         errs.append("미완성(종결부호 없음)")
 
+    # 리포트 수치는 '누가 제시했는지' 가 붙어야 인용이 된다.
+    # 주어가 없으면 봇의 단정으로 읽힌다 (실측 #72: fatal 목표주가 단정).
+    if re.search(r"적정가격|목표주가", body) and "리포트" in (facts or ""):
+        firms = re.findall(r"([가-힣A-Za-z]{2,10}(?:증권|투자증권|자산운용|IR협의회))",
+                           facts or "")
+        if not any(f in body for f in firms):
+            errs.append("출처없는목표주가")
+
     # 첫 문장이 수치로 시작하면 주어 없이 툭 던지는 글이 된다
     # (실측: 50건 중 22건. "9.43% 올랐습니다."로 시작해 종목명이 끝까지 안 나옴).
     # 파손도 여기서 걸린다 — "6.4배습니다.", "2.5배.", "663,000원."

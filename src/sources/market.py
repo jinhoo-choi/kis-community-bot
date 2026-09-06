@@ -69,6 +69,44 @@ SISE_JSON = ("https://api.finance.naver.com/siseJson.naver"
 FRGN_URL = "https://finance.naver.com/item/frgn.naver?code={code}"
 
 
+# 수급 상위 페이지. 프로브(data/flow_probe.txt)로 확인한 실제 iframe 주소다.
+# 목록 페이지는 프레임 껍데기라 th 가 하나도 없다.
+#   헤더 ['종목명', '수량', '금액', '당일거래량']
+#   행   ['우리금융지주', '13,052', '431,651', '18,186,793']
+# 금액 단위는 확정되지 않았다(천원/백만원 모두 자기정합적). 그래서 순위만 쓴다.
+# 순위는 시세 화면에 없는 사실이라 그 자체로 정보가 된다.
+_RANK_URL = ("https://finance.naver.com/sise/sise_deal_rank_iframe.naver"
+             "?sosok={sosok}&investor_gubun=9000&type={type}")
+
+
+def flow_ranks() -> dict:
+    """종목명 -> 수급 순위 문구. 종목코드가 없어 이름으로 맞춘다."""
+    out = {}
+    for sosok in ("01", "02"):
+        for typ, label in (("buy", "순매수"), ("sell", "순매도")):
+            soup = crawl.get_soup(_RANK_URL.format(sosok=sosok, type=typ),
+                                  encoding="euc-kr")
+            if soup is None:
+                continue
+            # 한 페이지에 표가 2쌍 들어있다(외국인/기관). 첫 표만 쓴다.
+            table = soup.find("table")
+            if table is None:
+                continue
+            rank = 0
+            for tr in table.find_all("tr"):
+                tds = tr.find_all("td")
+                if len(tds) < 4:
+                    continue
+                name = tds[0].get_text(strip=True)
+                if not name:
+                    continue
+                rank += 1
+                if rank <= 10:
+                    out.setdefault(name, f"외국인 {label} 상위 {rank}위")
+            crawl.sleep_jitter(0.3, 0.7)
+    return out
+
+
 def _add_flow(r: dict):
     """외국인·기관 순매매를 붙인다.
 
@@ -248,9 +286,14 @@ def fetch(limit: int = 12) -> list[dict]:
     # 입력이 종가·등락률·거래대금 3개뿐이면 아무리 축을 늘려도
     # 표현법만 30가지지 콘텐츠는 3가지다 (외부 검토 지적).
     # 원인 추정 없이 안전하게 늘릴 수 있는 정형 지표를 붙인다.
+    ranks = flow_ranks()
+    if ranks:
+        print(f"[market] 수급 상위 {len(ranks)}종목 확보")
     for r in rows[:limit]:
         _add_history(r)
         _add_flow(r)
+        if r["name"] in ranks:
+            r["flow_rank"] = ranks[r["name"]]
         crawl.sleep_jitter(0.4, 0.9)
 
     out = []
@@ -274,6 +317,7 @@ def fetch(limit: int = 12) -> list[dict]:
                 f"등락률: {r['pct']:.2f}%\n"
                 + ("" if r.get("eok_approx")
                    else f"거래대금: {r['eok']:,.0f}억원\n")
+                + (f"{r['flow_rank']}\n" if r.get("flow_rank") else "")
                 + "".join(f"{lbl}\n" for lbl in facts.evaluate(r))
                 + "※ '평가' 항목은 코드가 계산한 관찰 결과다. 그대로 인용하되 원인으로 해석하지 말 것.\n"
                 + "※ 등락 사유는 데이터에 없음. 원인을 추측해 단정하지 말 것."
