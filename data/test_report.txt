@@ -231,7 +231,7 @@ ok
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'careful_note', 'fact_note', 'check_list', 'open_talk', 'data_focus', 'brief_report'})
+  OK    flow 에서 quick_memo 미선택  ({'brief_report', 'careful_note', 'fact_note', 'open_talk', 'data_focus', 'check_list'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
 [crawl] market 62건
@@ -299,7 +299,7 @@ FAIL 0 / WARN 0
 [dedup] 제외 2건 {'EVT': 2}
 
 [3] 중복 제거 → 통과 13건
-[enrich] GEMINI_API_KEY 없음 → 보강 스킵
+[enrich] GEMINI_API_KEY 없음 → 캐시 0건만 사용, 13건 스킵
 
 [4] 생성 + 정규식 필터
 [gen] claude: 6/6건 생성
