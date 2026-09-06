@@ -4,58 +4,27 @@ KIND 조회공시 엔드포인트 프로브
 
 [A. 조회공시 메인(GET)]
   GET https://kind.krx.co.kr/disclosure/inquirydisclosure.do
-  HTTP 404  1679 bytes  ct=text/html; charset=UTF-8
+  HTTP 403  416 bytes  ct=text/html
 
 [B. 조회공시 서브(POST)]
   POST https://kind.krx.co.kr/disclosure/inquirydisclosure.do
-  HTTP 404  1679 bytes  ct=text/html; charset=UTF-8
+  HTTP 403  411 bytes  ct=text/html
 
 [C. 오늘의 공시(POST)]
   POST https://kind.krx.co.kr/disclosure/todaydisclosure.do
-  HTTP 200  16969 bytes  ct=text/html; charset=UTF-8
-  <tr> 16개
-  row0: ['20:00', 'HLB이노베이션', '공매도 과열종목 지정(공매도 거래 금지 적용)', '코스닥시장본부', '공시차트 주가차트']
-        href: #companysum
-  row1: ['20:00', '우리기술투자', '공매도 과열종목 지정(공매도 거래 금지 적용)', '코스닥시장본부', '공시차트 주가차트']
-        href: #companysum
-  row2: ['20:00', '모아라이프플러스', '공매도 과열종목 연장(공매도 거래 금지 연장)', '코스닥시장본부', '공시차트 주가차트']
-        href: #companysum
+  HTTP 403  409 bytes  ct=text/html
 
 [D. 전체공시 검색(POST)]
   POST https://kind.krx.co.kr/disclosure/searchtotalinfo.do
-  HTTP 200  2298 bytes  ct=text/html; charset=UTF-8
-  <tr> 0개
-  본문 앞부분: ''
+  HTTP 403  409 bytes  ct=text/html
 
 ==================================================================
 행 원본 HTML 덤프 + 조회공시 필터 테스트
 ==================================================================
-총 100행 (currentPageSize=100)
-
-[행 원본 HTML]
-<tr class="first" id="parkman">
-<td class="first txc">20:00</td>
-<td><img alt="코스닥" class="vmiddle legend" src="/images/common/icn_t_ko.gif"/> <a href="#companysum" id="companysum" onclick="companysummary_open('02485'); return false;" title="HLB이노베이션"> HLB이노베이션</a> </td>
-<td><a href="#viewer" onclick="openDisclsViewer('20260904000781','')" title="공매도 과열종목 지정(공매도 거래 금지 적용)">공매도 과열종목 지정(공매도 거래 금지 적용)</a></td>
-<td>코스닥시장본부</td>
-<td class="txc">
-<a class="btn ico chart-00" href="#" onclick="openDisclsChart('02485');return false;" title="공시차트"><span>공시차트</span></a>
-<a class="btn ico chart-01" href="#" onclick="fnPopStockPrices('02485');return false;" title="주가차트"><span>주가차트</span></a>
-</td>
-</tr>
+총 0행 (currentPageSize=100)
 
 [조회공시 관련 행]
-  ['18:32', '디에이치엑스컴퍼니', '주권매매거래정지기간변경(풍문 또는 보도 관련)', '코스닥시장본부', '공시차트 주가차트']
-    RAW: <tr id="parkman">
-<td class="first txc">18:32</td>
-<td><img alt="코스닥" class="vmiddle legend" src="/images/common/icn_t_ko.gif"/> <a href="#companysum" id="companysum" onclick="companysummary_open('03186'); return false;" title="디에이치엑스컴퍼니"> 디에이치엑스컴퍼니</a> <img alt="관리종목" class="vmiddle legend" src="/images/common/icn_t_kwan.gif"/> <img alt="투자주의환기종목" class="vmiddle legend" src="/images/common/icn_t_hwan.gif"/> </td>
-<td><a href="#viewer" onclick="openDisclsViewer('20260904000786','')" title="주권매매거
-  ['18:19', '디에이치엑스컴퍼니', '조회공시요구(풍문또는보도)(현직 임원의 횡령·배임혐의설)', '코스닥시장본부', '공시차트 주가차트']
-    RAW: <tr id="parkman">
-<td class="first txc">18:19</td>
-<td><img alt="코스닥" class="vmiddle legend" src="/images/common/icn_t_ko.gif"/> <a href="#companysum" id="companysum" onclick="companysummary_open('03186'); return false;" title="디에이치엑스컴퍼니"> 디에이치엑스컴퍼니</a> <img alt="관리종목" class="vmiddle legend" src="/images/common/icn_t_kwan.gif"/> <img alt="투자주의환기종목" class="vmiddle legend" src="/images/common/icn_t_hwan.gif"/> </td>
-<td><a href="#viewer" onclick="openDisclsViewer('20260904000759','')" title="조회공시요
-  조회공시 행 2건
+  조회공시 행 0건
 
-6자리 코드 후보: ['000781', '000780', '000779']
+6자리 코드 후보: []
 acptno 후보: []

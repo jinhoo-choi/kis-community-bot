@@ -2,18 +2,14 @@
 ==================================================================
 4. 상장종목 리스트 소스 (KIND corpList 3종목만 파싱 원인)
 ==================================================================
-[KIND] HTTP 200  1263772 bytes
-[KIND] Content-Type: application/vnd.ms-excel; charset=EUC-KR
+[KIND] HTTP 403  408 bytes
+[KIND] Content-Type: text/html
 [KIND] decode euc-kr: OK
 [KIND] head 400자:
-'\r\n\r\n\r\n\r\n\r\n\r\n<html xmlns="http://www.w3.org/1999/xhtml">\r\n<head>\r\n<meta http-equiv="Content-Type" content="text/html; charset=euc-kr" />\r\n<title>상장법인목록(EXCEL)</title>\r\n</head>\r\n<body>\r\n\t<table cellpadding="0" cellspacing="1" class="bbs_tb" border="1">\r\n\t\r\n\t<col width="20%" />\r\n\t<col width="10%" />\r\n\t<col width="15%" />\r\n\t<col width="20%" />\r\n\t<col width="10%" />\r\n\t<col width="5%" />\r\n\t<col width="8'
-[KIND] <tr> 개수(정규식): 2803
-[KIND] <td> 개수(정규식): 28020
-[KIND] 6자리코드 개수: 2743
-[KIND] 첫 tr:
-'<tr>\r\n\t\t<th bgcolor="#66FF99" >회사명</th>\r\n\t\t<th bgcolor="#66FF99" >시장구분</th>\r\n\t\t<th bgcolor="#66FF99" >종목코드</th>\r\n\t\t<th bgcolor="#66FF99" >업종</th>\r\n\t\t<th bgcolor="#66FF99" >주요제품</th>\r\n\t\t<th bgcolor="#66FF99" >상장일</th>\r\n\t\t<th bgcolor="#66FF99" >결산월</th>\r\n\t\t<th bgcolor="#66FF99" >대표자명</th>\r\n\t\t<th bgcolor="#66FF99" >홈페이지</th>\r\n\t\t<th bgcolor="#66FF99" >지역</th>\r\n\t</tr>'
-[KIND] 둘째 tr:
-'<tr>\r\n\t\t<td>스카이랩스</td>\r\n\t\t<td>\r\n\t\t\t\r\n\t\t\t\t\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t코스닥\r\n\t\t\t\t\t\r\n\t\t\t\t\t\r\n\t\t\t\t\t\t\r\n\t\t\t\r\n\t\t</td>\r\n\t\t<td style="mso-number-format:\'@\';text-align:center;">386380</td>\r\n\t\t<td>의료용 기기 제조업</td>\r\n\t\t<td>커프리스 연속혈압 모니터링 의료기기 (CART)</td>\r\n\t\t<td style="text-align:center;">2026-09-04</td>\r\n\t\t<td style="text-align:center;">12월</td>\r\n\t\t<td>이병환</td>\r\n\t\t<td>\r\n\t\t\thttp://www.skylabs.io/\r\n\t\t</td>\r\n\t\t<td >경기도</td>\r\n\t</tr>'
+'<HTML><HEAD>\n<TITLE>Access Denied</TITLE>\n</HEAD><BODY>\n<H1>Access Denied</H1>\n \nYou don\'t have permission to access "http&#58;&#47;&#47;kind&#46;krx&#46;co&#46;kr&#47;corpgeneral&#47;corpList&#46;do&#63;" on this server.<P>\nReference&#32;&#35;18&#46;1768dc17&#46;1788661572&#46;6ed8030f\n<P>https&#58;&#47;&#47;errors&#46;edgesuite&#46;net&#47;18&#46;1768dc17&#46;1788661572&#46;6ed8030f</P>\n</BODY>\n'
+[KIND] <tr> 개수(정규식): 0
+[KIND] <td> 개수(정규식): 0
+[KIND] 6자리코드 개수: 0
 [대안A] naver sise_market_sum p1: 50종목, 페이지링크 12개
 [대안B] entryJongmok HTTP 200 9315 bytes
 
@@ -73,17 +69,17 @@ HTTP 200 / 69323 bytes
 [B] KODEX 인버스 114800 종가=1,040 등락=-1.98% 거래대금=1,040
 [B] KODEX 코스닥150레버리지 233740 종가=6,725 등락=+8.12% 거래대금=6,720
 [B] naver sise_quant  HTTP 200  파싱 81건
-[C] KRX 상장법인목록  HTTP 200  1263772 bytes
+[C] KRX 상장법인목록  HTTP 403  408 bytes
 [C] 네이버 종목 시세 KOSPI  HTTP 200  102380 bytes
 
 ==================================================================
 3. 정책 소스 후보 (korea.kr 대체)
 ==================================================================
-  korea.kr RSS         HTTP 404     1294 bytes  '\ufeff<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http:'
-  기재부 보도자료             HTTP 200        0 bytes  ''
-  금융위 보도자료             HTTP 200   122196 bytes  '<!DOCTYPE html>\r <html lang="ko" class="ko">\r <head>\r \t<title>\r \t\t보도자료'
+  korea.kr RSS         실패 ConnectTimeout
+  기재부 보도자료             실패 ConnectTimeout
+  금융위 보도자료             실패 ConnectTimeout
   한국은행 보도자료            HTTP 200   392734 bytes  '                                          \t \t\t \t\t \t \t  \t \t\t \t\t \t \t  \t '
-  산업부 보도자료             HTTP 404     2036 bytes  '\r \r \r <!DOCTYPE html>\r <html lang="ko">\r <head>\r     <meta http-equiv='
+  산업부 보도자료             실패 ConnectTimeout
   금감원 보도자료             실패 ConnectionError
-  연합뉴스 경제 RSS          HTTP 200    98778 bytes  '<?xml version="1.0" encoding="UTF-8"?> <rss version="2.0" xmlns:conten'
+  연합뉴스 경제 RSS          HTTP 200    98651 bytes  '<?xml version="1.0" encoding="UTF-8"?> <rss version="2.0" xmlns:conten'
   한경 정책 RSS            HTTP 200    22761 bytes  '<!DOCTYPE html> <html lang="ko"> <head> <meta charset="UTF-8"> <title>'
