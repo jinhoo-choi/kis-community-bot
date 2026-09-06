@@ -71,12 +71,24 @@ _BASE_QUOTA = {
 # 슬롯별 하루 공급 상한 (실측). 이보다 크게 잡아도 그만큼 들어오지 않는다.
 # 상한을 두지 않으면 TARGET=50 일 때 생성 대상이 357건으로 부풀어
 # LLM 호출 714회가 되고 워크플로가 타임아웃된다.
-SUPPLY_CAP = {"disclosure": 20, "research": 12, "flow": 120, "policy": 8, "poll": 10}
+# flow 는 배포 상한이 19건인데 183건을 생성하고 있었다 (LLM 호출 낭비).
+# 배포 상한의 3배까지만 만든다.
+SUPPLY_CAP = {"disclosure": 20, "research": 12, "flow": 60, "policy": 12, "poll": 10}
 
 _need = TARGET_POSTS / max(YIELD, 0.02)          # 발송 목표를 위한 생성 필요량
 _scale = _need / sum(_BASE_QUOTA.values())
 SLOT_QUOTA = {k: min(SUPPLY_CAP[k], max(1, round(v * _scale)))
               for k, v in _BASE_QUOTA.items()}
+
+# 최종 배포 구성비. SLOT_QUOTA(생성 대상)와 별개다.
+# 실측: TARGET=50 실행에서 배포 50건 중 flow 가 35건(70%)을 차지했다.
+# decide 가 per_kind_cap 으로 SLOT_QUOTA(flow 120)를 쓰는 바람에
+# flow 혼자 정원을 채울 수 있었기 때문이다. 배포 상한은 공급량이 아니라
+# '독자가 읽을 만한 구성'으로 정해야 한다.
+_MIX = {"disclosure": 12, "research": 12, "flow": 20, "policy": 6, "poll": 2}
+DIST_CAP = {k: max(1, round(v * TARGET_POSTS / sum(_MIX.values())))
+            for k, v in _MIX.items()}
+DIST_CAP["theme"] = DIST_CAP["policy"]
 
 # 목표에 못 미치는 이유가 필터인지 공급인지 즉시 판별할 수 있어야 한다.
 EXPECTED_SENT = sum(SLOT_QUOTA.values()) * YIELD

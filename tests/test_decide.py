@@ -492,8 +492,16 @@ def main():
         "1 대 1.8702948. 우성이 우성유통을 흡수합병하기로 결정했습니다.",
         "합병 비율: 1 대 1.8702948", "fact_read", "ratio", "quick_memo"))))
     ok.append(run("자연스러운 글 통과", not _f2.check(
-        "20.32% 상승. 로보티즈 종가는 299,000원입니다. 거래대금은 2,990억원이었습니다.",
+        "로보티즈가 어제 20.32% 올랐습니다. 종가는 299,000원입니다. "
+        "거래대금은 2,990억원이었습니다.",
         _f_ai, "fact_read", "reaction", "short")))
+    # 실측: 50건 중 22건이 수치로 시작해 종목명이 끝까지 안 나왔다
+    ok.append(run("수치 선두 리젝", any("수치선두" in e for e in _f2.check(
+        "20.32% 상승. 로보티즈 종가는 299,000원입니다.",
+        _f_ai, "fact_read", "reaction", "short"))))
+    ok.append(run("선두 파손 리젝", any("선두파손" in e for e in _f2.check(
+        "6.4배습니다. 어제 로보티즈 거래량이 20일 평균의 6.4배였습니다.",
+        _f_ai, "fact_read", "reaction", "short"))))
 
     # ── Voice 가 계약을 담고 있는가 (라벨이면 문체가 안 바뀐다)
     from src.personas_v2 import PERSONAS as _PD

@@ -130,6 +130,11 @@ _SUBSTANCE = re.compile(
 # 검색으로 얻은 '회사 배경'은 리포트 내용이 아니므로 글감으로 치지 않는다.
 _RESEARCH_SUBSTANCE = re.compile(r"제시 적정가격|투자의견")
 
+# 정책 글은 수치가 아니라 '무엇이 어떻게 바뀌는가'가 글감이다.
+# 수치를 요구했더니 26건 수집분에서 4건만 통과했다 (실측).
+# 대신 요지가 실제 내용을 담고 있는지를 본다 — 제목 재탕은 걸러야 한다.
+_POLICY_MIN_DESC = 120
+
 
 def has_substance(item: dict) -> bool:
     facts = item.get("facts", "")
@@ -138,6 +143,15 @@ def has_substance(item: dict) -> bool:
                       if l.strip() and not l.strip().startswith("※"))
     if item.get("kind") == "research":
         return bool(_RESEARCH_SUBSTANCE.search(core))
+    if item.get("kind") in ("policy", "theme"):
+        desc = "".join(l.split(":", 1)[-1] for l in core.splitlines()
+                       if l.startswith("요지"))
+        title = "".join(l.split(":", 1)[-1] for l in core.splitlines()
+                        if l.startswith("제목"))
+        # 요지가 제목을 그대로 옮긴 것이면 글감이 아니다
+        if desc.strip() and desc.strip() != title.strip():
+            return len(desc.strip()) >= _POLICY_MIN_DESC or bool(_SUBSTANCE.search(core))
+        return bool(_SUBSTANCE.search(core))
     return bool(_SUBSTANCE.search(core))
 
 

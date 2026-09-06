@@ -121,6 +121,20 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
     if body.strip() and body.strip()[-1] not in ".!?\"')]”’":
         errs.append("미완성(종결부호 없음)")
 
+    # 첫 문장이 수치로 시작하면 주어 없이 툭 던지는 글이 된다
+    # (실측: 50건 중 22건. "9.43% 올랐습니다."로 시작해 종목명이 끝까지 안 나옴).
+    # 파손도 여기서 걸린다 — "6.4배습니다.", "2.5배.", "663,000원."
+    first = re.split(r"(?<=[.!?])\s", body.strip(), 1)[0] if body.strip() else ""
+    if re.match(r"^[\d(]", first):
+        errs.append("수치선두")
+    if first and len(first) < 12:
+        errs.append(f"선두파손({first[:12]})")
+    # 같은 수치가 첫 문장과 둘째 문장에 그대로 반복되는 사례
+    # (실측: "4.4% 장중 저가 대비 고가가 4.4%였습니다.")
+    _n1 = re.findall(r"\d[\d,]*\.?\d*", first)
+    if _n1 and len(set(_n1)) < len(_n1):
+        errs.append("선두수치중복")
+
     # 환각 수치 탐지: 본문 숫자가 원본 facts 에 없으면 리젝
     # (연도/퍼센트 등 흔한 값은 화이트리스트)
     allow = _numbers(facts) | {"1", "2", "3", "4", "5", "10", "100"}

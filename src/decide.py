@@ -34,7 +34,9 @@ def decide_distribution(
     if per_kind_cap is None and config.TARGET_POSTS < 30:
         cap = max(2, target // 3)
         per_kind_cap = {k: cap for k in config.SLOT_QUOTA} | {"theme": cap}
-    per_kind_cap = per_kind_cap if per_kind_cap is not None else config.SLOT_QUOTA
+    # SLOT_QUOTA(생성 대상 배분)를 배포 상한으로 쓰면 안 된다. flow 가 120 이라
+    # 목표 50건을 혼자 채운다 (실측: 배포 50건 중 flow 35건).
+    per_kind_cap = per_kind_cap if per_kind_cap is not None else config.DIST_CAP
     min_score = min_score if min_score is not None else config.MIN_JUDGE_SCORE
 
     held = []
