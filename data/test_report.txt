@@ -83,26 +83,23 @@ ok
   OK    주체없는 평가 차단
   OK    제목만 있는 항목 차단
   OK    수치 있는 항목 통과
-  OK    Voice 4종  (4)
-  OK    Format 6종(길이 분리)  (6)
-  OK    Length 축 신설  (3)
-  OK    short_note 제거
+  OK    페르소나 10종  (10)
   OK    Angle 11종  (11)
-  OK    4축 조합 700가지 이상  (792)
-  OK    금지 조합 없음(가중치 방식)
+  OK    Persona x Angle 100가지 이상  (110)
+  OK    슬롯 전건 페르소나 가중치 존재
   OK    가능한 Angle 전부 등장  ([] 미등장)
   OK    한 Angle 쏠림 없음(50% 미만)  (25%)
   OK    같은 실행 내 억제 동작  (['amount', 'terms', 'ratio', 'ratio', 'ratio', 'purpose'])
   OK    데이터에 없는 Angle 미생성  (['amount', 'ratio', 'duration', 'terms', 'purpose'])
   OK    uncertainty 단독은 앵글 없음
-  OK    Length spec 존재
+  OK    페르소나 문장수 지시 존재
   OK    Global 최소문장수 제거
   OK    '확인되지 않았다' 강제 제거
   OK    DART 상세는 글감 인정
   OK    억원 단위 변환  (123억원)
   OK    빈값은 빈 문자열
-  OK    fact_read 질문마무리 리젝
-  OK    open_question 은 허용
+  OK    fact_note 질문마무리 리젝
+  OK    open_talk 은 허용
   OK    리포트 제목만 차단
   OK    리포트 배경보강만으로는 불충분
   OK    적정가격 있으면 통과
@@ -116,14 +113,12 @@ ok
   OK    빈약한 특징주에 context 미채택  (['reaction', 'amount', 'ratio'])
   OK    지표 보강 시 compare 채택  (['reaction', 'compare', 'amount', 'ratio'])
   OK    Angle 계약에 첫문장 규칙
-  OK    lead_number 구조 존재
-  OK    길이 short/34자 리젝  (['너무짧음(34자<40/short)'])
+  OK    길이 short/34자 리젝  (['너무짧음(34자<50/short)'])
   OK    길이 short/90자 통과  ([])
   OK    길이 medium/150자 통과  ([])
   OK    길이 long/260자 통과  ([])
-  OK    길이 long/370자 리젝  (['너무김(370자>330/long)'])
-  OK    Length spec 에 하한 명시
-  OK    프롬프트 상한 < 필터 상한
+  OK    길이 long/370자 리젝  (['너무김(370자>300/long)'])
+  OK    페르소나 상한이 필터 상한 이내
   OK    verified 아니면 미수집
   OK    타사 상품 홍보 차단
   OK    상품명 필터
@@ -142,20 +137,20 @@ ok
   OK    근거없는 수치 차단
   OK    한 주장의 복수 숫자는 1개로
   OK    자연스러운 글 통과
-  OK    Voice 계약에 어미 규칙
-  OK    Voice 계약에 문장 규칙
+  OK    수치 선두 리젝
+  OK    선두 파손 리젝
+  OK    페르소나 계약에 어미 규칙
   OK    힌트에 수치 지적
   OK    힌트에 방향 지적
   OK    힌트 중복 제거
   OK    힌트가 프롬프트에 주입
-  OK    calm 계약에 방향 규칙
   OK    전역 규칙에 방향 어휘
   OK    v2 페르소나 10종  (10)
   OK    v2 슬롯 가중치 전건 10종
   OK    v2 조합 110가지
   OK    페르소나마다 길이·숫자상한 보유
-  OK    접근자 v1 호환
-  OK    접근자 v2 호환
+  OK    접근자 길이 반영
+  OK    미등록 페르소나는 기본값
   OK    숫자상한 ≥ 주장상한
   OK    접근자 숫자상한
   OK    v2 슬롯 가중치 0 허용(정책×수치중심)
@@ -236,7 +231,7 @@ ok
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'brief_report', 'careful_note', 'data_focus', 'open_talk', 'check_list', 'fact_note'})
+  OK    flow 에서 quick_memo 미선택  ({'careful_note', 'fact_note', 'check_list', 'data_focus', 'open_talk', 'brief_report'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
 [crawl] market 62건
@@ -248,24 +243,21 @@ ok
   OK    상승일 5거래일 하락 언급 통과
   OK    진짜 방향오용은 잡음
 
-228/228 passed
+223/223 passed
 
 === 2b. 전수검사 (설정-코드 정합성) ===
 
 === 프롬프트 치환 ===
   OK    v2 페르소나 10종 전건 치환 완료
-  OK    v1 72조합 전건 치환 완료
 
 === 길이 규칙 ===
   OK    v2 길이 지시와 필터 경계 정합
-  OK    v1 Length 지시와 필터 경계 정합
 
 === 숫자 상한 vs Angle 계약 ===
   OK    페르소나 숫자 상한이 Angle 최소 요구를 충족
 
 === 슬롯 가중치 ===
   OK    v2 슬롯 가중치 정합
-  OK    v1 슬롯 가중치 정합
 
 === 규칙 단일 소스 ===
   OK    규칙 20종이 작성·심사 프롬프트에 파생됨
@@ -279,11 +271,11 @@ ok
   OK    필터 매매권유: ['trade_advice', 'price_target', '너무짧음(42자<80/fact_note)']
   OK    필터 기사체: ['literary_style', '너무짧음(40자<80/fact_note)', "미확인수치['200']", "근거없는수치['200']"]
   OK    필터 당신: ['second_person', '너무짧음(42자<80/fact_note)']
+  OK    필터 수치선두: ['너무짧음(52자<80/fact_note)', '수치선두', '선두파손(20.32% 상승.)']
   OK    필터 정상: 통과
 
 === 설정 ===
-  OK    PERSONA_MODE=v2
-  OK    TARGET=50 QUOTA={'disclosure': 20, 'research': 12, 'flow': 120, 'policy': 8, 'poll': 10} OVERGEN=7.142857142857142
+  OK    TARGET=50 QUOTA={'disclosure': 20, 'research': 12, 'flow': 60, 'policy': 12, 'poll': 10} OVERGEN=7.142857142857142
 
 ==================================================
 FAIL 0 / WARN 0
@@ -318,7 +310,7 @@ FAIL 0 / WARN 0
        └ '두산에너빌리티 원전 수주 소식이 나왔네요. 저는 이거 물렸는데 이번엔 좀 오르려나요. 체코 건 이후로 분위기가 달라진 건 맞습니다. 다만 확정된 수치는 없습니다. 어떻게 보시나요.'
 [gen] 정규식 리젝 v2 ['trade_advice', 'price_target']
        └ '카카오 광고매출 회복 얘기가 나옵니다. 지금 비중확대 하세요. 목표가 6만원 갑니다. 반드시 오릅니다. 지금이 기회입니다. 다들 어떻게 보시나요.'
-[gen] 정규식 리젝 v3 ["미확인수치['1530', '452', '8742']", "근거없는수치['1530', '452', '8742']"]
+[gen] 정규식 리젝 v3 ["미확인수치['452', '8742', '1530']", "근거없는수치['1530', '452', '8742']"]
        └ 'LG에너지솔루션이 어제 2.30% 올랐습니다. 거래대금은 8,742억원이었고 외국인이 1,530억 순매수했습니다. 수주잔고도 452조원까지 늘었다고 합니다. 배터리 업황이 돌아서는 걸까요.'
 [gen] 정규식 통과 9건 / 시도 13건
 
