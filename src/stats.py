@@ -37,6 +37,21 @@ def _reject_reasons() -> dict:
     return dict(c.most_common(25))
 
 
+def _axis_avg(posts: list[dict]) -> dict:
+    """심사 항목별 평균. 총점만 보면 어느 축이 병목인지 모른다."""
+    # judge 는 항목 점수를 score 최상위에 평평하게 넣는다 (중첩 아님)
+    axes = ("factual", "useful", "natural", "compliant", "gain", "fit")
+    acc, n = {}, {}
+    for p in posts:
+        sc = p.get("score") or {}
+        for k in axes:
+            v = sc.get(k)
+            if isinstance(v, (int, float)):
+                acc[k] = acc.get(k, 0) + v
+                n[k] = n.get(k, 0) + 1
+    return {k: round(acc[k] / n[k], 2) for k in acc}
+
+
 def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) -> dict:
     def avg_score(ps):
         v = [(p.get("score") or {}).get("total") for p in ps]
@@ -63,6 +78,13 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) ->
         # filter_log 를 아티팩트로 돌린 뒤 리젝 사유를 볼 수 없게 됐다.
         # 튜닝에 필요한 건 사유 분포이므로 집계만이라도 여기 남긴다.
         "reject_reasons": _reject_reasons(),
+        # fatal 은 치명적 위반 코드다. 진짜 위반인지 오탐인지 가르려면
+        # 건수가 아니라 코드별 분포가 필요하다 (실측 #69: fatal 42건, 원인 미상).
+        "fatal_codes": dict(Counter(
+            f"{p.get('kind')}:{f}" for p in held
+            for f in ((p.get("score") or {}).get("fatal") or [])).most_common(20)),
+        # 어느 항목이 점수를 깎는지. fit 이 범인이면 소재 문제, natural 이면 문체 문제다.
+        "score_axis_avg": _axis_avg(generated),
         "hold_kinds": dict(Counter(f"{p.get('kind')}:"
                                    f"{(p.get('hold_reason') or '?').split('(')[0].split(' ')[0]}"
                                    for p in held).most_common(20)),
