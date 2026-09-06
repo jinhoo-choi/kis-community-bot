@@ -162,8 +162,11 @@ def fetch(limit: int = 12) -> list[dict]:
         ok += 1
 
         col = _col_map(soup)
-        if not {"종목명", "현재가", "등락률", "거래대금"} <= set(col):
-            print(f"[market] ⚠ 컬럼 구조 인식 실패 — {url}")
+        need = {"종목명", "현재가", "등락률", "거래대금"}
+        if not need <= set(col):
+            # 어떤 컬럼이 없는지 남긴다. '인식 실패'만으로는 원인을 못 좁힌다.
+            print(f"[market] ⚠ 컬럼 부족 {sorted(need - set(col))} "
+                  f"/ 발견 {sorted(col)} — {url}")
             continue
 
         n_page = 0
