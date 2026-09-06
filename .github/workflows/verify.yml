@@ -20,6 +20,10 @@ on:
         description: '리서치 상세 페이지 구조 덤프 (LLM 호출 없음)'
         type: boolean
         default: false
+      probe_flow:
+        description: '수급(외국인/기관) 페이지 구조 덤프 (LLM 호출 없음)'
+        type: boolean
+        default: false
       chat_suffix:
         description: '테스트 발송할 chat_id 뒤 4자리 (시크릿 미등록 시 사용)'
         type: string
@@ -148,6 +152,14 @@ jobs:
           pip install -q -r requirements.txt
           python tools/probe_research.py || true
 
+      - name: Probe flow pages
+        if: ${{ inputs.probe_flow }}
+        env:
+          TZ: Asia/Seoul
+        run: |
+          pip install -q -r requirements.txt
+          python tools/probe_flow.py || true
+
       - name: Summary & commit
         if: always()
         run: |
@@ -161,6 +173,7 @@ jobs:
           git add -f data/verify.txt
           git add -f data/voice_sample.txt || true
           git add -f data/research_probe.txt || true
+          git add -f data/flow_probe.txt || true
           git diff --staged --quiet || git commit -m "chore: verify keys $(date +%FT%H%M)"
           git pull --rebase -q origin main || true
           git push
