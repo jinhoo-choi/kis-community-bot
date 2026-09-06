@@ -126,7 +126,6 @@ TEMPERATURE = float(os.environ.get("TEMPERATURE", "1.0"))
 #   특히 v1 은 길이 미달 4건, 어미반복 2건 — Length 를 별도 축으로 두면
 #   다른 축과 계속 충돌한다. v2 는 길이가 페르소나 안에 있어 1건뿐이었다.
 # v1 은 롤백용으로 유지한다.
-PERSONA_MODE = os.environ.get("PERSONA_MODE", "v2")
 
 # 슬롯별 temperature 차등.
 # 수치가 본문에 직접 등장하는 슬롯은 낮춰 숫자 창작을 억제하고,

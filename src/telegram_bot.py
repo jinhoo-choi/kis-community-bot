@@ -25,7 +25,6 @@ import requests
 
 import config
 from config import TELEGRAM_TOKEN, FOOTER
-from src.personas import TONES
 
 API = "https://api.telegram.org/bot{}/{}"
 
@@ -181,8 +180,7 @@ def send_summary(posts: list[dict], sent: int, stats_row: dict = None):
         f"<b>배포 완료</b>  {sent}/{len(posts)}건 전송",
         f"담당: {assign.summary(posts)}",
         f"유형: " + (", ".join(f"{k} {v}" for k, v in c.items()) or "-"),
-        f"문체: {len({(p.get('tone'), p.get('angle')) for p in posts})}가지 조합"
-        f" ({__import__('config').PERSONA_MODE})",
+        f"문체: {len({(p.get('tone'), p.get('angle')) for p in posts})}가지 조합",
         f"품질 심사 평균: {avg}",
     ]
     if stats_row:

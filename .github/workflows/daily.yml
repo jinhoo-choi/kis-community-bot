@@ -23,11 +23,6 @@ on:
         type: choice
         options: ['auto', '0', '1']
         default: 'auto'
-      persona_mode:
-        description: '페르소나 설계 (v1=4축 / v2=10페르소나)'
-        type: choice
-        options: ['v2', 'v1']
-        default: 'v2'
       target_posts:
         description: '배포 건수 (비우면 50)'
         type: string
@@ -82,7 +77,6 @@ jobs:
           MIN_JUDGE_SCORE:   ${{ vars.MIN_JUDGE_SCORE || '14' }}
           MAX_PER_STOCK:     ${{ vars.MAX_PER_STOCK || '2' }}
           TARGET_POSTS:      ${{ inputs.target_posts || vars.TARGET_POSTS || '50' }}
-          PERSONA_MODE:      ${{ inputs.persona_mode || vars.PERSONA_MODE || 'v2' }}
           TZ: Asia/Seoul
         id: pipeline
         continue-on-error: true
@@ -107,6 +101,17 @@ jobs:
           git pull --rebase -q origin main || true
           git push
 
+      # filter_log 는 실행마다 새 파일이 생겨 레포에 무한 축적됐다 (37개).
+      # 커밋 대신 아티팩트로 남긴다 — 품질 검토는 사후 1회면 충분하다.
+      - name: Upload filter_log
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: filter-log-${{ github.run_id }}
+          path: data/filter_log_*.json
+          retention-days: 30
+          if-no-files-found: ignore
+
       - name: Fail if any step failed
         if: ${{ always() && (steps.tests.outcome == 'failure' || steps.pipeline.outcome == 'failure') }}
         run: exit 1
@@ -119,7 +124,6 @@ jobs:
           git add data/state.json data/run_stats.jsonl 2>/dev/null || true
           git add -f data/test_report.txt || true
           git add -f data/posts_latest.json data/run_log.txt || true
-          git add -f data/filter_log_*.json || true
           git diff --staged --quiet || git commit -m "chore: update state $(date +%F)"
           git pull --rebase -q origin main || true
           git push

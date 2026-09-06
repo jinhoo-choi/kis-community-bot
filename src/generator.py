@@ -14,7 +14,6 @@ from src.decide import temperature_for
 from src import angles
 from src import facts as facts_mod
 from src import personas as P
-from src.personas import VOICE_W, FORMAT_W, LENGTH_W, build_messages
 
 
 # 리젝된 생성물 보관 (품질 검토용). main 이 filter_log 에 함께 기록한다.
@@ -133,8 +132,8 @@ def pick_style(item: dict, recent: dict, used_now: set,
     그래서 voice/angle/format 을 각각 따로 억제한다.
     """
     kind = item["kind"]
-    if P.is_v2():
-        # v2: 페르소나 하나가 말투·구조·길이를 모두 갖는다. 축은 Persona × Angle.
+    if True:
+        # 페르소나 하나가 말투·구조·길이를 모두 갖는다. 축은 Persona × Angle.
         pw = dict(P.style_ids().get(kind, {}))
         # 글자수 기준을 버리고 Fact Slot(독립 사실 개수·종류)으로 판단한다.
         # 글자수는 정보량이 아니다 — "A사가 B사를 흡수합병" 은 짧지만 사실 1개,
@@ -188,29 +187,6 @@ def pick_style(item: dict, recent: dict, used_now: set,
         used_now.add((persona, ang2, persona, persona))
         return persona, ang2, persona, persona
 
-    vw = VOICE_W.get(kind, {"calm": 3, "dry": 2, "explainer": 2, "light": 1})
-    fw = FORMAT_W.get(kind, {"fact_read": 3, "question": 2, "check_points": 2})
-    lw = LENGTH_W.get(kind, {"short": 2, "medium": 3, "long": 2})
-
-    hist = recent.get(item.get("stock_code") or "_theme", [])
-    used_v = {h.split(":")[0] for h in hist} | {u[0] for u in used_now}
-    used_a = {h.split(":")[1] for h in hist if h.count(":") >= 2} | {u[1] for u in used_now}
-    used_f = {h.split(":")[-1] for h in hist} | {u[2] for u in used_now}
-
-    used_l = {h.split(":")[3] for h in hist if h.count(":") >= 3} | {u[3] for u in used_now}
-
-    voice = _weighted(vw, used_v)
-    fmt = _weighted(fw, used_f)
-    length = _weighted(lw, used_l)
-
-    cand = angles.available(item)
-    if not allow_uncertainty:
-        cand = [a for a in cand if a != "uncertainty"] or cand
-    angle = _weighted({a: 3 for a in cand}, used_a) if cand else ""
-
-    used_now.add((voice, angle, fmt, length))
-    return voice, angle, fmt, length
-
 
 def pick_tone(item: dict, recent: dict) -> str:      # 하위 호환
     return pick_style(item, recent, set())[0]
@@ -232,8 +208,7 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
 
     results = [None] * len(items)
     for temp, grp in groups.items():
-        jobs = [(P.build_messages_v2(it, tn, ag) if P.is_v2()
-                 else build_messages(it, tn, fm, ag, ln))
+        jobs = [P.build_messages_v2(it, tn, ag)
                 for _, it, tn, fm, ag, ln in grp]
         for g, r in zip(grp, p.generate_many(jobs, temperature=temp)):
             results[g[0]] = r

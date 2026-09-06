@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 .venv/
 data/posts_latest.json
+
+# 실행마다 쌓이는 진단 산출물. 커밋 대상이 아니다 (37개까지 누적됐다).
+# 최근 것만 필요하면 Actions artifact 나 run_stats.jsonl 로 충분하다.
+data/filter_log_*.json

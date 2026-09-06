@@ -44,7 +44,6 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) ->
 
     import config as _c
     return {
-        "persona_mode": _c.PERSONA_MODE,
         "collected": len(collected),
         "gate_blocked": len(blocked),
         "gate_reasons": dict(Counter(w.split(":")[0] for _, w in blocked)),

@@ -49,15 +49,6 @@ for pid in PERSONAS:
 if not FAIL:
     ok(f"v2 페르소나 {len(PERSONAS)}종 전건 치환 완료")
 
-for v in P.VOICES:
-    for f in P.FORMATS:
-        for l in P.LENGTHS:
-            s, _ = P.build_messages({"kind": "flow", "title": "t", "facts": "x"},
-                                    v, f, "reaction", l)
-            if re.findall(r"\{[a-z_]+\}", s):
-                fail(f"v1 {v}/{f}/{l}: 미치환")
-ok(f"v1 {len(P.VOICES)*len(P.FORMATS)*len(P.LENGTHS)}조합 전건 치환 완료")
-
 # 2. 길이 규칙 정합성 (프롬프트 지시 vs 필터 경계)
 sec("길이 규칙")
 for pid, p in PERSONAS.items():
@@ -73,14 +64,6 @@ for pid, p in PERSONAS.items():
         warn(f"{pid}: 상한 {hi}자가 과도")
 if not [f for f in FAIL if "자" in f]:
     ok("v2 길이 지시와 필터 경계 정합")
-
-for lid, spec in P.LENGTHS.items():
-    nums = [int(x) for x in re.findall(r"(\d+)자", spec["spec"])]
-    if nums and spec["max"] < max(nums):
-        fail(f"v1 {lid}: 필터 상한 {spec['max']} < 프롬프트 지시 {max(nums)}")
-    if nums and spec["min"] > min(nums):
-        fail(f"v1 {lid}: 필터 하한 {spec['min']} > 프롬프트 지시 {min(nums)}")
-ok("v1 Length 지시와 필터 경계 정합")
 
 # 3. 숫자 상한 vs Angle 계약
 sec("숫자 상한 vs Angle 계약")
@@ -103,13 +86,6 @@ for slot, w in SLOT_W.items():
     if len(live) < 4:
         warn(f"v2 {slot}: 선택 가능 페르소나 {len(live)}종뿐")
 ok("v2 슬롯 가중치 정합")
-
-for slot in P.VOICE_W:
-    if set(P.VOICE_W[slot]) != set(P.VOICES):
-        fail(f"v1 {slot}: Voice 누락")
-    if set(P.FORMAT_W[slot]) != set(P.FORMATS):
-        fail(f"v1 {slot}: Format 누락")
-ok("v1 슬롯 가중치 정합")
 
 # 5. 규칙 단일 소스 파생
 sec("규칙 단일 소스")
@@ -159,9 +135,6 @@ for nm, body, should in cases:
 
 # 8. 설정
 sec("설정")
-if config.PERSONA_MODE not in ("v1", "v2"):
-    fail(f"PERSONA_MODE 값 이상: {config.PERSONA_MODE}")
-ok(f"PERSONA_MODE={config.PERSONA_MODE}")
 if sum(config.SLOT_QUOTA.values()) < config.TARGET_POSTS:
     warn(f"슬롯 합 {sum(config.SLOT_QUOTA.values())} < 목표 {config.TARGET_POSTS}")
 ok(f"TARGET={config.TARGET_POSTS} QUOTA={config.SLOT_QUOTA} OVERGEN={config.OVERGEN_RATE}")

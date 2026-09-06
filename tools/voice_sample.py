@@ -1,7 +1,7 @@
-"""Voice 4종을 같은 소재로 하나씩 생성해 비교한다.
+"""페르소나 10종을 같은 소재로 하나씩 생성해 비교한다.
 
-축이 실제로 문체를 바꾸는지는 조합을 통제하지 않으면 알 수 없다.
-Angle/Format/Length 를 고정하고 Voice 만 바꿔 나란히 뽑는다.
+페르소나가 실제로 문체를 바꾸는지는 조합을 통제하지 않으면 알 수 없다.
+Angle 을 고정하고 Persona 만 바꿔 나란히 뽑는다.
 """
 import json
 import os
@@ -11,7 +11,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src import filters
 from src.llm import router
-from src.personas import VOICES, build_messages
+from src.personas import build_messages_v2
+from src.personas_v2 import PERSONAS
 
 ITEM = {
     "kind": "flow", "stock_code": "108490", "stock_name": "로보티즈",
@@ -24,7 +25,7 @@ ITEM = {
     "src": "https://finance.naver.com/item/main.naver?code=108490",
 }
 
-FIXED = dict(angle="reaction", fmt="fact_read", length="medium")
+FIXED = dict(angle="reaction")
 OUT = []
 
 
@@ -37,15 +38,15 @@ def log(*a):
 def main():
     p = router.writers().get("claude") or list(router.writers().values())[0]
     log("=" * 66)
-    log(f"Voice 비교  (Angle={FIXED['angle']} / Format={FIXED['fmt']} / Length={FIXED['length']} 고정)")
+    log(f"페르소나 비교  (Angle={FIXED['angle']} 고정)")
     log(f"소재: {ITEM['title']}")
     log("=" * 66)
 
-    for vid, v in VOICES.items():
-        system, user = build_messages(ITEM, vid, FIXED["fmt"], FIXED["angle"], FIXED["length"])
+    for vid, v in PERSONAS.items():
+        system, user = build_messages_v2(ITEM, vid, FIXED["angle"])
         r = p.generate(system, user, temperature=1.0)
         body = (r.text or "").strip()
-        errs = filters.check(body, ITEM["facts"], FIXED["fmt"], FIXED["angle"], FIXED["length"])
+        errs = filters.check(body, ITEM["facts"], vid, FIXED["angle"], vid)
         log(f"\n[{vid}] {v['name']}  ({len(body)}자)  필터: {errs or 'OK'}")
         log(body or f"(생성 실패: {r.error})")
 

@@ -13,7 +13,7 @@ on:
         type: boolean
         default: false
       voice_sample:
-        description: 'Voice 4종 비교 샘플 생성'
+        description: '페르소나 10종 비교 샘플 생성'
         type: boolean
         default: false
       chat_suffix:

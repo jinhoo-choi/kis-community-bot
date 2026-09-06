@@ -101,12 +101,12 @@ def main():
 
 
     # ── 프롬프트 빌드가 예외 없이 되는지 (JSON 리터럴 + format 충돌 회귀)
-    from src.personas import build_messages
+    from src.personas import build_messages_v2
     from src.judge import SYSTEM as JSYS
     try:
-        build_messages({"kind": "flow", "title": "t", "facts": "f",
-                        "stock_name": "삼성전자", "thin_facts": True},
-                       "dry", "lead_number", "reaction", "short")
+        build_messages_v2({"kind": "flow", "title": "t", "facts": "f",
+                           "stock_name": "삼성전자", "thin_facts": True},
+                          "fact_note", "reaction")
         JSYS.replace("__FATAL_BLOCK__", rules.judge_block())
         built = True
     except Exception as e:
@@ -309,21 +309,16 @@ def main():
 
 
     # ── 문체 다양성 (실측: 5건이 전부 같은 구조로 수렴)
-    from src.personas import VOICES as _V, FORMATS as _F, VOICE_W as _VW, FORMAT_W as _FW
     from src.generator import pick_style as _pick
     from src import angles as _ang
-    ok.append(run("Voice 4종", len(_V) == 4, str(len(_V))))
-    from src.personas import LENGTHS as _L
-    ok.append(run("Format 6종(길이 분리)", len(_F) == 6, str(len(_F))))
-    ok.append(run("Length 축 신설", len(_L) == 3, str(len(_L))))
-    ok.append(run("short_note 제거", "short_note" not in _F))
+    from src.personas_v2 import PERSONAS as _P2, SLOT_W as _SW
+    ok.append(run("페르소나 10종", len(_P2) == 10, str(len(_P2))))
     ok.append(run("Angle 11종", len(_ang.ANGLES) == 11, str(len(_ang.ANGLES))))
-    ok.append(run("4축 조합 700가지 이상",
-                  len(_V) * len(_ang.ANGLES) * len(_F) * len(_L) >= 700,
-                  str(len(_V) * len(_ang.ANGLES) * len(_F) * len(_L))))
-    ok.append(run("금지 조합 없음(가중치 방식)",
-                  all(len(v) == 4 for v in _VW.values()) and
-                  all(len(f) == 6 for f in _FW.values())))
+    ok.append(run("Persona x Angle 100가지 이상",
+                  len(_P2) * len(_ang.ANGLES) >= 100,
+                  str(len(_P2) * len(_ang.ANGLES))))
+    ok.append(run("슬롯 전건 페르소나 가중치 존재",
+                  all(w and sum(w.values()) > 0 for w in _SW.values())))
 
     _it = {"kind": "disclosure", "stock_code": "005930",
            "facts": "발행 총액: 200억원\n전환가액: 2,396원\n만기: 2031-09-11\n"
@@ -352,8 +347,9 @@ def main():
                   _ang.available({"facts": "상세 수치는 공개되지 않음"}) == []))
 
     # 길이·문장수는 Format 에 귀속 (Global '최소 5문장' 과 충돌하던 문제)
-    ok.append(run("Length spec 존재", "3문장" in _L["short"]["spec"]))
-    from src.personas import SYSTEM_PROMPT as _SP
+    from src.personas_v2 import SYSTEM_PROMPT as _SP, PERSONAS as _PD2
+    ok.append(run("페르소나 문장수 지시 존재",
+                  all(p["sentences"] for p in _PD2.values())))
     ok.append(run("Global 최소문장수 제거", "최소 5문장" not in _SP))
     ok.append(run("'확인되지 않았다' 강제 제거", '"확인되지 않았다"고 적을 것' not in _SP))
 
@@ -367,12 +363,12 @@ def main():
     ok.append(run("빈값은 빈 문자열", _dfmt("-", "원") == ""))
 
 
-    # ── 구조별 질문 마무리 금지 (실측: 프롬프트만으로는 4건 전부 물음표로 끝남)
+    # ── 페르소나별 질문 마무리 금지 (실측: 프롬프트만으로는 4건 전부 물음표로 끝남)
     _qb = "디케이티가 어제 올랐네요. 거래대금도 늘었는데요. 사유는 확인이 안 됩니다. 배경이 뭐라고 보시나요?"
-    ok.append(run("fact_read 질문마무리 리젝",
-                  any("질문마무리금지" in e for e in _f2.check(_qb, "", "fact_read"))))
-    ok.append(run("open_question 은 허용",
-                  not any("질문마무리금지" in e for e in _f2.check(_qb, "", "open_question"))))
+    ok.append(run("fact_note 질문마무리 리젝",
+                  any("질문마무리금지" in e for e in _f2.check(_qb, "", "fact_note"))))
+    ok.append(run("open_talk 은 허용",
+                  not any("질문마무리금지" in e for e in _f2.check(_qb, "", "open_talk"))))
 
     # ── 리포트 글감 기준 (제목만 있으면 차단)
     ok.append(run("리포트 제목만 차단", not _hs2(
@@ -428,7 +424,6 @@ def main():
 
     # ── Angle 이 생성 계약을 담고 있는가
     ok.append(run("Angle 계약에 첫문장 규칙", "첫 문장" in _ang.contract("reaction")))
-    ok.append(run("lead_number 구조 존재", "lead_number" in _F))
 
 
     # ── Length 연동 길이 기준 (실측: 고정 50~300 과 어긋나 4건 과잉 리젝)
@@ -439,8 +434,8 @@ def main():
               if "너무" in x]
         ok.append(run(f"길이 {_ln}/{_n}자 {'리젝' if _should else '통과'}",
                       bool(_e) == _should, str(_e)))
-    ok.append(run("Length spec 에 하한 명시", "이상" in _L["short"]["spec"]))
-    ok.append(run("프롬프트 상한 < 필터 상한", _L["long"]["max"] > 270))
+    ok.append(run("페르소나 상한이 필터 상한 이내",
+                  max(p["max"] for p in _PD2.values()) <= 330))
 
 
     # ── 텔레그램 운용사 채널 (화이트리스트 + 필터)
@@ -501,8 +496,9 @@ def main():
         _f_ai, "fact_read", "reaction", "short")))
 
     # ── Voice 가 계약을 담고 있는가 (라벨이면 문체가 안 바뀐다)
-    ok.append(run("Voice 계약에 어미 규칙", "종결어미" in _V["dry"]["desc"]))
-    ok.append(run("Voice 계약에 문장 규칙", "5어절" in _V["light"]["desc"]))
+    from src.personas_v2 import PERSONAS as _PD
+    ok.append(run("페르소나 계약에 어미 규칙",
+                  any("종결어미" in p["desc"] for p in _PD.values())))
 
 
     # ── 재생성 힌트 (같은 프롬프트로 재시도하면 같은 실수를 반복한다)
@@ -511,17 +507,16 @@ def main():
     ok.append(run("힌트에 수치 지적", "숫자" in _hh))
     ok.append(run("힌트에 방향 지적", "부호" in _hh))
     ok.append(run("힌트 중복 제거", _h(["수치과다(5개)", "수치과다(6개)"]).count("\n") == 0))
-    from src.personas import build_messages as _bm
+    from src.personas import build_messages_v2 as _bm
     _sys, _ = _bm({"kind": "flow", "title": "t", "facts": "등락률: 20.32%",
-                   "retry_hint": "- 숫자를 줄이세요."}, "calm", "fact_read", "reaction", "medium")
+                   "retry_hint": "- 숫자를 줄이세요."}, "fact_note", "reaction")
     ok.append(run("힌트가 프롬프트에 주입", "직전 시도에서" in _sys))
 
-    # calm 계약이 방향 오용을 유도하지 않는가
-    ok.append(run("calm 계약에 방향 규칙", "낙폭" in _V["calm"]["desc"]))
+    # 방향 오용 규칙은 전역(SYSTEM_PROMPT)에만 둔다 — 페르소나마다 적으면 어긋난다
     ok.append(run("전역 규칙에 방향 어휘", "등락 방향 어휘" in _SP))
 
 
-    # ── 페르소나 v2 (캐릭터 통합형) — 되돌릴 수 있게 v1 과 공존
+    # ── 페르소나 v2 (캐릭터 통합형)
     from src.personas_v2 import PERSONAS as _P2, SLOT_W as _SW2
     from src import personas as _PM
     ok.append(run("v2 페르소나 10종", len(_P2) == 10, str(len(_P2))))
@@ -531,9 +526,9 @@ def main():
     ok.append(run("페르소나마다 길이·숫자상한 보유",
                   all({"min", "max", "num_cap", "no_question", "sentences"} <= set(v)
                       for v in _P2.values())))
-    # 모드 공통 접근자가 v1/v2 를 모두 흡수하는가
-    ok.append(run("접근자 v1 호환", _PM.len_bounds("short") == (40, 160)))
-    ok.append(run("접근자 v2 호환", _PM.len_bounds("quick_memo") == (35, 120)))
+    # 공통 접근자가 페르소나 스펙을 정확히 흡수하는가
+    ok.append(run("접근자 길이 반영", _PM.len_bounds("quick_memo") == (35, 120)))
+    ok.append(run("미등록 페르소나는 기본값", _PM.len_bounds("없는페르소나") == (50, 300)))
     from src import personas_v2 as _P2v
     # num_cap 은 claim_cap 에서 파생된다. 주장 하나가 숫자 둘을 데려오므로
     # claim_cap 보다 작으면 모순이다 (실측: 수치과다 6건 중 5건이 이 불일치)
