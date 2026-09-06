@@ -26,6 +26,41 @@ HK_ROW_SELECTORS = [
 ]
 
 
+# 상세 페이지 헤더 줄: "한화투자증권 | 2026.09.04 | 조회 7522 목표가 30,000 | 투자의견 Buy"
+# 프로브(data/research_probe.txt)로 확인한 실제 문자열이다. 추측이 아니다.
+DETAIL_MAX = 20        # 상세 조회 건수 상한 (요청 수 = 그대로 부하)
+_TP = re.compile(r"목표가\s*([\d,]+)")
+_OPINION = re.compile(r"투자의견\s*([A-Za-z가-힣.]+)")
+
+
+def _naver_detail(url: str) -> str:
+    """상세 페이지에서 목표가·투자의견만 가져온다.
+
+    목록은 제목·증권사만 준다. 그래서 이 두 값을 Gemini 검색 그라운딩으로
+    알아내고 있었는데 1회 약 35원이다(실청구 역산). 상세 페이지에 그냥 있다.
+    본문 요약은 리포트 저작물이라 가져오지 않는다 — 수치와 의견만 쓴다.
+    """
+    soup = crawl.get_soup(url, encoding="euc-kr")
+    if soup is None:
+        return ""
+    crawl.sleep_jitter(0.2, 0.6)     # 연속 요청으로 차단당하지 않게
+    for sel in ["div.box_type_m", "table.type_1", "body"]:
+        el = soup.select_one(sel)
+        if not el:
+            continue
+        head = el.get_text(" ", strip=True)[:300]
+        tp, op = _TP.search(head), _OPINION.search(head)
+        if not (tp or op):
+            continue
+        out = []
+        if tp and tp.group(1).replace(",", "") != "0":
+            out.append(f"제시 적정가격: {tp.group(1)}원")
+        if op and "없음" not in op.group(1):
+            out.append(f"투자의견: {op.group(1)}")
+        return "\n".join(out)
+    return ""
+
+
 def fetch_naver(limit: int = 12) -> list[dict]:
     url = "https://finance.naver.com/research/company_list.naver"
     out = []
@@ -48,6 +83,12 @@ def fetch_naver(limit: int = 12) -> list[dict]:
 
         name = a_stock.get_text(strip=True)
         title = a_title.get_text(strip=True)
+        _href = a_title.get("href", "")
+        _url = _href if _href.startswith("http") else \
+            "https://finance.naver.com/research/" + _href.lstrip("/")
+        # 배포 상한이 12건이라 전건 상세 조회는 낭비다. 앞쪽만 본다.
+        _d = _naver_detail(_url) if len(out) < DETAIL_MAX else ""
+        _detail = (_d + "\n") if _d else ""
         out.append({
             "id": "naver-" + re.sub(r"\W", "", a_title.get("href", ""))[-24:],
             "kind": "research",
@@ -58,7 +99,9 @@ def fetch_naver(limit: int = 12) -> list[dict]:
                 f"종목: {name} ({m.group(1)})\n"
                 f"리포트 제목: {title}\n"
                 f"발간: {tds[2].get_text(strip=True)} / {tds[4].get_text(strip=True)}\n"
-                f"※ 제목 외 본문 수치는 미제공. 목표주가·투자의견을 추정하지 말 것."
+                f"{_detail}"
+                f"※ 제시 수치는 증권사 의견이며 단정하지 말 것."
+                + ("" if _detail else "\n※ 목표주가·투자의견 미제공. 추정하지 말 것.")
             ),
             "src": "https://finance.naver.com" + a_title.get("href", ""),
         })
