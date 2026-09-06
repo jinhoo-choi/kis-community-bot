@@ -162,7 +162,12 @@ def fetch(limit: int = 12) -> list[dict]:
         ok += 1
 
         col = _col_map(soup)
-        need = {"종목명", "현재가", "등락률", "거래대금"}
+        # 상승/하락률 페이지에는 거래대금 컬럼이 없다 (실측: 거래량만 있음).
+        # 현재가 x 거래량으로 대체한다 — 당일 평균단가가 아니라 종가 기준이라
+        # 정확한 거래대금은 아니지만, 유동성 하한 판정에는 충분하다.
+        need = {"종목명", "현재가", "등락률"}
+        if "거래대금" not in col and "거래량" not in col:
+            need = need | {"거래대금"}
         if not need <= set(col):
             # 어떤 컬럼이 없는지 남긴다. '인식 실패'만으로는 원인을 못 좁힌다.
             print(f"[market] ⚠ 컬럼 부족 {sorted(need - set(col))} "
@@ -196,7 +201,11 @@ def fetch(limit: int = 12) -> list[dict]:
             if raw_pct.startswith("-") or (
                     "전일비" in col and "하락" in tds[col["전일비"]].get_text()):
                 change_pct = -abs(change_pct)
-            eok = _num(cell("거래대금")) / 100      # 백만원 -> 억원
+            if "거래대금" in col:
+                eok = _num(cell("거래대금")) / 100          # 백만원 -> 억원
+            else:
+                vol = _num(cell("거래량"))
+                eok = (close * vol / 1e8) if (close and vol) else None
 
             if close is None or change_pct is None or eok is None:
                 continue
