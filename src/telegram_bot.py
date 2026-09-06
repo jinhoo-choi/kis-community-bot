@@ -145,11 +145,29 @@ def send_all(posts: list[dict]) -> int:
             if not config.target_chat()[0] and not _resolve_by_suffix():
                 return sent
             continue
-        if r.ok:
+        # 429 는 재시도로 회수한다. 텔레그램이 대기 초를 알려주므로 그대로 따른다.
+        # 실측(#76): 0.06초 간격으로 36건을 쏴서 18건이 429 로 유실됐다.
+        # 봇의 초당 30건 제한은 전체 기준이고, 한 채팅방은 그보다 훨씬 빡빡하다.
+        for _ in range(3):
+            if r is None or r.ok or r.status_code != 429:
+                break
+            try:
+                wait = int(r.json()["parameters"]["retry_after"]) + 1
+            except Exception:
+                wait = 5
+            print(f"[tg] 429 — {wait}초 대기 후 재시도 {p['id']}")
+            time.sleep(min(wait, 60))
+            r = _post("sendMessage", {
+                "parse_mode": "HTML",
+                "text": card(p, i, total),
+                "disable_web_page_preview": True,
+            })
+
+        if r is not None and r.ok:
             sent += 1
-        else:
+        elif r is not None:
             print(f"[tg] 실패 {p['id']}: {r.text[:300]}")
-        time.sleep(0.06)          # 초당 ~30건 제한 회피
+        time.sleep(config.TG_SEND_INTERVAL)
     return sent
 
 

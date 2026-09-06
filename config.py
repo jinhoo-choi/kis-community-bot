@@ -209,3 +209,7 @@ STATE_PATH = "data/state.json"
 OUTPUT_PATH = "data/posts_latest.json"
 
 FOOTER = "AI 생성 · 출처 {src}\n※ 투자 판단과 그 책임은 본인에게 있습니다."
+
+# 발송 간격. 0.06초로 36건을 연속 발송해 18건이 429 로 유실됐다(#76).
+# 봇 전체 한도(초당 30건)와 별개로 한 채팅방 한도가 훨씬 낮다.
+TG_SEND_INTERVAL = float(os.environ.get("TG_SEND_INTERVAL", "1.2"))

@@ -6,6 +6,8 @@ pykrx 는 사용하지 않는다 — 2026년 기준 KRX_ID/KRX_PW 계정을 요�
 GitHub Actions 에서 `KRX 로그인 실패` 로 전건 실패했다 (dry-run 실측).
 """
 import functools
+import json
+import os
 import re
 import time
 
@@ -65,6 +67,37 @@ _HEADERS = {
 }
 
 
+# 상장사 목록은 하루에 몇 종목 바뀌지 않는다. 그런데 KIND 가 403 을 내면
+# 네이버 폴백이 665종목만 주고(정상 2,700+), 2,000종목이 통째로 사라진다.
+# 그러면 공시·리포트의 종목명->코드 변환이 실패해 테마글로 강등되고
+# 게이트에서 글감부족으로 떨어진다 (실측 #76: 글감부족 38 -> 44, 공시 3 -> 1).
+# 마지막으로 성공한 목록을 디스크에 두고 실패 시 그걸 쓴다.
+_CACHE_PATH = "data/listed_cache.json"
+_CACHE_TTL = 30 * 86400
+
+
+def _cache_read() -> dict[str, str]:
+    try:
+        with open(_CACHE_PATH, encoding="utf-8") as f:
+            c = json.load(f)
+        if time.time() - c.get("ts", 0) < _CACHE_TTL and len(c.get("map", {})) > 1000:
+            return c["map"]
+    except Exception:
+        pass
+    return {}
+
+
+def _cache_write(table: dict[str, str]) -> None:
+    if len(table) < 1000:
+        return
+    try:
+        os.makedirs(os.path.dirname(_CACHE_PATH), exist_ok=True)
+        with open(_CACHE_PATH, "w", encoding="utf-8") as f:
+            json.dump({"ts": time.time(), "map": table}, f, ensure_ascii=False)
+    except Exception as e:
+        print(f"[tickers] 캐시 저장 실패: {e}")
+
+
 @functools.lru_cache(maxsize=1)
 def listed() -> dict[str, str]:
     """{종목명: 종목코드}. 실패 시 빈 dict (호출부는 전부 테마글로 강등)."""
@@ -105,6 +138,7 @@ def listed() -> dict[str, str]:
                     table[name] = code
             if len(table) > 1000:
                 print(f"[tickers] 상장 {len(table)}종목 로드 ({parser})")
+                _cache_write(table)
                 return table
 
         # 폴백: 태그 트리 없이 원문에서 직접 추출
@@ -121,14 +155,20 @@ def listed() -> dict[str, str]:
             print(f"[tickers] ⚠ 상장 {len(table)}종목만 파싱됨 — 소스 구조 변경 의심")
         else:
             print(f"[tickers] 상장 {len(table)}종목 로드 (regex)")
+            _cache_write(table)
         return table
     except Exception as e:
-        print(f"[tickers] ⚠ KIND 실패: {e} → 네이버 폴백")
+        print(f"[tickers] ⚠ KIND 실패: {e}")
+        cached = _cache_read()
         t = _from_naver()
+        # 네이버 폴백은 665종목뿐이라 캐시(2,700+)가 있으면 그쪽이 낫다.
+        if len(cached) > len(t):
+            print(f"[tickers] 캐시 {len(cached)}종목 사용 (네이버 폴백 {len(t)}종목보다 큼)")
+            return cached
         if t:
             print(f"[tickers] 네이버 폴백 {len(t)}종목 로드")
         else:
-            print("[tickers] ⚠ 폴백도 실패 — 전건 테마글로 강등된다")
+            print("[tickers] ⚠ 폴백도 캐시도 없음 — 전건 테마글로 강등된다")
         return t
 
 
