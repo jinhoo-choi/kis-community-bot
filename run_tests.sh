@@ -44,6 +44,9 @@ echo
 echo "=== 2b. 전수검사 (설정-코드 정합성) ==="
 python3 tools/audit.py
 echo
+echo "=== 2c. 계약 정합성 (전역 규칙 x 페르소나 x Angle x 필터) ==="
+python3 tools/audit_contracts.py
+echo
 echo "=== 3. E2E 시뮬레이션 ==="
 python3 tests/test_e2e.py
 echo
