@@ -234,7 +234,7 @@ ok
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'careful_note', 'brief_report', 'open_talk', 'check_list', 'data_focus', 'fact_note'})
+  OK    flow 에서 quick_memo 미선택  ({'fact_note', 'open_talk', 'brief_report', 'check_list', 'careful_note', 'data_focus'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
 [crawl] market 62건
