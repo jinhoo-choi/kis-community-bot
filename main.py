@@ -57,8 +57,16 @@ def main():
     # 사실 보강을 게이트보다 먼저 한다.
     # 순서가 반대면 '보강하면 글감이 되는' 공시·리포트가 tier5(글감부족)로 미리 잘려
     # 수치가 확실한 flow(특징주)만 살아남는 편향이 생긴다 (실측: 3건 전부 특징주).
-    if config.ENABLE_ENRICH:
-        raw = enrich.enrich_all(raw)
+    # 다만 flow(특징주)는 시세 수치가 이미 facts 에 있어 보강 없이도 게이트를 통과한다
+    # (실측: 게이트 차단 60건 중 flow 는 0건). 수집 287건 중 185건이 flow 이므로
+    # 전건 보강은 검색 그라운딩 호출을 3배 가까이 낭비한다.
+    # dry-run 은 '수집만 실행'이라고 안내하면서 보강을 돌리고 있었다 — 스킵한다.
+    if config.ENABLE_ENRICH and not dry:
+        targets = [x for x in raw if x.get("kind") != "flow"]
+        skipped = [x for x in raw if x.get("kind") == "flow"]
+        raw = enrich.enrich_all(targets) + skipped
+    elif dry:
+        print("[enrich] dry-run — 보강 스킵 (그라운딩 호출 없음)")
     enriched_n = sum(1 for x in raw if x.get("enriched"))
 
     # 하드 게이트 — AI 호출 이전에 구조적으로 배제
