@@ -168,7 +168,10 @@ ENABLE_ENRICH = os.environ.get("ENABLE_ENRICH", "1") == "1"
 # 실청구 역산: 그라운딩 1회 약 35원. 월 22영업일 기준
 #   40건/일 -> 3.3만원 / 30건 -> 2.5만원 / 20건 -> 1.7만원
 # 목표가 월 2만원 미만이므로 운영 상한을 20 으로 둔다.
-ENRICH_MAX = int(os.environ.get("ENRICH_MAX", "10" if TEST_MODE else "20"))
+# 테스트도 운영과 같은 공급 조건이어야 50건 달성 여부를 잴 수 있다.
+# 10 으로 조였더니 공시 9 / 정책 5 밖에 안 남아 배포가 22건에 그쳤다(실측 #67,#68).
+# 반복 실행은 캐시 적중으로 호출이 0 이라 테스트 상한을 높여도 비용이 늘지 않는다.
+ENRICH_MAX = int(os.environ.get("ENRICH_MAX", "40" if TEST_MODE else "20"))
 
 ENABLE_JUDGE  = os.environ.get("ENABLE_JUDGE", "1") == "1"
 MIN_JUDGE_SCORE = int(os.environ.get("MIN_JUDGE_SCORE", "14"))   # 20점 환산
