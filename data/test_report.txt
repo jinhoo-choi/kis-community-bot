@@ -117,11 +117,11 @@ ok
   OK    지표 보강 시 compare 채택  (['reaction', 'compare', 'amount', 'ratio'])
   OK    Angle 계약에 첫문장 규칙
   OK    lead_number 구조 존재
-  OK    길이 short/34자 리젝  (['너무짧음(34자/short)'])
+  OK    길이 short/34자 리젝  (['너무짧음(34자<40/short)'])
   OK    길이 short/90자 통과  ([])
   OK    길이 medium/150자 통과  ([])
   OK    길이 long/260자 통과  ([])
-  OK    길이 long/370자 리젝  (['너무김(370자/long)'])
+  OK    길이 long/370자 리젝  (['너무김(370자>330/long)'])
   OK    Length spec 에 하한 명시
   OK    프롬프트 상한 < 필터 상한
   OK    verified 아니면 미수집
@@ -239,7 +239,7 @@ ok
   OK    공급계약 제목만 처리
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'check_list', 'data_focus', 'careful_note', 'open_talk', 'fact_note', 'brief_report'})
+  OK    flow 에서 quick_memo 미선택  ({'careful_note', 'brief_report', 'fact_note', 'check_list', 'open_talk', 'data_focus'})
 
 224/224 passed
 
@@ -268,10 +268,10 @@ ok
   OK    Angle 11종 / 미확인 허용 ['inquiry', 'uncertainty']
 
 === 필터 동작 ===
-  OK    필터 1인칭: ['first_person_trade', '너무짧음(43자/fact_note)']
-  OK    필터 매매권유: ['trade_advice', 'price_target', '너무짧음(42자/fact_note)']
-  OK    필터 기사체: ['literary_style', '너무짧음(40자/fact_note)', "미확인수치['200']", "근거없는수치['200']"]
-  OK    필터 당신: ['second_person', '너무짧음(42자/fact_note)']
+  OK    필터 1인칭: ['first_person_trade', '너무짧음(43자<80/fact_note)']
+  OK    필터 매매권유: ['trade_advice', 'price_target', '너무짧음(42자<80/fact_note)']
+  OK    필터 기사체: ['literary_style', '너무짧음(40자<80/fact_note)', "미확인수치['200']", "근거없는수치['200']"]
+  OK    필터 당신: ['second_person', '너무짧음(42자<80/fact_note)']
   OK    필터 정상: 통과
 
 === 설정 ===
@@ -304,14 +304,14 @@ FAIL 0 / WARN 0
 
 [4] 생성 + 정규식 필터
 [gen] claude: 6/6건 생성
-[gen] 정규식 리젝 d1 ['너무짧음(98자/careful_note)']
+[gen] 정규식 리젝 d1 ['너무짧음(98자<100/careful_note)']
        └ '단일판매·공급계약 체결 관련 공시가 어제 나왔습니다.\n공시 제목 기준으로만 정리해 둡니다. 규모는 원문에서 확인하시면 됩니다.\n다음 공시에서 이어지는 내용이 나올 것 같습니다.'
 [gen] gemini: 7/7건 생성
 [gen] 정규식 리젝 v1 ['first_person_trade']
        └ '두산에너빌리티 원전 수주 소식이 나왔네요. 저는 이거 물렸는데 이번엔 좀 오르려나요. 체코 건 이후로 분위기가 달라진 건 맞습니다. 다만 확정된 수치는 없습니다. 어떻게 보시나요.'
 [gen] 정규식 리젝 v2 ['trade_advice', 'price_target']
        └ '카카오 광고매출 회복 얘기가 나옵니다. 지금 비중확대 하세요. 목표가 6만원 갑니다. 반드시 오릅니다. 지금이 기회입니다. 다들 어떻게 보시나요.'
-[gen] 정규식 리젝 v3 ["미확인수치['8742', '452', '1530']", "근거없는수치['1530', '452', '8742']"]
+[gen] 정규식 리젝 v3 ["미확인수치['452', '8742', '1530']", "근거없는수치['1530', '452', '8742']"]
        └ 'LG에너지솔루션이 어제 2.30% 올랐습니다. 거래대금은 8,742억원이었고 외국인이 1,530억 순매수했습니다. 수주잔고도 452조원까지 늘었다고 합니다. 배터리 업황이 돌아서는 걸까요.'
 [gen] 정규식 통과 9건 / 시도 13건
 

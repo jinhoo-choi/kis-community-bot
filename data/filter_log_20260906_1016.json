@@ -1,0 +1,376 @@
+[
+ {
+  "id": "dart-20260904000367",
+  "result": "rejected",
+  "reason": "수치과다(4개/quick_memo)",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "decode",
+  "len": 95,
+  "body": "NICE가 자기주식취득신탁계약을 해지하기로 결정했어요. 신탁계약이 2026년 09월 04일 만료되면서 기간만료에 의한 해지인데, 발행주식 대비 6.45%가 관련된 거네요."
+ },
+ {
+  "id": "hk-652137",
+  "result": "rejected",
+  "reason": "news_cliche",
+  "provider": "claude",
+  "tone": "open_talk",
+  "angle": "amount",
+  "len": 160,
+  "body": "30,000원이 한화투자증권의 적정가격이네요. DBO 레퍼런스를 확보하면서 수익성이 개선되는 흐름이라고 보는 건데, 남은 과제는 멀티플 정상화라는 분석이군요. 투자의견은 Buy를 제시했습니다. 리포트에서 말하는 멀티플 정상화가 구체적으로 어떤 단계를 거칠 걸로 보는지 아시는 분 있나요?"
+ },
+ {
+  "id": "flow-2026-09-04-030530",
+  "result": "rejected",
+  "reason": "어미반복(습니다×4)",
+  "provider": "claude",
+  "tone": "data_focus",
+  "angle": "reaction",
+  "len": 120,
+  "body": "원익홀딩스가 29.91% 올랐습니다. 종가는 22,500원으로 마감했으며 거래대금은 225억원이었습니다. 5거래일 누적 기준으로는 17.92% 상승했습니다. 지난 거래일의 움직임이 최근 흐름과는 별개로 나타났습니다."
+ },
+ {
+  "id": "flow-2026-09-04-108490",
+  "result": "rejected",
+  "reason": "수치과다(6개/careful_note)",
+  "provider": "claude",
+  "tone": "careful_note",
+  "angle": "compare",
+  "len": 127,
+  "body": "어제 22.54% 올랐네요. 거래량은 20일 평균의 6.4배까지 불어났습니다. 장중에는 저가 대비 18.9% 오르내렸고, 마감은 장중 고가보다 3.3% 낮은 수준에서 마감했어요. 지난 5거래일 누적으로는 25.83% 올랐습니다."
+ },
+ {
+  "id": "flow-2026-09-04-234340",
+  "result": "rejected",
+  "reason": "수치과다(5개/two_view)",
+  "provider": "claude",
+  "tone": "two_view",
+  "angle": "amount",
+  "len": 144,
+  "body": "252억원의 거래대금이 나왔어요. 어제 헥토파이낸셜이 13.48% 올랐고, 거래량은 20일 평균의 3.6배였습니다. 긍정적으로 보면 5거래일 누적으로 7.91% 오른 흐름이 이어지는 중입니다. 다른 각도로는 하루 사이 큰 폭의 변동이 나타난 것이기도 합니다."
+ },
+ {
+  "id": "flow-2026-09-04-336260",
+  "result": "rejected",
+  "reason": "수치과다(5개/timeline_note)",
+  "provider": "claude",
+  "tone": "timeline_note",
+  "angle": "duration",
+  "len": 131,
+  "body": "어제 두산퓨얼셀이 12.44% 올랐어요. 종가는 43,850원이었습니다. 장중에는 저가에서 14.4%까지 움직였는데 마감은 장중 고가보다 2.3% 낮은 수준에서 정리됐네요. 다만 5거래일 누적으로는 아직 3.41% 내려있는 상황입니다."
+ },
+ {
+  "id": "flow-2026-09-04-058610",
+  "result": "rejected",
+  "reason": "수치과다(6개/fact_note)",
+  "provider": "claude",
+  "tone": "fact_note",
+  "angle": "reaction",
+  "len": 108,
+  "body": "에스피지가 전일 12.41% 올랐습니다. 종가는 94,200원이었는데요. 거래대금은 942억원이었습니다. 거래량은 20일 평균의 2.3배 수준이었고, 5거래일 누적으로는 1.62% 상승했습니다."
+ },
+ {
+  "id": "flow-2026-09-04-263750",
+  "result": "rejected",
+  "reason": "주장과다(6개/5)",
+  "provider": "claude",
+  "tone": "fact_note",
+  "angle": "reaction",
+  "len": 117,
+  "body": "펄어비스가 11.47% 상승해 34,500원에 마감했습니다. 어제 거래대금은 345억원이었는데요. 장중 저가 대비 8.5% 폭으로 움직였고, 고가에서 시작한 상승장을 마감 시점에 2.1% 정도 내준 모습입니다."
+ },
+ {
+  "id": "flow-2026-09-04-240810",
+  "result": "rejected",
+  "reason": "수치과다(5개/careful_note)",
+  "provider": "claude",
+  "tone": "careful_note",
+  "angle": "ratio",
+  "len": 134,
+  "body": "종가 대비 거래대금 비율을 보면 1,147억원이 114,800원에서 거래됐어요. 9.33% 상승률을 기록했고, 거래량은 20일 평균의 1.1배 수준이었습니다. 반도체 증착장이 주력 사업인 회사네요. 장 중에 가격 변동이 있었을 것 같습니다."
+ },
+ {
+  "id": "kind-20260904000786",
+  "result": "rejected",
+  "reason": "stock_ending",
+  "provider": "claude",
+  "tone": "fact_note",
+  "angle": "duration",
+  "len": 158,
+  "body": "디에이치엑스컴퍼니가 거래소 조회공시에 답변했습니다. 공시 제목은 '주권매매거래정지기간변경(풍문 또는 보도 관련)'인데요. 거래소가 시황 변동이나 풍문 관련해 회사의 입장을 요구한 건입니다. 답변 내용은 원문 확인이 필요합니다. 이날 종가는 6,930원으로 전일 대비 변동 없었습니다."
+ },
+ {
+  "id": "pol-하후상박개편기초연금2030년지출30조원돌파전",
+  "result": "rejected",
+  "reason": "너무짧음(33자<45/brief_report),미완성(종결부호 없음)",
+  "provider": "gemini",
+  "tone": "brief_report",
+  "angle": "amount",
+  "len": 33,
+  "body": "2문장: 정부는 기초연금 의무 지출액이 2030년에 이 금액"
+ },
+ {
+  "id": "pol-집값안꺾이면2030년강북금천도봉뺀서울전역종부",
+  "result": "rejected",
+  "reason": "너무짧음(39자<45/brief_report),미완성(종결부호 없음),근거없는수치['2030']",
+  "provider": "gemini",
+  "tone": "brief_report",
+  "angle": "duration",
+  "len": 39,
+  "body": "2030년. 이 해는 집값 상승과 종합부동산세 개편이 맞물릴 경우 강북"
+ },
+ {
+  "id": "poll-flow-2026-09-04-030530",
+  "result": "rejected",
+  "reason": "너무짧음(34자<110/two_view)",
+  "provider": "gemini",
+  "tone": "two_view",
+  "angle": "compare",
+  "len": 34,
+  "body": "사실 2문장): - 전일 등락률은 29.91%를 나타냈습니다."
+ },
+ {
+  "id": "poll-flow-2026-09-04-108490",
+  "result": "rejected",
+  "reason": "너무짧음(37자<100/careful_note)",
+  "provider": "gemini",
+  "tone": "careful_note",
+  "angle": "ratio",
+  "len": 37,
+  "body": "로보티즈의 전일 거래량은 20일 평균 대비 6.4배 수준이었습니다."
+ },
+ {
+  "id": "poll-flow-2026-09-04-234340",
+  "result": "rejected",
+  "reason": "너무짧음(78자<80/open_talk),미완성(종결부호 없음),미확인수치['250'],근거없는수치['250']",
+  "provider": "gemini",
+  "tone": "open_talk",
+  "angle": "amount",
+  "len": 78,
+  "body": "(Target: 4 sentences, 250 chars, 3 distinct numbers, mix endings, 구체적 질문 마무리):"
+ },
+ {
+  "id": "flow-2026-09-04-090460",
+  "kind": "flow",
+  "stock": "비에이치",
+  "title": "비에이치 전일 10.75% 상승",
+  "provider": "claude",
+  "tone": "data_focus",
+  "angle": "amount",
+  "score": 17.3,
+  "score_parts": {
+   "factual": 5,
+   "useful": 4,
+   "natural": 4,
+   "compliant": 5,
+   "gain": 4,
+   "fit": 4
+  },
+  "result": "sent",
+  "reason": "",
+  "attr_reject": null,
+  "thin_facts": true,
+  "len": 88,
+  "body": "218억원이 거래된 가운데 10.75% 올랐습니다. 마감은 장중 고가보다 1.6% 낮은 수준에서 마무리됐습니다. 5거래일 누적으로는 27.78% 상승했습니다."
+ },
+ {
+  "id": "dart-20260904000355",
+  "kind": "disclosure",
+  "stock": "우성",
+  "title": "주요사항보고서(회사합병결정)",
+  "provider": "claude",
+  "tone": "brief_report",
+  "angle": "ratio",
+  "score": 16.0,
+  "score_parts": {
+   "factual": 5,
+   "useful": 3,
+   "natural": 4,
+   "compliant": 5,
+   "gain": 4,
+   "fit": 3
+  },
+  "result": "sent",
+  "reason": "",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 147,
+  "body": "1.8702948주 비율입니다. 우성이 계열사인 우성유통을 흡수합병하면서 우성 보통주 1주당 우성유통 보통주 1.8702948주로 교환하는 조건입니다. 합병 후 사료-농장-유통으로 이어지는 축산 식품 사업 Value Chain이 단일 조직 내에서 통합 운영됩니다."
+ },
+ {
+  "id": "dart-20260904000209",
+  "kind": "disclosure",
+  "stock": "신라교역",
+  "title": "주요사항보고서(타법인주식및출자증권양수결정)",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "ratio",
+  "score": 15.3,
+  "score_parts": {
+   "factual": 5,
+   "useful": 3,
+   "natural": 4,
+   "compliant": 5,
+   "gain": 3,
+   "fit": 3
+  },
+  "result": "sent",
+  "reason": "",
+  "attr_reject": null,
+  "thin_facts": true,
+  "len": 94,
+  "body": "신라교역이 자산총액의 11.39%에 해당하는 규모로 선민수산을 인수하기로 결정했어요. 양수 후 지분율은 100%가 될 예정이고요. 사업다각화를 목적으로 진행되는 거네요."
+ },
+ {
+  "id": "dart-20260904000431",
+  "kind": "disclosure",
+  "stock": "우성",
+  "title": "주요사항보고서(자기주식처분결정)",
+  "provider": "claude",
+  "tone": "quick_memo",
+  "angle": "decode",
+  "score": 10.7,
+  "score_parts": {
+   "factual": 3,
+   "useful": 2,
+   "natural": 3,
+   "compliant": 4,
+   "gain": 2,
+   "fit": 2
+  },
+  "result": "held",
+  "reason": "fatal:상세 수치는 공개되지 않았다가 내용의 절반",
+  "attr_reject": null,
+  "thin_facts": false,
+  "len": 95,
+  "body": "우성이 자기주식 처분을 결정했어요. 합병 대가로 자기주식을 교부하겠다는 내용인데, 이때 '자기주식교부'는 회사가 보유 중인 자사주를 합병 상대방에게 주는 방식을 말합니다."
+ },
+ {
+  "id": "hk-652124",
+  "kind": "research",
+  "stock": "세경하이테크",
+  "title": "세경하이테크 실적 반등 시작, 모멘텀도 대기 중",
+  "provider": "claude",
+  "tone": "check_list",
+  "angle": "amount",
+  "score": 10.7,
+  "score_parts": {
+   "factual": 3,
+   "useful": 2,
+   "natural": 4,
+   "compliant": 3,
+   "gain": 2,
+   "fit": 2
+  },
+  "result": "held",
+  "reason": "fatal:상세 수치는 리포트에 있습니다 류 filler",
+  "attr_reject": null,
+  "thin_facts": true,
+  "len": 177,
+  "body": "메리츠증권 양승수 애널리스트가 세경하이테크에 대해 실적 반등 시작이라는 평가를 내렸어요. 적정가격은 6,500원, 투자의견은 Buy라고 제시했네요. 제목에서 '모멘텀도 대기 중'이라고 했는데, 본문 구체 수치가 없어서 어떤 지표를 봐야 하는지 궁금하네요. 리포트 전문에서 확인하면 더 자세히 알 수 있을 것 같습니다."
+ },
+ {
+  "id": "pol-하나금융소진공소공연과착한계란물가안정화업무협약",
+  "kind": "policy",
+  "stock": "신한지주",
+  "title": "하나금융, 소진공·소공연과 '착한계란 물가안정화' 업무협약",
+  "provider": "claude",
+  "tone": "brief_report",
+  "angle": "duration",
+  "score": 14.7,
+  "score_parts": {
+   "factual": 5,
+   "useful": 3,
+   "natural": 4,
+   "compliant": 5,
+   "gain": 3,
+   "fit": 2
+  },
+  "result": "held",
+  "reason": "커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "thin_facts": false,
+  "len": 110,
+  "body": "하나금융그룹이 소상공인시장진흥공단, 소상공인연합회와 업무협약을 체결했습니다. 동네슈퍼를 통한 착한계란 공급으로 물가안정화를 추진하는 내용입니다. 금융회사가 소상공인 물가대응에 직접 나선 사례입니다."
+ },
+ {
+  "id": "pol-빚투속에50대이상보험계약대출카드론늘었다",
+  "kind": "policy",
+  "stock": "신한지주",
+  "title": "'빚투' 속에 50대 이상 보험계약대출·카드론 늘었다",
+  "provider": "claude",
+  "tone": "brief_report",
+  "angle": "duration",
+  "score": 12.0,
+  "score_parts": {
+   "factual": 4,
+   "useful": 2,
+   "natural": 3,
+   "compliant": 5,
+   "gain": 2,
+   "fit": 2
+  },
+  "result": "held",
+  "reason": "커뮤니티적합성 2/5 정보량이 적고 일반적인 요약에 그침",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "thin_facts": false,
+  "len": 119,
+  "body": "올해 상반기 증시 활황으로 빚내서 투자하는 사례가 늘어났습니다. 2금융권에서는 50·60대를 중심으로 보험계약대출과 카드론 이용이 증가한 것으로 나타났습니다. 언론 보도에 따르면 이 같은 추세가 관찰되고 있습니다."
+ },
+ {
+  "id": "pol-23개월만에최저환율에기업달러예금역대최대",
+  "kind": "policy",
+  "stock": "KB금융",
+  "title": "23개월 만에 최저 환율에…기업 달러예금 역대 최대",
+  "provider": "claude",
+  "tone": "brief_report",
+  "angle": "amount",
+  "score": 14.7,
+  "score_parts": {
+   "factual": 5,
+   "useful": 3,
+   "natural": 4,
+   "compliant": 5,
+   "gain": 3,
+   "fit": 2
+  },
+  "result": "held",
+  "reason": "커뮤니티적합성 2/5 정보량이 적고 커뮤니티 논점이 부족함",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "thin_facts": false,
+  "len": 76,
+  "body": "1,345원. 원/달러 환율이 23개월 만에 최저 수준까지 내려갔습니다. 이에 따라 기업들의 달러 예금이 역대 최대 규모로 늘어났습니다."
+ },
+ {
+  "id": "pol-하후상박개편기초연금2030년지출30조원돌파전",
+  "kind": "policy",
+  "stock": "KB금융",
+  "title": "'하후상박' 개편 기초연금, 2030년 지출 30조원 돌파 전망",
+  "provider": "claude",
+  "tone": "brief_report",
+  "angle": "amount",
+  "score": 10.7,
+  "score_parts": {
+   "factual": 3,
+   "useful": 2,
+   "natural": 3,
+   "compliant": 4,
+   "gain": 2,
+   "fit": 2
+  },
+  "result": "held",
+  "reason": "fatal:허용된 사실 외의 주장(원인·수혜·기대감·전망·의도 추측)을 함",
+  "attr_reject": [
+   "종목명미검출"
+  ],
+  "thin_facts": false,
+  "len": 145,
+  "body": "30조원. 정부가 2030년 기초연금 의무 지출액으로 전망한 규모입니다. 현재보다 크게 늘어날 것으로 예상되며, 이는 노후 생활 안정 정책의 확대를 반영한 수치입니다. 기초연금 지출 증가는 금융권의 자산관리와 보험 수요에 영향을 미치는 정책 변수로 작동합니다."
+ }
+]
