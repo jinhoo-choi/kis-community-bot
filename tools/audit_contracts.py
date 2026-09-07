@@ -202,6 +202,26 @@ def check_scenarios() -> None:
     ok(f"전체 조합 {total}개 중 불가 {dead}개")
 
 
+# ── H. 전역 길이 지시 vs 페르소나 하한 ────────────────────────────
+# 실측 #77: 프롬프트는 "250자 이내"만 말하고 하한이 없었다.
+# 필터는 페르소나별 하한으로 자르는데 지시는 정반대였고,
+# 너무짧음 리젝 36건이 여기서 나왔다.
+def check_length_instruction() -> None:
+    sec("전역 길이 지시 vs 페르소나 하한")
+    if "{min}" not in SYSTEM_PROMPT or "{max}" not in SYSTEM_PROMPT:
+        fail("SYSTEM_PROMPT 에 페르소나별 길이 하한/상한 치환자가 없다 — "
+             "모델이 하한을 모른 채 쓰게 된다")
+    else:
+        ok("길이 하한/상한이 프롬프트에 주입된다")
+    m = re.search(r"(\d+)자 이내", SYSTEM_PROMPT)
+    if m:
+        lit = int(m.group(1))
+        over = [k for k, p in PERSONAS.items() if p["max"] > lit]
+        if over:
+            fail(f"프롬프트는 {lit}자 이내라는데 상한이 더 큰 페르소나: {over}")
+    ok("길이 지시 점검 완료")
+
+
 def main() -> None:
     check_ending_conflict()
     check_desc_examples()
@@ -210,6 +230,7 @@ def main() -> None:
     check_global_vs_angle()
     check_angle_numcap()
     check_length_sentences()
+    check_length_instruction()
     check_scenarios()
     print("\n" + "=" * 50)
     print(f"FAIL {len(FAIL)} / WARN {len(WARN)}")

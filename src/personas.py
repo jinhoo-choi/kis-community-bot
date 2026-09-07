@@ -65,6 +65,12 @@ def build_messages_v2(item: dict, persona: str, angle: str = "") -> tuple[str, s
               .replace("{persona_name}", p["name"])
               .replace("{persona_desc}", p["desc"])
               .replace("{sentences}", p["sentences"])
+              # 프롬프트는 "250자 이내"만 말하고 하한이 없었다. 필터는
+              # 페르소나별 하한(35~110자)으로 자르는데 지시는 정반대였다.
+              # 실측 #77: 너무짧음 리젝이 raw 106자 -> clean 106자,
+              # 즉 후처리 문제가 아니라 모델이 실제로 짧게 쓴 것이었다.
+              .replace("{min}", str(p["min"]))
+              .replace("{max}", str(p["max"]))
               .replace("{num_cap}", str(p["num_cap"]))
               .replace("{angle_desc}", angles.contract(angle))
               .replace("{claim_block}",
