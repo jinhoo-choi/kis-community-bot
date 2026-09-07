@@ -157,7 +157,13 @@
   "flow-2026-09-04-196170": "2026-09-07",
   "flow-2026-09-04-009900": "2026-09-07",
   "flow-2026-09-04-388210": "2026-09-07",
-  "flow-2026-09-04-027360": "2026-09-07"
+  "flow-2026-09-04-027360": "2026-09-07",
+  "ID::hk-652123": "2026-09-08",
+  "TTL::028670::팬오션high&dry": "2026-09-08",
+  "ID::naver-y_readnavernid96033page1": "2026-09-08",
+  "TTL::035420::아시아유일통합ai팩토리사업자로의부상": "2026-09-08",
+  "hk-652123": "2026-09-08",
+  "naver-y_readnavernid96033page1": "2026-09-08"
  },
  "recent_tone": {
   "_theme": [
@@ -207,7 +213,8 @@
    "brief:short_note"
   ],
   "028670": [
-   "context:fact_then_read"
+   "context:fact_then_read",
+   "open_talk:terms:open_talk:open_talk"
   ],
   "286940": [
    "careful:what_to_check"
@@ -265,7 +272,8 @@
    "careful_note:ratio:careful_note:careful_note"
   ],
   "035420": [
-   "careful_note:compare:careful_note:careful_note"
+   "careful_note:compare:careful_note:careful_note",
+   "fact_note:terms:fact_note:fact_note"
   ],
   "001820": [
    "open_talk:reaction:open_talk:open_talk"

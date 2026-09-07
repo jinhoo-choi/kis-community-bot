@@ -237,7 +237,7 @@ ok
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'careful_note', 'brief_report', 'data_focus', 'fact_note', 'check_list', 'open_talk'})
+  OK    flow 에서 quick_memo 미선택  ({'brief_report', 'check_list', 'careful_note', 'data_focus', 'open_talk', 'fact_note'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
 [crawl] market 62건
@@ -312,6 +312,10 @@ FAIL 0 / WARN 0
 === 문장 수 vs 길이 범위 ===
   WARN  quick_memo: 2~3문장 인데 하한 35자 — 문장당 11자면 파편이 된다
   OK    길이/문장수 대조 완료
+
+=== 전역 길이 지시 vs 페르소나 하한 ===
+  OK    길이 하한/상한이 프롬프트에 주입된다
+  OK    길이 지시 점검 완료
 
 === 시나리오 매트릭스 (슬롯 × 페르소나 × Angle) ===
   OK    슬롯 'disclosure': 조합 60개 / 페르소나 10종
