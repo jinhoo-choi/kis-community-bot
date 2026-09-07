@@ -5,30 +5,56 @@
 
 ── 2. 토론방 [삼성전자 005930] ──
   https://finance.naver.com/item/board.naver?code=005930&page=1
-  HTTP 200 / 165,360bytes
+  HTTP 200 / 167,905bytes
+  [euc-kr] meta charset=utf-8 표본='<title>��쇱�깆����� : Npay 利�沅�</title>\n\t\n\t\n\n\n\n\n<meta http-equ'
+  [utf-8] meta charset=utf-8 표본='<title>삼성전자 : Npay 증권</title>\n\t\n\t\n\n\n\n\n<meta http-equiv="Cont'
   표2 헤더(6): ['���吏�', '���紐�', '湲���댁��', '議고��', '異�泥�', '鍮�異�泥�']
-    행(6): ['2026.09.07 23:08', '<JP紐④굔> "��쇱�������� ��ш����� ������媛�������, 吏�...', '�����ㅽ�몃━��몄�����', '1', '0', '0']
-      제목링크: <JP紐④굔> "��쇱�������� ��ш����� ������媛�������, 吏�...
-      href: /item/board_read.naver?code=005930&nid=429055131&page=1
-    행(6): ['2026.09.07 23:03', '��멸��媛� ���湲���� ������ ��� 吏�吏� ��댁��', '�����몃�����', '26', '2', '0']
-      제목링크: ��멸��媛� ���湲���� ������ ��� 吏�吏� ��댁��
-      href: /item/board_read.naver?code=005930&nid=429055075&page=1
-    행(6): ['2026.09.07 23:02', '媛�誘� 湲곕��  臾댁��留�吏� ���寃� ���������', '���諛����醫�', '22', '0', '0']
-      제목링크: 媛�誘� 湲곕��  臾댁��留�吏� ���寃� ���������
-      href: /item/board_read.naver?code=005930&nid=429055062&page=1
-  페이지 링크 표본: ['/item/board_read.naver?code=005930&nid=429055131&page=1', '/item/board_read.naver?code=005930&nid=429055075&page=1', '/item/board_read.naver?code=005930&nid=429055062&page=1', '/item/board_read.naver?code=005930&nid=429055059&page=1', '/item/board_read.naver?code=005930&nid=429055038&page=1', '/item/board_read.naver?code=005930&nid=429055027&page=1']
+    행(6): ['2026.09.07 23:09', '��대��二쇱�������댁㎏..', '援녹�쇰�곗�댄�곕��怨����', '8', '0', '0']
+      제목링크: ��대��二쇱�������댁㎏..
+      href: /item/board_read.naver?code=005930&nid=429055145&page=1
+      제목셀 HTML: <td class="title" style="word-break: break-all;">
+<a href="/item/board_read.naver?code=005930&amp;nid=429055145&amp;page=1" onclick="return singleSubmitCheck();" title="��대��二쇱�������댁㎏..">��대��二쇱�������댁㎏..
+						
+						<img height="10" src="https://ssl.pstat
+    행(6): ['2026.09.07 23:09', '��ㅻ�� ��������� 泥�遺� 怨���쏀�����', '踰�媛����', '4', '0', '1']
+      제목링크: ��ㅻ�� ��������� 泥�遺� 怨���쏀�����
+      href: /item/board_read.naver?code=005930&nid=429055142&page=1
+      제목셀 HTML: <td class="title" style="word-break: break-all;">
+<a href="/item/board_read.naver?code=005930&amp;nid=429055142&amp;page=1" onclick="return singleSubmitCheck();" title="��ㅻ�� ��������� 泥�遺� 怨���쏀�����">��ㅻ�� ��������� 泥�遺� 怨���쏀�����
+						
+						<img height="
+    행(6): ['2026.09.07 23:08', '��⑺����� ��닿굅��� 留�留� ��� ������', '留뱀�����', '3', '0', '0']
+      제목링크: ��⑺����� ��닿굅��� 留�留� ��� ������
+      href: /item/board_read.naver?code=005930&nid=429055137&page=1
+      제목셀 HTML: <td class="title" style="word-break: break-all;">
+<a href="/item/board_read.naver?code=005930&amp;nid=429055137&amp;page=1" onclick="return singleSubmitCheck();" title="��⑺����� ��닿굅��� 留�留� ��� ������">��⑺����� ��닿굅��� 留�留� ��� ������
+						
+						<img height
+  페이지 링크 표본: ['/item/board_read.naver?code=005930&nid=429055145&page=1', '/item/board_read.naver?code=005930&nid=429055142&page=1', '/item/board_read.naver?code=005930&nid=429055137&page=1', '/item/board_read.naver?code=005930&nid=429055133&page=1', '/item/board_read.naver?code=005930&nid=429055131&page=1', '/item/board_read.naver?code=005930&nid=429055075&page=1']
 
 ── 2. 토론방 [SK하이닉스 000660] ──
   https://finance.naver.com/item/board.naver?code=000660&page=1
-  HTTP 200 / 167,394bytes
+  HTTP 200 / 169,901bytes
+  [euc-kr] meta charset=utf-8 표본='<title>SK�����대����� : Npay 利�沅�</title>\n\t\n\t\n\n\n\n\n<meta http-'
+  [utf-8] meta charset=utf-8 표본='<title>SK하이닉스 : Npay 증권</title>\n\t\n\t\n\n\n\n\n<meta http-equiv="Co'
   표2 헤더(6): ['���吏�', '���紐�', '湲���댁��', '議고��', '異�泥�', '鍮�異�泥�']
-    행(6): ['2026.09.07 23:07', '���罹�由� 泥���곌났���', 'Naruemol', '13', '0', '0']
+    행(6): ['2026.09.07 23:08', '��쎈�ㅼ�� 肄���ㅽ�� ��쇱��- 0.23���.��〓�쎌�댁��?������...', '��щえfomo', '17', '0', '0']
+      제목링크: ��쎈�ㅼ�� 肄���ㅽ�� ��쇱��- 0.23���.��〓�쎌�댁��?������...
+      href: /item/board_read.naver?code=000660&nid=429055136&page=1
+      제목셀 HTML: <td class="title" style="word-break: break-all;">
+<a href="/item/board_read.naver?code=000660&amp;nid=429055136&amp;page=1" onclick="return singleSubmitCheck();" title="��쎈�ㅼ�� 肄���ㅽ�� ��쇱��- 0.23���.��〓�쎌�댁��?������������ -2��쇰�� ������怨�???0.2��몃�� 蹂댄�⑹��以��
+    행(6): ['2026.09.07 23:08', '���吏���� ��������� 留����', 'ydkimjj', '8', '1', '0']
+      제목링크: ���吏���� ��������� 留����
+      href: /item/board_read.naver?code=000660&nid=429055132&page=1
+      제목셀 HTML: <td class="title" style="word-break: break-all;">
+<a href="/item/board_read.naver?code=000660&amp;nid=429055132&amp;page=1" onclick="return singleSubmitCheck();" title="���吏���� ��������� 留����">���吏���� ��������� 留����
+						
+						<img height="10" src="https
+    행(6): ['2026.09.07 23:07', '���罹�由� 泥���곌났���', 'Naruemol', '36', '0', '0']
       제목링크: ���罹�由� 泥���곌났���
       href: /item/board_read.naver?code=000660&nid=429055126&page=1
-    행(6): ['2026.09.07 23:07', '��닿굔 萸�������?', '��щ�������몄�щ�����由�', '29', '0', '0']
-      제목링크: ��닿굔 萸�������?
-      href: /item/board_read.naver?code=000660&nid=429055122&page=1
-    행(6): ['2026.09.07 23:06', '怨듦����� ������瑜� ������寃�������', '���������遊�李⑦�몃�����', '18', '0', '0']
-      제목링크: 怨듦����� ������瑜� ������寃�������
-      href: /item/board_read.naver?code=000660&nid=429055114&page=1
-  페이지 링크 표본: ['/item/board_read.naver?code=000660&nid=429055126&page=1', '/item/board_read.naver?code=000660&nid=429055122&page=1', '/item/board_read.naver?code=000660&nid=429055114&page=1', '/item/board_read.naver?code=000660&nid=429055102&page=1', '/item/board_read.naver?code=000660&nid=429055090&page=1', '/item/board_read.naver?code=000660&nid=429055085&page=1']
+      제목셀 HTML: <td class="title" style="word-break: break-all;">
+<a href="/item/board_read.naver?code=000660&amp;nid=429055126&amp;page=1" onclick="return singleSubmitCheck();" title="���罹�由� 泥���곌났���">���罹�由� 泥���곌났���
+						
+						<img height="10" src="https://ssl.pstatic
+  페이지 링크 표본: ['/item/board_read.naver?code=000660&nid=429055136&page=1', '/item/board_read.naver?code=000660&nid=429055132&page=1', '/item/board_read.naver?code=000660&nid=429055126&page=1', '/item/board_read.naver?code=000660&nid=429055122&page=1', '/item/board_read.naver?code=000660&nid=429055114&page=1', '/item/board_read.naver?code=000660&nid=429055102&page=1']
