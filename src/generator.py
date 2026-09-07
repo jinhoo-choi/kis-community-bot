@@ -231,7 +231,12 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
             print(f"[gen] ⚠ {provider_name} 후처리 후 빈 본문 {it['id']}")
             continue
         out.append({**it, "tone": tn, "fmt": fm, "angle": ag, "length": ln,
-                    "body": body, "provider": r.provider, "model": r.model})
+                    "body": body, "provider": r.provider, "model": r.model,
+                    # raw 정상인데 processed 가 파손이면 LLM 문제가 아니라
+                    # 후처리(clean) 문제다. 미완성 33건 / 너무짧음 36건의
+                    # 책임 소재를 가르려면 둘을 나란히 봐야 한다.
+                    "raw_len": len(r.text.strip()),
+                    "raw_tail": r.text.strip()[-45:]})
     return out
 
 

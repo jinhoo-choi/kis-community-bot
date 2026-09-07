@@ -67,6 +67,26 @@ def _fail_samples(held: list[dict]) -> dict:
     return dict(list(out.items())[:18])
 
 
+def _raw_vs_clean() -> dict:
+    """길이 계열 리젝만 모아 raw 와 후처리 결과를 나란히 본다."""
+    from src.generator import REJECTED
+    out = {}
+    for p in REJECTED:
+        errs = [e for e in p.get("reject_errs", [])
+                if e.startswith(("미완성", "너무짧음", "선두파손"))]
+        if not errs:
+            continue
+        k = errs[0].split("(")[0]
+        out.setdefault(k, []).append({
+            "raw_len": p.get("raw_len"),
+            "clean_len": len(p.get("body", "")),
+            "raw_tail": p.get("raw_tail", "")[-45:],
+            "clean_tail": p.get("body", "")[-45:],
+        })
+    # 사유별 2건이면 패턴이 보인다
+    return {k: v[:2] for k, v in out.items()}
+
+
 def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) -> dict:
     def avg_score(ps):
         v = [(p.get("score") or {}).get("total") for p in ps]
@@ -92,6 +112,11 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) ->
         # filter_log 를 아티팩트로 돌린 뒤 리젝 사유를 볼 수 없게 됐다.
         # 튜닝에 필요한 건 사유 분포이므로 집계만이라도 여기 남긴다.
         "reject_reasons": _reject_reasons(),
+        # 정규식이 못 잡고 심사가 fatal 로 잡은 상투구의 실제 마무리 문장.
+        # 정규식을 계속 넓히는 게 맞는지 판단하려면 무엇이 새는지 봐야 한다.
+        "cliche_tails": [p.get("body", "").strip()[-35:] for p in held
+                         if any("상투" in f for f in
+                                ((p.get("score") or {}).get("fatal") or []))][:8],
         # fatal 은 치명적 위반 코드다. 진짜 위반인지 오탐인지 가르려면
         # 건수가 아니라 코드별 분포가 필요하다 (실측 #69: fatal 42건, 원인 미상).
         "fatal_codes": dict(Counter(
@@ -102,6 +127,8 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) ->
         # 사유 이름만으로는 정규식을 못 고친다. 어떤 문장이 걸렸는지 꼬리만 본다.
         # 본문 전체는 아티팩트에 두고 여기엔 30자만 남긴다.
         "fail_samples": _fail_samples(held),
+        # 미완성/너무짧음이 생성 문제인지 후처리 문제인지 가른다
+        "raw_vs_clean": _raw_vs_clean(),
         "hold_kinds": dict(Counter(f"{p.get('kind')}:"
                                    f"{(p.get('hold_reason') or '?').split('(')[0].split(' ')[0]}"
                                    for p in held).most_common(20)),
