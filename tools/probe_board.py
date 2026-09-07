@@ -52,9 +52,20 @@ def probe_board(code: str, name: str) -> None:
     log(f"\n── 2. 토론방 [{name} {code}] ──")
     url = f"https://finance.naver.com/item/board.naver?code={code}&page=1"
     r = requests.get(url, headers=H, timeout=20)
-    r.encoding = "euc-kr"
     log(f"  {url}")
-    log(f"  HTTP {r.status_code} / {len(r.text):,}bytes")
+    log(f"  HTTP {r.status_code} / {len(r.content):,}bytes")
+    # DART 원문이 meta 는 euc-kr 인데 실제는 UTF-8 이었던 전례가 있다.
+    # 선언을 믿지 말고 둘 다 디코딩해 눈으로 고른다.
+    for enc in ("euc-kr", "utf-8"):
+        try:
+            head = r.content[:4000].decode(enc, errors="replace")
+        except Exception as e:
+            log(f"  [{enc}] 디코딩 실패 {e}")
+            continue
+        m = re.search(r"charset=([\w-]+)", head, re.I)
+        log(f"  [{enc}] meta charset={m.group(1) if m else '?'} "
+            f"표본={head[head.find('<title>'):head.find('<title>') + 60]!r}")
+    r.encoding = "euc-kr"
     if r.status_code != 200:
         return
     soup = BeautifulSoup(r.text, "html.parser")
@@ -81,6 +92,8 @@ def probe_board(code: str, name: str) -> None:
             if a:
                 log(f"      제목링크: {a.get_text(' ', strip=True)[:60]}")
                 log(f"      href: {a['href'][:110]}")
+                # 댓글 수는 별도 컬럼이 없다. 제목 옆 표기인지 확인한다.
+                log(f"      제목셀 HTML: {str(tds[1])[:260]}")
             shown += 1
             if shown >= 3:
                 break
