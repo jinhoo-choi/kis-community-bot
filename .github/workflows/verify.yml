@@ -32,6 +32,10 @@ on:
         description: '토론방 추천수 분포 조사 (LLM 호출 없음)'
         type: boolean
         default: false
+      board_style:
+        description: '토론방 고반응/대조군 구조 분석 (약 15분, LLM 호출 없음)'
+        type: boolean
+        default: false
       chat_suffix:
         description: '테스트 발송할 chat_id 뒤 4자리 (시크릿 미등록 시 사용)'
         type: string
@@ -184,6 +188,15 @@ jobs:
           pip install -q -r requirements.txt
           python tools/board_dist.py || true
 
+      - name: Board style analysis
+        if: ${{ !cancelled() && inputs.board_style }}
+        timeout-minutes: 40
+        env:
+          TZ: Asia/Seoul
+        run: |
+          pip install -q -r requirements.txt
+          python tools/board_style.py || true
+
       - name: Summary & commit
         if: always()
         run: |
@@ -200,6 +213,7 @@ jobs:
           git add -f data/flow_probe.txt || true
           git add -f data/board_probe.txt || true
           git add -f data/board_dist.json || true
+          git add -f data/board_style.json || true
           git diff --staged --quiet || git commit -m "chore: verify keys $(date +%FT%H%M)"
           git pull --rebase -q origin main || true
           git push
