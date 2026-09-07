@@ -143,7 +143,7 @@ jobs:
           echo "GEMINI_KEY       : $([ "$C" = "200" ] && echo OK || echo "FAIL($C) $E")" | tee -a data/verify.txt
 
       - name: Voice sample
-        if: ${{ inputs.voice_sample }}
+        if: ${{ !cancelled() && inputs.voice_sample }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}
@@ -153,7 +153,7 @@ jobs:
           python tools/voice_sample.py | tee -a data/verify.txt
 
       - name: Probe research pages
-        if: ${{ inputs.probe_research }}
+        if: ${{ !cancelled() && inputs.probe_research }}
         env:
           TZ: Asia/Seoul
         run: |
@@ -161,7 +161,7 @@ jobs:
           python tools/probe_research.py || true
 
       - name: Probe flow pages
-        if: ${{ inputs.probe_flow }}
+        if: ${{ !cancelled() && inputs.probe_flow }}
         env:
           TZ: Asia/Seoul
         run: |
@@ -169,7 +169,7 @@ jobs:
           python tools/probe_flow.py || true
 
       - name: Probe board pages
-        if: ${{ inputs.probe_board }}
+        if: ${{ !cancelled() && inputs.probe_board }}
         env:
           TZ: Asia/Seoul
         run: |
@@ -177,7 +177,7 @@ jobs:
           python tools/probe_board.py || true
 
       - name: Board reaction distribution
-        if: ${{ inputs.board_dist }}
+        if: ${{ !cancelled() && inputs.board_dist }}
         env:
           TZ: Asia/Seoul
         run: |
