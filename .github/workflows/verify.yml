@@ -48,7 +48,10 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # 키 검증만 할 때는 10분이면 충분했지만, 토론방 구조 분석은
+    # 요청 3,000건에 15분 넘게 걸린다. job 상한이 스텝 상한을 덮어써
+    # 두 번 연속 10분에 잘렸다.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
