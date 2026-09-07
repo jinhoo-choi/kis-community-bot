@@ -104,6 +104,17 @@ def main() -> None:
     print("\n=== 조회 수 분포 ===")
     vs = sorted(r["views"] for r in all_rows)
     print(f"  평균 {st.mean(vs):.0f} / 중앙 {st.median(vs)} / 최대 {vs[-1]}")
+    for thr in (100, 300, 500, 1000, 3000):
+        c = sum(1 for v in vs if v >= thr)
+        print(f"  조회 {thr:>4}+ : {c:>5}건 ({c / n:6.2%})")
+
+    print("\n=== 교집합 (본수집 대상 규모) ===")
+    joint = {}
+    for u_thr in (10, 20, 30):
+        for v_thr in (300, 500, 1000):
+            c = sum(1 for r in all_rows if r["up"] >= u_thr and r["views"] >= v_thr)
+            joint[f"up{u_thr}_view{v_thr}"] = c
+            print(f"  추천 {u_thr}+ & 조회 {v_thr}+ : {c:>4}건 ({c / n:6.2%})")
 
     print("\n=== 반응 상위 글의 제목 길이 ===")
     top = [r for r in all_rows if r["up"] >= max(3, ups[int(n * 0.99)])]
@@ -125,6 +136,9 @@ def main() -> None:
                           for t in (1, 2, 3, 5, 10, 20, 50)},
         "up_mean": round(st.mean(ups), 2),
         "views_mean": round(st.mean(vs), 1),
+        "view_thresholds": {str(t): sum(1 for v in vs if v >= t)
+                            for t in (100, 300, 500, 1000, 3000)},
+        "joint": joint,
     }
     with open("data/board_dist.json", "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1)
