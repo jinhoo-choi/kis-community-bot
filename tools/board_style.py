@@ -28,11 +28,16 @@ sys.path.insert(0, ".")
 
 H = {"User-Agent": "Mozilla/5.0", "Referer": "https://finance.naver.com/"}
 
+# 30종목 x 45페이지로 잡았더니 40분 상한에 걸렸다. 요청당 대기(0.35초) 외에
+# 네트워크 왕복이 더 붙어 실제로는 요청당 1초에 가깝다.
+# 분포 조사 실측(5종목 x 20페이지 = 2,000건 -> 고반응 63건)을 근거로
+# 30종목 x 20페이지면 고반응 약 380건이 나온다. 표본으로 충분하다.
 N_STOCKS = 30
-N_PAGES = 45          # 종목당 약 900건 = 30일치
+N_PAGES = 20          # 종목당 약 400건 = 14일치
+SLEEP = 0.25
 HOT_UP, HOT_VIEW = 20, 300
 COLD_UP, COLD_VIEW = 2, 100
-MAX_BODY_FETCH = 500  # 집단별 상세 조회 상한
+MAX_BODY_FETCH = 250  # 집단별 상세 조회 상한
 
 _SENT = re.compile(r"[.!?…]+\s|[.!?…]+$")
 _ENDING = re.compile(r"(습니다|합니다|입니다|네요|는데요|어요|아요|죠|군요|"
@@ -58,7 +63,7 @@ def top_stocks(n: int) -> list[tuple[str, str]]:
             out.append((name, m.group(1)))
             if len(out) >= n:
                 return out
-        time.sleep(0.4)
+        time.sleep(SLEEP)
     return out
 
 
@@ -149,6 +154,15 @@ def summarize(rows: list[dict], label: str) -> dict:
     return out
 
 
+def _dump(obj: dict) -> None:
+    """중간 결과를 그때그때 파일로 남긴다. 40분 상한에 두 번 잘렸다."""
+    try:
+        with open("data/board_style.json", "w", encoding="utf-8") as f:
+            json.dump(obj, f, ensure_ascii=False, indent=1)
+    except Exception as e:
+        print(f"[board] 중간 저장 실패: {e}")
+
+
 def main() -> None:
     stocks = top_stocks(N_STOCKS)
     print(f"[board] 대상 {len(stocks)}종목: {[n for n, _ in stocks]}")
@@ -161,9 +175,12 @@ def main() -> None:
             if not rows:
                 break
             got += rows
-            time.sleep(0.35)
+            time.sleep(SLEEP)
         listed += got
         print(f"[board] {i:>2}/{len(stocks)} {name} {len(got)}건")
+
+    _dump({"stage": "listed", "listed": len(listed),
+           "by_stock": dict(Counter(r["code"] for r in listed))})
 
     hot = [r for r in listed if r["up"] >= HOT_UP and r["views"] >= HOT_VIEW]
     cold = [r for r in listed if r["up"] <= COLD_UP and r["views"] >= COLD_VIEW]
@@ -180,9 +197,11 @@ def main() -> None:
             body = fetch_body(r["href"])
             if len(body) >= 10:
                 met.append(metrics(r["title"], body))
-            time.sleep(0.35)
+            time.sleep(SLEEP)
             if j % 50 == 0:
                 print(f"[board] {label} 본문 {j}/{len(group)}")
+                # 타임아웃돼도 여기까지는 남는다
+                _dump({"stage": f"{label}_partial", **{label: summarize(met, label)}})
         result[label] = summarize(met, "고반응군" if label == "hot" else "대조군")
 
     result["config"] = {"stocks": len(stocks), "pages": N_PAGES,
