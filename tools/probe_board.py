@@ -200,6 +200,29 @@ def probe_read(code: str) -> None:
                                         log(f"           {k} = "
                                             f"{str(r2[k])[:200]!r}")
 
+                # queryKey 가 {'url': '/auth/userInfo'} 형태다 → API base 확인
+                base = "https://m.stock.naver.com/api"
+                rb = requests.get(f"{base}/auth/userInfo",
+                                  headers={**H, "Referer": iu}, timeout=15)
+                log(f"    API base 확인 [{rb.status_code}] {base}/auth/userInfo")
+
+                # JS 번들에서 discussion 엔드포인트 문자열을 직접 찾는다.
+                # 주소를 추측하는 것보다 확실하다.
+                srcs = [x["src"] for x in fs.find_all("script", src=True)
+                        if "_next/static" in x["src"]]
+                log(f"    JS 청크 {len(srcs)}개")
+                found = set()
+                for js in srcs[:25]:
+                    ju = js if js.startswith("http") else "https://m.stock.naver.com" + js
+                    try:
+                        t = requests.get(ju, headers=H, timeout=20).text
+                    except Exception:
+                        continue
+                    for m2 in re.finditer(r"[\"'`](/[a-zA-Z0-9/_\-{}$.]*discussion[a-zA-Z0-9/_\-{}$.]*)[\"'`]", t):
+                        found.add(m2.group(1))
+                for f2 in sorted(found)[:30]:
+                    log(f"      endpoint: {f2}")
+
                 for u2 in tries:
                     try:
                         rr = requests.get(u2, headers={**H, "Referer": iu,
