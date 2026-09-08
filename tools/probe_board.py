@@ -7,6 +7,7 @@
 URL·컬럼·파라미터명은 추측하지 않는다. 응답을 덤프해 근거를 만든다.
 과거 KIND 에서 td[2]를 td[1]로 잡아 2743종목 중 3개만 파싱된 적이 있다.
 """
+import json
 import re
 import sys
 
@@ -149,12 +150,43 @@ def probe_read(code: str) -> None:
             fs = BeautifulSoup(f2.text, "html.parser")
             txt = fs.get_text(" ", strip=True)
             log(f"  전체 텍스트 {len(txt)}자 → {txt[:300]}")
-            # SPA 라면 __NEXT_DATA__ 같은 JSON 이 박혀 있다
-            for sc in fs.find_all("script"):
-                sid = sc.get("id") or ""
-                body = sc.string or ""
-                if sid or "contents" in body[:400] or "discussion" in body[:400]:
-                    log(f"    <script id={sid!r}> {len(body)}자 → {body[:200]}")
+            # Next.js SPA 다. __NEXT_DATA__ 의 buildId 로 데이터 경로가 열린다.
+            nd = fs.find("script", id="__NEXT_DATA__")
+            if nd and nd.string:
+                try:
+                    j = json.loads(nd.string)
+                except Exception as ex:
+                    log(f"    __NEXT_DATA__ 파싱 실패 {ex}")
+                    j = {}
+                bid = j.get("buildId")
+                log(f"    buildId={bid} / page={j.get('page')} "
+                    f"/ query={j.get('query')}")
+                log(f"    pageProps keys={list((j.get('props') or {}).get('pageProps', {}))}")
+
+                m = re.search(r"/stock/(\d{6})/discussion/(\d+)", iu)
+                code2, nid2 = (m.group(1), m.group(2)) if m else ("", "")
+                tries = []
+                if bid:
+                    tries.append(f"https://m.stock.naver.com/_next/data/{bid}"
+                                 f"/pc/domestic/stock/{code2}/discussion/{nid2}.json")
+                tries += [
+                    f"https://m.stock.naver.com/api/discussion/domestic/STOCK/{code2}/{nid2}",
+                    f"https://m.stock.naver.com/api/discussion/domestic/stock/{code2}/{nid2}",
+                    f"https://m.stock.naver.com/api/discussion/{code2}/{nid2}",
+                    f"https://m.stock.naver.com/api/discuss/domestic/STOCK/{code2}/{nid2}",
+                    f"https://m.stock.naver.com/api/json/discussion/{code2}/{nid2}",
+                ]
+                for u2 in tries:
+                    try:
+                        rr = requests.get(u2, headers={**H, "Referer": iu,
+                                                       "Accept": "application/json"},
+                                          timeout=15)
+                        ct = rr.headers.get("content-type", "")[:28]
+                        log(f"    [{rr.status_code}] {ct:28} {u2}")
+                        if rr.status_code == 200 and "json" in ct:
+                            log(f"      → {rr.text[:400]}")
+                    except Exception as ex:
+                        log(f"    [ERR] {type(ex).__name__} {u2}")
         except Exception as ex:
             log(f"  iframe 실패 {type(ex).__name__} {ex}")
 
