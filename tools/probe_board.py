@@ -223,6 +223,42 @@ def probe_read(code: str) -> None:
                 for f2 in sorted(found)[:30]:
                     log(f"      endpoint: {f2}")
 
+                # base URL 후보를 번들에서 직접 뽑는다 (/api/auth/userInfo 는 404였다)
+                bases = set()
+                for js in srcs[:25]:
+                    ju = js if js.startswith("http") else "https://m.stock.naver.com" + js
+                    try:
+                        t = requests.get(ju, headers=H, timeout=20).text
+                    except Exception:
+                        continue
+                    for m3 in re.finditer(
+                            r"[\"'`](https://[a-z0-9.\-]*naver\.com/[a-zA-Z0-9/_\-]*api[a-zA-Z0-9/_\-]*)[\"'`]", t):
+                        bases.add(m3.group(1))
+                for b in sorted(bases)[:20]:
+                    log(f"      base: {b}")
+
+                # /discussion/{market}/{type}/posts/{id} 조합을 실제로 때린다
+                log("    --- posts 엔드포인트 시도 ---")
+                cand_bases = sorted(bases) + [
+                    "https://m.stock.naver.com/api",
+                    "https://m.stock.naver.com/front-api",
+                    "https://api.stock.naver.com",
+                ]
+                for b in cand_bases[:8]:
+                    for path in (f"/discussion/domestic/stock/posts/{nid2}",
+                                 f"/discussion/domestic/STOCK/posts/{nid2}"):
+                        u3 = b.rstrip("/") + path
+                        try:
+                            rr = requests.get(u3, headers={**H, "Referer": iu,
+                                                           "Accept": "application/json"},
+                                              timeout=12)
+                            ct = rr.headers.get("content-type", "")[:24]
+                            log(f"      [{rr.status_code}] {ct:24} {u3}")
+                            if rr.status_code == 200 and "json" in ct:
+                                log(f"        → {rr.text[:500]}")
+                        except Exception as ex:
+                            log(f"      [ERR] {type(ex).__name__} {u3}")
+
                 for u2 in tries:
                     try:
                         rr = requests.get(u2, headers={**H, "Referer": iu,
