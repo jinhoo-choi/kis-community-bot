@@ -92,6 +92,35 @@ def list_page(code: str, page: int) -> list[dict]:
     return rows
 
 
+def probe_body_api(code: str, nid: str) -> str:
+    """본문 API 주소를 후보로 때려 찾는다.
+
+    본문은 iframe(m.stock.naver.com) 안에서 클라이언트가 따로 부른다.
+    __NEXT_DATA__ 에도 없다. 주소를 추측하지 않고 응답으로 확인한다.
+    """
+    cands = [
+        f"https://m.stock.naver.com/api/discussion/domestic/stock/{code}/{nid}",
+        f"https://m.stock.naver.com/api/discussion/domestic/{code}/{nid}",
+        f"https://m.stock.naver.com/api/discussion/{nid}",
+        f"https://m.stock.naver.com/api/stock/{code}/discussion/{nid}",
+        f"https://m.stock.naver.com/api/json/discussion/{code}/{nid}",
+    ]
+    hdr = {**H, "Referer": f"https://m.stock.naver.com/pc/domestic/stock/{code}"
+                           f"/discussion/{nid}", "Accept": "application/json"}
+    for u in cands:
+        try:
+            r = requests.get(u, headers=hdr, timeout=15)
+            ct = r.headers.get("content-type", "")
+            print(f"[probe] {r.status_code} {ct[:24]:24} {u}")
+            if r.status_code == 200 and "json" in ct:
+                print(f"[probe] 본문 API 확인: {r.text[:200]}")
+                return u
+        except Exception as e:
+            print(f"[probe] 실패 {type(e).__name__} {u}")
+        time.sleep(0.3)
+    return ""
+
+
 def fetch_body(href: str) -> str:
     """본문 텍스트. 반환값은 지표 계산에만 쓰고 저장하지 않는다."""
     url = "https://finance.naver.com" + href
@@ -127,6 +156,38 @@ def metrics(title: str, body: str) -> dict:
         "ending": m.group(1) if m else "기타",
         "has_url": bool(re.search(r"https?://", body)),
     }
+
+
+def title_metrics(t: str) -> dict:
+    return {
+        "len": len(t),
+        "lead": ("number" if re.match(r"^[\d(]", t)
+                 else "question" if t.rstrip().endswith("?") else "text"),
+        "is_question": t.rstrip().endswith("?"),
+        "has_number": bool(re.search(r"\d", t)),
+        "has_stockname": False,
+    }
+
+
+def summarize_titles(rows: list[dict], label: str) -> dict:
+    if not rows:
+        return {}
+    m = [title_metrics(r["title"]) for r in rows]
+    out = {
+        "n": len(m),
+        "title_len_mean": round(st.mean([x["len"] for x in m]), 1),
+        "title_len_median": st.median([x["len"] for x in m]),
+        "lead": dict(Counter(x["lead"] for x in m)),
+        "question_pct": round(sum(x["is_question"] for x in m) / len(m) * 100, 1),
+        "has_number_pct": round(sum(x["has_number"] for x in m) / len(m) * 100, 1),
+        "up_mean": round(st.mean([r["up"] for r in rows]), 1),
+        "views_mean": round(st.mean([r["views"] for r in rows]), 1),
+    }
+    print(f"\n=== {label} 제목 지표 (n={out['n']}) ===")
+    for k, v in out.items():
+        if k != "n":
+            print(f"  {k:20} {v}")
+    return out
 
 
 def summarize(rows: list[dict], label: str) -> dict:
@@ -179,11 +240,20 @@ def main() -> None:
         listed += got
         print(f"[board] {i:>2}/{len(stocks)} {name} {len(got)}건")
 
-    _dump({"stage": "listed", "listed": len(listed),
-           "by_stock": dict(Counter(r["code"] for r in listed))})
-
     hot = [r for r in listed if r["up"] >= HOT_UP and r["views"] >= HOT_VIEW]
     cold = [r for r in listed if r["up"] <= COLD_UP and r["views"] >= COLD_VIEW]
+
+    # 본문 수집이 실패해도 제목 비교는 남는다 (실측: 본문이 SPA 라 전부 빈 값이었다)
+    title_res = {"hot_title": summarize_titles(hot, "고반응군"),
+                 "cold_title": summarize_titles(
+                     sorted(cold, key=lambda r: -r["views"])[:len(hot)], "대조군"),
+                 "stage": "title_done", "listed": len(listed)}
+    _dump(title_res)
+
+    if hot:
+        nid = re.search(r"nid=(\d+)", hot[0]["href"])
+        if nid:
+            probe_body_api(hot[0]["code"], nid.group(1))
     print(f"\n[board] 목록 {len(listed)}건 → 고반응 {len(hot)} / 대조 {len(cold)}")
 
     # 대조군은 고반응군과 같은 규모로 맞춘다 (조회 높은 순)
@@ -204,6 +274,7 @@ def main() -> None:
                 _dump({"stage": f"{label}_partial", **{label: summarize(met, label)}})
         result[label] = summarize(met, "고반응군" if label == "hot" else "대조군")
 
+    result.update(title_res)
     result["config"] = {"stocks": len(stocks), "pages": N_PAGES,
                         "hot": f"up>={HOT_UP} & views>={HOT_VIEW}",
                         "cold": f"up<={COLD_UP} & views>={COLD_VIEW}",
