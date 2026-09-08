@@ -325,6 +325,15 @@ def fetch(limit: int = 12) -> list[dict]:
             "src": f"https://finance.naver.com/item/main.naver?code={r['code']}",
         })
 
-    # 조건(거래대금·등락률)을 만족하는 종목이 없는 날은 정상적인 0건이다
-    crawl.report("market", len(out), limit if rows else 0, "시세 파싱 실패")
+    # 조건(거래대금·등락률)을 만족하는 종목이 없는 날은 정상적인 0건이다.
+    # 다만 rows 자체가 비면 정상이 아니다. 실측(#81, 08:30 KST): 순위 페이지가
+    # 장 시작 전에는 헤더만 있고 데이터 행이 없다. 이걸 '정상 0건'으로 넘기는
+    # 바람에 특징주가 통째로 빠진 채 발송 3건으로 끝났고 경보도 안 떴다.
+    if not rows:
+        h = datetime.now(KST).hour
+        why = ("장 시작 전이라 순위 페이지가 비어 있다 (장 마감 후 수집 필요)"
+               if h < 9 else "시세 파싱 실패 — 페이지 구조 변경 의심")
+        crawl.report("market", 0, limit, why)
+    else:
+        crawl.report("market", len(out), limit, "조건 충족 종목 없음")
     return out
