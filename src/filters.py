@@ -60,13 +60,27 @@ def _hedge_errors(body: str) -> list[str]:
 
 
 def _ending_variety(body: str) -> list[str]:
-    """문장 어미 단조로움. 같은 어미가 4번 이상이면 리듬이 죽는다."""
+    """문장 어미 단조로움. 같은 어미가 4번 이상이면 리듬이 죽는다.
+
+    추가로 '~습니다' 일변도를 막는다. 네이버 종토방 실측에서
+    반응 좋은 글의 종결어미 중 '~습니다' 는 1.7% 뿐이었다.
+    우리 글은 사실상 100% 라 'AI 티' 피드백의 주원인으로 보인다.
+    존댓말은 유지하되 구어체 어미를 섞게 한다.
+    """
     ends = _ENDING.findall(body)
-    if len(ends) < 4:
+    if len(ends) < 3:
         return []
     from collections import Counter
-    top, n = Counter(ends).most_common(1)[0]
-    return [f"어미반복({top}×{n})"] if n >= 4 else []
+    errs = []
+    c = Counter(ends)
+    top, n = c.most_common(1)[0]
+    if n >= 4:
+        errs.append(f"어미반복({top}×{n})")
+    formal = sum(v for k, v in c.items()
+                 if k in ("습니다", "합니다", "입니다", "됩니다"))
+    if len(ends) >= 3 and formal == len(ends):
+        errs.append(f"어미단조(격식체만 {formal}문장)")
+    return errs
 
 
 # 길이별 허용 수치 개수. 짧은 글에 숫자 5개면 표지 나열이지만

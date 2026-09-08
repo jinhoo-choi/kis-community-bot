@@ -66,6 +66,25 @@ def check_ending_conflict() -> None:
 # ── B. 계약이 시킨 예시 문장을 실제 필터에 태운다 ──────────────────
 # desc 안의 예시(예: '...')는 모델이 그대로 베낀다. 예시가 필터를 통과하지
 # 못하면 그 페르소나는 매번 리젝된다.
+# 실측(종토방)으로 '~습니다' 일변도를 필터가 막게 했다. 페르소나 계약이
+# 격식체만 쓰라고 지시하면 그 페르소나는 매번 리젝된다.
+# brief_report 가 '수치 선두' 로 통째로 죽었던 사고와 같은 유형이다.
+def check_formal_only() -> None:
+    sec("격식체 지정 vs 어미단조 필터")
+    bad = re.compile(r"'~(습니다|합니다|입니다)'\s*로만")
+    for pid, p in PERSONAS.items():
+        if bad.search(p["desc"]):
+            fail(f"{pid}: 격식체 전용 지정 — 어미단조 필터에 매번 걸린다")
+    # 실사격: 격식체만 3문장인 글이 실제로 리젝되는지
+    body = ("로보티즈가 어제 20.32% 올랐습니다. 종가는 299,000원입니다. "
+            "거래대금은 2,990억원이었습니다.")
+    errs = filters.check(body, "등락률: 20.32%", "fact_note", "reaction", "fact_note")
+    if not any("어미단조" in e for e in errs):
+        fail("격식체 일변도가 필터에 안 걸린다 — 규칙이 죽어 있다")
+    else:
+        ok("격식체 일변도를 필터가 잡는다")
+
+
 def check_desc_examples() -> None:
     sec("계약 예시문 실사격")
     facts = ("종목: 로보티즈 (108490)\n등락률: 20.32%\n종가: 299,000원\n"
@@ -224,6 +243,7 @@ def check_length_instruction() -> None:
 
 def main() -> None:
     check_ending_conflict()
+    check_formal_only()
     check_desc_examples()
     check_example_cloning()
     check_global_vs_persona()
