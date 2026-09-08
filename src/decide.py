@@ -4,9 +4,22 @@
 테스트가 실제 프로덕션 코드를 호출해야 의미가 있다.
 main() 안에 있으면 테스트는 로직을 '복사'해서 검증하게 되고, 그건 아무것도 검증하지 못한다.
 """
+import re
 from collections import Counter
 
 import config
+
+
+# 물음표 없이도 질문이다. 실측(#79): 10건 중 4건이 질문형인데
+# 물음표로 끝난 건 1건뿐이고 나머지는 "~인지 궁금합니다" 로 끝났다.
+# 상한이 형태만 보면 우회된다.
+_QUESTION_TAIL = re.compile(
+    r"(\?|궁금(합니다|하네요|해요|하다)|무엇일까요|뭘까요|어떨까요|"
+    r"아시는 분|알고 계신|의견이 궁금|어떻게 보시)\s*[.!]?\s*$")
+
+
+def _is_question(body: str) -> bool:
+    return bool(_QUESTION_TAIL.search(body.strip()))
 
 
 # 좋은 유형부터 채운다. 숫자가 작을수록 먼저.
@@ -97,7 +110,7 @@ def decide_distribution(
             return False
         # tone 이 비면 전부 한 묶음이 돼 상한에 걸린다. 미상은 상한에서 뺀다.
         tone = p.get("tone", "")
-        if p.get("body", "").strip().endswith("?"):
+        if _is_question(p.get("body", "")):
             if per_t["_q"] >= per_question_cap:
                 p["hold_reason"] = "질문상한"
                 return False
@@ -113,7 +126,7 @@ def decide_distribution(
         per_k[kind] += 1
         if tone:
             per_t[tone] += 1
-        if p.get("body", "").strip().endswith("?"):
+        if _is_question(p.get("body", "")):
             per_t["_q"] += 1
         if ending:
             per_e[ending] += 1

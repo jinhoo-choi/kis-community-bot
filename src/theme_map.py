@@ -84,6 +84,26 @@ def classify(item: dict, table: dict) -> tuple[str, str]:
     return "SECTOR_PROXY", ""
 
 
+# 특정 회사가 주어인 기사를 다른 회사의 종목방에 붙이면 안 된다.
+# 실측: '신한은행, 퇴직연금형 개인 투자용 국채 판매' 기사가
+# '금융|은행' 키워드로 KB금융 종목방에 배정됐다. 경쟁사 뉴스다.
+_COMPANY_IN_TITLE = re.compile(
+    r"[가-힣A-Za-z]{2,10}(은행|증권|화재|생명|카드|캐피탈|자산운용|손보|"
+    r"전자|중공업|건설|제약|바이오|텔레콤|화학|에너지)")
+
+
+def _other_company_subject(item: dict, assigned: str) -> str:
+    """제목의 주어가 배정 종목과 다른 회사면 그 이름을 돌려준다."""
+    title = item.get("title", "")
+    m = _COMPANY_IN_TITLE.search(title)
+    if not m:
+        return ""
+    found = m.group(0)
+    # 배정 종목과 같은 계열이면 문제없다 (신한은행 <-> 신한지주)
+    stem = re.sub(r"(지주|금융|홀딩스)$", "", assigned)
+    return "" if (stem and stem in found) or found in assigned else found
+
+
 def assign(item: dict) -> bool:
     """테마·정책 항목에 게시할 종목을 배정한다. 배정했으면 True."""
     from src import tickers
@@ -113,6 +133,14 @@ def assign(item: dict) -> bool:
         return False
 
     name = random.choice(cands)
+    other = _other_company_subject(item, name)
+    if other:
+        # 경쟁사 기사를 남의 종목방에 붙이느니 배정을 포기한다
+        item["no_stock_fit"] = True
+        item["board_mapping"] = "NO_BOARD"
+        print(f"[theme] 배정 취소 — 제목 주어 '{other}' vs 배정 '{name}': "
+              f"{item.get('title', '')[:40]}")
+        return False
     item["stock_code"] = table[name]
     item["stock_name"] = name
     item["board"] = "stock"
