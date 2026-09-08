@@ -1,33 +1,82 @@
 {
- "hot": {},
- "cold": {},
- "hot_title": {
-  "n": 209,
-  "title_len_mean": 21.5,
-  "title_len_median": 21,
+ "hot": {
+  "n": 173,
+  "body_len_mean": 282.1,
+  "body_len_median": 101,
+  "sent_n_mean": 5.12,
+  "sent_avg_len": 55.0,
+  "title_len_mean": 22.0,
   "lead": {
-   "text": 194,
-   "number": 14,
-   "question": 1
+   "text": 157,
+   "number": 16
   },
-  "question_pct": 0.5,
-  "has_number_pct": 90.0,
-  "up_mean": 31.5,
-  "views_mean": 739.1
+  "ends_question_pct": 6.4,
+  "has_number_pct": 65.3,
+  "num_count_mean": 4.5,
+  "ending_top": {
+   "기타": 123,
+   "다": 20,
+   "합니다": 7,
+   "네요": 5,
+   "세요": 4,
+   "습니다": 3,
+   "입니다": 3,
+   "요": 3
+  },
+  "has_url_pct": 5.8
+ },
+ "cold": {
+  "n": 134,
+  "body_len_mean": 179.0,
+  "body_len_median": 38.5,
+  "sent_n_mean": 3.71,
+  "sent_avg_len": 39.0,
+  "title_len_mean": 19.7,
+  "lead": {
+   "text": 123,
+   "number": 11
+  },
+  "ends_question_pct": 15.7,
+  "has_number_pct": 47.8,
+  "num_count_mean": 4.45,
+  "ending_top": {
+   "기타": 91,
+   "요": 10,
+   "다": 7,
+   "세요": 5,
+   "ㅋㅋ": 4,
+   "까요": 4,
+   "습니다": 3,
+   "네요": 3
+  },
+  "has_url_pct": 1.5
+ },
+ "hot_title": {
+  "n": 177,
+  "title_len_mean": 22.0,
+  "title_len_median": 22,
+  "lead": {
+   "text": 168,
+   "number": 9
+  },
+  "question_pct": 0.0,
+  "has_number_pct": 92.7,
+  "up_mean": 30.6,
+  "views_mean": 717.1
  },
  "cold_title": {
-  "n": 209,
+  "n": 177,
   "title_len_mean": 19.3,
   "title_len_median": 19,
   "lead": {
-   "text": 186,
-   "number": 22,
+   "text": 155,
+   "number": 21,
    "question": 1
   },
-  "question_pct": 0.5,
-  "has_number_pct": 81.8,
+  "question_pct": 0.6,
+  "has_number_pct": 80.8,
   "up_mean": 1.1,
-  "views_mean": 501.5
+  "views_mean": 524.8
  },
  "stage": "title_done",
  "listed": 12000,
