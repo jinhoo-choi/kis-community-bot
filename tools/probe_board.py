@@ -268,6 +268,27 @@ def probe_read(code: str) -> None:
                     except Exception as ex:
                         log(f"      [ERR] {type(ex).__name__} stype={stype}")
 
+                # queryKey 가 {url:"/auth/userInfo", method:"get"} 형태였다.
+                # 번들에서 url:"/..." 패턴을 찾으면 API 경로가 그대로 나온다.
+                log("    --- url: 패턴 (API 경로) ---")
+                api_paths = set()
+                for js in srcs[:25]:
+                    ju = js if js.startswith("http") else "https://m.stock.naver.com" + js
+                    try:
+                        t = requests.get(ju, headers=H, timeout=20).text
+                    except Exception:
+                        continue
+                    for m6 in re.finditer(
+                            r"url:\s*[\"'`]([^\"'`]{3,90})[\"'`]", t):
+                        pth = m6.group(1)
+                        if "discussion" in pth or "post" in pth:
+                            api_paths.add(pth)
+                    for m7 in re.finditer(
+                            r"url:\s*`([^`]{3,90})`", t):
+                        api_paths.add(m7.group(1))
+                for a2 in sorted(api_paths)[:40]:
+                    log(f"      url: {a2}")
+
                 # 템플릿 변수의 실제 값을 알려면 번들 문맥을 봐야 한다.
                 log("    --- posts 템플릿 문맥 ---")
                 for js in srcs[:25]:
