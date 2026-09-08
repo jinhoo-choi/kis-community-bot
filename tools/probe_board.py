@@ -176,6 +176,30 @@ def probe_read(code: str) -> None:
                     f"https://m.stock.naver.com/api/discuss/domestic/STOCK/{code2}/{nid2}",
                     f"https://m.stock.naver.com/api/json/discussion/{code2}/{nid2}",
                 ]
+                # 본문이 dehydratedState 어디에 들어있는지 키 경로를 확인한다
+                if bid:
+                    du = (f"https://m.stock.naver.com/_next/data/{bid}"
+                          f"/pc/domestic/stock/{code2}/discussion/{nid2}.json")
+                    dj = requests.get(du, headers={**H, "Referer": iu},
+                                      timeout=15).json()
+                    qs = (dj.get("pageProps", {}).get("dehydratedState", {})
+                          .get("queries", []))
+                    log(f"    queries {len(qs)}개")
+                    for qi, q in enumerate(qs):
+                        res = (q.get("state") or {}).get("data")
+                        log(f"      q{qi} key={q.get('queryKey')} "
+                            f"type={type(res).__name__}")
+                        if isinstance(res, dict):
+                            log(f"         result keys={list(res)[:8]}")
+                            r2 = res.get("result")
+                            if isinstance(r2, dict):
+                                log(f"         result.result keys={list(r2)[:14]}")
+                                for k in ("contents", "body", "content", "text",
+                                          "title", "commentCount", "goodCount"):
+                                    if k in r2:
+                                        log(f"           {k} = "
+                                            f"{str(r2[k])[:200]!r}")
+
                 for u2 in tries:
                     try:
                         rr = requests.get(u2, headers={**H, "Referer": iu,
