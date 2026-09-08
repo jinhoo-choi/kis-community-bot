@@ -5,76 +5,72 @@
 
 ── 2. 토론방 [삼성전자 005930] ──
   https://finance.naver.com/item/board.naver?code=005930&page=1
-  HTTP 200 / 167,273bytes
+  HTTP 200 / 168,193bytes
   [euc-kr] meta charset=utf-8 표본='<title>��쇱�깆����� : Npay 利�沅�</title>\n\t\n\t\n\n\n\n\n<meta http-equ'
   [utf-8] meta charset=utf-8 표본='<title>삼성전자 : Npay 증권</title>\n\t\n\t\n\n\n\n\n<meta http-equiv="Cont'
   표2 헤더(6): ['���吏�', '���紐�', '湲���댁��', '議고��', '異�泥�', '鍮�異�泥�']
-    행(6): ['2026.09.08 12:33', '���媛���대낫���', '湲�由ъ�щ�ㅻ�쇱��諛�', '1', '0', '0']
-      제목링크: ���媛���대낫���
-      href: /item/board_read.naver?code=005930&nid=429086159&page=1
+    행(6): ['2026.09.08 12:35', '9��� ��ㅼ��怨� 3遺�湲� ��ㅼ����� 留���ㅼ�댁��������', 'nemo', '1', '0', '0']
+      제목링크: 9��� ��ㅼ��怨� 3遺�湲� ��ㅼ����� 留���ㅼ�댁��������
+      href: /item/board_read.naver?code=005930&nid=429086397&page=1
       제목셀 HTML: <td class="title" style="word-break: break-all;">
-<a href="/item/board_read.naver?code=005930&amp;nid=429086159&amp;page=1" onclick="return singleSubmitCheck();" title="���媛���대낫���">���媛���대낫���
+<a href="/item/board_read.naver?code=005930&amp;nid=429086397&amp;page=1" onclick="return singleSubmitCheck();" title="9��� ��ㅼ��怨� 3遺�湲� ��ㅼ����� 留���ㅼ�댁��������">9��� ��ㅼ��怨� 3遺�湲� ��ㅼ����� 留���ㅼ�댁��������
+		
+    행(6): ['2026.09.08 12:35', '������ ��쇱�� 50% ��듭��,50%��� 濡깆�쇰��!!', '��μ��遊�', '1', '0', '0']
+      제목링크: ������ ��쇱�� 50% ��듭��,50%��� 濡깆�쇰��!!
+      href: /item/board_read.naver?code=005930&nid=429086395&page=1
+      제목셀 HTML: <td class="title" style="word-break: break-all;">
+<a href="/item/board_read.naver?code=005930&amp;nid=429086395&amp;page=1" onclick="return singleSubmitCheck();" title="������ ��쇱�� 50% ��듭��,50%��� 濡깆�쇰��!!">������ ��쇱�� 50% ��듭��,50%��� 濡깆�쇰��!!
 						
-						<img height="10" src="https://ssl.pstatic.net/imgst
-    행(6): ['2026.09.08 12:33', '��ㅻ�⑥�� 留�怨� 移⑥갑 ��⑹�����', '���泥�108', '3', '0', '0']
-      제목링크: ��ㅻ�⑥�� 留�怨� 移⑥갑 ��⑹�����
-      href: /item/board_read.naver?code=005930&nid=429086151&page=1
+					
+    행(6): ['2026.09.08 12:35', '二쇱＜������ ���湲�諛곕�� �����ㅺ�� 28留���� 嫄곗�� ��ㅻ�����...', '1d1234', '6', '0', '0']
+      제목링크: 二쇱＜������ ���湲�諛곕�� �����ㅺ�� 28留���� 嫄곗�� ��ㅻ�����...
+      href: /item/board_read.naver?code=005930&nid=429086391&page=1
       제목셀 HTML: <td class="title" style="word-break: break-all;">
-<a href="/item/board_read.naver?code=005930&amp;nid=429086151&amp;page=1" onclick="return singleSubmitCheck();" title="��ㅻ�⑥�� 留�怨� 移⑥갑 ��⑹�����">��ㅻ�⑥�� 留�怨� 移⑥갑 ��⑹�����
-						
-						<img height="10" src="htt
-    행(6): ['2026.09.08 12:33', '��대�� 癒몄����대�ㅼ�� 28留���� ������寃� 留ㅻЪ踰� ���������...', '泥�泥�', '1', '0', '0']
-      제목링크: ��대�� 癒몄����대�ㅼ�� 28留���� ������寃� 留ㅻЪ踰� ���������...
-      href: /item/board_read.naver?code=005930&nid=429086148&page=1
-      제목셀 HTML: <td class="title" style="word-break: break-all;">
-<a href="/item/board_read.naver?code=005930&amp;nid=429086148&amp;page=1" onclick="return singleSubmitCheck();" title="��대�� 癒몄����대�ㅼ�� 28留���� ������寃� 留ㅻЪ踰� ��������⑤��">��대�� 癒몄����대�ㅼ�� 28留���� ������寃� 留ㅻ
-  페이지 링크 표본: ['/item/board_read.naver?code=005930&nid=429086159&page=1', '/item/board_read.naver?code=005930&nid=429086151&page=1', '/item/board_read.naver?code=005930&nid=429086148&page=1', '/item/board_read.naver?code=005930&nid=429086146&page=1', '/item/board_read.naver?code=005930&nid=429086127&page=1', '/item/board_read.naver?code=005930&nid=429086114&page=1']
+<a href="/item/board_read.naver?code=005930&amp;nid=429086391&amp;page=1" onclick="return singleSubmitCheck();" title="二쇱＜������ ���湲�諛곕�� �����ㅺ�� 28留���� 嫄곗�� ��ㅻ����몄�� ��곕��誘몄����� 留ㅻЪ��몄�����">二쇱＜������ ��
+  페이지 링크 표본: ['/item/board_read.naver?code=005930&nid=429086397&page=1', '/item/board_read.naver?code=005930&nid=429086395&page=1', '/item/board_read.naver?code=005930&nid=429086391&page=1', '/item/board_read.naver?code=005930&nid=429086385&page=1', '/item/board_read.naver?code=005930&nid=429086373&page=1', '/item/board_read.naver?code=005930&nid=429086332&page=1']
 
 ── 3. 상세 페이지 [005930] ──
-  https://finance.naver.com/item/board_read.naver?code=005930&nid=429086159&page=1
-  HTTP 200 / 154,204bytes
-  [#content] 1270자 → KRX NXT 넥스트레이드(NXT) 도움말 넥스트레이드(NXT) 넥스트레이드(NXT)란 대한민국 최초의
+  https://finance.naver.com/item/board_read.naver?code=005930&nid=429086397&page=1
+  HTTP 200 / 154,527bytes
+  [#content] 1293자 → KRX NXT 넥스트레이드(NXT) 도움말 넥스트레이드(NXT) 넥스트레이드(NXT)란 대한민국 최초의
                                 대체거래소(ATS, Alternative Trading
                              
-  [table.view] 60자 → 게시판 글 본문보기 생각해보니 조회 3 추천 0 비추천 0 신고 금리올려라제발 2026.09.08 12:33
+  [table.view] 73자 → 게시판 글 본문보기 9월 실적과 3분기 실적이 만들어집니다 조회 2 추천 0 비추천 0 신고 nemo 2026.09.08 12:35
   --- table.view HTML (앞 1800자) ---
 <table cellspacing="0" class="view" style="table-layout:fixed;" summary="게시판 글 본문보기">
 <caption>게시판 글 본문보기</caption>
 <tr>
 <th align="left" width="320">
 <div class="title">
-<strong class="c p15" title="생각해보니">생각해보니</strong>
+<strong class="c p15" title="9월 실적과 3분기 실적이 만들어집니다">9월 실적과 3분기 실적이 만들어집니다</strong>
 </div>
 </th>
-<th align="right" style="padding-right:14px; white-space:nowrap">조회 <span class="tah p11">3</span><img height="9" hspace="8" src="https://ssl.pstatic.net/imgstock/images5/bar_B1B.gif" width="1"/>추천
+<th align="right" style="padding-right:14px; white-space:nowrap">조회 <span class="tah p11">2</span><img height="9" hspace="8" src="https://ssl.pstatic.net/imgstock/images5/bar_B1B.gif" width="1"/>추천
                 <strong class="tah p11 red01 _goodCnt">0</strong><img height="9" hspace="8" src="https://ssl.pstatic.net/imgstock/images5/bar_B1B.gif" width="1"/>비추천
                 <strong class="tah p11 blue01 _badCnt">0</strong><img height="9" hspace="8" src="https://ssl.pstatic.net/imgstock/images5/bar_B1B.gif" width="1"/><a class="report_article" href="javascript:report_doc();">신고</a></th>
 </tr>
 <tr>
 <th align="left" class="info">
-<a class="profile_link" href="javascript:openWindowProfilePage('29080536739382541');">
+<a class="profile_link" href="javascript:openWindowProfilePage('28660364036434684');">
 <span class="profile_thumb">
-<img alt="프로필 이미지" height="14" id="_item_news_profile_img" src="https://ssl.pstatic.net/imgstock/fn/real/_front/image/profile/avatar-4.png" width="14"/>
-<img alt="프로필 이미지" height="14" src="https://ssl.pstatic.net/imgstock/fn/real/_front/image/profile/avatar-4.png" width="14"/>
+<img alt="프로필 이미지" height="14" id="_item_news_profile_img" src="https://sec-discuss-phinf.pstatic.net/MjAyNTA3MDRfMjYx/MDAxNzUxNTg3OTQxMTY2.eYe1LKfh0W4XN4AiGnCyHIKzwAi0F2WNAHkUEBtOCvEg.I4bfFWBnhY-66eNOsl-Kyyggf0wUraLtjmjfieAyb9gg.JPEG/profile_20250704091221.jpg" width="14"/>
+<img alt="프로필 이미지" height="14" src="https://sec-discuss-phinf.pstatic.net/MjAyNTA3MDRfMjYx/MDAxNzUxNTg3OTQxMTY2.eYe1LKfh0W4XN4AiGnCyHIKzwAi0F2WNAHkUEBtOCvEg.I4bfFWBnhY-66eNOsl-Kyyggf0wUraLtjmjfieAyb9gg.JPEG/profile_20250704091221.jpg" width="14"/>
 </span>
-<span class="profile_name">금리올려라제발</span>
+<span class="profile_name">nemo</span>
 </a>
 </th>
-<th align="right" class="gray03 p9 tah" style="padding: 5px 14px 7px 0pt; border-bottom: 1px solid #E5E5E5;">2026.09.08 12:33</th>
+<th align="right" class="gray03 p9 tah" style="padding: 5px 14px 7px 0pt; border-bottom: 1px solid #E5E5E5;">2026.09.08 12:35</th>
 </tr>
 <tr>
 <td colspan="2">
-<iframe bottommargin="0" frameborder="0" height="0" id="contents" marginheight="0" name="contents" scrolling="no" src="https://m.stock.naver.com/pc/domestic/stock/005930/discussion/429086159" title="글 본문 영역" topmargin="0" width="100%"></iframe>
-</td>
-</tr>
-</table>
-  상세 프레임: ['https://m.stock.naver.com/pc/domestic/stock/005930/discussion/429086159']
+<iframe bottommargin="0" frameborder="
+  상세 프레임: ['https://m.stock.naver.com/pc/domestic/stock/005930/discussion/429086397']
 
   --- iframe 직접 요청 ---
-  https://m.stock.naver.com/pc/domestic/stock/005930/discussion/429086159
+  https://m.stock.naver.com/pc/domestic/stock/005930/discussion/429086397
   HTTP 200 / 11,363bytes
   전체 텍스트 14자 → Npay 증권 로딩중 닫기
-    buildId=dbb855825e2208259c5d3306ae6a38ba5ef73111 / page=/pc/domestic/[stockEndType]/[code]/discussion/[discussionId] / query={'stockEndType': 'stock', 'code': '005930', 'discussionId': '429086159'}
+    buildId=dbb855825e2208259c5d3306ae6a38ba5ef73111 / page=/pc/domestic/[stockEndType]/[code]/discussion/[discussionId] / query={'stockEndType': 'stock', 'code': '005930', 'discussionId': '429086397'}
     pageProps keys=['userAgent', '_sentryTraceData', '_sentryBaggage', 'dehydratedState', 'stockEndType', 'code', 'discussionId']
     queries 1개
       q0 key=[{'url': '/auth/userInfo', 'method': 'get'}] type=dict
@@ -116,29 +112,51 @@
       base: https://local-m.stock.naver.com/front-api
       base: https://m.stock.naver.com/front-api
       base: https://staging-m.stock.naver.com/front-api
+    --- posts 템플릿 문맥 ---
+      …or(let[n,t]of Object.entries(o.Tt))for(let[i,r]of Object.entries(t))if(r===e)return{discussionServiceType:n,discussionCategory:i};return null},A=e=>{let{discussionType:n,itemCode:t,discussionId:i,queryString:r="",isForExternal:s=!1}=e,_=C(n);if(!_)return"";let{discussionServiceType:c,discussionCategory:u}=_;return s?`/discussion/${c}/${t}/posts/${i}${r}`:n===o.xl.IPO?`/${c}/${t}/discussion/${i}${r}`:c===o.IX.CRYPTO?`/${c}/${u}/${t}/discussion/${o.Az.NPAY}/${i}${r}`:`/${c}/${u}/${t}/discussion/${i}${r}`…
+      const: STOCK:"stock"
+      const: STOCK:"stock"
+      const: CRYPTO:"crypto"
+      const: DOMESTIC:"domestic"
+      const: CRYPTO:"crypto"
+      const: CRYPTO:"crypto"
+      const: STOCK:"stock"
+      const: STOCK:"domesticstock"
+      const: CRYPTO:"coin"
+      const: STOCK:"stock"
+      const: CRYPTO:"crypto"
+      …/my-461959d4c1922f04.js"],"/discussion/[discussionServiceType]/[code]/posts":[S,s,t,e,d,n,k,m,g,A,I,V,Z,W,sr,"static/chunks/18674-3256516e039bb6a4.js",a,i,r,P,L,$,ss,sc,se,sb,sw,sS,sA,sK,sG,sP,"static/css/6150f85901fc927c.css","static/chunks/pages/discussion/[discussionServiceType]/[code]/posts-b8983e6a861f2106.js"],"/discussion/[discussionServiceType]/[code]/posts/add":[s,c,t,e,o,d,V,si,sk,a,i,r,L,R,sh,sp,sg,sy,"static/chunks/pages/discussion/[discussionServiceType]/[code]/posts/add-ebb473f0f7891f40.js"],"/discussion/[dis…
+      …chunks/18674-3256516e039bb6a4.js",a,i,r,P,L,$,ss,sc,se,sb,sw,sS,sA,sK,sG,sP,"static/css/6150f85901fc927c.css","static/chunks/pages/discussion/[discussionServiceType]/[code]/posts-b8983e6a861f2106.js"],"/discussion/[discussionServiceType]/[code]/posts/add":[s,c,t,e,o,d,V,si,sk,a,i,r,L,R,sh,sp,sg,sy,"static/chunks/pages/discussion/[discussionServiceType]/[code]/posts/add-ebb473f0f7891f40.js"],"/discussion/[discussionServiceType]/[code]/posts/[discussionId]":[S,s,c,t,e,o,d,n,k,p,u,g,A,I,V,W,sr,sV,a,i,r,f,L,R,$,ss,sc,se,sC,sM,…
+      …"static/css/6150f85901fc927c.css","static/chunks/pages/discussion/[discussionServiceType]/[code]/posts-b8983e6a861f2106.js"],"/discussion/[discussionServiceType]/[code]/posts/add":[s,c,t,e,o,d,V,si,sk,a,i,r,L,R,sh,sp,sg,sy,"static/chunks/pages/discussion/[discussionServiceType]/[code]/posts/add-ebb473f0f7891f40.js"],"/discussion/[discussionServiceType]/[code]/posts/[discussionId]":[S,s,c,t,e,o,d,n,k,p,u,g,A,I,V,W,sr,sV,a,i,r,f,L,R,$,ss,sc,se,sC,sM,sD,sQ,"static/chunks/pages/discussion/[discussionServiceType]/[code]/posts/[…
+      …e]/[code]/posts/add":[s,c,t,e,o,d,V,si,sk,a,i,r,L,R,sh,sp,sg,sy,"static/chunks/pages/discussion/[discussionServiceType]/[code]/posts/add-ebb473f0f7891f40.js"],"/discussion/[discussionServiceType]/[code]/posts/[discussionId]":[S,s,c,t,e,o,d,n,k,p,u,g,A,I,V,W,sr,sV,a,i,r,f,L,R,$,ss,sc,se,sC,sM,sD,sQ,"static/chunks/pages/discussion/[discussionServiceType]/[code]/posts/[discussionId]-66d4f3f5885d5be1.js"],"/discussion/[discussionServiceType]/[code]/posts/[discussionId]/edit":[s,c,t,e,o,d,V,si,sk,a,i,r,L,R,sh,sp,sg,sy,"static/c…
+      …scussion/[discussionServiceType]/[code]/posts/add-ebb473f0f7891f40.js"],"/discussion/[discussionServiceType]/[code]/posts/[discussionId]":[S,s,c,t,e,o,d,n,k,p,u,g,A,I,V,W,sr,sV,a,i,r,f,L,R,$,ss,sc,se,sC,sM,sD,sQ,"static/chunks/pages/discussion/[discussionServiceType]/[code]/posts/[discussionId]-66d4f3f5885d5be1.js"],"/discussion/[discussionServiceType]/[code]/posts/[discussionId]/edit":[s,c,t,e,o,d,V,si,sk,a,i,r,L,R,sh,sp,sg,sy,"static/chunks/pages/discussion/[discussionServiceType]/[code]/posts/[discussionId]/edit-a88aeec…
+      …Id]":[S,s,c,t,e,o,d,n,k,p,u,g,A,I,V,W,sr,sV,a,i,r,f,L,R,$,ss,sc,se,sC,sM,sD,sQ,"static/chunks/pages/discussion/[discussionServiceType]/[code]/posts/[discussionId]-66d4f3f5885d5be1.js"],"/discussion/[discussionServiceType]/[code]/posts/[discussionId]/edit":[s,c,t,e,o,d,V,si,sk,a,i,r,L,R,sh,sp,sg,sy,"static/chunks/pages/discussion/[discussionServiceType]/[code]/posts/[discussionId]/edit-a88aeecbba0abb08.js"],"/domestic/fund/[fundCode]/allocation":[sl,s,c,t,e,o,d,h,l,b,sj,cD,a,i,w,cs,cc,cm,cQ,cY,"static/css/3e2700e9574fb2ce.c…
+      …rror/delisting","/discussion/error/ipoListed","/discussion/error/notFound/code","/discussion/error/notFound/code/external","/discussion/error/notFound/discussionId","/discussion/error/userBan","/discussion/home/following","/discussion/home/hot","/discussion/home/my","/discussion/[discussionServiceType]/[code]/posts","/discussion/[discussionServiceType]/[code]/posts/add","/discussion/[discussionServiceType]/[code]/posts/[discussionId]","/discussion/[discussionServiceType]/[code]/posts/[discussionId]/edit","/domestic/fund/[f…
+      …ion/error/notFound/code","/discussion/error/notFound/code/external","/discussion/error/notFound/discussionId","/discussion/error/userBan","/discussion/home/following","/discussion/home/hot","/discussion/home/my","/discussion/[discussionServiceType]/[code]/posts","/discussion/[discussionServiceType]/[code]/posts/add","/discussion/[discussionServiceType]/[code]/posts/[discussionId]","/discussion/[discussionServiceType]/[code]/posts/[discussionId]/edit","/domestic/fund/[fundCode]/allocation","/domestic/fund/[fundCode]/perform…
+      …","/discussion/error/notFound/discussionId","/discussion/error/userBan","/discussion/home/following","/discussion/home/hot","/discussion/home/my","/discussion/[discussionServiceType]/[code]/posts","/discussion/[discussionServiceType]/[code]/posts/add","/discussion/[discussionServiceType]/[code]/posts/[discussionId]","/discussion/[discussionServiceType]/[code]/posts/[discussionId]/edit","/domestic/fund/[fundCode]/allocation","/domestic/fund/[fundCode]/performance","/domestic/fund/[fundCode]/total","/domestic/home/capitaliza…
     --- posts 엔드포인트 시도 ---
-      [ERR] ConnectTimeout https://dev-m.stock.naver.com/front-api/discussion/domestic/stock/posts/429086159
-      [ERR] ConnectTimeout https://dev-m.stock.naver.com/front-api/discussion/domestic/STOCK/posts/429086159
-      [ERR] ConnectionError https://local-m.stock.naver.com/front-api/discussion/domestic/stock/posts/429086159
-      [ERR] ConnectionError https://local-m.stock.naver.com/front-api/discussion/domestic/STOCK/posts/429086159
-      [404] application/json; charse https://m.stock.naver.com/front-api/discussion/domestic/stock/posts/429086159
-      [404] application/json; charse https://m.stock.naver.com/front-api/discussion/domestic/STOCK/posts/429086159
-      [500] text/html                https://staging-m.stock.naver.com/front-api/discussion/domestic/stock/posts/429086159
-      [500] text/html                https://staging-m.stock.naver.com/front-api/discussion/domestic/STOCK/posts/429086159
-      [404] text/html;charset=UTF-8  https://m.stock.naver.com/api/discussion/domestic/stock/posts/429086159
-      [404] text/html;charset=UTF-8  https://m.stock.naver.com/api/discussion/domestic/STOCK/posts/429086159
-      [404] application/json; charse https://m.stock.naver.com/front-api/discussion/domestic/stock/posts/429086159
-      [404] application/json; charse https://m.stock.naver.com/front-api/discussion/domestic/STOCK/posts/429086159
-      [404] application/json;charset https://api.stock.naver.com/discussion/domestic/stock/posts/429086159
-      [404] application/json;charset https://api.stock.naver.com/discussion/domestic/STOCK/posts/429086159
-    [200] application/json             https://m.stock.naver.com/_next/data/dbb855825e2208259c5d3306ae6a38ba5ef73111/pc/domestic/stock/005930/discussion/429086159.json
-      → {"pageProps":{"userAgent":"Mozilla/5.0","_sentryTraceData":"712943bf9b484e83868f176de2f98d1e-9bf8170ae09a8c53","_sentryBaggage":"sentry-environment=real,sentry-release=stock-web%402026.09.03,sentry-public_key=470bdc83f341950b9dc087aa40f5db39,sentry-trace_id=712943bf9b484e83868f176de2f98d1e","dehydratedState":{"mutations":[],"queries":[{"dehydratedAt":1788838454418,"state":{"data":{"result":{"isLog
-    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discussion/domestic/STOCK/005930/429086159
-    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discussion/domestic/stock/005930/429086159
-    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discussion/005930/429086159
-    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discuss/domestic/STOCK/005930/429086159
-    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/json/discussion/005930/429086159
+      [ERR] ConnectTimeout https://dev-m.stock.naver.com/front-api/discussion/domestic/stock/posts/429086397
+      [ERR] ConnectTimeout https://dev-m.stock.naver.com/front-api/discussion/domestic/STOCK/posts/429086397
+      [ERR] ConnectionError https://local-m.stock.naver.com/front-api/discussion/domestic/stock/posts/429086397
+      [ERR] ConnectionError https://local-m.stock.naver.com/front-api/discussion/domestic/STOCK/posts/429086397
+      [404] application/json; charse https://m.stock.naver.com/front-api/discussion/domestic/stock/posts/429086397
+      [404] application/json; charse https://m.stock.naver.com/front-api/discussion/domestic/STOCK/posts/429086397
+      [500] text/html                https://staging-m.stock.naver.com/front-api/discussion/domestic/stock/posts/429086397
+      [500] text/html                https://staging-m.stock.naver.com/front-api/discussion/domestic/STOCK/posts/429086397
+      [404] text/html;charset=UTF-8  https://m.stock.naver.com/api/discussion/domestic/stock/posts/429086397
+      [404] text/html;charset=UTF-8  https://m.stock.naver.com/api/discussion/domestic/STOCK/posts/429086397
+      [404] application/json; charse https://m.stock.naver.com/front-api/discussion/domestic/stock/posts/429086397
+      [404] application/json; charse https://m.stock.naver.com/front-api/discussion/domestic/STOCK/posts/429086397
+      [404] application/json;charset https://api.stock.naver.com/discussion/domestic/stock/posts/429086397
+      [404] application/json;charset https://api.stock.naver.com/discussion/domestic/STOCK/posts/429086397
+    [200] application/json             https://m.stock.naver.com/_next/data/dbb855825e2208259c5d3306ae6a38ba5ef73111/pc/domestic/stock/005930/discussion/429086397.json
+      → {"pageProps":{"userAgent":"Mozilla/5.0","_sentryTraceData":"4e1459435604432e862e666913c232ca-80490039ee4dc100","_sentryBaggage":"sentry-environment=real,sentry-release=stock-web%402026.09.03,sentry-public_key=470bdc83f341950b9dc087aa40f5db39,sentry-trace_id=4e1459435604432e862e666913c232ca","dehydratedState":{"mutations":[],"queries":[{"dehydratedAt":1788838603277,"state":{"data":{"result":{"isLog
+    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discussion/domestic/STOCK/005930/429086397
+    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discussion/domestic/stock/005930/429086397
+    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discussion/005930/429086397
+    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discuss/domestic/STOCK/005930/429086397
+    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/json/discussion/005930/429086397
   --- id/class 후보 ---
     <div id=None class=['content']> 229자 → 네이버 주식거래연결 빠른 주문을 도와드립니다! 본 서비스는 고객님의 빠른 주문을 돕기 위해 증권사의 로그인을 연결 해드리고 있습니다. 고객님이 보유하고 계신 증권
-    <div id=content class=None> 1270자 → KRX NXT 넥스트레이드(NXT) 도움말 넥스트레이드(NXT) 넥스트레이드(NXT)란 대한민국 최초의
+    <div id=content class=None> 1293자 → KRX NXT 넥스트레이드(NXT) 도움말 넥스트레이드(NXT) 넥스트레이드(NXT)란 대한민국 최초의
                                 
