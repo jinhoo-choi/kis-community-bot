@@ -10,6 +10,7 @@ URL·컬럼·파라미터명은 추측하지 않는다. 응답을 덤프해 근�
 import json
 import re
 import sys
+import time
 
 import requests
 from bs4 import BeautifulSoup
@@ -288,6 +289,36 @@ def probe_read(code: str) -> None:
                         api_paths.add(m7.group(1))
                 for a2 in sorted(api_paths)[:40]:
                     log(f"      url: {a2}")
+
+                # /discussion/detail, /discussion/list 가 실제 API 다. 파라미터를 찾는다.
+                FB = "https://m.stock.naver.com/front-api"
+                log("    --- detail/list API 파라미터 ---")
+                combos = [
+                    ("/discussion/detail", {"discussionId": nid2, "itemCode": code2}),
+                    ("/discussion/detail", {"discussionId": nid2,
+                                            "discussionServiceType": "domesticstock",
+                                            "itemCode": code2}),
+                    ("/discussion/detail", {"id": nid2, "itemCode": code2}),
+                    ("/discussion/detail/view", {"discussionId": nid2,
+                                                 "itemCode": code2}),
+                    ("/discussion/list", {"itemCode": code2, "page": 1, "size": 5}),
+                    ("/discussion/list", {"itemCode": code2,
+                                          "discussionServiceType": "domesticstock",
+                                          "page": 1, "size": 5}),
+                ]
+                for path, params in combos:
+                    try:
+                        rr = requests.get(FB + path, params=params,
+                                          headers={**H, "Referer": iu,
+                                                   "Accept": "application/json"},
+                                          timeout=15)
+                        ct = rr.headers.get("content-type", "")[:24]
+                        log(f"      [{rr.status_code}] {ct:24} {path} {params}")
+                        if rr.status_code == 200:
+                            log(f"        → {rr.text[:600]}")
+                    except Exception as ex:
+                        log(f"      [ERR] {type(ex).__name__} {path}")
+                    time.sleep(0.3)
 
                 # 템플릿 변수의 실제 값을 알려면 번들 문맥을 봐야 한다.
                 log("    --- posts 템플릿 문맥 ---")
