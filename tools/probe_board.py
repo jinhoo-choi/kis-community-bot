@@ -130,6 +130,15 @@ def probe_read(code: str) -> None:
             t = el.get_text(" ", strip=True)
             log(f"  [{sel}] {len(t)}자 → {t[:150]}")
 
+    # table.view 안에 본문이 있는데 텍스트가 84자뿐이었다. 원문 HTML 을 본다.
+    tv = ds.select_one("table.view")
+    if tv:
+        log(f"  --- table.view HTML (앞 1800자) ---\n{str(tv)[:1800]}")
+
+    # iframe 으로 본문을 따로 부르는 구조인지 확인
+    fr = [f.get("src") for f in ds.find_all(["frame", "iframe"]) if f.get("src")]
+    log(f"  상세 프레임: {fr[:5]}")
+
     # id/class 에 view/body/content 가 들어간 요소를 전부 나열
     log("  --- id/class 후보 ---")
     for el in ds.find_all(True, limit=400):
