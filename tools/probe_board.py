@@ -237,6 +237,37 @@ def probe_read(code: str) -> None:
                 for b in sorted(bases)[:20]:
                     log(f"      base: {b}")
 
+                # 번들에서 확정한 라우트: /discussion/{serviceType}/{code}/posts/{id}
+                # serviceType 상수는 "domesticstock". _next/data 로 부른다.
+                log("    --- 확정 라우트 _next/data ---")
+                for stype in ("domesticstock", "domestic", "stock"):
+                    u4 = (f"https://m.stock.naver.com/_next/data/{bid}"
+                          f"/discussion/{stype}/{code2}/posts/{nid2}.json")
+                    try:
+                        rr = requests.get(u4, headers={**H, "Referer": iu}, timeout=15)
+                        ct = rr.headers.get("content-type", "")[:24]
+                        log(f"      [{rr.status_code}] {ct:24} stype={stype}")
+                        if rr.status_code == 200 and "json" in ct:
+                            jj = rr.json()
+                            qs2 = (jj.get("pageProps", {}).get("dehydratedState", {})
+                                   .get("queries", []))
+                            log(f"        queries {len(qs2)}개")
+                            for q in qs2:
+                                d2 = (q.get("state") or {}).get("data")
+                                log(f"        key={str(q.get('queryKey'))[:110]}")
+                                if isinstance(d2, dict):
+                                    r3 = d2.get("result", d2)
+                                    if isinstance(r3, dict):
+                                        log(f"          keys={list(r3)[:16]}")
+                                        for k in ("contents", "body", "content",
+                                                  "title", "commentCount",
+                                                  "goodCount", "readCount"):
+                                            if k in r3:
+                                                log(f"            {k} = {str(r3[k])[:220]!r}")
+                            break
+                    except Exception as ex:
+                        log(f"      [ERR] {type(ex).__name__} stype={stype}")
+
                 # 템플릿 변수의 실제 값을 알려면 번들 문맥을 봐야 한다.
                 log("    --- posts 템플릿 문맥 ---")
                 for js in srcs[:25]:
