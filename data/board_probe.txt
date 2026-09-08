@@ -1,60 +1,43 @@
 
 ── 1. 시총 상위 ──
-  HTTP 200 / 100,872bytes
+  HTTP 200 / 100,746bytes
   종목 50개 추출 / 앞 5개: [('삼성전자', '005930'), ('SK하이닉스', '000660'), ('삼성전자우', '005935'), ('SK스퀘어', '402340'), ('삼성전기', '009150')]
 
 ── 2. 토론방 [삼성전자 005930] ──
   https://finance.naver.com/item/board.naver?code=005930&page=1
-  HTTP 200 / 167,905bytes
+  HTTP 200 / 168,428bytes
   [euc-kr] meta charset=utf-8 표본='<title>��쇱�깆����� : Npay 利�沅�</title>\n\t\n\t\n\n\n\n\n<meta http-equ'
   [utf-8] meta charset=utf-8 표본='<title>삼성전자 : Npay 증권</title>\n\t\n\t\n\n\n\n\n<meta http-equiv="Cont'
   표2 헤더(6): ['���吏�', '���紐�', '湲���댁��', '議고��', '異�泥�', '鍮�異�泥�']
-    행(6): ['2026.09.07 23:09', '��대��二쇱�������댁㎏..', '援녹�쇰�곗�댄�곕��怨����', '8', '0', '0']
-      제목링크: ��대��二쇱�������댁㎏..
-      href: /item/board_read.naver?code=005930&nid=429055145&page=1
+    행(6): ['2026.09.08 10:03', '怨�醫���몄��) 諛����泥대�� �����몃��, ������留ㅼ�� ��ㅽ�����?', '�����듭땐留�������媛�怨⑦�ㅽ��', '10', '0', '0']
+      제목링크: 怨�醫���몄��) 諛����泥대�� �����몃��, ������留ㅼ�� ��ㅽ�����?
+      href: /item/board_read.naver?code=005930&nid=429071709&page=1
       제목셀 HTML: <td class="title" style="word-break: break-all;">
-<a href="/item/board_read.naver?code=005930&amp;nid=429055145&amp;page=1" onclick="return singleSubmitCheck();" title="��대��二쇱�������댁㎏..">��대��二쇱�������댁㎏..
-						
-						<img height="10" src="https://ssl.pstat
-    행(6): ['2026.09.07 23:09', '��ㅻ�� ��������� 泥�遺� 怨���쏀�����', '踰�媛����', '4', '0', '1']
-      제목링크: ��ㅻ�� ��������� 泥�遺� 怨���쏀�����
-      href: /item/board_read.naver?code=005930&nid=429055142&page=1
+<a href="/item/board_read.naver?code=005930&amp;nid=429071709&amp;page=1" onclick="return singleSubmitCheck();" title="怨�醫���몄��) 諛����泥대�� �����몃��, ������留ㅼ�� ��ㅽ�����?">怨�醫���몄��) 諛����泥대�� �����몃��, ������留
+    행(6): ['2026.09.08 10:03', '��� 吏�吏�.. ��곌린湲���대��?', '���������', '21', '0', '0']
+      제목링크: ��� 吏�吏�.. ��곌린湲���대��?
+      href: /item/board_read.naver?code=005930&nid=429071652&page=1
       제목셀 HTML: <td class="title" style="word-break: break-all;">
-<a href="/item/board_read.naver?code=005930&amp;nid=429055142&amp;page=1" onclick="return singleSubmitCheck();" title="��ㅻ�� ��������� 泥�遺� 怨���쏀�����">��ㅻ�� ��������� 泥�遺� 怨���쏀�����
+<a href="/item/board_read.naver?code=005930&amp;nid=429071652&amp;page=1" onclick="return singleSubmitCheck();" title="��� 吏�吏�.. ��곌린湲���대��?">��� 吏�吏�.. ��곌린湲���대��?
 						
-						<img height="
-    행(6): ['2026.09.07 23:08', '��⑺����� ��닿굅��� 留�留� ��� ������', '留뱀�����', '3', '0', '0']
-      제목링크: ��⑺����� ��닿굅��� 留�留� ��� ������
-      href: /item/board_read.naver?code=005930&nid=429055137&page=1
+						<img height="10" src="https:/
+    행(6): ['2026.09.08 10:03', '吏�湲� ��≪�쇰㈃', 'drime77', '5', '0', '0']
+      제목링크: 吏�湲� ��≪�쇰㈃
+      href: /item/board_read.naver?code=005930&nid=429071649&page=1
       제목셀 HTML: <td class="title" style="word-break: break-all;">
-<a href="/item/board_read.naver?code=005930&amp;nid=429055137&amp;page=1" onclick="return singleSubmitCheck();" title="��⑺����� ��닿굅��� 留�留� ��� ������">��⑺����� ��닿굅��� 留�留� ��� ������
+<a href="/item/board_read.naver?code=005930&amp;nid=429071649&amp;page=1" onclick="return singleSubmitCheck();" title="吏�湲� ��≪�쇰㈃">吏�湲� ��≪�쇰㈃
 						
-						<img height
-  페이지 링크 표본: ['/item/board_read.naver?code=005930&nid=429055145&page=1', '/item/board_read.naver?code=005930&nid=429055142&page=1', '/item/board_read.naver?code=005930&nid=429055137&page=1', '/item/board_read.naver?code=005930&nid=429055133&page=1', '/item/board_read.naver?code=005930&nid=429055131&page=1', '/item/board_read.naver?code=005930&nid=429055075&page=1']
+						<img height="10" src="https://ssl.pstatic.net/imgstoc
+  페이지 링크 표본: ['/item/board_read.naver?code=005930&nid=429071709&page=1', '/item/board_read.naver?code=005930&nid=429071652&page=1', '/item/board_read.naver?code=005930&nid=429071649&page=1', '/item/board_read.naver?code=005930&nid=429071641&page=1', '/item/board_read.naver?code=005930&nid=429071626&page=1', '/item/board_read.naver?code=005930&nid=429071622&page=1']
 
-── 2. 토론방 [SK하이닉스 000660] ──
-  https://finance.naver.com/item/board.naver?code=000660&page=1
-  HTTP 200 / 169,901bytes
-  [euc-kr] meta charset=utf-8 표본='<title>SK�����대����� : Npay 利�沅�</title>\n\t\n\t\n\n\n\n\n<meta http-'
-  [utf-8] meta charset=utf-8 표본='<title>SK하이닉스 : Npay 증권</title>\n\t\n\t\n\n\n\n\n<meta http-equiv="Co'
-  표2 헤더(6): ['���吏�', '���紐�', '湲���댁��', '議고��', '異�泥�', '鍮�異�泥�']
-    행(6): ['2026.09.07 23:08', '��쎈�ㅼ�� 肄���ㅽ�� ��쇱��- 0.23���.��〓�쎌�댁��?������...', '��щえfomo', '17', '0', '0']
-      제목링크: ��쎈�ㅼ�� 肄���ㅽ�� ��쇱��- 0.23���.��〓�쎌�댁��?������...
-      href: /item/board_read.naver?code=000660&nid=429055136&page=1
-      제목셀 HTML: <td class="title" style="word-break: break-all;">
-<a href="/item/board_read.naver?code=000660&amp;nid=429055136&amp;page=1" onclick="return singleSubmitCheck();" title="��쎈�ㅼ�� 肄���ㅽ�� ��쇱��- 0.23���.��〓�쎌�댁��?������������ -2��쇰�� ������怨�???0.2��몃�� 蹂댄�⑹��以��
-    행(6): ['2026.09.07 23:08', '���吏���� ��������� 留����', 'ydkimjj', '8', '1', '0']
-      제목링크: ���吏���� ��������� 留����
-      href: /item/board_read.naver?code=000660&nid=429055132&page=1
-      제목셀 HTML: <td class="title" style="word-break: break-all;">
-<a href="/item/board_read.naver?code=000660&amp;nid=429055132&amp;page=1" onclick="return singleSubmitCheck();" title="���吏���� ��������� 留����">���吏���� ��������� 留����
-						
-						<img height="10" src="https
-    행(6): ['2026.09.07 23:07', '���罹�由� 泥���곌났���', 'Naruemol', '36', '0', '0']
-      제목링크: ���罹�由� 泥���곌났���
-      href: /item/board_read.naver?code=000660&nid=429055126&page=1
-      제목셀 HTML: <td class="title" style="word-break: break-all;">
-<a href="/item/board_read.naver?code=000660&amp;nid=429055126&amp;page=1" onclick="return singleSubmitCheck();" title="���罹�由� 泥���곌났���">���罹�由� 泥���곌났���
-						
-						<img height="10" src="https://ssl.pstatic
-  페이지 링크 표본: ['/item/board_read.naver?code=000660&nid=429055136&page=1', '/item/board_read.naver?code=000660&nid=429055132&page=1', '/item/board_read.naver?code=000660&nid=429055126&page=1', '/item/board_read.naver?code=000660&nid=429055122&page=1', '/item/board_read.naver?code=000660&nid=429055114&page=1', '/item/board_read.naver?code=000660&nid=429055102&page=1']
+── 3. 상세 페이지 [005930] ──
+  https://finance.naver.com/item/board_read.naver?code=005930&nid=429071709&page=1
+  HTTP 200 / 154,260bytes
+  [#content] 1291자 → KRX NXT 넥스트레이드(NXT) 도움말 넥스트레이드(NXT) 넥스트레이드(NXT)란 대한민국 최초의
+                                대체거래소(ATS, Alternative Trading
+                             
+  [table.view] 84자 → 게시판 글 본문보기 계좌인증) 반도체는 신인데, 저점매수 다햇제? 조회 11 추천 0 비추천 0 신고 수익충만상한가골키퍼 2026.09.08 10:03
+  --- id/class 후보 ---
+    <div id=None class=['content']> 229자 → 네이버 주식거래연결 빠른 주문을 도와드립니다! 본 서비스는 고객님의 빠른 주문을 돕기 위해 증권사의 로그인을 연결 해드리고 있습니다. 고객님이 보유하고 계신 증권
+    <div id=content class=None> 1291자 → KRX NXT 넥스트레이드(NXT) 도움말 넥스트레이드(NXT) 넥스트레이드(NXT)란 대한민국 최초의
+                                
