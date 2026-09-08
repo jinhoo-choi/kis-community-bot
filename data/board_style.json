@@ -1,6 +1,36 @@
 {
  "hot": {},
  "cold": {},
+ "hot_title": {
+  "n": 209,
+  "title_len_mean": 21.5,
+  "title_len_median": 21,
+  "lead": {
+   "text": 194,
+   "number": 14,
+   "question": 1
+  },
+  "question_pct": 0.5,
+  "has_number_pct": 90.0,
+  "up_mean": 31.5,
+  "views_mean": 739.1
+ },
+ "cold_title": {
+  "n": 209,
+  "title_len_mean": 19.3,
+  "title_len_median": 19,
+  "lead": {
+   "text": 186,
+   "number": 22,
+   "question": 1
+  },
+  "question_pct": 0.5,
+  "has_number_pct": 81.8,
+  "up_mean": 1.1,
+  "views_mean": 501.5
+ },
+ "stage": "title_done",
+ "listed": 12000,
  "config": {
   "stocks": 30,
   "pages": 20,
