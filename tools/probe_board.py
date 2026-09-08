@@ -103,10 +103,50 @@ def probe_board(code: str, name: str) -> None:
     log(f"  페이지 링크 표본: {pg}")
 
 
+def probe_read(code: str) -> None:
+    """상세(본문) 페이지 구조. board_style 이 본문을 못 읽어 전부 빈 값이었다."""
+    log(f"\n── 3. 상세 페이지 [{code}] ──")
+    r = requests.get(f"https://finance.naver.com/item/board.naver?code={code}&page=1",
+                     headers=H, timeout=20)
+    r.encoding = "utf-8"
+    soup = BeautifulSoup(r.text, "html.parser")
+    a = soup.select_one("td.title a[href*='board_read']")
+    if not a:
+        log("  목록에서 상세 링크를 못 찾음")
+        return
+    url = "https://finance.naver.com" + a["href"]
+    log(f"  {url}")
+    d = requests.get(url, headers=H, timeout=20)
+    d.encoding = "utf-8"
+    log(f"  HTTP {d.status_code} / {len(d.content):,}bytes")
+    ds = BeautifulSoup(d.text, "html.parser")
+
+    # 어떤 셀렉터가 본문을 담고 있는지 후보를 전부 때려본다
+    for sel in ["#body", "div#body", "td.view_se", "div.view_se", "#content",
+                "div.view_ct", "div.section_view", "table.view", "div.box_type_m",
+                "#contentarea", "div.view_area"]:
+        el = ds.select_one(sel)
+        if el:
+            t = el.get_text(" ", strip=True)
+            log(f"  [{sel}] {len(t)}자 → {t[:150]}")
+
+    # id/class 에 view/body/content 가 들어간 요소를 전부 나열
+    log("  --- id/class 후보 ---")
+    for el in ds.find_all(True, limit=400):
+        ident = (el.get("id") or "") + " " + " ".join(el.get("class") or [])
+        if re.search(r"view|body|content|cont", ident, re.I):
+            t = el.get_text(" ", strip=True)
+            if 20 < len(t) < 3000:
+                log(f"    <{el.name} id={el.get('id')} class={el.get('class')}> "
+                    f"{len(t)}자 → {t[:90]}")
+
+
 def main() -> None:
     stocks = probe_market_sum()
-    for name, code in stocks[:2]:
+    for name, code in stocks[:1]:
         probe_board(code, name)
+    if stocks:
+        probe_read(stocks[0][1])
     with open("data/board_probe.txt", "w", encoding="utf-8") as f:
         f.write("\n".join(OUT))
     print("\n[probe] data/board_probe.txt 저장")
