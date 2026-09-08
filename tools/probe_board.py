@@ -139,6 +139,25 @@ def probe_read(code: str) -> None:
     fr = [f.get("src") for f in ds.find_all(["frame", "iframe"]) if f.get("src")]
     log(f"  상세 프레임: {fr[:5]}")
 
+    # 본문은 iframe 으로 따로 온다. 그 주소를 직접 때려본다.
+    if fr:
+        iu = fr[0]
+        log(f"\n  --- iframe 직접 요청 ---\n  {iu}")
+        try:
+            f2 = requests.get(iu, headers={**H, "Referer": url}, timeout=20)
+            log(f"  HTTP {f2.status_code} / {len(f2.content):,}bytes")
+            fs = BeautifulSoup(f2.text, "html.parser")
+            txt = fs.get_text(" ", strip=True)
+            log(f"  전체 텍스트 {len(txt)}자 → {txt[:300]}")
+            # SPA 라면 __NEXT_DATA__ 같은 JSON 이 박혀 있다
+            for sc in fs.find_all("script"):
+                sid = sc.get("id") or ""
+                body = sc.string or ""
+                if sid or "contents" in body[:400] or "discussion" in body[:400]:
+                    log(f"    <script id={sid!r}> {len(body)}자 → {body[:200]}")
+        except Exception as ex:
+            log(f"  iframe 실패 {type(ex).__name__} {ex}")
+
     # id/class 에 view/body/content 가 들어간 요소를 전부 나열
     log("  --- id/class 후보 ---")
     for el in ds.find_all(True, limit=400):
