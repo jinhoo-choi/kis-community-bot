@@ -1,48 +1,49 @@
 
 ── 1. 시총 상위 ──
-  HTTP 200 / 100,837bytes
+  HTTP 200 / 100,770bytes
   종목 50개 추출 / 앞 5개: [('삼성전자', '005930'), ('SK하이닉스', '000660'), ('삼성전자우', '005935'), ('SK스퀘어', '402340'), ('삼성전기', '009150')]
 
 ── 2. 토론방 [삼성전자 005930] ──
   https://finance.naver.com/item/board.naver?code=005930&page=1
-  HTTP 200 / 169,029bytes
+  HTTP 200 / 168,498bytes
   [euc-kr] meta charset=utf-8 표본='<title>��쇱�깆����� : Npay 利�沅�</title>\n\t\n\t\n\n\n\n\n<meta http-equ'
   [utf-8] meta charset=utf-8 표본='<title>삼성전자 : Npay 증권</title>\n\t\n\t\n\n\n\n\n<meta http-equiv="Cont'
   표2 헤더(6): ['���吏�', '���紐�', '湲���댁��', '議고��', '異�泥�', '鍮�異�泥�']
-    행(6): ['2026.09.08 12:29', '洹몃�� ��ㅽ����μ�� �����ㅻ�쇰━', 'Fractal', '1', '0', '0']
-      제목링크: 洹몃�� ��ㅽ����μ�� �����ㅻ�쇰━
-      href: /item/board_read.naver?code=005930&nid=429085837&page=1
+    행(6): ['2026.09.08 12:30', '���ytn��댁�� ��노�ㅼ�� ������ ������������������������...', '吏����媛�紐쎌����듯��', '3', '0', '0']
+      제목링크: ���ytn��댁�� ��노�ㅼ�� ������ ������������������������...
+      href: /item/board_read.naver?code=005930&nid=429085935&page=1
       제목셀 HTML: <td class="title" style="word-break: break-all;">
-<a href="/item/board_read.naver?code=005930&amp;nid=429085837&amp;page=1" onclick="return singleSubmitCheck();" title="洹몃�� ��ㅽ����μ�� �����ㅻ�쇰━">洹몃�� ��ㅽ����μ�� �����ㅻ�쇰━
+<a href="/item/board_read.naver?code=005930&amp;nid=429085935&amp;page=1" onclick="return singleSubmitCheck();" title="���ytn��댁�� ��노�ㅼ�� ������ ���������������������������������������������">���ytn��댁�� ��노�ㅼ
+    행(6): ['2026.09.08 12:30', '��댁��吏���대��二�', '��⑦�������곗����μ＜������', '2', '0', '0']
+      제목링크: ��댁��吏���대��二�
+      href: /item/board_read.naver?code=005930&nid=429085933&page=1
+      제목셀 HTML: <td class="title" style="word-break: break-all;">
+<a href="/item/board_read.naver?code=005930&amp;nid=429085933&amp;page=1" onclick="return singleSubmitCheck();" title="��댁��吏���대��二�">��댁��吏���대��二�
 						
-						<img height="10" src="htt
-    행(6): ['2026.09.08 12:29', '�����듬�� 吏�吏����20��� ������寃� 援쇨돔������?', '���由щ����댄�몄��痢듯�대┃������1���', '1', '0', '0']
-      제목링크: �����듬�� 吏�吏����20��� ������寃� 援쇨돔������?
-      href: /item/board_read.naver?code=005930&nid=429085836&page=1
+						<img height="10" src="https://ssl.pstatic.net/i
+    행(6): ['2026.09.08 12:30', '�����쏀����ㅺ��', '��⑷�����遺���μ＜��멸났', '8', '0', '0']
+      제목링크: �����쏀����ㅺ��
+      href: /item/board_read.naver?code=005930&nid=429085919&page=1
       제목셀 HTML: <td class="title" style="word-break: break-all;">
-<a href="/item/board_read.naver?code=005930&amp;nid=429085836&amp;page=1" onclick="return singleSubmitCheck();" title="�����듬�� 吏�吏����20��� ������寃� 援쇨돔������?">�����듬�� 吏�吏����20��� ������寃� 援쇨돔������?
+<a href="/item/board_read.naver?code=005930&amp;nid=429085919&amp;page=1" onclick="return singleSubmitCheck();" title="�����쏀����ㅺ��">�����쏀����ㅺ��
 						
-    행(6): ['2026.09.08 12:29', '�����대����� 諛�留���대�쇰�� 已����媛���� ��������� 吏�吏�...', 'k1971323', '10', '1', '0']
-      제목링크: �����대����� 諛�留���대�쇰�� 已����媛���� ��������� 吏�吏�...
-      href: /item/board_read.naver?code=005930&nid=429085816&page=1
-      제목셀 HTML: <td class="title" style="word-break: break-all;">
-<a href="/item/board_read.naver?code=005930&amp;nid=429085816&amp;page=1" onclick="return singleSubmitCheck();" title="�����대����� 諛�留���대�쇰�� 已����媛���� ��������� 吏�吏� 諛�留� 已����媛�怨������� ">�����대����� 諛�留���
-  페이지 링크 표본: ['/item/board_read.naver?code=005930&nid=429085837&page=1', '/item/board_read.naver?code=005930&nid=429085836&page=1', '/item/board_read.naver?code=005930&nid=429085816&page=1', '/item/board_read.naver?code=005930&nid=429085802&page=1', '/item/board_read.naver?code=005930&nid=429085800&page=1', '/item/board_read.naver?code=005930&nid=429085793&page=1']
+						<img height="10" src="https://ssl.pstatic.net/img
+  페이지 링크 표본: ['/item/board_read.naver?code=005930&nid=429085935&page=1', '/item/board_read.naver?code=005930&nid=429085933&page=1', '/item/board_read.naver?code=005930&nid=429085919&page=1', '/item/board_read.naver?code=005930&nid=429085908&page=1', '/item/board_read.naver?code=005930&nid=429085903&page=1', '/item/board_read.naver?code=005930&nid=429085887&page=1']
 
 ── 3. 상세 페이지 [005930] ──
-  https://finance.naver.com/item/board_read.naver?code=005930&nid=429085837&page=1
-  HTTP 200 / 154,252bytes
-  [#content] 1284자 → KRX NXT 넥스트레이드(NXT) 도움말 넥스트레이드(NXT) 넥스트레이드(NXT)란 대한민국 최초의
+  https://finance.naver.com/item/board_read.naver?code=005930&nid=429085944&page=1
+  HTTP 200 / 154,325bytes
+  [#content] 1295자 → KRX NXT 넥스트레이드(NXT) 도움말 넥스트레이드(NXT) 넥스트레이드(NXT)란 대한민국 최초의
                                 대체거래소(ATS, Alternative Trading
                              
-  [table.view] 67자 → 게시판 글 본문보기 그럼 오후장은 너네끼리 조회 1 추천 0 비추천 0 신고 Fractal 2026.09.08 12:29
+  [table.view] 71자 → 게시판 글 본문보기 드디어 방향이 정해졌구나.. 조회 1 추천 0 비추천 0 신고 소박한투자레전드 2026.09.08 12:30
   --- table.view HTML (앞 1800자) ---
 <table cellspacing="0" class="view" style="table-layout:fixed;" summary="게시판 글 본문보기">
 <caption>게시판 글 본문보기</caption>
 <tr>
 <th align="left" width="320">
 <div class="title">
-<strong class="c p15" title="그럼 오후장은 너네끼리">그럼 오후장은 너네끼리</strong>
+<strong class="c p15" title="드디어 방향이 정해졌구나..">드디어 방향이 정해졌구나..</strong>
 </div>
 </th>
 <th align="right" style="padding-right:14px; white-space:nowrap">조회 <span class="tah p11">1</span><img height="9" hspace="8" src="https://ssl.pstatic.net/imgstock/images5/bar_B1B.gif" width="1"/>추천
@@ -51,38 +52,42 @@
 </tr>
 <tr>
 <th align="left" class="info">
-<a class="profile_link" href="javascript:openWindowProfilePage('29082312964157876');">
+<a class="profile_link" href="javascript:openWindowProfilePage('28660352179877031');">
 <span class="profile_thumb">
-<img alt="프로필 이미지" height="14" id="_item_news_profile_img" src="https://ssl.pstatic.net/imgstock/fn/real/_front/image/profile/avatar-4.png" width="14"/>
-<img alt="프로필 이미지" height="14" src="https://ssl.pstatic.net/imgstock/fn/real/_front/image/profile/avatar-4.png" width="14"/>
+<img alt="프로필 이미지" height="14" id="_item_news_profile_img" src="https://ssl.pstatic.net/imgstock/fn/real/_front/image/profile/avatar-7.png" width="14"/>
+<img alt="프로필 이미지" height="14" src="https://ssl.pstatic.net/imgstock/fn/real/_front/image/profile/avatar-7.png" width="14"/>
 </span>
-<span class="profile_name">Fractal</span>
+<span class="profile_name">소박한투자레전드</span>
 </a>
 </th>
-<th align="right" class="gray03 p9 tah" style="padding: 5px 14px 7px 0pt; border-bottom: 1px solid #E5E5E5;">2026.09.08 12:29</th>
+<th align="right" class="gray03 p9 tah" style="padding: 5px 14px 7px 0pt; border-bottom: 1px solid #E5E5E5;">2026.09.08 12:30</th>
 </tr>
 <tr>
 <td colspan="2">
-<iframe bottommargin="0" frameborder="0" height="0" id="contents" marginheight="0" name="contents" scrolling="no" src="https://m.stock.naver.com/pc/domestic/stock/005930/discussion/429085837" title="글 본문 영역" topmargin="0" width="100%"></iframe>
+<iframe bottommargin="0" frameborder="0" height="0" id="contents" marginheight="0" name="contents" scrolling="no" src="https://m.stock.naver.com/pc/domestic/stock/005930/discussion/429085944" title="글 본문 영역" topmargin="0" width="100%"></iframe>
 </td>
 </tr>
 </table>
-  상세 프레임: ['https://m.stock.naver.com/pc/domestic/stock/005930/discussion/429085837']
+  상세 프레임: ['https://m.stock.naver.com/pc/domestic/stock/005930/discussion/429085944']
 
   --- iframe 직접 요청 ---
-  https://m.stock.naver.com/pc/domestic/stock/005930/discussion/429085837
+  https://m.stock.naver.com/pc/domestic/stock/005930/discussion/429085944
   HTTP 200 / 11,363bytes
   전체 텍스트 14자 → Npay 증권 로딩중 닫기
-    buildId=dbb855825e2208259c5d3306ae6a38ba5ef73111 / page=/pc/domestic/[stockEndType]/[code]/discussion/[discussionId] / query={'stockEndType': 'stock', 'code': '005930', 'discussionId': '429085837'}
+    buildId=dbb855825e2208259c5d3306ae6a38ba5ef73111 / page=/pc/domestic/[stockEndType]/[code]/discussion/[discussionId] / query={'stockEndType': 'stock', 'code': '005930', 'discussionId': '429085944'}
     pageProps keys=['userAgent', '_sentryTraceData', '_sentryBaggage', 'dehydratedState', 'stockEndType', 'code', 'discussionId']
-    [200] application/json             https://m.stock.naver.com/_next/data/dbb855825e2208259c5d3306ae6a38ba5ef73111/pc/domestic/stock/005930/discussion/429085837.json
-      → {"pageProps":{"userAgent":"Mozilla/5.0","_sentryTraceData":"cd33a92ce4fb478595dbf9e4658daf7c-8b95bd372005580f","_sentryBaggage":"sentry-environment=real,sentry-release=stock-web%402026.09.03,sentry-public_key=470bdc83f341950b9dc087aa40f5db39,sentry-trace_id=cd33a92ce4fb478595dbf9e4658daf7c","dehydratedState":{"mutations":[],"queries":[{"dehydratedAt":1788838172481,"state":{"data":{"result":{"isLog
-    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discussion/domestic/STOCK/005930/429085837
-    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discussion/domestic/stock/005930/429085837
-    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discussion/005930/429085837
-    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discuss/domestic/STOCK/005930/429085837
-    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/json/discussion/005930/429085837
+    queries 1개
+      q0 key=[{'url': '/auth/userInfo', 'method': 'get'}] type=dict
+         result keys=['result']
+         result.result keys=['isLogin', 'isAgreementYn', 'isAdult', 'userId', 'nidNo', 'realNameVerified', 'name', 'age']
+    [200] application/json             https://m.stock.naver.com/_next/data/dbb855825e2208259c5d3306ae6a38ba5ef73111/pc/domestic/stock/005930/discussion/429085944.json
+      → {"pageProps":{"userAgent":"Mozilla/5.0","_sentryTraceData":"1c6a02eb2f9542ac9ada6d451685cce9-b43626fdd2300820","_sentryBaggage":"sentry-environment=real,sentry-release=stock-web%402026.09.03,sentry-public_key=470bdc83f341950b9dc087aa40f5db39,sentry-trace_id=1c6a02eb2f9542ac9ada6d451685cce9","dehydratedState":{"mutations":[],"queries":[{"dehydratedAt":1788838245397,"state":{"data":{"result":{"isLog
+    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discussion/domestic/STOCK/005930/429085944
+    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discussion/domestic/stock/005930/429085944
+    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discussion/005930/429085944
+    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/discuss/domestic/STOCK/005930/429085944
+    [404] text/html;charset=UTF-8      https://m.stock.naver.com/api/json/discussion/005930/429085944
   --- id/class 후보 ---
     <div id=None class=['content']> 229자 → 네이버 주식거래연결 빠른 주문을 도와드립니다! 본 서비스는 고객님의 빠른 주문을 돕기 위해 증권사의 로그인을 연결 해드리고 있습니다. 고객님이 보유하고 계신 증권
-    <div id=content class=None> 1284자 → KRX NXT 넥스트레이드(NXT) 도움말 넥스트레이드(NXT) 넥스트레이드(NXT)란 대한민국 최초의
+    <div id=content class=None> 1295자 → KRX NXT 넥스트레이드(NXT) 도움말 넥스트레이드(NXT) 넥스트레이드(NXT)란 대한민국 최초의
                                 
