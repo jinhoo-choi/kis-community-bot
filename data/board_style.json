@@ -1,0 +1,11 @@
+{
+ "hot": {},
+ "cold": {},
+ "config": {
+  "stocks": 30,
+  "pages": 20,
+  "hot": "up>=20 & views>=300",
+  "cold": "up<=2 & views>=100",
+  "listed": 12000
+ }
+}
