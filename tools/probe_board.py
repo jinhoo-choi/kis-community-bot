@@ -237,6 +237,23 @@ def probe_read(code: str) -> None:
                 for b in sorted(bases)[:20]:
                     log(f"      base: {b}")
 
+                # 템플릿 변수의 실제 값을 알려면 번들 문맥을 봐야 한다.
+                log("    --- posts 템플릿 문맥 ---")
+                for js in srcs[:25]:
+                    ju = js if js.startswith("http") else "https://m.stock.naver.com" + js
+                    try:
+                        t = requests.get(ju, headers=H, timeout=20).text
+                    except Exception:
+                        continue
+                    for m4 in re.finditer(r"discussion/[^\"'`]{0,40}posts/", t):
+                        a, b2 = max(0, m4.start() - 320), min(len(t), m4.end() + 160)
+                        log(f"      …{t[a:b2]}…")
+                    if "posts/" in t and "discussion" in t:
+                        # DOMESTIC/STOCK 같은 상수 정의도 함께 본다
+                        for m5 in re.finditer(
+                                r"(DOMESTIC|OVERSEAS|STOCK|CRYPTO)\s*[:=]\s*[\"'`][^\"'`]{1,20}[\"'`]", t):
+                            log(f"      const: {m5.group(0)}")
+
                 # /discussion/{market}/{type}/posts/{id} 조합을 실제로 때린다
                 log("    --- posts 엔드포인트 시도 ---")
                 cand_bases = sorted(bases) + [
