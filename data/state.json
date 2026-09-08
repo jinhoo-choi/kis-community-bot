@@ -163,7 +163,16 @@
   "ID::naver-y_readnavernid96033page1": "2026-09-08",
   "TTL::035420::아시아유일통합ai팩토리사업자로의부상": "2026-09-08",
   "hk-652123": "2026-09-08",
-  "naver-y_readnavernid96033page1": "2026-09-08"
+  "naver-y_readnavernid96033page1": "2026-09-08",
+  "ID::naver-y_readnavernid96051page1": "2026-09-09",
+  "TTL::336260::pafc미국진출성공": "2026-09-09",
+  "ID::hk-652165": "2026-09-09",
+  "TTL::257720::실리콘투벤더사역할이중요해지는구간": "2026-09-09",
+  "ID::naver-y_readnavernid96049page1": "2026-09-09",
+  "TTL::196170::노바티스deldesiran가치제외": "2026-09-09",
+  "naver-y_readnavernid96051page1": "2026-09-09",
+  "hk-652165": "2026-09-09",
+  "naver-y_readnavernid96049page1": "2026-09-09"
  },
  "recent_tone": {
   "_theme": [
@@ -233,7 +242,8 @@
   ],
   "336260": [
    "dry:duration:fact_read:short",
-   "two_view:amount:two_view:two_view"
+   "two_view:amount:two_view:two_view",
+   "open_talk:terms:open_talk:open_talk"
   ],
   "176750": [
    "timeline_note:amount:timeline_note:timeline_note",
@@ -336,7 +346,8 @@
    "open_talk:reaction:open_talk:open_talk"
   ],
   "196170": [
-   "open_talk:amount:open_talk:open_talk"
+   "open_talk:amount:open_talk:open_talk",
+   "fact_note:terms:fact_note:fact_note"
   ],
   "009900": [
    "two_view:reaction:two_view:two_view"
@@ -346,6 +357,9 @@
   ],
   "027360": [
    "two_view:amount:two_view:two_view"
+  ],
+  "257720": [
+   "open_talk:terms:open_talk:open_talk"
   ]
  }
 }
