@@ -74,6 +74,10 @@ def decide_distribution(
     # open_talk 만 살아남아 배포 23건 중 17건이 질문형이 됐다.
     # 계약 충돌은 고쳤지만, 같은 일이 다시 생겨도 배포까지 가지 않게 상한을 둔다.
     per_tone_cap = max(2, round(target * 0.3))
+    # 실측(네이버 종토방 12,000건): 질문으로 끝나는 글의 비율이
+    # 고반응군 6.4%, 대조군 15.7% 였다. 질문 마무리는 반응을 '낮춘다'.
+    # 질문형 페르소나는 별도로 더 조인다.
+    per_question_cap = max(1, round(target * 0.1))
     # 같은 페르소나 안에서도 마무리 문구가 복제된다.
     # 실측: '아시는 분 계신가요?' 로 끝나는 글이 7건이었다.
     sent, per_s, per_k, per_t, per_e = [], Counter(), Counter(), Counter(), Counter()
@@ -93,6 +97,10 @@ def decide_distribution(
             return False
         # tone 이 비면 전부 한 묶음이 돼 상한에 걸린다. 미상은 상한에서 뺀다.
         tone = p.get("tone", "")
+        if p.get("body", "").strip().endswith("?"):
+            if per_t["_q"] >= per_question_cap:
+                p["hold_reason"] = "질문상한"
+                return False
         if tone and per_t[tone] >= per_tone_cap:
             p["hold_reason"] = f"문체상한({tone})"
             return False
@@ -105,6 +113,8 @@ def decide_distribution(
         per_k[kind] += 1
         if tone:
             per_t[tone] += 1
+        if p.get("body", "").strip().endswith("?"):
+            per_t["_q"] += 1
         if ending:
             per_e[ending] += 1
         sent.append(p)
