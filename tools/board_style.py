@@ -92,6 +92,35 @@ def list_page(code: str, page: int) -> list[dict]:
     return rows
 
 
+FRONT_API = "https://m.stock.naver.com/front-api"
+
+
+def fetch_detail(code: str, nid: str) -> dict:
+    """본문 API. 프로브로 확정한 경로다.
+
+      GET /front-api/discussion/detail?id={nid}&itemCode={code}
+    파라미터가 discussionId 가 아니라 id 다. 나머지 조합은 전부 400/404 였다.
+    본문은 contentHtml 로 온다 (contentJsonSwReplaced 는 스마트에디터 JSON).
+    """
+    try:
+        r = requests.get(f"{FRONT_API}/discussion/detail",
+                         params={"id": nid, "itemCode": code},
+                         headers={**H, "Accept": "application/json",
+                                  "Referer": f"https://m.stock.naver.com/domestic/"
+                                             f"stock/{code}/discussion"},
+                         timeout=15)
+        if r.status_code != 200:
+            return {}
+        res = r.json().get("result") or {}
+    except Exception:
+        return {}
+    html = res.get("contentHtml") or ""
+    body = BeautifulSoup(html, "html.parser").get_text("\n", strip=True) if html else ""
+    return {"body": body, "title": res.get("title", ""),
+            "views": res.get("viewCount", 0),
+            "up": res.get("recommendCount", 0)}
+
+
 def probe_body_api(code: str, nid: str) -> str:
     """본문 API 주소를 후보로 때려 찾는다.
 
@@ -264,7 +293,9 @@ def main() -> None:
     for label, group in (("hot", hot), ("cold", cold)):
         met = []
         for j, r in enumerate(group, 1):
-            body = fetch_body(r["href"])
+            nid = re.search(r"nid=(\d+)", r["href"])
+            d = fetch_detail(r["code"], nid.group(1)) if nid else {}
+            body = d.get("body", "")
             if len(body) >= 10:
                 met.append(metrics(r["title"], body))
             time.sleep(SLEEP)
