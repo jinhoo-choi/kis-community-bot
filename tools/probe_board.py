@@ -320,6 +320,23 @@ def probe_read(code: str) -> None:
                         log(f"      [ERR] {type(ex).__name__} {path}")
                     time.sleep(0.3)
 
+                # 본문 API 확정: /discussion/detail?id=&itemCode=
+                # contentJsonSwReplaced 가 스마트에디터 JSON 이다. 구조를 본다.
+                rr = requests.get(FB + "/discussion/detail",
+                                  params={"id": nid2, "itemCode": code2},
+                                  headers={**H, "Referer": iu,
+                                           "Accept": "application/json"}, timeout=15)
+                if rr.status_code == 200:
+                    res = rr.json().get("result", {})
+                    log("    --- detail result 키 ---")
+                    log(f"      keys={list(res)}")
+                    for k in ("commentCount", "likeCount", "goodCount", "readCount",
+                              "viewCount", "badCount", "content", "contents"):
+                        if k in res:
+                            log(f"      {k} = {res[k]!r}")
+                    cj = res.get("contentJsonSwReplaced") or ""
+                    log(f"    --- contentJson 원문 앞 900자 ---\n{cj[:900]}")
+
                 # 템플릿 변수의 실제 값을 알려면 번들 문맥을 봐야 한다.
                 log("    --- posts 템플릿 문맥 ---")
                 for js in srcs[:25]:
