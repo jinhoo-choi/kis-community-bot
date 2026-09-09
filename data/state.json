@@ -172,7 +172,62 @@
   "TTL::196170::노바티스deldesiran가치제외": "2026-09-09",
   "naver-y_readnavernid96051page1": "2026-09-09",
   "hk-652165": "2026-09-09",
-  "naver-y_readnavernid96049page1": "2026-09-09"
+  "naver-y_readnavernid96049page1": "2026-09-09",
+  "ID::dart-20260909000492": "2026-09-10",
+  "EVT::001940::자기주식": "2026-09-10",
+  "TTL::001940::주요사항보고서자기주식취득신탁계약해지결정": "2026-09-10",
+  "ID::dart-20260909000470": "2026-09-10",
+  "EVT::001570::합병분할": "2026-09-10",
+  "TTL::001570::기재정정주요사항보고서회사분할결정": "2026-09-10",
+  "ID::dart-20260909800113": "2026-09-10",
+  "EVT::278470::합병분할": "2026-09-10",
+  "TTL::278470::회사합병결정종속회사의주요경영사항": "2026-09-10",
+  "ID::dart-20260909800012": "2026-09-10",
+  "EVT::007570::공급계약": "2026-09-10",
+  "TTL::007570::단일판매ㆍ공급계약해지": "2026-09-10",
+  "ID::naver-y_readnavernid96056page1": "2026-09-10",
+  "TTL::012630::나의계절이왔다": "2026-09-10",
+  "ID::naver-y_readnavernid96054page1": "2026-09-10",
+  "TTL::017670::데이터센터확장이주주에게호재인이유": "2026-09-10",
+  "ID::naver-y_readnavernid96053page1": "2026-09-10",
+  "EVT::222800::실적": "2026-09-10",
+  "TTL::222800::3q실적상향소캠2매출은예상상회": "2026-09-10",
+  "ID::hk-652226": "2026-09-10",
+  "TTL::018260::삼성에스디에스내러티브에서실행으로": "2026-09-10",
+  "ID::hk-652219": "2026-09-10",
+  "TTL::095610::테스27년성장성을반영하는우상향": "2026-09-10",
+  "ID::hk-652210": "2026-09-10",
+  "TTL::336260::두산퓨얼셀pafc미국진출성공": "2026-09-10",
+  "ID::hk-652194": "2026-09-10",
+  "TTL::004170::신세계명동본점이쓸어담는외국인인바운드소비": "2026-09-10",
+  "ID::hk-652169": "2026-09-10",
+  "EVT::090430::실적": "2026-09-10",
+  "TTL::090430::아모레퍼시픽안정적인실적성장궤도진입": "2026-09-10",
+  "ID::hk-652159": "2026-09-10",
+  "TTL::161890::한국콜마업황강세에글로벌mnc모멘텀까지": "2026-09-10",
+  "ID::hk-652137": "2026-09-10",
+  "TTL::286940::롯데이노베이트dbo레퍼런스확보수익성개선남은건멀티플정상화": "2026-09-10",
+  "ID::hk-652124": "2026-09-10",
+  "EVT::148150::실적": "2026-09-10",
+  "TTL::148150::세경하이테크실적반등시작모멘텀도대기중": "2026-09-10",
+  "ID::pol-박홍근빚은감당할수있느냐가더중요충분히관리가능종": "2026-09-10",
+  "TTL::000660::박홍근빚은감당할수있느냐가더중요…충분히관리가능종합": "2026-09-10",
+  "dart-20260909000492": "2026-09-10",
+  "dart-20260909000470": "2026-09-10",
+  "dart-20260909800113": "2026-09-10",
+  "dart-20260909800012": "2026-09-10",
+  "naver-y_readnavernid96056page1": "2026-09-10",
+  "naver-y_readnavernid96054page1": "2026-09-10",
+  "naver-y_readnavernid96053page1": "2026-09-10",
+  "hk-652226": "2026-09-10",
+  "hk-652219": "2026-09-10",
+  "hk-652210": "2026-09-10",
+  "hk-652194": "2026-09-10",
+  "hk-652169": "2026-09-10",
+  "hk-652159": "2026-09-10",
+  "hk-652137": "2026-09-10",
+  "hk-652124": "2026-09-10",
+  "pol-박홍근빚은감당할수있느냐가더중요충분히관리가능종": "2026-09-10"
  },
  "recent_tone": {
   "_theme": [
@@ -192,9 +247,9 @@
    "skeptic"
   ],
   "148150": [
-   "skeptic",
    "light:amount:short_note",
-   "light:amount:two_sides:long"
+   "light:amount:two_sides:long",
+   "check_list:terms:check_list:check_list"
   ],
   "108490": [
    "dry:reaction:lead_number:short",
@@ -226,7 +281,8 @@
    "open_talk:terms:open_talk:open_talk"
   ],
   "286940": [
-   "careful:what_to_check"
+   "careful:what_to_check",
+   "check_list:terms:check_list:check_list"
   ],
   "386380": [
    "curious:open_question",
@@ -241,9 +297,9 @@
    "open_talk:amount:open_talk:open_talk"
   ],
   "336260": [
-   "dry:duration:fact_read:short",
    "two_view:amount:two_view:two_view",
-   "open_talk:terms:open_talk:open_talk"
+   "open_talk:terms:open_talk:open_talk",
+   "brief_report:terms:brief_report:brief_report"
   ],
   "176750": [
    "timeline_note:amount:timeline_note:timeline_note",
@@ -255,7 +311,8 @@
   ],
   "000660": [
    "data_focus:inquiry:data_focus:data_focus",
-   "check_list:amount:check_list:check_list"
+   "check_list:amount:check_list:check_list",
+   "brief_report:amount:brief_report:brief_report"
   ],
   "034310": [
    "quick_memo:amount:quick_memo:quick_memo"
@@ -310,7 +367,8 @@
    "open_talk:amount:open_talk:open_talk"
   ],
   "161890": [
-   "open_talk:amount:open_talk:open_talk"
+   "open_talk:amount:open_talk:open_talk",
+   "open_talk:terms:open_talk:open_talk"
   ],
   "131290": [
    "fact_note:ratio:fact_note:fact_note"
@@ -360,6 +418,39 @@
   ],
   "257720": [
    "open_talk:terms:open_talk:open_talk"
+  ],
+  "001940": [
+   "quick_memo:ratio:quick_memo:quick_memo"
+  ],
+  "001570": [
+   "quick_memo:decode:quick_memo:quick_memo"
+  ],
+  "278470": [
+   "brief_report:ratio:brief_report:brief_report"
+  ],
+  "007570": [
+   "quick_memo:ratio:quick_memo:quick_memo"
+  ],
+  "012630": [
+   "fact_note:terms:fact_note:fact_note"
+  ],
+  "017670": [
+   "open_talk:terms:open_talk:open_talk"
+  ],
+  "222800": [
+   "check_list:terms:check_list:check_list"
+  ],
+  "018260": [
+   "careful_note:terms:careful_note:careful_note"
+  ],
+  "095610": [
+   "careful_note:terms:careful_note:careful_note"
+  ],
+  "004170": [
+   "open_talk:terms:open_talk:open_talk"
+  ],
+  "090430": [
+   "brief_report:terms:brief_report:brief_report"
   ]
  }
 }
