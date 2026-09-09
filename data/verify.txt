@@ -4,6 +4,6 @@ TELEGRAM_TOKEN   : OK  @commwrite_bot (comwritebot)
   webhook        : 없음 (getUpdates 정상 사용 가능)
 CHAT 후보        : 없음 — 봇 초대 후 그룹에 '/start@봇아이디' 전송 필요
   update 개수    : 0
-DART_API_KEY     : OK  총 508건
+DART_API_KEY     : OK  총 520건
 ANTHROPIC_KEY    : OK
 GEMINI_KEY       : FAIL(429) Your prepayment credits are depleted. Please go to AI Studio at https://ai.studi
