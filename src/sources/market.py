@@ -10,6 +10,8 @@ GitHub Actions 에서 `KRX 로그인 실패` 로 전건 실패했다 (dry-run �
 주의: 상위권을 ETF·인버스가 점유하므로 반드시 걸러낸다.
       (진단 실측: 1~3위가 KODEX 200선물인버스2X, KODEX 인버스, TIGER 200선물인버스2X)
 """
+import json
+import os
 import re
 from datetime import datetime, timedelta
 
@@ -49,10 +51,47 @@ BIG_MOVE_MIN_EOK = 30
 
 
 def _last_trading_day() -> str:
-    d = datetime.now(KST) - timedelta(days=1)
+    """순위 페이지가 지금 보여주는 데이터의 기준일.
+
+    무조건 '어제' 로 잡으면 장 마감 후 수집 시 하루가 밀린다.
+    실측(#80): 09-08 16:06 에 수집한 09-08 종가 데이터를 '9월 7일' 로 적었다.
+    마감(15:30) 이후에는 당일이 기준일이다.
+    """
+    now = datetime.now(KST)
+    d = now if (now.weekday() < 5 and now.hour * 60 + now.minute >= 940) \
+        else now - timedelta(days=1)
     while d.weekday() >= 5:
         d -= timedelta(days=1)
     return d.strftime("%Y-%m-%d")
+
+
+# 순위 페이지는 장 시작 전에 비어 있다(실측 #81). 06시 실행을 살리려면
+# 마감 후에 받아둔 결과를 재사용해야 한다. 기준일이 같을 때만 쓴다.
+_CACHE = "data/market_cache.json"
+
+
+def _cache_save(day: str, items: list[dict]) -> None:
+    if len(items) < 10:
+        return
+    try:
+        os.makedirs("data", exist_ok=True)
+        with open(_CACHE, "w", encoding="utf-8") as f:
+            json.dump({"day": day, "items": items}, f, ensure_ascii=False)
+        print(f"[market] 캐시 저장 {len(items)}건 (기준일 {day})")
+    except Exception as e:
+        print(f"[market] 캐시 저장 실패: {e}")
+
+
+def _cache_load(day: str) -> list[dict]:
+    try:
+        with open(_CACHE, encoding="utf-8") as f:
+            c = json.load(f)
+    except Exception:
+        return []
+    if c.get("day") != day:
+        print(f"[market] 캐시 기준일 불일치 (캐시 {c.get('day')} vs 필요 {day})")
+        return []
+    return c.get("items") or []
 
 
 def _num(s: str) -> float:
@@ -140,8 +179,6 @@ def _add_flow(r: dict):
 def _add_history(r: dict):
     """네이버 siseJson 으로 20일 평균 거래대금·5일 수익률·장중 고저를 붙인다.
     원인 추정이 아니라 정형 수치라 안전하면서 콘텐츠 variation 을 크게 늘린다."""
-    import json
-
     try:
         end = datetime.now(KST)
         beg = end - timedelta(days=45)
@@ -330,10 +367,18 @@ def fetch(limit: int = 12) -> list[dict]:
     # 장 시작 전에는 헤더만 있고 데이터 행이 없다. 이걸 '정상 0건'으로 넘기는
     # 바람에 특징주가 통째로 빠진 채 발송 3건으로 끝났고 경보도 안 떴다.
     if not rows:
+        cached = _cache_load(day)
+        if cached:
+            print(f"[market] 순위 페이지가 비어 캐시 {len(cached)}건 사용 "
+                  f"(기준일 {day})")
+            crawl.report("market", len(cached), limit, "")
+            return cached[:limit]
         h = datetime.now(KST).hour
-        why = ("장 시작 전이라 순위 페이지가 비어 있다 (장 마감 후 수집 필요)"
+        why = ("장 시작 전이라 순위 페이지가 비어 있고 캐시도 없다 "
+               "(장 마감 후 캐시 적재 필요)"
                if h < 9 else "시세 파싱 실패 — 페이지 구조 변경 의심")
         crawl.report("market", 0, limit, why)
     else:
+        _cache_save(day, out)
         crawl.report("market", len(out), limit, "조건 충족 종목 없음")
     return out
