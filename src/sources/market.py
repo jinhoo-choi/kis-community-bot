@@ -15,6 +15,7 @@ import os
 import re
 from datetime import datetime, timedelta
 
+import config
 from config import KST
 from src import crawl, facts
 
@@ -58,8 +59,7 @@ def _last_trading_day() -> str:
     마감(15:30) 이후에는 당일이 기준일이다.
     """
     now = datetime.now(KST)
-    d = now if (now.weekday() < 5 and now.hour * 60 + now.minute >= 940) \
-        else now - timedelta(days=1)
+    d = now if (now.weekday() < 5 and _after_close(now)) else now - timedelta(days=1)
     while d.weekday() >= 5:
         d -= timedelta(days=1)
     return d.strftime("%Y-%m-%d")
@@ -70,8 +70,20 @@ def _last_trading_day() -> str:
 _CACHE = "data/market_cache.json"
 
 
+def _after_close(now=None) -> bool:
+    now = now or datetime.now(KST)
+    return now.hour * 60 + now.minute >= config.MARKET_CLOSE_MIN
+
+
 def _cache_save(day: str, items: list[dict]) -> None:
     if len(items) < 10:
+        return
+    # 장중에 저장하면 오늘 장중 데이터가 '어제 확정치' 로 둔갑한다.
+    # 실측 확인: 09:09 에 _last_trading_day() 는 09-08 을 주는데
+    # 페이지는 09-09 장중 데이터를 준다.
+    if not (datetime.now(KST).weekday() < 5 and _after_close()):
+        print("[market] 장 마감 전이라 캐시를 저장하지 않는다 "
+              "(장중 데이터가 전일 확정치로 둔갑한다)")
         return
     try:
         os.makedirs("data", exist_ok=True)

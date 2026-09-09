@@ -7,8 +7,9 @@ name: verify-keys
 
 on:
   schedule:
-    # 07:40 UTC = 16:40 KST. 장 마감(15:30) 후 시세 캐시를 채운다.
-    - cron: '40 7 * * 1-5'
+    # 11:30 UTC = 20:30 KST. 대체거래소 애프터마켓까지 끝난 뒤 시세 캐시를 채운다.
+    # 정규장 15:30 기준으로도 20:30 은 마감 후라 어느 쪽이든 확정 시세다.
+    - cron: '30 11 * * 1-5'
   workflow_dispatch:
     inputs:
       send_test:
@@ -207,8 +208,9 @@ jobs:
           pip install -q -r requirements.txt
           python tools/board_style.py || true
 
-      # 순위 페이지는 장 시작 전에 비어 있다. 06시 실행을 살리려면
-      # 마감 후에 시세를 받아 캐시에 넣어둬야 한다.
+      # 순위 페이지는 장 시작 전에 비어 있다(실측 08:33 헤더만, 행 0).
+      # 06시 실행을 살리려면 마감 후에 시세를 받아 캐시에 넣어둬야 한다.
+      # 장중 실행이면 market 이 스스로 저장을 거부한다.
       - name: Warm market cache
         if: ${{ !cancelled() && (inputs.warm_market || github.event_name == 'schedule') }}
         env:
