@@ -201,7 +201,28 @@ def _add_history(r: dict):
         if len(rows) < 6:
             return
         # [날짜, 시가, 고가, 저가, 종가, 거래량, 외국인소진율]
+        # 장중에 부르면 rows[-1] 이 '오늘 진행 중' 데이터다. 그러면 순위 페이지의
+        # 실시간 값과 함께 미확정 수치가 '전일 확정치' 로 나간다.
+        # 기준일과 일치하는 행을 찾아 쓴다. 없으면 마지막 확정일을 쓴다.
+        want = _last_trading_day().replace("-", "")
+        idx = next((i for i, x in enumerate(rows) if str(x[0]) == want), None)
+        if idx is None:
+            # 오늘 행이 섞여 있으면 그 앞 행이 직전 거래일이다
+            idx = len(rows) - (2 if str(rows[-1][0]) > want else 1)
+        if idx < 5:
+            return
+        rows = rows[:idx + 1]
         last = rows[-1]
+        # 전일 확정치로 목록 페이지의 실시간 값을 덮어쓴다
+        r["day_used"] = str(last[0])
+        if last[4]:
+            r["close"] = float(last[4])
+        prev = int(rows[-2][4]) if len(rows) >= 2 and rows[-2][4] else 0
+        if prev:
+            r["pct"] = (int(last[4]) - prev) / prev * 100
+        if last[5] and last[4]:
+            r["eok"] = int(last[5]) * int(last[4]) / 1e8
+            r["eok_approx"] = True
         r["high"], r["low"] = int(last[2]), int(last[3])
         if last[1]:
             r["from_open"] = (int(last[4]) - int(last[1])) / int(last[1]) * 100
