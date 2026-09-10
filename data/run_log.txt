@@ -1,91 +1,78 @@
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
-[dart] corp_code 3989종목 매핑
-[dart] 상세 보강 19/26건
-[dart] 미보강 제목: ['신탁계약에의한취득상황보고서', '신탁계약에의한취득상황보고서', '영업(잠정)실적(공정공시)', '영업(잠정)실적(공정공시)', '타법인주식및출자증권취득결정', '유상증자결정(종속회사의주요경영사항)', '영업(잠정)실적(공정공시)']
-[crawl] dart 26건
-[crawl] naver_research 29건
+[dart] corp_code 3990종목 매핑
+[dart] 상세 보강 14/24건
+[dart] 미보강 제목: ['주요사항보고서(자기전환사채만기전취득결정)', '타법인주식및출자증권취득결정(자회사의 주요경영사항)', '[기재정정]타법인주식및출자증권처분결정', '신탁계약에의한취득상황보고서', '타법인주식및출자증권취득결정(종속회사의주요경영사항)', '매출액또는손익구조30%(대규모법인은15%)이상변경', '신탁계약에의한취득상황보고서', '유상증자또는주식관련사채등의청약결과(자율공시)']
+[crawl] dart 24건
+[crawl] ⚠ naver_research 수집 0건 — 셀렉터 개편 의심
 [crawl] hankyung 20건
-[market] ⚠ 0건 파싱 — https://finance.naver.com/sise/sise_quant.naver?sosok=0
-[market] ⚠ 0건 파싱 — https://finance.naver.com/sise/sise_quant.naver?sosok=1
-[market] ⚠ 0건 파싱 — https://finance.naver.com/sise/sise_rise.naver?sosok=0
-[market] ⚠ 0건 파싱 — https://finance.naver.com/sise/sise_rise.naver?sosok=1
-[market] ⚠ 0건 파싱 — https://finance.naver.com/sise/sise_fall.naver?sosok=0
-[market] ⚠ 0건 파싱 — https://finance.naver.com/sise/sise_fall.naver?sosok=1
+[market] 발견된 헤더: []
+[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_quant.naver?sosok=0
+[market] 발견된 헤더: []
+[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_quant.naver?sosok=1
+[market] 발견된 헤더: []
+[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_rise.naver?sosok=0
+[market] 발견된 헤더: []
+[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_rise.naver?sosok=1
+[market] 발견된 헤더: []
+[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_fall.naver?sosok=0
+[market] 발견된 헤더: []
+[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_fall.naver?sosok=1
 [market] 후보 0종목 (중복 제거 후)
 [market] 수급 상위 40종목 확보
-[market] 캐시 기준일 불일치 (캐시 2026-09-08 vs 필요 2026-09-09)
+[market] 캐시 기준일 불일치 (캐시 2026-09-08 vs 필요 2026-09-10)
 [crawl] ⚠ market 수집 0건 — 장 시작 전이라 순위 페이지가 비어 있고 캐시도 없다 (장 마감 후 캐시 적재 필요)
 [tickers] 상장 2632종목 로드 (lxml)
 [crawl] ⚠ kind_inquiry 수집 0건 — KIND 제목 구조 변경 의심
-[crawl] policy_rss 19건
+[crawl] policy_rss 35건
 [tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
 [crawl] telegram_ch 0건 (정상 0건)
-[main] 수집 총 104건
-[enrich] 그라운딩 대상 20건 (수집 104건 중, 상한 20)
-[enrich] 0/20건 배경 보강 완료
-[enrich] ⚠ 전건 실패 — 게이트 글감부족이 급증한다. 오류 표본: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[main] 수집 총 89건
+[enrich] 그라운딩 대상 20건 (수집 89건 중, 상한 20)
+[enrich] 캐시 적중 1건 → 그라운딩 19건만 호출
+[enrich] 1/20건 배경 보강 완료
 [main] 발송 목표 50건 / 수율 14% → 생성 상한 429건 → 기대 발송 50건
-[gate] 차단 48건 {'tier5': 46, 'tier2': 2}
-[theme] 테마글 10건에 게시 종목 배정
-[dedup] 제외 20건 {'EVT': 5, 'SIM': 10, 'ID': 5}
-[main] ⚠ 수집 이상 소스: ['market', 'kind_inquiry']
-[main] 생성 대상 36건 {'disclosure': 7, 'research': 21, 'flow': 0, 'policy': 4, 'poll': 4}
-[claude] SDK 1.4.0
+[gate] 차단 51건 {'tier5': 48, 'tier2': 1, 'tier1': 2}
+[theme] 배정 취소 — 제목 주어 '삼성바이오' vs 배정 '셀트리온': 삼성바이오, 수주 확대…유럽 업체와 3천508억원 규모 계약
+[theme] 테마글 7건에 게시 종목 배정
+[dedup] 제외 16건 {'EVT': 3, 'SIM': 7, 'ID': 6}
+[main] ⚠ 수집 이상 소스: ['naver_research', 'market', 'kind_inquiry']
+[main] 생성 대상 22건 {'disclosure': 5, 'research': 10, 'flow': 0, 'policy': 5, 'poll': 2}
+[claude] SDK 1.5.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
-[claude] batch msgbatch_01Qw1ddwWbQ3WeUiT1xLEFtR 제출 (21건)
-[gen] claude: 29/29건 생성
-[gen] 정규식 리젝 dart-20260909000530 ['unsourced_eval']
-       └ '우성 1:1.8702948입니다. 우성이 자회사인 우성유통을 흡수합병하기로 결정했는데, 우성 보통주 1주당 우성유통 보통주 1.8702948주씩 배정된다는 뜻이네요. 합병을 통해 사료·농장·유통 사업이 하나의 조직 안에서 운영되게 됩니다.'
-[gen] 정규식 리젝 dart-20260909800281 ["근거없는수치['2028']"]
-       └ '까뮤이앤씨가 최근 매출액의 17.8%에 해당하는 단일판매·공급계약을 체결했어요. 공급 지역은 경기 용인과 화성이고 계약은 2028년 4월까지 이어가기로 했네요.'
-[gen] 정규식 리젝 dart-20260909800115 ["근거없는수치['2029']"]
-       └ 'HDC가 자회사 명의로 계약을 체결했는데 최근 매출액의 10.9%에 해당하네요. 공급 지역은 경기도 광명시 광명4동과 철산4동 일원이고, 계약은 2029년 6월까지 진행될 예정입니다.'
-[gen] 정규식 리젝 naver-y_readnavernid96055page1 ['stock_ending', "근거없는수치['26']"]
-       └ 'DB하이텍이 DS투자증권으로부터 적정가격 210,000원을 제시받았네요. 이는 현재 시세에서 어느 정도 수준인지 확인해 볼 필요가 있습니다. DS투자증권은 이 종목에 대해 매수 의견을 내놨는데요, 이는 긍정적인 평가 기조를 담고 있습니다. 시장에서 주목할 만한 움직임이 있는 시점인 만큼, 26일 발간된 리포트의 근거를 살펴보는 것도 도움이 될 것 같습니다.'
-[gen] 정규식 리젝 naver-y_readnavernid96052page1 ['claim_out_of_scope']
-       └ "티엘비가 3분기 실적에서 호조를 보였는데요. 대신증권에서 지난 9월 9일 발간한 리포트 제목이 '3Q실적 호조/소캠2 수혜, 숨은 강자~'였습니다. 대신증권은 이 종목에 대해 적정가격 60,000원과 Buy 투자의견을 제시했는데요. 실적 개선과 소캠2 정책 수혜가 맞물린 상황을 어떻게 평가하고 계신지 궁금합니다."
-[gen] 정규식 리젝 naver-y_readnavernid96048page1 ['unsourced_eval']
-       └ '지엔씨에너지가 AI데이터센터 수주에서 1번 타자 역할을 한다는 평가네요. IBK투자증권이 최근 리포트에서 이 회사를 주목했는데, 앞으로 어떤 수주 계약이 구체화되고 실행되는지가 중요한데요. IBK투자증권은 이 종목에 매수 의견을 제시했으며 적정가격으로 70,000원을 제시했습니다. 데이터센터 사업의 수주 일정과 실행 시점을 확인하면서 봐야겠어요.'
-[gen] 정규식 리젝 naver-y_readnavernid96044page1 ['어미단조(격식체만 3문장)']
-       └ '대한항공이 미래에셋증권으로부터 37,000원의 적정가격을 제시받았습니다. 미래에셋증권은 통합을 앞두고 나타난 원화 강세를 배경으로 이 평가를 내렸는데요, 원화 강세는 항공사의 달러 수익성에 영향을 미치는 요인입니다. 미래에셋증권의 투자의견은 매수로 제시됐습니다.'
-[gen] 정규식 리젝 naver-y_readnavernid96043page1 ['stock_ending']
-       └ '미스토홀딩스가 대신증권으로부터 적정가격 60,000원과 Buy 투자의견을 받았어요. 연말 배당 시즌을 앞두고 진행된 평가네요. 대신증권에서 제시한 60,000원은 현재 수준 대비 어느 정도 수준인지 확인해보면 투자 판단에 도움이 될 것 같습니다. 배당금을 기다리는 투자자라면 이번 시점이 언제쯤인지 살펴볼 만합니다. 자세한 내용은 리포트를 참고하시면 좋겠습니'
-[gen] 정규식 리젝 naver-y_readnavernid96042page1 ['unsourced_eval']
-       └ '알테오젠은 하나증권에서 450,000원의 적정가격을 제시했어요. 지금까지 계약 소식 중심으로 평가받던 시점에서 실제 실적 창출 능력을 봐야 한다는 평가네요. 하나증권은 이 종목에 Buy 투자의견을 부여했습니다. 회사의 파이프라인이 상용화 단계로 진입하면서 평가 기준이 바뀌는 시점으로 보이고 있어요. 앞으로는 매출 실현 여부가 주요 변수가 될 것으로 예상되고'
+[gen] claude: 18/18건 생성
+[gen] 정규식 리젝 dart-20260910800393 ["근거없는수치['12', '2028', '31']"]
+       └ '삼성바이오로직스가 최근 매출액의 105.89%에 해당하는 단일판매·공급계약을 체결했어요. 계약 종료는 2028년 12월 31일로 정해졌는데, 실제 매출 반영 시점과 규모는 별도로 공시되지 않았어요.'
+[gen] 정규식 리젝 dart-20260910800316 ['미확인표현(공개되지 않)']
+       └ 'KB스타리츠가 매출액 또는 손익구조 15% 이상 변경을 공시했어요. 상세 내용은 아직 공개되지 않았네요.'
+[gen] 정규식 리젝 dart-20260910000095 ["근거없는수치['12']", '어미단조(격식체만 4문장)']
+       └ '주성코퍼레이션이 전환사채 발행을 결정했습니다. 9월 18일 기재정정 공시에 따르면 300억원 규모의 무기명식 이권부 무보증 사모 전환사채를 발행하기로 했는데요, 이는 회차로는 12번째입니다. 전환가액은 7,380원이며 표면이자율은 0%로 정해졌습니다. 만기는 2029년 09월 18일입니다.'
+[gen] 정규식 리젝 hk-652251 ['second_person']
+       └ '키움증권이 개인투자자 회전율 회복에 따라 주가가 오르는 모습이네요. 회전율이 높아진다는 건 개인투자자들의 거래 빈도가 증가한다는 뜻인데요. 유안타증권 우도형 애널리스트가 적정가격으로 470,000원을 제시했고 투자의견은 Buy를 제시했습니다. 개인투자자 활동이 증가했을 때 증권사의 실적에는 어떤 영향을 미치는 건지 궁금하신 분 계세요?'
+[gen] 정규식 리젝 hk-652247 ['claim_out_of_scope', 'unsourced_eval']
+       └ '삼성증권이 유안타증권에서 코스피 장세 수혜주로 분류됐어요. 코스피 지수가 상승할 때 영향을 받는 종목이라는 뜻입니다. 유안타증권 우도형 애널리스트는 이 종목에 대해 Buy 투자의견을 제시했네요. 적정가격으로는 155,000원을 제시했습니다.'
+[gen] 정규식 리젝 hk-652245 ['어미단조(격식체만 3문장)']
+       └ '한국가스공사는 유안타증권에서 48,000원의 적정가격을 제시했습니다. 해외 사업이 이익 체력을 높이고 있는데요, 동시에 미수금 규모가 과제로 남아있는 상황입니다. 유안타증권은 투자의견으로 Buy를 제시했습니다.'
 [gen] 정규식 리젝 hk-652192 ['unsourced_eval']
-       └ '한국전력 적정가격을 LS증권 성종화 애널리스트가 48,000원으로 제시했어요. 단기적으로는 우크라이나 전쟁 같은 지정학적 리스크가 변수인데, 장기적으로는 국내외 원전 사업과 국내 AI·반도체 산업 수요 증가가 성장 축으로 작용할 수 있다는 평가네요. LS증권은 투자의견으로 Buy를 제시했습니다.'
-[gen] 정규식 리젝 hk-652168 ['어미단조(격식체만 3문장)']
-       └ '파인엠텍이 메리츠증권으로부터 적정가격 13,000원과 Buy 투자의견을 받았습니다. 메리츠증권 양승수 애널리스트는 현재의 실적 개선을 에피타이저로 보고 앞으로의 성장 여력을 메인디시에 비유했는데요. 이는 단기 개선뿐 아니라 중기적 실적 확대 가능성을 평가한 것입니다. 리포트에서 제시한 적정가격은 13,000원입니다.'
-[gen] 정규식 리젝 hk-652162 ['어미단조(격식체만 3문장)']
-       └ "코스맥스에 대해 SK증권 형권훈 애널리스트가 적정가격 350,000원을 제시했습니다. 이는 현재 주가 대비 목표가를 의미하는데요, 해당 증권사는 이 종목에 매수 의견을 함께 제시했습니다. 구체적인 근거와 실적 전망은 리포트 '코스맥스 On Track'에서 확인할 수 있습니다."
-[gen] 정규식 리젝 hk-652161 ['unsourced_eval']
-       └ '에이피알이 상대적 밸류에이션 매력도를 높였다는 평가인데요. SK증권의 형권훈 애널리스트가 적정가격 560,000원을 제시하고 매수 의견을 냈네요. 밸류에이션이란 기업 가치를 평가하는 지표들을 뜻하는데, 같은 업계 다른 기업들과 비교했을 때 에이피알의 매력이 상대적으로 커졌다는 뜻입니다. 현재 주가가 SK증권의 목표가에서 얼마나 떨어져 있다고 보시나요?'
-[gen] ⚠ gemini 실패 pol-무안국가산단에98개기업투자협약용지50유치: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 pol-에너지기업등4개사광양만권1조655억원투자협약: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 pol-정부농협추석상차림할인확대한우한돈최대50할인: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 poll-pol-박홍근빚은감당할수있느냐가더중요충분히관리가능종: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 poll-pol-무안국가산단에98개기업투자협약용지50유치: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 poll-pol-에너지기업등4개사광양만권1조655억원투자협약: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 poll-pol-정부농협추석상차림할인확대한우한돈최대50할인: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] gemini: 0/7건 생성
-[gen] ⚠ gemini 실패 dart-20260909000530: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 dart-20260909800281: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 dart-20260909800115: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 naver-y_readnavernid96055page1: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 naver-y_readnavernid96052page1: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 naver-y_readnavernid96048page1: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 naver-y_readnavernid96044page1: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 naver-y_readnavernid96043page1: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 naver-y_readnavernid96042page1: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+       └ '한국전력 48,000원이네요. LS증권이 적정가격으로 제시했습니다. 단기에는 전쟁 상황이 발목을 잡지만, 장기로는 국내외 원전과 국내 AI, 반도체 수요가 뒷받침된다는 평가입니다. LS증권의 투자의견은 Buy예요.'
+[gen] 정규식 리젝 pol-로이터설문조사709월에연준금리동결예상 ["근거없는수치['70']"]
+       └ '연준 금리동결 예상 70% 수준이네요. 오는 15~16일 연방공개시장위원회 회의에서 기준금리를 현 수준에서 유지할 것으로 로이터 설문조사에서 조사 대상의 70%가 예상했습니다. 나머지는 추가 인상이나 인하 등 다른 결정을 점치고 있습니다.'
+[gen] ⚠ gemini 실패 pol-삼성바이오수주확대유럽업체와3천508억원규모계: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 pol-포스코기술대학포스코철강AI융합대학으로개편AI: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 poll-pol-ECB올해두번째금리인상중동전쟁물가압박계속종합: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 poll-pol-충남도8개시군27개사와1조5천억원규모투자협약: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] gemini: 0/4건 생성
+[gen] ⚠ gemini 실패 dart-20260910800393: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 dart-20260910800316: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 dart-20260910000095: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 hk-652251: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 hk-652247: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] ⚠ gemini 실패 hk-652245: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
 [gen] ⚠ gemini 실패 hk-652192: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 hk-652168: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 hk-652162: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] ⚠ gemini 실패 hk-652161: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
-[gen] 정규식 통과 16건 / 시도 36건
-[claude] SDK 1.4.0
+[gen] ⚠ gemini 실패 pol-로이터설문조사709월에연준금리동결예상: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Your prepayment credits are depleted. Please go to AI Studio at https://ai.studio/projects to manage your project and billing. Learn more at
+[gen] 정규식 통과 10건 / 시도 22건
+[claude] SDK 1.5.0
 [assign] 담당자 명단 없음 → 전건 '미지정'
-[main] 배포 16건 / 보류 0건
-[main] filter_log data/filter_log_20260910_0818.json
-[main] stats {"ts": "2026-09-10T08:18:18+09:00", "collected": 104, "gate_blocked": 48, "gate_reasons": {"tier5": 46, "tier2": 2}, "gate_detail": {"tier5:글감부족": 42, "tier5:앵글없음": 4, "tier2:이해상충(카카오뱅크)": 2}, "enrich_ok": 0, "reject_reasons": {"research:unsourced_eval": 4, "research:어미단조": 3, "research:stock_ending": 2, "disclosure:unsourced_eval": 1, "disclosure:근거없는수치['2028']": 1, "disclosure:근거없는수치['2029']": 1, "research:근거없는수치['26']": 1, "research:claim_out_of_scope": 1}, "cliche_tails": [], "fatal_codes": {}, "score_axis_avg": {}, "fail_samples": {"unsourced_eval": "합병을 통해 사료·농장·유통 사업이 하나의 조직 안에서 운영되게 됩니다.", "근거없는수치['2028']": "역은 경기 용인과 화성이고 계약은 2028년 4월까지 이어가기로 했네요.", "근거없는수치['2029']": "4동과 철산4동 일원이고, 계약은 2029년 6월까지 진행될 예정입니다.", "stock_ending": ", 26일 발간된 리포트의 근거를 살펴보는 것도 도움이 될 것 같습니다.", "근거없는수치['26']": ", 26일 발간된 리포트의 근거를 살펴보는 것도 도움이 될 것 같습니다.", "claim_out_of_scope": "과 소캠2 정책 수혜가 맞물린 상황을 어떻게 평가하고 계신지 궁금합니다.", "어미단조": "영향을 미치는 요인입니다. 미래에셋증권의 투자의견은 매수로 제시됐습니다."}, "raw_vs_clean": {}, "hold_kinds": {}, "enrich_calls": 20, "generated": 16, "sent": 16, "held": 0, "hold_reasons": {}, "avg_score": null, "by_provider": {"claude": {"generated": 16, "sent": 16, "avg_score": null}}, "model_fallbacks": [], "dedup": {"EVT": 5, "SIM": 10, "ID": 5}, "crawl_health": {"dart": {"got": 26, "expected": 8, "degraded": false}, "naver_research": {"got": 29, "expected": 5, "degraded": false}, "hankyung": {"got": 20, "expected": 2, "degraded": false}, "market": {"got": 0, "expected": 20, "degraded": true}, "kind_inquiry": {"got": 0, "expected": 1, "degraded": true}, "policy_rss": {"got": 19, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+[main] 배포 10건 / 보류 0건
+[main] filter_log data/filter_log_20260911_0808.json
+[main] stats {"ts": "2026-09-11T08:08:03+09:00", "collected": 89, "gate_blocked": 51, "gate_reasons": {"tier5": 48, "tier2": 1, "tier1": 2}, "gate_detail": {"tier5:글감부족": 45, "tier5:앵글없음": 3, "tier1:법적사안(과징금)": 2, "tier2:자사계열종목": 1}, "enrich_ok": 1, "reject_reasons": {"research:unsourced_eval": 2, "disclosure:근거없는수치['12', '2028', '31']": 1, "disclosure:미확인표현": 1, "disclosure:근거없는수치['12']": 1, "disclosure:어미단조": 1, "research:second_person": 1, "research:claim_out_of_scope": 1, "research:어미단조": 1, "policy:근거없는수치['70']": 1}, "cliche_tails": [], "fatal_codes": {}, "score_axis_avg": {}, "fail_samples": {"근거없는수치['12', '2028', '31']": "로 정해졌는데, 실제 매출 반영 시점과 규모는 별도로 공시되지 않았어요.", "미확인표현": "조 15% 이상 변경을 공시했어요. 상세 내용은 아직 공개되지 않았네요.", "근거없는수치['12']": "표면이자율은 0%로 정해졌습니다. 만기는 2029년 09월 18일입니다.", "어미단조": "표면이자율은 0%로 정해졌습니다. 만기는 2029년 09월 18일입니다.", "second_person": "했을 때 증권사의 실적에는 어떤 영향을 미치는 건지 궁금하신 분 계세요?", "claim_out_of_scope": "y 투자의견을 제시했네요. 적정가격으로는 155,000원을 제시했습니다.", "unsourced_eval": "y 투자의견을 제시했네요. 적정가격으로는 155,000원을 제시했습니다.", "근거없는수치['70']": "했습니다. 나머지는 추가 인상이나 인하 등 다른 결정을 점치고 있습니다."}, "raw_vs_clean": {}, "hold_kinds": {}, "enrich_calls": 19, "generated": 10, "sent": 10, "held": 0, "hold_reasons": {}, "avg_score": null, "by_provider": {"claude": {"generated": 10, "sent": 10, "avg_score": null}}, "model_fallbacks": [], "dedup": {"EVT": 3, "SIM": 7, "ID": 6}, "crawl_health": {"dart": {"got": 24, "expected": 8, "degraded": false}, "naver_research": {"got": 0, "expected": 5, "degraded": true}, "hankyung": {"got": 20, "expected": 2, "degraded": false}, "market": {"got": 0, "expected": 20, "degraded": true}, "kind_inquiry": {"got": 0, "expected": 1, "degraded": true}, "policy_rss": {"got": 35, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
