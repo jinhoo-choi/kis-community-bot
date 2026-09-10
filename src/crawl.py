@@ -18,6 +18,7 @@
    기대치 미달이면 경고를 띄워 셀렉터 개편을 즉시 알아차린다.
 """
 import random
+import re
 import time
 
 import requests
@@ -37,6 +38,26 @@ def sleep_jitter(lo: float = 1.0, hi: float = 2.4):
     time.sleep(random.uniform(lo, hi))
 
 
+# 네이버 금융이 페이지별로 인코딩이 다르고 예고 없이 바뀐다.
+# 실측: 시세 페이지는 euc-kr 이었는데 09-11 아침 깨져서 나왔고,
+# 토론방은 UTF-8 이다. 선언을 믿지 말고 한글이 제대로 나오는 쪽을 고른다.
+_KO = re.compile(r"[가-힣]")
+
+
+def _best_encoding(content: bytes, prefer: str) -> str:
+    """한글이 더 많이 살아나는 인코딩을 고른다."""
+    head = content[:20000]
+    best, best_n = prefer, -1
+    for enc in (prefer, "utf-8", "euc-kr", "cp949"):
+        try:
+            n = len(_KO.findall(head.decode(enc, errors="replace")))
+        except Exception:
+            continue
+        if n > best_n:
+            best, best_n = enc, n
+    return best
+
+
 def get_soup(url: str, encoding: str = None, retries: int = 1,
              timeout: int = 15) -> BeautifulSoup | None:
     """실패 시 타임아웃을 늘려 1회 재시도. 최종 실패해도 예외 대신 None."""
@@ -45,7 +66,7 @@ def get_soup(url: str, encoding: str = None, retries: int = 1,
             r = requests.get(url, headers=HEADERS, timeout=timeout + attempt * 10)
             r.raise_for_status()
             if encoding:
-                r.encoding = encoding
+                r.encoding = _best_encoding(r.content, encoding)
             return BeautifulSoup(r.text, "html.parser")
         except Exception as e:
             if attempt >= retries:
