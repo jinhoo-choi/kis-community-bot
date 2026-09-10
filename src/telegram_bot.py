@@ -28,6 +28,10 @@ from config import TELEGRAM_TOKEN
 
 API = "https://api.telegram.org/bot{}/{}"
 
+# 앱 종목 커뮤니티 딥링크. 게시글 하단 버튼에 넣는다.
+APP_LINK = ("https://securities.koreainvestment.com/app/mtsrenewal.jsp"
+            "?type=06&SSO_SCREENNO=0800&openData={code}")
+
 BOARD_LABEL = {"stock": "종목방", "free": "자유게시판"}
 KIND_LABEL = {
     "disclosure": "공시", "research": "리포트", "flow": "특징주",
@@ -61,9 +65,14 @@ def card(p: dict, idx: int = 0, total: int = 0) -> str:
     if len(body) > BODY_LIMIT:
         body = body[:BODY_LIMIT].rstrip() + "…"
 
+    # 게시글 하단에 붙일 앱 딥링크. 종목코드가 있는 건에만 붙는다.
+    link = ""
+    if p.get("stock_code"):
+        link = (f'\n종목방 링크 : <code>{APP_LINK.format(code=p["stock_code"])}</code>')
+
     return (
         f"카테고리 : {cat}\n"
-        f"담당 : {who}\n"
+        f"담당 : {who}{link}\n"
         f'<pre><code class="language-복사">{_esc(body)}</code></pre>'
     )
 
