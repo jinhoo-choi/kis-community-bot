@@ -68,11 +68,13 @@ ok
   OK    60자 통과
   OK    300자 초과 리젝
   OK    카드 태그 미절단
-  OK    본문만 절단  (3080자)
+  OK    본문만 절단  (3202자)
   OK    복사블록 language 지정
   OK    1행 카테고리
   OK    2행 담당
-  OK    3행부터 복사블록
+  OK    종목건 딥링크 포함
+  OK    딥링크에 종목코드
+  OK    복사블록은 링크 다음
   OK    종목건은 종목명+코드 표기  (카테고리 : 공시 · 삼성전자 (005930))
   OK    테마건은 카테고리만  (카테고리 : 정책)
   OK    방향오용 차단
@@ -237,7 +239,7 @@ ok
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'careful_note', 'brief_report', 'fact_note', 'data_focus', 'check_list', 'open_talk'})
+  OK    flow 에서 quick_memo 미선택  ({'fact_note', 'careful_note', 'check_list', 'open_talk', 'data_focus', 'brief_report'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
 [crawl] market 62건
@@ -249,7 +251,7 @@ ok
   OK    상승일 5거래일 하락 언급 통과
   OK    진짜 방향오용은 잡음
 
-225/225 passed
+227/227 passed
 
 === 2b. 전수검사 (설정-코드 정합성) ===
 
