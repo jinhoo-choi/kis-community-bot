@@ -1,0 +1,39 @@
+
+══ 1. 개편 페이지 구조 ══
+
+  https://m.stock.naver.com/domestic/capitalization/KOSPI
+  HTTP 200 / 43,697bytes
+  th=0 table=0
+  buildId=dbb855825e2208259c5d3306ae6a38ba5ef73111 page=/domestic/home/capitalization/KOSPI
+  JS 청크 34개
+
+  https://finance.naver.com/sise/sise_quant.naver?sosok=0
+  HTTP 200 / 122,234bytes
+  th=0 table=0
+  JS 청크 65개
+
+══ 2. front-api 랭킹 후보 ══
+  [404] application/json; charse /stock/ranking/domestic/tradingValue?page=1&pageSize=50
+  [404] application/json; charse /stock/ranking/domestic/rise?page=1&pageSize=50
+  [404] application/json; charse /ranking/domestic/tradingValue?page=1&pageSize=50
+  [404] application/json; charse /marketIndex/ranking/tradingValue
+  [404] application/json; charse /stocks/ranking?type=tradingValue&market=KOSPI
+  [404] application/json; charse /v1/stock/ranking/tradingValue
+
+══ 3. siseJson 생존 확인 ══
+  [200] 657자 → 
+ [['날짜', '시가', '고가', '저가', '종가', '거래량', '외국인소진율'],
+
+	
+	
+		
+["20260901", 256500, 262500, 254000, 261000, 15319615, 46.71],
+		
+["20260902", 252000, 255500, 249500, 250500, 15176841, 46.69],
+		
+["20260903", 254000, 255000,
+
+══ 4. KRX 전종목 시세 ══
+  [400] text/html; charset=utf-8 getJsonData
+    → LOGOUT
+  [OTP 200] LOGOUT
