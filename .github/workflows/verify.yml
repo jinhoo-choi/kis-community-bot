@@ -40,6 +40,10 @@ on:
         description: '장 마감 후 시세 캐시 적재 (LLM 호출 없음)'
         type: boolean
         default: false
+      probe_source:
+        description: '시세 소스 복구 탐색 (네이버 개편 대응, LLM 호출 없음)'
+        type: boolean
+        default: false
       board_style:
         description: '토론방 고반응/대조군 구조 분석 (약 15분, LLM 호출 없음)'
         type: boolean
@@ -219,6 +223,14 @@ jobs:
           pip install -q -r requirements.txt
           python -c "from src.sources import market; print(len(market.fetch(200)), '건 수집')"
 
+      - name: Probe data sources
+        if: ${{ !cancelled() && inputs.probe_source }}
+        env:
+          TZ: Asia/Seoul
+        run: |
+          pip install -q -r requirements.txt
+          python tools/probe_source.py || true
+
       - name: Summary & commit
         if: always()
         run: |
@@ -233,6 +245,7 @@ jobs:
           git add -f data/voice_sample.txt || true
           git add -f data/research_probe.txt || true
           git add -f data/flow_probe.txt || true
+          git add -f data/source_probe.txt || true
           git add -f data/board_probe.txt || true
           git add -f data/board_dist.json || true
           git add -f data/board_style.json || true
