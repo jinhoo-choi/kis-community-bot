@@ -10,6 +10,7 @@ GitHub Actions 에서 `KRX 로그인 실패` 로 전건 실패했다 (dry-run �
 주의: 상위권을 ETF·인버스가 점유하므로 반드시 걸러낸다.
       (진단 실측: 1~3위가 KODEX 200선물인버스2X, KODEX 인버스, TIGER 200선물인버스2X)
 """
+import concurrent.futures as cf
 import json
 import os
 import re
@@ -17,7 +18,7 @@ from datetime import datetime, timedelta
 
 import config
 from config import KST
-from src import crawl, facts
+from src import crawl, facts, tickers
 
 # 거래대금 상위만 보면 하루 8건이 한계다 (실측). 발송 목표를 맞추려면
 # 유일하게 탄력적인 소스가 특징주다. 등락률 상·하위를 함께 본다.
@@ -262,6 +263,67 @@ def _col_map(soup) -> dict:
     return {}
 
 
+def _daily_rows(code: str, name: str, day: str) -> dict | None:
+    """siseJson 으로 한 종목의 기준일 확정 시세를 만든다.
+
+    네이버가 'Npay 증권' 으로 개편되면서 표 기반 순위 페이지가 사라졌다
+    (121KB 응답에 th 0개). front-api 랭킹 엔드포인트는 후보 6종 전부 404다.
+    siseJson 은 살아있고 날짜 지정이 되므로 랭킹을 직접 만든다.
+    실행 시각과 무관하고 장중에도 전일 확정치를 준다.
+    """
+    end = datetime.now(KST)
+    beg = end - timedelta(days=12)
+    try:
+        url = SISE_JSON.format(code=code, s=beg.strftime("%Y%m%d"),
+                               e=end.strftime("%Y%m%d"))
+        txt = crawl.requests.get(url, headers=crawl.HEADERS, timeout=10).text
+        rows = json.loads(txt.replace("'", '"'))[1:]
+    except Exception:
+        return None
+    want = day.replace("-", "")
+    idx = next((i for i, r in enumerate(rows) if str(r[0]) == want), None)
+    if idx is None or idx < 1:
+        return None
+    cur, prev = rows[idx], rows[idx - 1]
+    if not (cur[4] and prev[4] and cur[5]):
+        return None
+    close, pclose, vol = int(cur[4]), int(prev[4]), int(cur[5])
+    return {
+        "code": code, "name": name, "market": "",
+        "close": float(close),
+        "pct": (close - pclose) / pclose * 100,
+        "eok": vol * close / 1e8,
+        "eok_approx": True,          # 거래량x종가. siseJson 에 금액이 없다
+        "day_used": want,
+    }
+
+
+def _rank_from_daily(day: str, limit: int) -> list[dict]:
+    """상장 전종목의 기준일 시세를 모아 랭킹을 만든다."""
+    table = tickers.listed()
+    if len(table) < 500:
+        print(f"[market] 상장사 목록 {len(table)}종목 — 랭킹 생성 스킵")
+        return []
+    items = list(table.items())
+    print(f"[market] siseJson 랭킹 생성 — {len(items)}종목 조회")
+    out = []
+    with cf.ThreadPoolExecutor(max_workers=8) as ex:
+        for r in ex.map(lambda kv: _daily_rows(kv[1], kv[0], day), items):
+            if r:
+                out.append(r)
+    print(f"[market] 확정 시세 {len(out)}종목 수집 (기준일 {day})")
+    # 거래대금 상위 + 등락률 상위/하위를 합쳐 후보를 만든다
+    by_eok = sorted(out, key=lambda r: -r["eok"])[:limit]
+    by_up = sorted(out, key=lambda r: -r["pct"])[:limit]
+    by_down = sorted(out, key=lambda r: r["pct"])[:limit]
+    seen, merged = set(), []
+    for r in by_eok + by_up + by_down:
+        if r["code"] not in seen:
+            seen.add(r["code"])
+            merged.append(r)
+    return merged
+
+
 def fetch(limit: int = 12) -> list[dict]:
     day = _last_trading_day()
     rows, ok = [], 0
@@ -382,7 +444,8 @@ def fetch(limit: int = 12) -> list[dict]:
             "title": f"{r['name']} 전일 {abs(r['pct']):.2f}% {direction}",
             "facts": (
                 f"기준일: {day}\n"
-                f"종목: {r['name']} ({r['code']}, {r['market']})\n"
+                f"종목: {r['name']} ({r['code']}"
+                + (f", {r['market']})\n" if r.get("market") else ")\n")
                 f"종가: {int(r['close']):,}원\n"
                 f"등락률: {r['pct']:.2f}%\n"
                 + ("" if r.get("eok_approx")
@@ -399,6 +462,12 @@ def fetch(limit: int = 12) -> list[dict]:
     # 다만 rows 자체가 비면 정상이 아니다. 실측(#81, 08:30 KST): 순위 페이지가
     # 장 시작 전에는 헤더만 있고 데이터 행이 없다. 이걸 '정상 0건'으로 넘기는
     # 바람에 특징주가 통째로 빠진 채 발송 3건으로 끝났고 경보도 안 떴다.
+    if not rows:
+        # 순위 페이지가 개편으로 죽었다. 전종목 일별시세로 랭킹을 직접 만든다.
+        rows = _rank_from_daily(day, max(limit, 60))
+        if rows:
+            ok = 1
+
     if not rows:
         cached = _cache_load(day)
         if cached:
