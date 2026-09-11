@@ -104,6 +104,31 @@ def _other_company_subject(item: dict, assigned: str) -> str:
     return "" if (stem and stem in found) or found in assigned else found
 
 
+# 비상장 자회사가 주어인 기사가 많다. 상장 지주사로 올려 붙인다.
+# 실측: '신한은행', '우리은행' 기사가 배정 취소돼 종목방에 못 갔다.
+_LISTED_FORMS = ("{stem}지주", "{stem}금융지주", "{stem}금융", "{stem}홀딩스",
+                 "{stem}", "{stem}증권", "{stem}화재", "{stem}생명")
+
+
+def _subject_ticker(subject: str, table: dict) -> str:
+    """기사 주어 회사에 대응하는 상장 종목명. 없으면 빈 문자열."""
+    if subject in table:
+        return subject
+    stem = re.sub(r"(은행|증권|화재|생명|카드|캐피탈|자산운용|손보)$", "", subject)
+    if not stem:
+        return ""
+    for form in _LISTED_FORMS:
+        cand = form.format(stem=stem)
+        if cand in table:
+            return cand
+    # 표기가 조금 달라도 stem 으로 시작하는 금융 지주를 찾는다
+    # (하나은행 -> 하나금융지주)
+    for nm in table:
+        if nm.startswith(stem) and re.search(r"(지주|금융|홀딩스)$", nm):
+            return nm
+    return ""
+
+
 def assign(item: dict) -> bool:
     """테마·정책 항목에 게시할 종목을 배정한다. 배정했으면 True."""
     from src import tickers
@@ -135,12 +160,24 @@ def assign(item: dict) -> bool:
     name = random.choice(cands)
     other = _other_company_subject(item, name)
     if other:
-        # 경쟁사 기사를 남의 종목방에 붙이느니 배정을 포기한다
-        item["no_stock_fit"] = True
-        item["board_mapping"] = "NO_BOARD"
-        print(f"[theme] 배정 취소 — 제목 주어 '{other}' vs 배정 '{name}': "
-              f"{item.get('title', '')[:40]}")
-        return False
+        # 경쟁사 종목방에 붙이면 안 되지만, 배정을 포기하면 종목방에 못 간다.
+        # 기사 주어의 상장 종목(또는 지주사)을 찾아 그쪽에 붙인다.
+        mapped = _subject_ticker(other, table)
+        if mapped:
+            print(f"[theme] 주어 '{other}' → 상장 '{mapped}' 로 배정 변경")
+            name = mapped
+        else:
+            # 상장사를 못 찾으면 그 회사와 무관한 다른 후보로 돌린다
+            alt = [c for c in cands
+                   if c != name and not _other_company_subject(item, c)]
+            if alt:
+                name = random.choice(alt)
+            else:
+                item["no_stock_fit"] = True
+                item["board_mapping"] = "NO_BOARD"
+                print(f"[theme] 배정 취소 — 주어 '{other}' 상장 매칭 실패: "
+                      f"{item.get('title', '')[:40]}")
+                return False
     item["stock_code"] = table[name]
     item["stock_name"] = name
     item["board"] = "stock"
