@@ -444,9 +444,9 @@ def fetch(limit: int = 12) -> list[dict]:
             "title": f"{r['name']} 전일 {abs(r['pct']):.2f}% {direction}",
             "facts": (
                 f"기준일: {day}\n"
-                f"종목: {r['name']} ({r['code']}"
+                + f"종목: {r['name']} ({r['code']}"
                 + (f", {r['market']})\n" if r.get("market") else ")\n")
-                f"종가: {int(r['close']):,}원\n"
+                + f"종가: {int(r['close']):,}원\n"
                 f"등락률: {r['pct']:.2f}%\n"
                 + ("" if r.get("eok_approx")
                    else f"거래대금: {r['eok']:,.0f}억원\n")
