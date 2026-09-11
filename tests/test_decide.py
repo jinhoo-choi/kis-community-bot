@@ -270,17 +270,15 @@ def main():
     ok.append(run("1행 카테고리", _lines[0].startswith("카테고리 : ")))
     ok.append(run("2행 담당", _lines[1] == "담당 : 김선임"))
     # 종목이 있으면 3행에 앱 종목방 딥링크가 붙는다
-    _has_link = any("openData=" in l for l in _lines)
-    ok.append(run("종목건 딥링크 포함", _has_link))
+    # URL 전문은 카드에 넣지 않는다. 버튼으로만 전달한다.
+    ok.append(run("카드에 URL 전문 없음", "openData=" not in _c))
     from src.telegram_bot import buttons as _btn
     _b = _btn({"stock_code": "005930", "stock_name": "삼성전자"})
     ok.append(run("인라인 버튼 생성",
                   bool(_b) and "openData=005930" in
                   _b["inline_keyboard"][0][0]["url"]))
     ok.append(run("종목 없으면 버튼 없음", _btn({"kind": "policy"}) is None))
-    ok.append(run("딥링크에 종목코드", "openData=005930" in _c))
-    ok.append(run("복사블록은 링크 다음",
-                  _lines[3 if _has_link else 2].startswith("<pre><code")))
+    ok.append(run("3행부터 복사블록", _lines[2].startswith("<pre><code")))
     ok.append(run("종목건은 종목명+코드 표기", "삼성전자 (005930)" in _lines[0], _lines[0]))
     _t = _tg.card({"kind": "policy", "assignee": "이책임", "body": "가" * 60})
     ok.append(run("테마건은 카테고리만", _t.splitlines()[0] == "카테고리 : 정책", _t.splitlines()[0]))

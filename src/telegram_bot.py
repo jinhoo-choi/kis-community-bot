@@ -77,15 +77,11 @@ def card(p: dict, idx: int = 0, total: int = 0) -> str:
     if len(body) > BODY_LIMIT:
         body = body[:BODY_LIMIT].rstrip() + "…"
 
-    # 딥링크는 텍스트가 아니라 인라인 버튼으로 보낸다(buttons 참조).
-    # 게시글에 넣을 URL 자체가 필요한 경우를 위해 코드 블록으로도 남긴다.
-    link = ""
-    if p.get("stock_code"):
-        link = f'\n<code>{APP_LINK.format(code=p["stock_code"])}</code>'
-
+    # 딥링크는 인라인 버튼으로만 보낸다. URL 전문을 본문에 두면
+    # 복사 영역이 지저분해지고 담당자가 쓸 일도 없다(실사용 확인).
     return (
         f"카테고리 : {cat}\n"
-        f"담당 : {who}{link}\n"
+        f"담당 : {who}\n"
         f'<pre><code class="language-복사">{_esc(body)}</code></pre>'
     )
 

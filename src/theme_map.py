@@ -99,6 +99,12 @@ def _other_company_subject(item: dict, assigned: str) -> str:
     if not m:
         return ""
     found = m.group(0)
+    # 회사명 뒤에 따옴표가 오면 기사 주어가 아니라 인용 출처다.
+    # 실측: 한투증권 "하반기 환율 전망치 1,380원" -> 환율 기사이지 증권사 기사가 아니다.
+    # 이걸 경쟁사로 보고 배정을 취소해 종목이 안 붙었다.
+    tail = title[m.end():m.end() + 4].lstrip()
+    if tail and tail[0] in "\"'\u201c\u2018":
+        return ""
     # 배정 종목과 같은 계열이면 문제없다 (신한은행 <-> 신한지주)
     stem = re.sub(r"(지주|금융|홀딩스)$", "", assigned)
     return "" if (stem and stem in found) or found in assigned else found
