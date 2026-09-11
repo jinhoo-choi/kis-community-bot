@@ -262,13 +262,22 @@
   "hk-652224": "2026-09-11",
   "hk-652208": "2026-09-11",
   "pol-ECB올해두번째금리인상중동전쟁물가압박계속종합": "2026-09-11",
-  "pol-충남도8개시군27개사와1조5천억원규모투자협약": "2026-09-11"
+  "pol-충남도8개시군27개사와1조5천억원규모투자협약": "2026-09-11",
+  "ID::dart-20260910000105": "2026-09-11",
+  "EVT::109070::유상증자": "2026-09-11",
+  "TTL::109070::기재정정주요사항보고서유상증자결정": "2026-09-11",
+  "ID::hk-652264": "2026-09-11",
+  "TTL::006260::ls보수적으로봐도주가상승여력충분": "2026-09-11",
+  "ID::pol-한투증권하반기환율전망치1380원기존대비40원": "2026-09-11",
+  "dart-20260910000105": "2026-09-11",
+  "hk-652264": "2026-09-11",
+  "pol-한투증권하반기환율전망치1380원기존대비40원": "2026-09-11"
  },
  "recent_tone": {
   "_theme": [
-   "data_focus:duration:data_focus:data_focus",
    "light:duration:timeline:short",
-   "fact_note:duration:fact_note:fact_note"
+   "fact_note:duration:fact_note:fact_note",
+   "brief_report:amount:brief_report:brief_report"
   ],
   "007460": [
    "explainer:context:fact_read",
@@ -514,6 +523,12 @@
   ],
   "207940": [
    "brief_report:amount:brief_report:brief_report"
+  ],
+  "109070": [
+   "term_guide:terms:term_guide:term_guide"
+  ],
+  "006260": [
+   "fact_note:terms:fact_note:fact_note"
   ]
  }
 }
