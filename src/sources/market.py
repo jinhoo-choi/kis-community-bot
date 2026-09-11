@@ -401,7 +401,14 @@ def fetch(limit: int = 12) -> list[dict]:
             print(f"[market] ⚠ 0건 파싱 — {url}")
         crawl.sleep_jitter()
 
-    if ok == 0:
+    # 순위 페이지가 개편으로 죽으면(th 0개) 전종목 일별시세로 랭킹을 직접 만든다.
+    # 아이템 생성 루프 앞에 둬야 뒤 단계가 그대로 처리한다.
+    if not rows:
+        rows = _rank_from_daily(day, max(limit, 60))
+        if rows:
+            ok = 1
+
+    if ok == 0 or not rows:
         crawl.report("market", 0, limit, "네이버 시세 페이지 로드 실패")
         return []
 
@@ -462,12 +469,6 @@ def fetch(limit: int = 12) -> list[dict]:
     # 다만 rows 자체가 비면 정상이 아니다. 실측(#81, 08:30 KST): 순위 페이지가
     # 장 시작 전에는 헤더만 있고 데이터 행이 없다. 이걸 '정상 0건'으로 넘기는
     # 바람에 특징주가 통째로 빠진 채 발송 3건으로 끝났고 경보도 안 떴다.
-    if not rows:
-        # 순위 페이지가 개편으로 죽었다. 전종목 일별시세로 랭킹을 직접 만든다.
-        rows = _rank_from_daily(day, max(limit, 60))
-        if rows:
-            ok = 1
-
     if not rows:
         cached = _cache_load(day)
         if cached:
