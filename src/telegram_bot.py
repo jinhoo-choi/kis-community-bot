@@ -19,6 +19,7 @@
     plain <pre> 는 클라이언트에 따라 길게 누르기를 요구한다.
 """
 import html
+import json
 import time
 
 import requests
@@ -45,6 +46,17 @@ def _esc(s: str) -> str:
     return html.escape(s or "", quote=False)
 
 
+def buttons(p: dict) -> dict | None:
+    """종목방 바로가기 인라인 버튼. 누르면 앱 딥링크가 열린다."""
+    if not p.get("stock_code"):
+        return None
+    name = p.get("stock_name") or "종목"
+    return {"inline_keyboard": [[{
+        "text": f"📈 {name} 커뮤니티 열기",
+        "url": APP_LINK.format(code=p["stock_code"]),
+    }]]}
+
+
 def card(p: dict, idx: int = 0, total: int = 0) -> str:
     """배포 카드.
 
@@ -65,10 +77,11 @@ def card(p: dict, idx: int = 0, total: int = 0) -> str:
     if len(body) > BODY_LIMIT:
         body = body[:BODY_LIMIT].rstrip() + "…"
 
-    # 게시글 하단에 붙일 앱 딥링크. 종목코드가 있는 건에만 붙는다.
+    # 딥링크는 텍스트가 아니라 인라인 버튼으로 보낸다(buttons 참조).
+    # 게시글에 넣을 URL 자체가 필요한 경우를 위해 코드 블록으로도 남긴다.
     link = ""
     if p.get("stock_code"):
-        link = (f'\n종목방 링크 : <code>{APP_LINK.format(code=p["stock_code"])}</code>')
+        link = f'\n<code>{APP_LINK.format(code=p["stock_code"])}</code>'
 
     return (
         f"카테고리 : {cat}\n"
@@ -144,11 +157,15 @@ def send_all(posts: list[dict]) -> int:
     total = len(posts)
     sent = 0
     for i, p in enumerate(posts, 1):
-        r = _post("sendMessage", {
+        _payload = {
             "parse_mode": "HTML",
             "text": card(p, i, total),
             "disable_web_page_preview": True,
-        })
+        }
+        _kb = buttons(p)
+        if _kb:
+            _payload["reply_markup"] = json.dumps(_kb, ensure_ascii=False)
+        r = _post("sendMessage", _payload)
         if r is None:
             # 연결 실패는 그 건만 건너뛴다. 채널 미특정이면 이후도 무의미하니 중단한다.
             if not config.target_chat()[0] and not _resolve_by_suffix():
@@ -166,11 +183,7 @@ def send_all(posts: list[dict]) -> int:
                 wait = 5
             print(f"[tg] 429 — {wait}초 대기 후 재시도 {p['id']}")
             time.sleep(min(wait, 60))
-            r = _post("sendMessage", {
-                "parse_mode": "HTML",
-                "text": card(p, i, total),
-                "disable_web_page_preview": True,
-            })
+            r = _post("sendMessage", _payload)
 
         if r is not None and r.ok:
             sent += 1

@@ -270,8 +270,14 @@ def main():
     ok.append(run("1행 카테고리", _lines[0].startswith("카테고리 : ")))
     ok.append(run("2행 담당", _lines[1] == "담당 : 김선임"))
     # 종목이 있으면 3행에 앱 종목방 딥링크가 붙는다
-    _has_link = any("종목방 링크" in l for l in _lines)
+    _has_link = any("openData=" in l for l in _lines)
     ok.append(run("종목건 딥링크 포함", _has_link))
+    from src.telegram_bot import buttons as _btn
+    _b = _btn({"stock_code": "005930", "stock_name": "삼성전자"})
+    ok.append(run("인라인 버튼 생성",
+                  bool(_b) and "openData=005930" in
+                  _b["inline_keyboard"][0][0]["url"]))
+    ok.append(run("종목 없으면 버튼 없음", _btn({"kind": "policy"}) is None))
     ok.append(run("딥링크에 종목코드", "openData=005930" in _c))
     ok.append(run("복사블록은 링크 다음",
                   _lines[3 if _has_link else 2].startswith("<pre><code")))
