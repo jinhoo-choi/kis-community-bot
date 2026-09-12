@@ -35,6 +35,7 @@ def decide_distribution(
     min_score: int = None,
     min_factual: int = None,
     min_compliant: int = None,
+    hard_kind_cap: dict = None,
 ) -> tuple[list[dict], list[dict]]:
     """(배포, 보류) 반환.
 
@@ -62,6 +63,9 @@ def decide_distribution(
                    else config.MIN_FACTUAL_SCORE)
     min_compliant = (min_compliant if min_compliant is not None
                      else config.MIN_COMPLIANT_SCORE)
+    hard_kind_cap = (hard_kind_cap if hard_kind_cap is not None
+                     else {k: max(1, round(v * target / config.TARGET_POSTS))
+                           for k, v in config.DIST_HARD_CAP.items()})
 
     held = []
     pool = []
@@ -120,6 +124,10 @@ def decide_distribution(
             p["hold_reason"] = f"종목상한({per_stock})"
             return False
         kind = p.get("kind", "")
+        # 2차 배분에서도 풀리지 않는 절대 상한. 목표 미달은 flow 로 메우지 않는다.
+        if kind in hard_kind_cap and per_k[kind] >= hard_kind_cap[kind]:
+            p["hold_reason"] = f"유형절대상한({kind})"
+            return False
         if cap_kind and kind in per_kind_cap and per_k[kind] >= per_kind_cap[kind]:
             p["hold_reason"] = f"유형상한({kind})"
             return False

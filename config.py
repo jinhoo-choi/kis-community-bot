@@ -104,6 +104,13 @@ DIST_CAP = {k: max(1, round(v * TARGET_POSTS / sum(_MIX.values())))
             for k, v in _MIX.items()}
 DIST_CAP["theme"] = DIST_CAP["policy"]
 
+# 2차 배분(유형상한 완화)에서도 넘지 못하는 절대 상한.
+# 실측(2026-09-12 본검증): 배포 50건 중 flow 가 46건(92%)이었다. 1차 상한 19건이
+# 2차에서 완전히 풀려 무력화됐기 때문이다. flow 는 이미 fit 2/5 로 깎이는 유형이라
+# (위 주석 참조) 목표를 채우려고 무제한 보충하면 피드 전체가 시세 나열이 된다.
+# 목표 미달은 '배포 미달' 로 보고돼야 하지 flow 로 가려져선 안 된다.
+DIST_HARD_CAP = {"flow": max(1, round(TARGET_POSTS * 0.6))}
+
 # 목표에 못 미치는 이유가 필터인지 공급인지 즉시 판별할 수 있어야 한다.
 # 생성 상한. LLM 은 이만큼을 한꺼번에 호출하지 않고 GEN_STAGE_SIZE 단위로
 # 처리한다. 따라서 후보 수집량과 실제 생성량을 분리할 수 있다.
