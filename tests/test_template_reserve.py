@@ -65,6 +65,17 @@ def main() -> None:
                "거래량 기준값", "종가의 마감 위치", "누적 값")
     checks.append(_ok("문장틀 운영체·비문 제거",
                       not any(term in p["body"] for p in reserve for term in awkward)))
+    close_only = _item(0)
+    close_only["facts"] = "\n".join(
+        line for line in close_only["facts"].splitlines()
+        if not line.startswith("· 거래량:")
+        and not line.startswith("· 5거래일 누적 등락률:"))
+    close_post = tr.render(close_only, "flow_template_13")
+    checks.append(_ok("마감 가격 문장 인접 반복 방지",
+                      bool(close_post)
+                      and close_post["body"].count("마감 가격은") == 1
+                      and "종가는 장중 고가 대비" in close_post["body"]
+                      and tr.is_valid(close_post)))
 
     sent, held = decide_distribution(reserve, target=50,
                                      per_kind_cap={"flow": 20},

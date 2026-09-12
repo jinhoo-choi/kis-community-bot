@@ -114,7 +114,7 @@ def _relation_sentence(kind: str, value: str, direction: str,
             "종가는 장중 고가 대비 {v}% 낮은 수준이었네요.",
             "종가는 장중 고가 대비 {v}% 낮은 수준이었습니다.",
             "종가는 장중 고가 대비 {v}% 낮게 마쳤네요.",
-            "마감 가격은 장중 고가 대비 {v}% 낮았어요.",
+            "종가는 장중 고가 대비 {v}% 낮게 마쳤어요.",
         ),
     }
     return choices[kind][variant % len(choices[kind])].format(
