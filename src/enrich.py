@@ -12,6 +12,7 @@ import os
 import time
 
 from src.llm.router import enricher
+from src.llm.base import record_usage
 
 # 같은 공시/리포트를 반복 실행마다 다시 그라운딩하고 있었다.
 # 09-05~06 이틀간 22회 실행에서 대상은 거의 동일한 항목들이었다.
@@ -84,6 +85,7 @@ def _one(item: dict) -> dict:
         temperature=0.2,       # 사실 추출이므로 낮게
         max_tokens=400,
     )
+    record_usage(r, "enrich")
     txt = (r.text or "").strip()
     if not r.ok:
         item["_enrich_error"] = r.error[:200]

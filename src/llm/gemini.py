@@ -46,6 +46,39 @@ def _grounding_sources(response) -> list[dict]:
     return out[:10]
 
 
+def _ival(obj, name: str) -> int:
+    try:
+        return int(getattr(obj, name, 0) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _grounding_query_count(response) -> int:
+    """한 요청이 실제로 만든 Google Search query 수를 합산한다."""
+    return sum(len(getattr(getattr(cand, "grounding_metadata", None),
+                           "web_search_queries", None) or [])
+               for cand in (getattr(response, "candidates", None) or []))
+
+
+def _response_result(response, provider: str, fallback_model: str, tier: str,
+                     grounding: bool, attempts: int) -> GenResult:
+    usage = getattr(response, "usage_metadata", None)
+    model = str(getattr(response, "model_version", "") or fallback_model)
+    return GenResult(
+        (response.text or "").strip(), provider, model,
+        ok=bool(response.text),
+        sources=_grounding_sources(response) if grounding else [],
+        input_tokens=_ival(usage, "prompt_token_count"),
+        output_tokens=_ival(usage, "candidates_token_count"),
+        thinking_tokens=_ival(usage, "thoughts_token_count"),
+        cache_read_tokens=_ival(usage, "cached_content_token_count"),
+        grounding_queries=_grounding_query_count(response) if grounding else 0,
+        tier=tier,
+        service_tier=str(getattr(usage, "service_tier", "standard") or "standard"),
+        attempts=attempts,
+    )
+
+
 def _is_permanent_quota(message: str) -> bool:
     low = message.lower()
     return any(k in low for k in _PERMANENT_QUOTA)
@@ -150,7 +183,8 @@ class GeminiProvider(Provider):
         active = self._active()
         if active is None:
             return GenResult("", self.name, self.model, ok=False,
-                             error="Gemini unavailable after quota/billing error")
+                             error="Gemini unavailable after quota/billing error",
+                             attempts=0)
         client, active_model, tier = active
         for attempt in range(3):
             try:
@@ -161,12 +195,14 @@ class GeminiProvider(Provider):
                     contents=user,
                     config=self._config(system, temperature, max_tokens, active_model),
                 )
-                return GenResult((r.text or "").strip(), self.name, active_model,
-                                 sources=_grounding_sources(r) if self.grounding else [])
+                return _response_result(r, self.name, active_model, tier,
+                                        self.grounding, attempt + 1)
             except Exception as e:
                 msg = str(e)
                 if tier == "paid" and self._promote(msg):
-                    return self.generate(system, user, temperature, max_tokens)
+                    result = self.generate(system, user, temperature, max_tokens)
+                    result.attempts += attempt + 1
+                    return result
                 if _is_permanent_quota(msg):
                     disabled = _FREE_QUOTA_DISABLED if tier == "free" else _PAID_QUOTA_DISABLED
                     if not disabled.is_set():
@@ -178,8 +214,12 @@ class GeminiProvider(Provider):
                         if note not in (self.fallbacks or []):
                             self.fallbacks = (self.fallbacks or []) + [note]
                         print(f"[gemini] 유료 티어 중단 → 무료 프로젝트 {fallback[1]} 폴백")
-                        return self.generate(system, user, temperature, max_tokens)
-                    return GenResult("", self.name, active_model, ok=False, error=msg[:200])
+                        result = self.generate(system, user, temperature, max_tokens)
+                        result.attempts += attempt + 1
+                        return result
+                    return GenResult("", self.name, active_model, ok=False,
+                                     error=msg[:200], tier=tier,
+                                     attempts=attempt + 1)
                 if _is_transport_failure(msg):
                     disabled = (_FREE_TRANSPORT_DISABLED if tier == "free"
                                 else _PAID_TRANSPORT_DISABLED)
@@ -194,13 +234,19 @@ class GeminiProvider(Provider):
                             self.fallbacks = (self.fallbacks or []) + [note]
                         print(f"[gemini] 유료 티어 연결 실패 → 무료 프로젝트 "
                               f"{fallback[1]} 폴백")
-                        return self.generate(system, user, temperature, max_tokens)
-                    return GenResult("", self.name, active_model, ok=False, error=msg[:200])
+                        result = self.generate(system, user, temperature, max_tokens)
+                        result.attempts += attempt + 1
+                        return result
+                    return GenResult("", self.name, active_model, ok=False,
+                                     error=msg[:200], tier=tier,
+                                     attempts=attempt + 1)
                 retryable = any(k in msg.lower() for k in _RETRYABLE_LIMIT)
                 if retryable and attempt < 2:
                     time.sleep(1.5 * (attempt + 1))
                     continue
-                return GenResult("", self.name, active_model, ok=False, error=msg[:200])
+                return GenResult("", self.name, active_model, ok=False,
+                                 error=msg[:200], tier=tier,
+                                 attempts=attempt + 1)
 
     def generate_many(self, jobs, temperature=1.0, max_tokens=700,
                       workers: int = 6) -> list[GenResult]:

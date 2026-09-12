@@ -21,6 +21,7 @@ import config
 from src import (state, tickers, generator, telegram_bot, enrich, judge,
                  gate, decide, stats, dedup, crawl, assign, theme_map, facts)
 from src.sources import dart, research, market, policy, telegram_ch, kind_inquiry
+from src.llm.base import reset_usage
 
 
 def collect() -> list[dict]:
@@ -75,6 +76,7 @@ def _drop_no_board(items: list[dict], blocked: list[tuple[str, str]]) -> list[di
 
 def main():
     dry = "--dry-run" in sys.argv
+    reset_usage()
     s = state.prune(state.load())
 
     raw = collect()

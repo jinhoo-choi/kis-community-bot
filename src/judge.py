@@ -12,6 +12,7 @@ import re
 
 from src import rules
 from src.llm.router import judges, cross_judge_for
+from src.llm.base import record_usage
 
 SYSTEM = """당신은 증권사 커뮤니티 게시글의 품질 심사자입니다.
 게시글에는 'AI 작성' 뱃지가 붙으므로 사람인 척할 필요는 없습니다.
@@ -115,7 +116,7 @@ def _one(post: dict) -> dict:
     names = [first] + [n for n, p in pool.items()
                        if n != writer and n != first and p.available()]
     errors = []
-    for jname in names:
+    for index, jname in enumerate(names):
         j = pool[jname]
         r = j.generate(
             # ※ SYSTEM 에 JSON 리터럴이 있어 .format() 을 쓰면 KeyError 로 죽는다. replace 고정.
@@ -127,6 +128,7 @@ def _one(post: dict) -> dict:
             temperature=0.0,
             max_tokens=300,
         )
+        record_usage(r, "judge", "initial" if index == 0 else "judge_fallback")
         d = _parse(r.text)
         if d is not None:
             post["score"] = d

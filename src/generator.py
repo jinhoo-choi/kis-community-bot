@@ -13,6 +13,7 @@ from src.decide import temperature_for
 from src import angles
 from src import facts as facts_mod
 from src import personas as P
+from src.llm.base import record_usage
 
 
 # 리젝된 생성물 보관 (품질 검토용). main 이 filter_log 에 함께 기록한다.
@@ -289,7 +290,7 @@ def pick_tone(item: dict, recent: dict) -> str:      # 하위 호환
 
 def _run(provider_name: str, items: list[dict], tones: list[str],
          fmts: list[str] = None, angs: list[str] = None,
-         lens: list[str] = None) -> list[dict]:
+         lens: list[str] = None, attempt_type: str = "initial") -> list[dict]:
     if not items:
         return []
     fmts = fmts or ["fact_read"] * len(items)
@@ -306,6 +307,7 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
         jobs = [P.build_messages_v2(it, tn, ag)
                 for _, it, tn, fm, ag, ln in grp]
         for g, r in zip(grp, p.generate_many(jobs, temperature=temp)):
+            record_usage(r, "write", attempt_type)
             results[g[0]] = r
 
     out = []
@@ -368,7 +370,8 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
                          [styles[id(x)][0] for x in failed],
                          [styles[id(x)][2] for x in failed],
                          [styles[id(x)][1] for x in failed],
-                         [styles[id(x)][3] for x in failed])
+                         [styles[id(x)][3] for x in failed],
+                         attempt_type="provider_reallocation")
         print(f"[gen] {name}: {len(made)}/{len(chunk)}건 생성")
         quality_pass = 0
         for p in made:
@@ -399,7 +402,8 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
             p["retry_hint"] = _hint(p.get("reject_errs", []))
             alt = next((n for n in names if n != p["provider"]), p["provider"])
             made = _run(alt, [p], [p["tone"]], [p.get("fmt", "fact_read")],
-                        [p.get("angle", "")], [p.get("length", "medium")])
+                        [p.get("angle", "")], [p.get("length", "medium")],
+                        attempt_type="filter_rewrite")
             if made and not filters.check(
                     made[0]["body"], p["facts"], p.get("fmt"), p.get("angle"),
                     p.get("length"),

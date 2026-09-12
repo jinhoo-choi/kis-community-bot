@@ -1225,6 +1225,23 @@ def main():
     ok.append(run("검색 근거 URL 추출·중복제거",
                   _gm._grounding_sources(_resp) ==
                   [{"title": "근거", "url": "https://example.com/a"}]))
+    _usage_resp = _NS(
+        text="ok", model_version="gemini-3.5-flash",
+        usage_metadata=_NS(prompt_token_count=120, candidates_token_count=30,
+                           thoughts_token_count=7, cached_content_token_count=20,
+                           service_tier="STANDARD"),
+        candidates=[_NS(grounding_metadata=_NS(
+            grounding_chunks=[], web_search_queries=["검색1", "검색2"]))],
+    )
+    _usage_gr = _gm._response_result(
+        _usage_resp, "gemini", "fallback", "paid", True, attempts=2)
+    ok.append(run("Gemini 실제 token·검색 query usage 추출",
+                  _usage_gr.input_tokens == 120
+                  and _usage_gr.output_tokens == 30
+                  and _usage_gr.thinking_tokens == 7
+                  and _usage_gr.cache_read_tokens == 20
+                  and _usage_gr.grounding_queries == 2
+                  and _usage_gr.attempts == 2))
     from google.genai import types as _gtypes
     _gcfg_provider = _gm.GeminiProvider.__new__(_gm.GeminiProvider)
     _gcfg_provider._types = _gtypes
@@ -1314,7 +1331,21 @@ def main():
         ok.append(run("확인된 배경 없음만 NONE 캐시", _saved["none"]["status"] == "none"))
     _en.CACHE_PATH, _en.enricher = _old_path, _old_enricher
 
+    from src.llm import claude as _claude_mod
     from src.llm.claude import ClaudeProvider as _CP
+    _claude_msg = _NS(
+        content=[_NS(type="text", text="ok")], model="claude-haiku-4-5-20251001",
+        usage=_NS(input_tokens=100, output_tokens=25,
+                  cache_read_input_tokens=50, cache_creation_input_tokens=20,
+                  service_tier="standard"),
+    )
+    _claude_gr = _claude_mod._message_result(
+        _claude_msg, "claude", "fallback")
+    ok.append(run("Claude 실제 cache 포함 token usage 추출",
+                  _claude_gr.input_tokens == 170
+                  and _claude_gr.output_tokens == 25
+                  and _claude_gr.cache_read_tokens == 50
+                  and _claude_gr.cache_write_tokens == 20))
     import threading as _th
     _cp = _CP("", "fake", use_batch=False)
     _barrier, _threads = _th.Barrier(2), set()
@@ -1325,6 +1356,29 @@ def main():
     _cp.generate = _parallel_generate
     _cp.generate_many([("s", "u")] * 4)
     ok.append(run("Claude 동기 호출 제한 병렬화", len(_threads) >= 2))
+
+    from src.llm import base as _usage_base
+    _usage_base.reset_usage()
+    _usage_base.record_usage(_GR(
+        "ok", "claude", "claude-haiku-4-5-20251001",
+        input_tokens=2000, output_tokens=1000,
+        cache_read_tokens=500, cache_write_tokens=500, attempts=2), "write")
+    _usage_base.record_usage(_GR(
+        "ok", "gemini", "gemini-3.1-flash-lite",
+        input_tokens=5000, output_tokens=500, tier="free"), "judge")
+    _usage_base.record_usage(_GR(
+        "", "other", "unknown", ok=False, attempts=0),
+        "write", "provider_reallocation")
+    _usage_sum = _usage_base.usage_summary(delivered=2)
+    ok.append(run("역할·모델·티어별 호출 비용 계측",
+                  _usage_sum["calls"] == 3
+                  and _usage_sum["api_attempts"] == 3
+                  and _usage_sum["unknown_cost_calls"] == 1
+                  and _usage_sum["estimated_token_cost_usd"] == 0.006675
+                  and _usage_sum["cost_per_delivered_usd"] == 0.003338
+                  and "claude|claude-haiku-4-5-20251001|paid|write"
+                  in _usage_sum["by_route"]))
+    _usage_base.reset_usage()
 
     # Gemini 유료·무료 티어가 모두 막혀도 동일 Haiku 자기심사는 하지 않는다.
     # Sonnet 5는 temperature를 거부하므로 sampling parameter 없이 호출해야 한다.

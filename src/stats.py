@@ -15,6 +15,7 @@ from collections import Counter
 from datetime import datetime
 
 from config import KST
+from src.llm.base import usage_summary
 
 PATH = "data/run_stats.jsonl"
 
@@ -208,6 +209,7 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks,
         "by_kind_funnel": _kind_funnel(
             collected, blocked, generation_candidates, generation_attempted,
             generated, delivery_attempted, sent, held),
+        "llm_usage": usage_summary(len(sent)),
         "model_fallbacks": fallbacks,
     }
 

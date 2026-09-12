@@ -15,6 +15,33 @@ _RETIRED = ("not_found", "404", "deprecated", "does not exist",
             "is not supported", "NOT_FOUND", "unsupported")
 
 
+def _ival(obj, name: str) -> int:
+    try:
+        return int(getattr(obj, name, 0) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _message_result(message, provider: str, fallback_model: str,
+                    billing_mode: str = "standard") -> GenResult:
+    """Anthropic message의 실제 usage를 공통 결과로 정규화한다."""
+    txt = "".join(b.text for b in message.content if b.type == "text").strip()
+    usage = getattr(message, "usage", None)
+    cache_read = _ival(usage, "cache_read_input_tokens")
+    cache_write = _ival(usage, "cache_creation_input_tokens")
+    uncached = _ival(usage, "input_tokens")
+    service_tier = str(getattr(usage, "service_tier", "standard") or "standard")
+    return GenResult(
+        txt, provider, str(getattr(message, "model", "") or fallback_model),
+        ok=bool(txt),
+        input_tokens=uncached + cache_read + cache_write,
+        output_tokens=_ival(usage, "output_tokens"),
+        cache_read_tokens=cache_read,
+        cache_write_tokens=cache_write,
+        tier="paid", service_tier=service_tier, billing_mode=billing_mode,
+    )
+
+
 class ClaudeProvider(Provider):
     name = "claude"
 
@@ -69,12 +96,13 @@ class ClaudeProvider(Provider):
     def generate(self, system, user, temperature=1.0, max_tokens=700) -> GenResult:
         try:
             r = self._create(system, user, temperature, max_tokens)
-            txt = "".join(b.text for b in r.content if b.type == "text")
-            return GenResult(txt.strip(), self.name, self.model)
+            return _message_result(r, self.name, self.model)
         except Exception as e:
             msg = str(e)
             if self._promote(msg):
-                return self.generate(system, user, temperature, max_tokens)
+                result = self.generate(system, user, temperature, max_tokens)
+                result.attempts += 1
+                return result
             return GenResult("", self.name, self.model, ok=False, error=msg[:200])
 
     def generate_many(self, jobs, temperature=1.0, max_tokens=700,
@@ -111,10 +139,12 @@ class ClaudeProvider(Provider):
             for res in self._client.messages.batches.results(batch.id):
                 if res.result.type == "succeeded":
                     m = res.result.message
-                    got[res.custom_id] = "".join(b.text for b in m.content if b.type == "text")
+                    got[res.custom_id] = _message_result(
+                        m, self.name, self.model, billing_mode="batch")
 
-            return [GenResult(got.get(f"j{i}", "").strip(), self.name, self.model,
-                              ok=bool(got.get(f"j{i}")))
+            return [got.get(f"j{i}") or GenResult(
+                        "", self.name, self.model, ok=False,
+                        error="batch result missing", billing_mode="batch")
                     for i in range(len(jobs))]
         except Exception as e:
             print(f"[claude] batch 실패 → 동기 폴백: {e}")
