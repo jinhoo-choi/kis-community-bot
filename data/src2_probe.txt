@@ -13,6 +13,25 @@
   company_read 링크 = 0
   본문 앞부분: Npay 증권 네이버 네이버페이 증권 메뉴모음 종목 검색 검색 전체메뉴 마켓 MY 국내 해외 공모주 토론 지표 가상자산 투자정보 현재 위치 뉴스 리서치 현재 위치 머니스토리 데일리 국내종목 산업분석 투자전략 경제분석 채권분석 로딩중 로그인 전체서비스 공지사항 증권 고객센터 토론 운영원칙 약관 및 정책 개인정보 처리방침 오류신고 네이버파이낸셜㈜가 제공하는 금
 
+══ 1b. 리서치 API 탐색 ══
+  buildId=dbb855825e2208259c5d3306ae6a38ba5ef73111 page=/investment/research/[category]
+  JS 청크 20개
+    path: /research/end
+    path: /research/list
+    path: /research/my
+    path: /research/stockEnd
+    path: /research/stockList
+  --- front-api 타격 ---
+    [400] application/json; char /research/end
+    [400] application/json; char /research/list
+    [200] application/json; char /research/my
+      → {"isSuccess":true,"detailCode":"","message":"","result":{"userResearchType":{"text":"많이 본 리서치","name":"TOP_SEARCH"},"researchSummaries":[{"itemCode":"005930","itemName":"삼성전자","researchId":95624,"title":"사방에서 울리는 낭보들","brokerName":"미래에셋증권","writeDate":"2026-08-14","content":"<p><strong>HBM 주도의 DRAM 
+    [400] application/json; char /research/stockEnd
+    [400] application/json; char /research/stockList
+    [404] application/json; char /research/company?page=1&pageSize=20
+    [404] application/json; char /research/companyList?page=1&pageSize=20
+    [404] application/json; char /investment/research/company?page=1&pageSize=20
+
 ══ 2. KIND 조회공시 ══
   payload keys = ['method', 'currentPageSize', 'pageIndex', 'orderMode', 'orderStat', 'forward', 'marketType']
   HTTP 200 / 88,004bytes / ct=text/html; charset=UTF-8
