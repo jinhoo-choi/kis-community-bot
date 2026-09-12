@@ -24,14 +24,16 @@ from src.sources import dart, research, market, policy, telegram_ch, kind_inquir
 
 
 def collect() -> list[dict]:
-    q, over = config.SLOT_QUOTA, config.OVERGEN_RATE
+    q = config.SLOT_QUOTA
     items = []
-    items += dart.fetch(int(q["disclosure"] * over))
-    items += research.fetch(int(q["research"] * over))
-    flow_items = market.fetch(int(q["flow"] * over))
+    # SLOT_QUOTA 에 이미 목표/수율과 공급 상한이 반영돼 있다. 여기서 다시
+    # OVERGEN_RATE 를 곱하면 flow 60건이 428건으로 이중 증폭된다.
+    items += dart.fetch(q["disclosure"])
+    items += research.fetch(q["research"])
+    flow_items = market.fetch(q["flow"])
     # 조회공시는 특징주의 '왜 올랐는지'를 메우는 유일한 공식 확정 정보다.
     # 독립 항목으로도 쓰고, 같은 종목 특징주에 근거로도 붙인다.
-    inquiries = kind_inquiry.fetch(max(3, int(q["disclosure"] * over / 4)))
+    inquiries = kind_inquiry.fetch(max(3, q["disclosure"] // 4))
     n_att = kind_inquiry.attach_to_flow(flow_items, inquiries)
     # 반대 방향도 채운다. 조회공시 종목이 거래대금 상위에 없으면
     # attach_to_flow 로는 영영 연결되지 않는다 (실측 2/3).
@@ -40,9 +42,9 @@ def collect() -> list[dict]:
         print(f"[kind] 특징주→조회공시 {n_att}건 / 조회공시→시세 {n_mkt}건")
     items += flow_items
     items += inquiries
-    items += policy.fetch(int(q["policy"] * over))
+    items += policy.fetch(q["policy"])
     # 운용사 공식 채널. verified 채널이 없으면 0건 반환한다.
-    items += telegram_ch.fetch(max(1, int(q["policy"] * over / 2)))
+    items += telegram_ch.fetch(max(1, q["policy"] // 2))
     items += policy.make_polls(items, q["poll"])
     return items
 
@@ -157,12 +159,20 @@ def main():
         print(f"\n───── dedup ─────\n {dup_reasons}")
         return
 
-    posts = generator.generate(picked, s["recent_tone"])
-
-    if config.ENABLE_JUDGE:
-        posts = judge.judge_all(posts)
-
-    sent_posts, held = decide.decide_distribution(posts)
+    # 생성→심사→판정을 묶음 단위로 실행한다. 목표를 채우면 남은 후보는 LLM에
+    # 보내지 않는다. 기존 함수와 최종 판정 기준은 그대로 재사용한다.
+    posts, sent_posts, held = [], [], []
+    for start in range(0, len(picked), config.GEN_STAGE_SIZE):
+        stage = picked[start:start + config.GEN_STAGE_SIZE]
+        made = generator.generate(stage, s["recent_tone"])
+        if config.ENABLE_JUDGE:
+            made = judge.judge_all(made)
+        posts.extend(made)
+        sent_posts, held = decide.decide_distribution(posts)
+        print(f"[main] 단계 생성 {start + len(stage)}/{len(picked)}건"
+              f" → 누적 배포 가능 {len(sent_posts)}/{config.TARGET_POSTS}건")
+        if len(sent_posts) >= config.TARGET_POSTS:
+            break
     # 담당자 배정은 최종 배포분이 확정된 뒤에 한다.
     # 보류될 글까지 배정하면 담당자별 건수가 실제와 달라진다.
     sent_posts = assign.assign(sent_posts)

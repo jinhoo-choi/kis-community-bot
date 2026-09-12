@@ -11,6 +11,7 @@
 문서: https://ai.google.dev/gemini-api/docs/models
 """
 import concurrent.futures as cf
+import threading
 
 import config
 from src.llm.base import Provider, GenResult
@@ -19,6 +20,8 @@ from src.llm.base import Provider, GenResult
 # 404/not_found/deprecated 계열 오류에서만 다음 후보로 승격한다.
 _RETIRED = ("not_found", "404", "deprecated", "does not exist",
             "is not supported", "NOT_FOUND", "unsupported")
+_QUOTA_ERRORS = ("429", "RESOURCE_EXHAUSTED", "quota", "billing")
+_QUOTA_DISABLED = threading.Event()
 
 
 class GeminiProvider(Provider):
@@ -36,7 +39,7 @@ class GeminiProvider(Provider):
             self._types = types
 
     def available(self) -> bool:
-        return self._client is not None
+        return self._client is not None and not _QUOTA_DISABLED.is_set()
 
     def _promote(self, err: str) -> bool:
         """모델 은퇴로 보이면 다음 후보로 교체. 교체했으면 True."""
@@ -65,6 +68,9 @@ class GeminiProvider(Provider):
         return t.GenerateContentConfig(**kw)
 
     def generate(self, system, user, temperature=1.0, max_tokens=700) -> GenResult:
+        if _QUOTA_DISABLED.is_set():
+            return GenResult("", self.name, self.model, ok=False,
+                             error="Gemini disabled after quota/billing error")
         try:
             r = self._client.models.generate_content(
                 model=self.model,
@@ -76,6 +82,10 @@ class GeminiProvider(Provider):
             msg = str(e)
             if self._promote(msg):
                 return self.generate(system, user, temperature, max_tokens)
+            if any(k.lower() in msg.lower() for k in _QUOTA_ERRORS):
+                if not _QUOTA_DISABLED.is_set():
+                    print("[gemini] quota/billing 오류 → 이번 실행의 후속 호출 중단")
+                _QUOTA_DISABLED.set()
             return GenResult("", self.name, self.model, ok=False, error=msg[:200])
 
     def generate_many(self, jobs, temperature=1.0, max_tokens=700,

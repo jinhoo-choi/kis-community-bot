@@ -48,7 +48,10 @@ def judges() -> dict:
 
 def split_by_ratio(items: list) -> dict[str, list]:
     """작성 물량을 프로바이더별로 배분. 프로바이더가 하나뿐이면 전부 몰아준다."""
-    w = writers()
+    # Gemini quota circuit breaker 가 동작했으면 이후 작성 물량은 Claude로 몰린다.
+    w = {n: p for n, p in writers().items() if p.available()}
+    if not w:
+        raise RuntimeError("사용 가능한 LLM 프로바이더가 없습니다.")
     names = list(w.keys())
     if len(names) == 1:
         return {names[0]: items}
@@ -68,6 +71,6 @@ def split_by_ratio(items: list) -> dict[str, list]:
 
 def cross_judge_for(writer: str) -> str | None:
     """작성자와 다른 프로바이더를 심사자로 지정. 없으면 None."""
-    j = judges()
+    j = {n: p for n, p in judges().items() if p.available()}
     other = [n for n in j if n != writer]
     return other[0] if other else None
