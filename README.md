@@ -70,7 +70,7 @@
 | 단계 | 담당 | 이유 |
 |---|---|---|
 | 사실 보강 | Gemini (grounding) | 검색 그라운딩으로 배경 사실을 채워 환각과 공허한 글을 동시에 줄임 |
-| 작성 | Claude + Gemini 8:2 | 실측 품질을 반영하되 보조 provider와 폴백 경로를 유지 |
+| 작성 | Claude + Gemini 8:2 | 실측 품질을 반영하고, 유료 Gemini 중단 시 별도 무료 프로젝트로 폴백 |
 | 심사 | 교차 (작성자 ≠ 심사자) | 같은 모델이 자기 글을 채점하면 점수가 후해진다(self-preference bias) |
 | 재생성 | 다른 프로바이더 | 같은 모델은 같은 실수를 반복함 |
 
@@ -92,6 +92,7 @@
 | 작성 | `claude-haiku-4-5-20251001` / `gemini-3.5-flash` |
 | 보강 | `gemini-3.5-flash` (Google 검색 그라운딩) |
 | 심사 | `claude-haiku-4-5-20251001` / `gemini-3.1-flash-lite` |
+| Gemini 무료 폴백 | `gemini-3.1-flash-lite` (작성·심사만, 검색 보강 제외) |
 
 ## 문체
 10개 통합 페르소나와 11개 Angle을 조합합니다. 각 페르소나가 문장 수·길이·숫자·
@@ -100,7 +101,10 @@
 ## 세팅
 1. `pip install -r requirements.txt`
 2. GitHub Secrets 등록: `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `DART_API_KEY`, `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID`
-   - 한쪽 키만 넣어도 동작한다. 살아있는 프로바이더에 물량이 자동으로 몰린다.
+   - 유료 Gemini 소진 대비용 선택 Secret: `GEMINI_FREE_API_KEY`. 유료키와 같은 결제계정이 아닌 별도 무료 티어 프로젝트의 키여야 한다.
+   - 테스트 채널 전용 무료키를 따로 쓰려면 `GEMINI_FREE_API_KEY_TEST`도 등록한다.
+   - 작성은 살아 있는 프로바이더에 자동으로 몰리지만, 기본 교차심사(`ENABLE_JUDGE=1`)까지
+     통과하려면 Claude와 Gemini 두 계열이 모두 사용 가능해야 한다.
 3. 로컬 점검: `python main.py --dry-run` (LLM·텔레그램 호출 없이 소스 수집·게이트 확인)
 4. 테스트: `./run_tests.sh`
 5. 스케줄: `.github/workflows/daily.yml` — UTC 21:11 = KST 06:11
