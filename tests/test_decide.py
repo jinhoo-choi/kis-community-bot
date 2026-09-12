@@ -1454,6 +1454,30 @@ def main():
     ok.append(run("장문 정책 요지는 사실정리 페르소나 허용",
                   _policy_style[0] == "fact_note"))
 
+    # flow 절대 상한: 2차 배분에서도 목표의 60% 를 넘지 못한다 (실측 46/50 재발 방지)
+    _flow = [P(f"f{i}", code=f"{i:06d}", total=18, kind="flow") for i in range(60)]
+    for i, _p in enumerate(_flow):
+        # 말미중복 상한에 걸리지 않도록 마무리 20자를 전부 다르게 둔다
+        _p["body"] = f"{i}번 종목 종가와 거래대금을 정리한 기록 {i:04d}-{i*7:05d} 입니다."
+    sent, held = decide_distribution(_flow, target=50, per_stock=2)
+    ok.append(run("flow 배포 절대상한 적용",
+                  sum(1 for x in sent if x["kind"] == "flow") <= 30,
+                  f"flow {sum(1 for x in sent if x['kind'] == 'flow')}건"))
+    ok.append(run("절대상한 보류 사유 표기",
+                  any("유형절대상한" in x.get("hold_reason", "") for x in held)))
+
+    from src import facts as _facts2
+    _terms = [{"kind": "disclosure", "title": "삼성전자 전환사채 발행 결정", "facts": "발행 총액: 1,000억원"},
+              {"kind": "flow", "title": "공매도 상위 종목", "facts": "등락률: +3.1%"}]
+    _n_term = _facts2.annotate_terms(_terms)
+    ok.append(run("공시에 용어 설명 주입", _n_term == 1 and "용어 설명:" in _terms[0]["facts"]))
+    ok.append(run("특징주에는 용어 설명 미주입", "용어 설명:" not in _terms[1]["facts"]))
+    ok.append(run("주입된 용어로 term_word 슬롯 성립",
+                  "term_word" in _facts2.slots(_terms[0])))
+    _facts2.annotate_terms(_terms)
+    ok.append(run("용어 설명 중복 주입 없음",
+                  _terms[0]["facts"].count("용어 설명:") == 1))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
