@@ -14,6 +14,7 @@
   - 미탐 > 오탐. 애매하면 배포하지 않는다 (리스크 모니터링과 반대 방향).
 """
 import json
+import math
 import os
 import sys
 
@@ -111,6 +112,18 @@ def _balanced_rescue(items: list[dict], limit: int) -> list[dict]:
             if by_kind[kind] and len(out) < limit:
                 out.append(by_kind[kind].pop(0))
     return out
+
+
+def _next_stage_size(remaining: int, needed: int,
+                     attempted: int, deliverable: int) -> int:
+    """누적 실수율로 다음 생성량을 계산하되 작은/과대한 묶음을 막는다."""
+    if remaining <= 0 or needed <= 0:
+        return 0
+    observed_yield = (deliverable / attempted) if attempted else config.YIELD
+    observed_yield = min(1.0, max(0.02, observed_yield))
+    estimated = math.ceil(needed / observed_yield)
+    bounded = min(config.GEN_STAGE_MAX, max(config.GEN_STAGE_MIN, estimated))
+    return min(remaining, bounded)
 
 
 def main():
@@ -224,19 +237,29 @@ def main():
 
     # 생성→심사→판정을 묶음 단위로 실행한다. 목표를 채우면 남은 후보는 LLM에
     # 보내지 않는다. 기존 함수와 최종 판정 기준은 그대로 재사용한다.
-    posts, sent_posts, held, attempted_items = [], [], [], []
-    for start in range(0, len(picked), config.GEN_STAGE_SIZE):
-        stage = picked[start:start + config.GEN_STAGE_SIZE]
+    posts, sent_posts, held, attempted_items, stage_sizes = [], [], [], [], []
+    start = 0
+    next_size = min(config.GEN_STAGE_SIZE, len(picked))
+    while start < len(picked) and next_size:
+        stage = picked[start:start + next_size]
+        start += len(stage)
+        stage_sizes.append(len(stage))
         attempted_items.extend(stage)
         made = generator.generate(stage, s["recent_tone"])
         if config.ENABLE_JUDGE:
             made = judge.judge_all(made)
         posts.extend(made)
         sent_posts, held = decide.decide_distribution(posts)
-        print(f"[main] 단계 생성 {start + len(stage)}/{len(picked)}건"
+        print(f"[main] 단계 생성 {start}/{len(picked)}건"
               f" → 누적 배포 가능 {len(sent_posts)}/{config.TARGET_POSTS}건")
         if len(sent_posts) >= config.TARGET_POSTS:
             break
+        next_size = _next_stage_size(
+            len(picked) - start,
+            config.TARGET_POSTS - len(sent_posts),
+            len(attempted_items),
+            len(sent_posts),
+        )
     # 정규식 리젝분을 즉시 재호출하면 아직 쓰지 않은 원본보다 비싼 두 번째 시도를
     # 먼저 하게 된다. 전체 원본 후보를 소진하고도 목표가 모자랄 때만 한 번 재작성한다.
     if len(sent_posts) < config.TARGET_POSTS:
@@ -266,7 +289,8 @@ def main():
     row = stats.record(**stats.summarize(
         raw, blocked, enriched_n, posts, delivered_posts, held,
         generator.collect_fallbacks(), generation_candidates=picked,
-        generation_attempted=attempted_items, delivery_attempted=sent_posts),
+        generation_attempted=attempted_items, generation_stages=stage_sizes,
+        delivery_attempted=sent_posts),
         dedup=dup_reasons, crawl_health=crawl.health())
     telegram_bot.send_summary(sent_posts, sent, row, config.TARGET_POSTS)
     print("[main] filter_log " + stats.detail_log(picked, sent_posts, held))

@@ -1069,6 +1069,13 @@ def main():
                   and sum(x["kind"] == "disclosure" for x in _rescued) < 5))
     ok.append(run("보강 rescue 기본 묶음은 5건",
                   _cfg.ENRICH_RESCUE_CHUNK == 5))
+    ok.append(run("50건 목표 첫 생성 묶음은 60건",
+                  _cfg.TARGET_POSTS != 50 or _cfg.GEN_STAGE_SIZE == 60))
+    ok.append(run("후속 생성량은 실수율 기반 10~60건",
+                  _pipeline._next_stage_size(200, 5, 100, 50) == 10
+                  and _pipeline._next_stage_size(200, 40, 100, 10) == 60
+                  and _pipeline._next_stage_size(7, 40, 100, 10) == 7
+                  and _pipeline._next_stage_size(200, 0, 100, 10) == 0))
 
     from src import stats as _stats
     _stat_candidates = [{"id": f"c{i}", "kind": "flow"} for i in range(4)]
@@ -1088,10 +1095,12 @@ def main():
     _stat_row = _stats.summarize(
         _stat_candidates, [], 0, _stat_generated, _stat_sent,
         [_stat_generated[1]], [], generation_candidates=_stat_candidates,
-        generation_attempted=_stat_attempted, delivery_attempted=_stat_sent)
+        generation_attempted=_stat_attempted, generation_stages=[2],
+        delivery_attempted=_stat_sent)
     ok.append(run("단계 생성 절감량 계측",
                   _stat_row["generation_items_avoided"] == 2
-                  and _stat_row["generation_attempted"] == 2))
+                  and _stat_row["generation_attempted"] == 2
+                  and _stat_row["generation_stages"] == [2]))
     ok.append(run("심사·전송 실패 계측",
                   _stat_row["judge_failed"] == 1
                   and _stat_row["delivery_failed"] == 0))
