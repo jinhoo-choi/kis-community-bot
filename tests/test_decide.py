@@ -332,7 +332,8 @@ def main():
     _lines = _c.splitlines()
     ok.append(run("1행 카테고리", _lines[0].startswith("카테고리 : ")))
     ok.append(run("2행 담당", _lines[1] == "담당 : 김선임"))
-    # 종목이 있으면 3행에 앱 종목방 딥링크가 붙는다
+    ok.append(run("3행 생성 경로", _lines[2] == "생성 경로 : LLM"))
+    # 종목이 있으면 앱 종목방 딥링크가 버튼에 붙는다
     # URL 전문은 카드에 넣지 않는다. 버튼으로만 전달한다.
     ok.append(run("카드에 URL 전문 없음", "openData=" not in _c))
     from src.telegram_bot import buttons as _btn
@@ -371,10 +372,14 @@ def main():
                   and "0/50건" in _summary_payload[0]["text"]))
     _tg.TELEGRAM_TOKEN, _tg._post = _old_token, _old_post
 
-    ok.append(run("3행부터 복사블록", _lines[2].startswith("<pre><code")))
+    ok.append(run("4행부터 복사블록", _lines[3].startswith("<pre><code")))
     ok.append(run("종목건은 종목명+코드 표기", "삼성전자 (005930)" in _lines[0], _lines[0]))
     _t = _tg.card({"kind": "policy", "assignee": "이책임", "body": "가" * 60})
     ok.append(run("테마건은 카테고리만", _t.splitlines()[0] == "카테고리 : 정책", _t.splitlines()[0]))
+    _tpl_card = _tg.card({"kind": "flow", "provider": "template",
+                          "body": "가" * 60})
+    ok.append(run("문장틀 생성 경로 표기",
+                  _tpl_card.splitlines()[2] == "생성 경로 : 검증 문장틀"))
 
     # 방향 오용 (2026-09-04 실측: +23.74% 상승 건에 '낙폭')
     _ff = "등락률: 23.74%\n종가: 307,500원"
@@ -436,6 +441,22 @@ def main():
     ok.append(run("장중 변동성 표현을 고저 차이로 정리",
                   "고저 차이는 저가 대비 31.1%였고" in
                   _cl("장중 저가 대비 31.1%까지 오르며 변동성을 보였는데,")))
+    ok.append(run("실발송 저가상승 오해 표현 정리",
+                  "고저 차이는 저가 대비 31.7%였으며" in
+                  _cl("장중 저가 대비 31.7%가 올랐던 만큼 변동성이 컸고,")))
+    ok.append(run("실발송 상승폭 오해 표현 정리",
+                  "고저 차이는 저가 대비 23.4%였으며" in
+                  _cl("장중 저가 대비 23.4% 상승한 폭을 기록했으며,")))
+    ok.append(run("실발송 마감 중복·거래량 비문 정리",
+                  "종가는 장중 고가 대비 6.5% 낮은 수준이었습니다" in
+                  _cl("마감은 장중 고가 대비 6.5% 낮은 수준에서 마감했습니다.")
+                  and "20일 평균의 9.5배였는데요" in
+                  _cl("거래량은 20일 평균의 9.5배로 집중했는데요.")))
+    ok.append(run("실발송 고가 기준·고저차 어순 정리",
+                  "종가는 장중 고가 대비 6.8% 낮은 수준이었네요" in
+                  _cl("장중 고가에서 6.8% 낮은 수준에서 장을 마감했네요.")
+                  and "고저 차이는 저가 대비 29.6%였고" in
+                  _cl("장중 저가 대비 29.6%의 고저차를 기록했고,")))
     ok.append(run("흐름 연결어미 마무리 정리",
                   _cl("5거래일 누적으로는 16.09% 상승한 흐름인데요.").endswith("흐름입니다.")))
     ok.append(run("상투어 리젝(치환불가)", any("news_cliche" in e for e in
