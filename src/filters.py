@@ -204,6 +204,20 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
     if re.search(r"[가-힣A-Za-z0-9]+[이가]\s*저가 대비[^.!?\n]{0,30}"
                  r"(?:변동폭|고저차)(?:이었|였습니다)", body):
         errs.append("문장성분오류")
+    if re.search(r"저가\s*대비\s*\d+(?:\.\d+)?%\s*(?:범위|폭)(?:에서)?\s*움직", body):
+        errs.append("장중범위표현오류")
+    if re.search(r"저가\s*대비\s*\d+(?:\.\d+)?%\s*(?:높아|낮아).{0,15}변동성", body):
+        errs.append("장중범위표현오류")
+    if re.search(r"(?:외국인|기관)\s*순매매\s*수급\s*순위", body):
+        errs.append("수급표현오류")
+
+    # 두 날짜를 보고 모델이 직접 '약 6개월 만'을 계산한 실발송 문장. 기간이
+    # facts 에 명시되지 않았다면 날짜 계산 역시 새 주장이다.
+    period = re.search(r"(?:약\s*)?\d+\s*(?:개월|년)\s*만(?:에)?", body)
+    if period and period.group() not in (facts or ""):
+        errs.append("기간계산근거없음")
+    if re.search(r"는데요\s*\.$", body.strip()):
+        errs.append("미완성(연결어미 마무리)")
 
     # 용어 정의는 입력에 정의문을 제공했을 때만 허용한다. 모델 상식으로 만든 정의는
     # 맞더라도 이 글의 근거가 아니다.

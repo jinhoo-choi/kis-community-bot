@@ -421,6 +421,15 @@ def main():
     ok.append(run("종가 뒤 음수 등락률 문장 정리",
                   _cl("제주반도체는 75,200원에 -4.57% 마감했습니다.") ==
                   "제주반도체는 4.57% 내려 75,200원에 마감했습니다."))
+    ok.append(run("장중 고저 범위 비문 정리",
+                  "고저 차이는 저가 대비 26.6%였네요" in
+                  _cl("장중에는 저가 대비 26.6% 범위에서 움직였네요.")))
+    ok.append(run("수급 순위 중복 표현 정리",
+                  "외국인 수급은 순매도 상위 5위" in
+                  _cl("외국인 순매매 수급 순위는 순매도 상위 5위였습니다.")))
+    ok.append(run("누적 등락률 부호를 방향어로 정리",
+                  "10.15% 상승했네요" in
+                  _cl("5거래일 누적 등락률은 +10.15%였습니다.")))
     ok.append(run("상투어 리젝(치환불가)", any("news_cliche" in e for e in
                   _f2.check("남은 과제입니다. " * 8, ""))))
     ok.append(run("주체없는 평가 차단", any("unsourced_eval" in e for e in
@@ -964,6 +973,15 @@ def main():
                       bool(_mk2._cache_load("2026-09-14", max_age_days=4))))
         ok.append(run("오래된 시세 캐시 거부",
                       not _mk2._cache_load("2026-09-20", max_age_days=4)))
+        pathlib.Path(_mk2._CACHE).write_text(_market_json.dumps({
+            "day": "2026-09-11", "items": [{
+                "id": "zero", "facts": "종가: 100원\n· 마감 위치: 장중 고가 대비 0.0% 낮은 수준\n· 거래량: 20일 평균의 2.0배"
+            }]
+        }), encoding="utf-8")
+        _fixed_cache = _mk2._cache_load("2026-09-11")
+        ok.append(run("이전 시세 캐시의 0.0% 마감위치 제거",
+                      "0.0% 낮은 수준" not in _fixed_cache[0]["facts"]
+                      and "2.0배" in _fixed_cache[0]["facts"]))
     _mk2._CACHE = _old_market_cache
 
     # 정확한 기준일 일별시세를 만들 수 있으면 오래된 캐시보다 우선해야 한다.
@@ -1359,6 +1377,38 @@ def main():
                       _f2.check("라온시큐어가 9,380원에서 6.59% 올랐습니다.",
                                 "종가: 9,380원\n등락률: 6.59%",
                                 "brief_report", "reaction", "brief_report"))))
+    ok.append(run("입력에 없는 기간 계산 차단",
+                  any("기간계산근거없음" in e for e in
+                      _f2.check("3월에 신청한 지 약 6개월 만에 승인됐습니다.",
+                                "신청일: 2026-03-10\n승인일: 2026-09-11",
+                                "brief_report", "duration", "brief_report"))))
+    ok.append(run("연결어미로 끝난 글 차단",
+                  any("연결어미" in e for e in
+                      _f2.check("종가는 14,850원이었고 거래량도 늘었는데요.",
+                                "종가: 14,850원", "brief_report", "reaction",
+                                "brief_report"))))
+
+    from src import claims as _claims2
+    _date_item = {"facts": "발행일: 2026-09-11\n요지: 정부가 지원안을 발표했습니다.",
+                  "angle": "context"}
+    ok.append(run("근거 있는 날짜 메타데이터 숫자 허용",
+                  not any("근거없는수치" in e for e in
+                          _claims2.grounding_errors(
+                              "정부가 9월 11일 지원안을 발표했습니다.", _date_item, 3))))
+    ok.append(run("날짜와 무관한 미확인 숫자는 계속 차단",
+                  any("근거없는수치" in e for e in
+                      _claims2.grounding_errors(
+                          "정부가 9월 11일 84% 지원안을 발표했습니다.", _date_item, 3))))
+
+    _old_weighted = _g2._weighted
+    _g2._weighted = lambda weights, _penalize: next(k for k, v in weights.items() if v > 0)
+    _policy_style = _g2.pick_style({
+        "id": "policy-rich", "kind": "policy", "stock_code": "",
+        "facts": "요지: " + ("확정된 정책 내용을 구체적으로 설명합니다. " * 4),
+    }, {}, set())
+    _g2._weighted = _old_weighted
+    ok.append(run("장문 정책 요지는 사실정리 페르소나 허용",
+                  _policy_style[0] == "fact_note"))
 
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)

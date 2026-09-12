@@ -120,7 +120,19 @@ def _cache_load(day: str, max_age_days: int = 0) -> list[dict]:
         print(f"[market] 최근 확정 캐시 사용 (캐시 {cache_day} vs 필요 {day}, "
               f"{age}일 차이)")
     items = c.get("items")
-    return items if isinstance(items, list) else []
+    if not isinstance(items, list):
+        return []
+    # 캐시는 완성된 facts 문자열을 담는다. 계산식을 고쳐도 이전 캐시의
+    # "고가 대비 0.0% 낮은 수준"이 그대로 살아 돌아온 실발송 회귀를 정리한다.
+    for it in items:
+        raw = it.get("facts")
+        if not isinstance(raw, str):
+            continue
+        it["facts"] = "\n".join(
+            line for line in raw.splitlines()
+            if not re.search(r"^·\s*마감 위치:.*\b0\.0%\s*낮은 수준", line)
+        )
+    return items
 
 
 def _num(s: str) -> float:

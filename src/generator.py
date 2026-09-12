@@ -104,6 +104,31 @@ def clean(body: str) -> str:
     b = re.sub(
         r"(\d[\d,]*원)에\s*-(\d+(?:\.\d+)?)%\s*마감(했습니다|했어요|했네요)",
         r"\2% 내려 \1에 마감\3", b)
+    # 실발송에서 확인된 결합 사실 비문은 값이 아니라 연결 표현만 고친다.
+    b = re.sub(
+        r"장중(?:에는)?\s*저가\s*대비\s*(\d+(?:\.\d+)?%)\s*"
+        r"(?:범위|폭)(?:에서)?\s*움직였(네요|어요|습니다)",
+        lambda m: (f"장중 고저 차이는 저가 대비 {m.group(1)}"
+                   + ("였습니다" if m.group(2) == "습니다" else f"였{m.group(2)}")), b)
+    b = re.sub(
+        r"장중\s*저가\s*대비\s*(\d+(?:\.\d+)?%)\s*높아지며\s*"
+        r"변동성을\s*보였(네요|어요|습니다)",
+        lambda m: (f"장중 고저 차이는 저가 대비 {m.group(1)}"
+                   + ("였습니다" if m.group(2) == "습니다" else f"였{m.group(2)}")), b)
+    b = re.sub(
+        r"장중\s*저가\s*대비\s*고가는\s*(\d+(?:\.\d+)?%)\s*차이를\s*보였",
+        r"장중 고저 차이는 저가 대비 \1였", b)
+    b = re.sub(r"(외국인|기관)\s*순매매\s*수급\s*순위는", r"\1 수급은", b)
+    b = re.sub(
+        r"마감은\s*(장중\s*고가\s*대비\s*\d+(?:\.\d+)?%\s*낮은\s*수준)"
+        r"에서\s*마감됐습니다",
+        r"종가는 \1이었습니다", b)
+    b = re.sub(r"누적\s*등락률은\s*\+(\d+(?:\.\d+)?)%였습니다",
+               r"누적 등락률은 \1% 상승했네요", b)
+    b = re.sub(r"누적\s*등락률은\s*-(\d+(?:\.\d+)?)%였습니다",
+               r"누적 등락률은 \1% 하락했네요", b)
+    b = re.sub(r"(\d+(?:\.\d+)?%)\s*(상승|하락)\s*중인데요(?=\.$)",
+               r"\1 \2했네요", b)
     # 따옴표로 통째로 감싼 출력
     if len(b) > 2 and b[0] in "\"'" and b[-1] == b[0]:
         b = b[1:-1]
@@ -183,8 +208,12 @@ def pick_style(item: dict, recent: dict, used_now: set,
             "term_guide": 2, "careful_note": 2,
             "check_list": 2, "timeline_note": 2, "two_view": 2,
         }
+        rich_policy = (kind in ("policy", "theme")
+                       and bool(re.search(r"(?m)^요지:\s*.{40,}", item.get("facts", ""))))
         for pid in list(pw):
-            if n_fact < need.get(pid, 2):
+            # 정책 요지는 claim 하나여도 여러 문장의 확정 사실을 담는다. 이를 단순
+            # fact 수 1로 보고 150자 속보만 허용하면 장문 요지가 전부 길이 리젝된다.
+            if n_fact < need.get(pid, 2) and not (rich_policy and pid == "fact_note"):
                 pw[pid] = 0
         # quick_memo 는 표본 9건에서 전멸했다 (sent 0 / held 5 / reject 4,
         # 사유가 전부 '정보량 부족'). 2~3문장으로는 fit 을 구조적으로 못 넘는다.

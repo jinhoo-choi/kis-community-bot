@@ -206,6 +206,15 @@ def _codes(item: dict) -> set[str]:
     return out
 
 
+def _metadata_numbers(item: dict) -> set[str]:
+    """날짜·시점은 주장 수에 넣지 않되 본문에서 그대로 인용할 수 있게 한다."""
+    out = set()
+    for line in item.get("facts", "").splitlines():
+        if re.match(r"^(?:기준일|공시일|발행일|기사일|발행 시각|시점)\s*:", line):
+            out |= _nums(line)
+    return out
+
+
 def grounding_errors(body: str, item: dict, cap: int) -> list[str]:
     """근거 검사. 숫자 개수가 아니라 인용한 주장 수로 판정한다."""
     all_cs = build(item)
@@ -213,7 +222,7 @@ def grounding_errors(body: str, item: dict, cap: int) -> list[str]:
         return []
     selected = (select(item, cap, item.get("angle", ""))
                 if item.get("angle") else all_cs)
-    hit, ungrounded = used(body, all_cs, _codes(item))
+    hit, ungrounded = used(body, all_cs, _codes(item) | _metadata_numbers(item))
     selected_ids = {c["id"] for c in selected}
     errs = []
     if len(hit) > cap:
