@@ -53,9 +53,13 @@ ok
   OK    뉴스 오탐 차단: 머니톡스 외국인 소문의 진  (제외어)
   OK    정책기사 통과: 산업부·코트라, 미국 첨단
   OK    정책기사 통과: 정부, 반도체 소부장 세제
+  OK    개별기업 기사는 정책 슬롯 차단  (개별기업사건)
   OK    최근 RSS 발행시각 통과
   OK    48시간 지난 RSS 제외
   OK    발행시각 없는 RSS 제외
+  OK    월요일 정책 RSS 금요일부터 포함
+  OK    월요일 DART 금~일 조회
+  OK    월요일 장전 시세는 금요일 기준
   OK    KIND 종목코드 컬럼(td[2])  ({'스카이랩스': '386380', '삼성전자': '005930'})
   OK    KIND 시장구분 오인 안함
   OK    KIND ETF 제외
@@ -85,6 +89,7 @@ ok
   OK    종목 없으면 버튼 없음
 [tg] 실패 fail: fail
   OK    부분 전송은 성공 글만 반환
+  OK    목표 기준 요약 0/50 표기
   OK    3행부터 복사블록
   OK    종목건은 종목명+코드 표기  (카테고리 : 공시 · 삼성전자 (005930))
   OK    테마건은 카테고리만  (카테고리 : 정책)
@@ -122,8 +127,9 @@ ok
   OK    리포트 제목만 차단
   OK    리포트 배경보강만으로는 불충분
   OK    적정가격 있으면 통과
+  OK    적정가격 리포트에 안전한 Angle 존재
   OK    억제 계수 0.5 미만  (0.3)
-  OK    Format 4종 이상 등장  ({'fact_note': 3, 'term_guide': 2, 'brief_report': 1, 'timeline_note': 2, 'careful_note': 1, 'check_list': 3})
+  OK    Format 4종 이상 등장  ({'fact_note': 3, 'check_list': 3, 'timeline_note': 2, 'careful_note': 1, 'quick_memo': 1, 'brief_report': 2})
   OK    배경블록만으로 context 미채택
   OK    업종 서술 있으면 context 채택
   OK    미확인표현 fatal
@@ -179,6 +185,12 @@ ok
   OK    v2 슬롯 가중치 0 허용(정책×수치중심)
   OK    투표 슬롯은 질문형 페르소나만 허용
   OK    투표 본문 질문 마무리 필수
+  OK    시세 상대날짜 차단
+  OK    근거 없는 원인 질문 차단
+  OK    추세·수급 평가 차단
+  OK    명사+수치 문장 파편 차단
+  OK    근거 없는 용어해설 차단
+  OK    결정 공시 완료형 차단
   OK    v2 프롬프트 미치환 없음
   OK    v2 프롬프트에 공통규칙 주입
   OK    테스트채널 미등록 시 발송 차단
@@ -247,6 +259,9 @@ ok
   OK    휴장일 최근 확정 캐시 허용
 [market] 캐시 기준일 불일치 (캐시 2026-09-11 vs 필요 2026-09-20)
   OK    오래된 시세 캐시 거부
+[market] 후보 1종목 (중복 제거 후)
+[crawl] market 1건
+  OK    정확한 시세가 오래된 캐시보다 우선
   OK    슬롯이 공급 상한을 넘지 않음
   OK    기대 발송 산출됨
   OK    수집 상한이 생성 상한을 충족
@@ -273,10 +288,11 @@ ok
   OK    표 비면 보강 안 함
   OK    타법인 양수 매칭
   OK    줄바꿈 접힘
+  OK    DART 고정소수 합병비율 정리
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'fact_note', 'open_talk', 'data_focus', 'careful_note', 'check_list', 'brief_report'})
+  OK    flow 에서 quick_memo 미선택  ({'brief_report', 'careful_note', 'data_focus', 'open_talk', 'fact_note', 'check_list'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
   OK    미선정 비수치 사실도 프롬프트에서 제거
@@ -286,6 +302,9 @@ ok
   OK    Gemini 일시 429는 전체 차단하지 않음
   OK    Gemini 결제 오류만 전체 차단
   OK    검색 근거 URL 추출·중복제거
+[gemini] paid billing/quota 오류 → 해당 티어 후속 호출 중단
+[gemini] 유료 티어 중단 → 무료 프로젝트 free 폴백
+  OK    Gemini 유료 소진 시 무료 프로젝트 폴백
 [enrich] 0/1건 배경 보강 완료
 [enrich] ⚠ 전건 실패 — 게이트 글감부족이 급증한다. 오류 표본: timeout
   OK    보강 오류는 NONE으로 캐시하지 않음
@@ -293,6 +312,8 @@ ok
 [enrich] 검색으로 확인된 추가 배경 없음
   OK    확인된 배경 없음만 NONE 캐시
   OK    Claude 동기 호출 제한 병렬화
+  OK    Claude Sonnet 심사는 temperature 없이 실행
+  OK    Gemini 심사 실패 시 Sonnet 교차모델 재심사
 [crawl] market 62건
 [crawl] kind_inquiry 2건
   OK    정상 공급을 경보하지 않음
@@ -302,7 +323,7 @@ ok
   OK    상승일 5거래일 하락 언급 통과
   OK    진짜 방향오용은 잡음
 
-267/267 passed
+284/284 passed
 
 === 2b. 전수검사 (설정-코드 정합성) ===
 
@@ -320,7 +341,7 @@ ok
   OK    v2 슬롯 가중치 정합
 
 === 규칙 단일 소스 ===
-  OK    규칙 20종이 작성·심사 프롬프트에 파생됨
+  OK    규칙 21종이 작성·심사 프롬프트에 파생됨
   OK    v2 프롬프트에 규칙 블록 주입 확인
 
 === Angle ===
@@ -357,8 +378,6 @@ FAIL 0 / WARN 0
   OK    복제 위험 점검 완료
 
 === 전역 금지 vs 페르소나 지시 ===
-  WARN  평가 금지: 전역은 금지, quick_memo 계약은 지시 — 문구 확인 필요
-  WARN  사전식 정의 금지: 전역은 금지, term_guide 계약은 지시 — 문구 확인 필요
   OK    전역/페르소나 대조 완료
 
 === 전역 금지 vs Angle 지시 ===
@@ -368,7 +387,6 @@ FAIL 0 / WARN 0
   OK    Angle × 페르소나 수치 계약 정합
 
 === 문장 수 vs 길이 범위 ===
-  WARN  quick_memo: 2~3문장 인데 하한 35자 — 문장당 11자면 파편이 된다
   OK    길이/문장수 대조 완료
 
 === 전역 길이 지시 vs 페르소나 하한 ===
@@ -385,7 +403,7 @@ FAIL 0 / WARN 0
   OK    전체 조합 299개 중 불가 0개
 
 ==================================================
-FAIL 0 / WARN 3
+FAIL 0 / WARN 0
 
 === 3. E2E 시뮬레이션 ===
 ==============================================================
