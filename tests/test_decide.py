@@ -489,6 +489,21 @@ def main():
     ok.append(run("uncertainty 단독은 앵글 없음",
                   _ang.available({"facts": "상세 수치는 공개되지 않음"}) == []))
 
+    # 페르소나를 먼저 뽑은 뒤 호환 Angle이 없다고 원 후보로 돌아가면 COMPAT을 우회한다.
+    from src import generator as _gen_style
+    _old_weighted_compat = _gen_style._weighted
+    def _prefer_careful(weights, _penalize):
+        return ("careful_note" if weights.get("careful_note", 0) > 0
+                else next(k for k, v in weights.items() if v > 0))
+    _gen_style._weighted = _prefer_careful
+    _amount_only = {"kind": "disclosure", "stock_code": "000001",
+                    "facts": "공시명: 유상증자 결정\n발행 총액: 200억원\n운영자금: 100억원"}
+    _compat_pick = _gen_style.pick_style(_amount_only, {}, set())
+    _gen_style._weighted = _old_weighted_compat
+    ok.append(run("런타임 Persona × Angle 호환 강제",
+                  _gen_style.P.v2.compatible(_compat_pick[0], _compat_pick[1]),
+                  f"{_compat_pick[0]}×{_compat_pick[1]}"))
+
     # 길이·문장수는 Format 에 귀속 (Global '최소 5문장' 과 충돌하던 문제)
     from src.personas_v2 import SYSTEM_PROMPT as _SP, PERSONAS as _PD2
     ok.append(run("페르소나 문장수 지시 존재",
@@ -706,6 +721,12 @@ def main():
                   all(_PM.num_cap(k) > _P2v.claim_cap(k) for k in _P2v.PERSONAS)))
     ok.append(run("접근자 숫자상한", _PM.num_cap("quick_memo") == 4))
     ok.append(run("v2 슬롯 가중치 0 허용(정책×수치중심)", _SW2["policy"]["data_focus"] == 0))
+    ok.append(run("짧은메모는 공시 슬롯만 활성",
+                  _SW2["disclosure"]["quick_memo"] > 0
+                  and all(_SW2[k]["quick_memo"] == 0 for k in
+                          ("research", "flow", "policy", "poll", "theme"))))
+    ok.append(run("짧은메모 숫자 지시 충돌 없음",
+                  "숫자는 가장 눈에 띄는 하나만" not in _P2["quick_memo"]["desc"]))
     _poll_styles = [p for p, w in _SW2["poll"].items() if w > 0]
     ok.append(run("투표 슬롯은 질문형 페르소나만 허용",
                   _poll_styles == ["open_talk"]
@@ -1042,10 +1063,16 @@ def main():
     from src import stats as _stats
     _stat_candidates = [{"id": f"c{i}", "kind": "flow"} for i in range(4)]
     _stat_attempted = _stat_candidates[:2]
+    _stat_attempted[0]["_selected_persona"] = "brief_report"
+    _stat_attempted[0]["_selected_angle"] = "reaction"
+    _stat_attempted[1]["_selected_persona"] = "fact_note"
+    _stat_attempted[1]["_selected_angle"] = "compare"
     _stat_generated = [
         {"id": "c0", "kind": "flow", "provider": "claude",
+         "tone": "brief_report", "angle": "reaction",
          "score": {"total": 16, "fit": 3}},
-        {"id": "c1", "kind": "flow", "provider": "claude", "score": None},
+        {"id": "c1", "kind": "flow", "provider": "claude",
+         "tone": "fact_note", "angle": "compare", "score": None},
     ]
     _stat_sent = [_stat_generated[0]]
     _stat_row = _stats.summarize(
@@ -1060,6 +1087,10 @@ def main():
                   and _stat_row["delivery_failed"] == 0))
     ok.append(run("유형별 퍼널 계측",
                   _stat_row["by_kind_funnel"]["flow"]["delivered"] == 1))
+    ok.append(run("페르소나별 퍼널 계측",
+                  _stat_row["by_persona"]["brief_report"]["attempted"] == 1
+                  and _stat_row["by_persona"]["brief_report"]["delivered"] == 1
+                  and _stat_row["by_persona"]["fact_note"]["held"] == 1))
 
     from src.sources import dart_detail as _dd
     ok.append(run("무수치 공시유형 차단",

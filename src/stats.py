@@ -135,6 +135,25 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks,
             "avg_score": avg_score(grp),
         }
 
+    # 페르소나를 선택한 후보부터 최종 전송까지 같은 축으로 본다. 이전 통계는
+    # provider·kind만 있어 특정 페르소나가 필터에서 전멸해도 원인을 알 수 없었다.
+    attempted_persona = Counter(
+        p.get("_selected_persona") for p in generation_attempted
+        if p.get("_selected_persona"))
+    persona_names = set(attempted_persona) | {
+        p.get("tone") for p in generated if p.get("tone")}
+    by_persona = {}
+    for name in sorted(persona_names):
+        grp = [p for p in generated if p.get("tone") == name]
+        by_persona[name] = {
+            "attempted": attempted_persona.get(name, 0),
+            "filter_passed": len(grp),
+            "held": sum(1 for p in held if p.get("tone") == name),
+            "delivered": sum(1 for p in sent if p.get("tone") == name),
+            "avg_score": avg_score(grp),
+            "angles": dict(Counter(p.get("angle") or "general" for p in grp)),
+        }
+
     return {
         "collected": len(collected),
         "gate_blocked": len(blocked),
@@ -185,6 +204,7 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks,
                                      for p in held)),
         "avg_score": avg_score(sent),
         "by_provider": by_provider,
+        "by_persona": by_persona,
         "by_kind_funnel": _kind_funnel(
             collected, blocked, generation_candidates, generation_attempted,
             generated, delivery_attempted, sent, held),

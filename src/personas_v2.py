@@ -10,12 +10,13 @@ v1(Voice × Format × Length 3축)의 문제는 조합 수가 아니라 **모순
 대신 다양성은 Angle 축이 담당한다. Angle 은 데이터가 허용하는 것만 뽑히므로
 '시세만 있는 항목에 업황 해설'같은 환각을 막아 준다.
 
-    Persona 10 × Angle 11 = 110 조합, 모순 조합 0
+    Persona 10 × Angle 11 = 원시 조합 공간 110개
+    실제 생성은 COMPAT 호환 그래프로 성립하는 조합만 허용한다.
 """
 
 # sentences  : 프롬프트에 줄 분량 지시
 # min/max    : 필터가 쓸 글자 수 경계 (지시보다 넉넉하게)
-# num_cap    : 본문에 허용할 서로 다른 숫자 개수
+# num_cap    : 모델 프롬프트에 제시하는 서로 다른 숫자 목표 상한
 # no_question: True 면 물음표로 끝내면 리젝
 PERSONAS = {
     "brief_report": {
@@ -91,7 +92,7 @@ PERSONAS = {
                 "대단하다, 크다, 이례적이다 같은 판단 표현은 쓰지 않습니다.\n"
                 "문장을 억지로 끊지 말고 자연스럽게 씁니다.\n"
                 "종결어미는 '~네요', '~어요' 위주로 씁니다.\n"
-                "숫자는 가장 눈에 띄는 하나만 쓰고 나머지는 버립니다. "
+                "핵심 사실에 필요한 숫자만 쓰고 입력의 다른 숫자를 나열하지 않습니다. "
                 "쓰기로 한 숫자는 입력 그대로 옮깁니다.",
     },
     "timeline_note": {
@@ -122,14 +123,14 @@ SLOT_W = {
                    "data_focus": 2, "careful_note": 2, "brief_report": 2,
                    # 적정가격·투자의견을 놓고 판단을 묻는 상투 질문이 심사 fatal로
                    # 반복됐다. 리서치는 값과 출처를 전달하고 질문형은 쓰지 않는다.
-                   "open_talk": 0, "quick_memo": 1, "timeline_note": 1},
-    "flow":       {"brief_report": 3, "quick_memo": 3, "data_focus": 3, "careful_note": 2,
+                   "open_talk": 0, "quick_memo": 0, "timeline_note": 1},
+    "flow":       {"brief_report": 3, "quick_memo": 0, "data_focus": 3, "careful_note": 2,
                    "fact_note": 2, "open_talk": 2, "check_list": 1,
                    "two_view": 1, "term_guide": 1, "timeline_note": 1},
     # 정책 항목은 수치가 없는 경우가 많다. 수치 기반 페르소나는 확률을 낮춘다.
     "policy":     {"term_guide": 3, "two_view": 3, "check_list": 3, "fact_note": 2,
                    "timeline_note": 2, "open_talk": 2, "careful_note": 2,
-                   "brief_report": 1, "data_focus": 0, "quick_memo": 1},
+                   "brief_report": 1, "data_focus": 0, "quick_memo": 0},
     # poll 은 make_polls()가 질문 마무리를 계약한다. 질문 금지 페르소나를
     # 섞으면 생성 프롬프트 내부에서 서로 모순되므로 발제형만 허용한다.
     "poll":       {"open_talk": 3, "two_view": 0, "check_list": 0, "quick_memo": 0,
@@ -137,7 +138,7 @@ SLOT_W = {
                    "data_focus": 0, "careful_note": 0, "timeline_note": 0},
     "theme":      {"term_guide": 3, "two_view": 3, "fact_note": 2, "open_talk": 2,
                    "check_list": 2, "careful_note": 2, "timeline_note": 1,
-                   "brief_report": 1, "data_focus": 0, "quick_memo": 1},
+                   "brief_report": 1, "data_focus": 0, "quick_memo": 0},
 }
 
 SYSTEM_PROMPT = """당신은 한국투자증권 앱 커뮤니티에 게시될 글을 쓰는 AI 작성 봇입니다.

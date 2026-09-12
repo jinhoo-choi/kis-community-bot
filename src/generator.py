@@ -200,12 +200,10 @@ def hist_v2(recent: dict, item: dict) -> list:
 
 def pick_style(item: dict, recent: dict, used_now: set,
                allow_uncertainty: bool = False) -> tuple[str, str, str, str]:
-    """(voice, angle, format) 선택.
+    """(persona, angle, persona, persona) 하위 호환 튜플을 선택한다.
 
-    외부 검토 반영으로 축을 셋으로 나눴다. 그리고 회피 기준을 조합 ID 가 아니라
-    '의미적 반복'으로 바꿨다 — 사람은 조합 ID 반복보다
-    "또 숫자로 시작해서 질문으로 끝나네"를 훨씬 빨리 알아챈다.
-    그래서 voice/angle/format 을 각각 따로 억제한다.
+    페르소나가 말투·구조·길이를 함께 소유하고 Angle이 정보 초점을 정한다.
+    최근 같은 종목과 이번 실행에서 사용한 각 축은 금지하지 않고 확률만 낮춘다.
     """
     kind = item["kind"]
     if True:
@@ -249,21 +247,38 @@ def pick_style(item: dict, recent: dict, used_now: set,
             pw["timeline_note"] = 0
         if not (sl & {"vs_avg", "five_day", "intraday", "flow_inv", "short"}):
             pw["data_focus"] = 0                   # 비교값이 있어야 성립
-        if not any(pw.values()):
-            # 최후 폴백도 공시가 아니면 quick_memo 를 쓰지 않는다.
-            pw = {"quick_memo": 1} if kind == "disclosure" else {"brief_report": 1}
-
         hist = hist_v2(recent, item)
         used_p = {h.split(":")[0] for h in hist} | {u[0] for u in used_now}
         used_a2 = {h.split(":")[1] for h in hist if ":" in h} | {u[1] for u in used_now}
-        persona = _weighted(pw, used_p)
         cand2 = angles.available(item)
         if not allow_uncertainty:
             cand2 = [a for a in cand2 if a != "uncertainty"] or cand2
-        # 호환 그래프: 성립하지 않는 조합은 처음부터 만들지 않는다
+
+        # 페르소나를 먼저 뽑고 호환 Angle이 없을 때 원래 후보로 되돌리면 COMPAT을
+        # 우회한다. 실재 재현: careful_note × amount. 선택 전에 불가능한 페르소나의
+        # 가중치를 0으로 만들어 계약 밖 조합이 생성되지 않게 한다.
+        if cand2:
+            for pid in list(pw):
+                if pw[pid] > 0 and not any(P.v2.compatible(pid, a) for a in cand2):
+                    pw[pid] = 0
+
+        if not any(pw.values()):
+            # Fact Slot이 짧아 정상 후보가 모두 꺼진 경우에도 슬롯 계약과 COMPAT을
+            # 깨지 않는다. 가능한 것 중 가장 짧은 페르소나를 쓰고, 호환 Angle조차
+            # 없으면 슬롯의 최단 페르소나 + 일반 초점으로 보수적으로 폴백한다.
+            base = P.style_ids().get(kind, {})
+            valid = [pid for pid, w in base.items() if w > 0 and
+                     any(P.v2.compatible(pid, a) for a in cand2)]
+            active = [pid for pid, w in base.items() if w > 0]
+            pool = valid or active or (["quick_memo"] if kind == "disclosure"
+                                        else ["brief_report"])
+            fallback = min(pool, key=lambda pid: P.len_bounds(pid)[0])
+            pw = {fallback: 1}
+
+        persona = _weighted(pw, used_p)
+        # 호환 그래프: 성립하지 않는 조합은 처음부터 만들지 않는다.
         compat = [a for a in cand2 if P.v2.compatible(persona, a)]
-        cand2 = compat or cand2
-        ang2 = _weighted({a: 3 for a in cand2}, used_a2) if cand2 else ""
+        ang2 = _weighted({a: 3 for a in compat}, used_a2) if compat else ""
         used_now.add((persona, ang2, persona, persona))
         return persona, ang2, persona, persona
 
@@ -319,7 +334,10 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
     n_unc = max(1, int(len(items) * UNCERTAINTY_QUOTA))
     styles = {}
     for i, it in enumerate(items):
-        styles[id(it)] = pick_style(it, recent, used_now, allow_uncertainty=(i < n_unc))
+        style = pick_style(it, recent, used_now, allow_uncertainty=(i < n_unc))
+        styles[id(it)] = style
+        # stats가 실제 생성 시도 기준 페르소나·Angle 수율을 기록할 수 있게 한다.
+        it["_selected_persona"], it["_selected_angle"] = style[0], style[1]
     buckets = router.split_by_ratio(items)
     # 앞 생성 단계에서 품질 회로가 열린 프로바이더 물량은 살아 있는 작성자에게
     # 넘긴다. provider.available()은 HTTP 성공만 보므로 내용 품질 장애는 못 잡는다.
