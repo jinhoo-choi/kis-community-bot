@@ -2,10 +2,10 @@ TELEGRAM_TOKEN   : OK  @commwrite_bot (comwritebot)
   privacy_mode   : ON (봇 명시 필요)
   can_join_groups: True
   webhook        : 없음 (getUpdates 정상 사용 가능)
-  pending        : 8건 대기 중
+  pending        : 6건 대기 중
 CHAT 후보        : group      *******4253  커뮤니티 게시글봇
-  update 개수    : 8
+  update 개수    : 6
   update 종류    : ['message']
-DART_API_KEY     : OK  총 652건
+DART_API_KEY     : OK  총 653건
 ANTHROPIC_KEY    : OK
 GEMINI_KEY       : FAIL(429) Your prepayment credits are depleted. Please go to AI Studio at https://ai.studi

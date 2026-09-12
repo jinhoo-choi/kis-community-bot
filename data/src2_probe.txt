@@ -1,0 +1,23 @@
+
+══ 1. 네이버 리서치 ══
+
+  https://finance.naver.com/research/company_list.naver
+  HTTP 200 / 118,018bytes / table=0 th=0
+  table.type_1 tr = 0
+  company_read 링크 = 0
+  본문 앞부분: Npay 증권 네이버 Pay 증권 종목명·지수명 입력 (단축키 Alt 또는 Cmd + K) 검색 종목명·지수명 입력 금융 금융 포인트 포인트 결제 결제 증권 증권 부동산 부동산 홈 국내 미국 · 글로벌 가상자산 시장지표 토론 뉴스 리서치 MY 네이버 새로운 증권 안내 리서치 홈 데일리 국내종목 산업분석 투자전략 경제분석 채권분석 국내종목 발행사 발행 일자 
+
+  https://m.stock.naver.com/investment/research/company
+  HTTP 200 / 42,541bytes / table=0 th=0
+  table.type_1 tr = 0
+  company_read 링크 = 0
+  본문 앞부분: Npay 증권 네이버 네이버페이 증권 메뉴모음 종목 검색 검색 전체메뉴 마켓 MY 국내 해외 공모주 토론 지표 가상자산 투자정보 현재 위치 뉴스 리서치 현재 위치 머니스토리 데일리 국내종목 산업분석 투자전략 경제분석 채권분석 로딩중 로그인 전체서비스 공지사항 증권 고객센터 토론 운영원칙 약관 및 정책 개인정보 처리방침 오류신고 네이버파이낸셜㈜가 제공하는 금
+
+══ 2. KIND 조회공시 ══
+  payload keys = ['method', 'currentPageSize', 'pageIndex', 'orderMode', 'orderStat', 'forward', 'marketType']
+  HTTP 200 / 88,004bytes / ct=text/html; charset=UTF-8
+  table=1 tr=101
+  헤더: []
+    행: ['20:01', '티에스이', '공매도 과열종목 연장(공매도 거래 금지 연장)', '코스닥시장본부', '공시차트 주가차트']
+    행: ['20:01', '주성엔지니어링', '공매도 과열종목 연장(공매도 거래 금지 연장)', '코스닥시장본부', '공시차트 주가차트']
+    행: ['20:01', '수성웹툰', '공매도 과열종목 지정(공매도 거래 금지 적용)', '코스닥시장본부', '공시차트 주가차트']
