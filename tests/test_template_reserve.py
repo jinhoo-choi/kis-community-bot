@@ -61,6 +61,10 @@ def main() -> None:
     checks.append(_ok("22종이 실제 reserve에 사용됨", len(template_counts) >= 22,
                       str(len(template_counts))))
     checks.append(_ok("동일 말미 20자 2건 이하", max(endings.values()) <= 2))
+    awkward = ("기준일 마감", "기준일 종가", "주가 변동은", "거래량 배수",
+               "거래량 기준값", "종가의 마감 위치", "누적 값")
+    checks.append(_ok("문장틀 운영체·비문 제거",
+                      not any(term in p["body"] for p in reserve for term in awkward)))
 
     sent, held = decide_distribution(reserve, target=50,
                                      per_kind_cap={"flow": 20},
