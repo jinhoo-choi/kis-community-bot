@@ -95,16 +95,32 @@ def _cache_save(day: str, items: list[dict]) -> None:
         print(f"[market] 캐시 저장 실패: {e}")
 
 
-def _cache_load(day: str) -> list[dict]:
+def _cache_load(day: str, max_age_days: int = 0) -> list[dict]:
+    """기준일 캐시를 읽는다.
+
+    휴장일에는 주말 보정만으로 직전 거래일을 알 수 없다. 이때만 최근 확정
+    캐시를 허용한다. 각 항목 facts 에 실제 기준일이 들어 있으므로 날짜를
+    바꿔 적지는 않는다.
+    """
     try:
         with open(_CACHE, encoding="utf-8") as f:
             c = json.load(f)
     except Exception:
         return []
-    if c.get("day") != day:
-        print(f"[market] 캐시 기준일 불일치 (캐시 {c.get('day')} vs 필요 {day})")
-        return []
-    return c.get("items") or []
+    cache_day = c.get("day")
+    if cache_day != day:
+        try:
+            age = (datetime.strptime(day, "%Y-%m-%d")
+                   - datetime.strptime(cache_day, "%Y-%m-%d")).days
+        except (TypeError, ValueError):
+            age = -1
+        if not (0 <= age <= max_age_days):
+            print(f"[market] 캐시 기준일 불일치 (캐시 {cache_day} vs 필요 {day})")
+            return []
+        print(f"[market] 최근 확정 캐시 사용 (캐시 {cache_day} vs 필요 {day}, "
+              f"{age}일 차이)")
+    items = c.get("items")
+    return items if isinstance(items, list) else []
 
 
 def _num(s: str) -> float:
@@ -326,6 +342,18 @@ def _rank_from_daily(day: str, limit: int) -> list[dict]:
 
 def fetch(limit: int = 12) -> list[dict]:
     day = _last_trading_day()
+    # 정규 실행은 장 시작 전이다. 전날 마감 후 워밍 워크플로가 저장한 확정
+    # 캐시가 충분하면 네이버 순위 페이지와 상장 전종목 siseJson을 다시 훑지 않는다.
+    # 최근 캐시는 휴장/장애 fallback 으로만 쓰고, 정상 거래일의 최신 데이터보다
+    # 먼저 반환하지 않는다.
+    cached = _cache_load(day)
+    recent_cached = cached or _cache_load(day, max_age_days=4)
+    cache_need = min(limit, max(20, config.GEN_STAGE_SIZE))
+    if not _after_close() and len(cached) >= cache_need:
+        print(f"[market] 장 시작 전 확정 캐시 {len(cached)}건 사용 (필요 {limit}건)")
+        crawl.report("market", len(cached), limit, "")
+        return cached[:limit]
+
     rows, ok = [], 0
 
     for market, url in URLS:
@@ -401,6 +429,13 @@ def fetch(limit: int = 12) -> list[dict]:
             print(f"[market] ⚠ 0건 파싱 — {url}")
         crawl.sleep_jitter()
 
+    # 휴장일/장전에는 순위 페이지가 빈다. 이때 최근 확정 캐시가 있으면
+    # 상장 전종목 siseJson을 2,600회 다시 조회하기 전에 사용한다.
+    if not rows and recent_cached:
+        print(f"[market] 순위 페이지가 비어 확정 캐시 {len(recent_cached)}건 사용")
+        crawl.report("market", len(recent_cached), limit, "")
+        return recent_cached[:limit]
+
     # 순위 페이지가 개편으로 죽으면(th 0개) 전종목 일별시세로 랭킹을 직접 만든다.
     # 아이템 생성 루프 앞에 둬야 뒤 단계가 그대로 처리한다.
     if not rows:
@@ -409,6 +444,10 @@ def fetch(limit: int = 12) -> list[dict]:
             ok = 1
 
     if ok == 0 or not rows:
+        if recent_cached:
+            print(f"[market] 실시간 수집 실패 — 확정 캐시 {len(recent_cached)}건 사용")
+            crawl.report("market", len(recent_cached), limit, "")
+            return recent_cached[:limit]
         crawl.report("market", 0, limit, "네이버 시세 페이지 로드 실패")
         return []
 
@@ -479,23 +518,8 @@ def fetch(limit: int = 12) -> list[dict]:
             "src": f"https://finance.naver.com/item/main.naver?code={r['code']}",
         })
 
-    # 조건(거래대금·등락률)을 만족하는 종목이 없는 날은 정상적인 0건이다.
-    # 다만 rows 자체가 비면 정상이 아니다. 실측(#81, 08:30 KST): 순위 페이지가
-    # 장 시작 전에는 헤더만 있고 데이터 행이 없다. 이걸 '정상 0건'으로 넘기는
-    # 바람에 특징주가 통째로 빠진 채 발송 3건으로 끝났고 경보도 안 떴다.
-    if not rows:
-        cached = _cache_load(day)
-        if cached:
-            print(f"[market] 순위 페이지가 비어 캐시 {len(cached)}건 사용 "
-                  f"(기준일 {day})")
-            crawl.report("market", len(cached), limit, "")
-            return cached[:limit]
-        h = datetime.now(KST).hour
-        why = ("장 시작 전이라 순위 페이지가 비어 있고 캐시도 없다 "
-               "(장 마감 후 캐시 적재 필요)"
-               if h < 9 else "시세 파싱 실패 — 페이지 구조 변경 의심")
-        crawl.report("market", 0, limit, why)
-    else:
-        _cache_save(day, out)
-        crawl.report("market", len(out), limit, "조건 충족 종목 없음")
+    # 원본 rows 는 확보됐지만 소재 게이트를 통과한 out 이 없을 수 있다.
+    # 이 경우는 수집 장애가 아니라 조건 충족 종목이 없는 정상적인 0건이다.
+    _cache_save(day, out)
+    crawl.report("market", len(out), limit, "조건 충족 종목 없음")
     return out

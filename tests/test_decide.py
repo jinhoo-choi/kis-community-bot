@@ -812,6 +812,42 @@ def main():
     ok.append(run("가격제한폭 위반은 연결 안 함",
                   _ki.enrich_with_market([{"stock_code": "000660", "facts": "x"}], []) == 0))
     _mk2._add_history = _orig
+
+    # 장 시작 전에는 마감 후 워밍 캐시를 먼저 써야 전종목 API 조회를 피한다.
+    _old_cache_load = _mk2._cache_load
+    _old_after_close = _mk2._after_close
+    _old_last_day = _mk2._last_trading_day
+    _old_get_soup = _mk2.crawl.get_soup
+    _mk2._cache_load = lambda _day, max_age_days=0: [
+        {"id": f"cached-{i}", "kind": "flow"} for i in range(100)]
+    _mk2._after_close = lambda now=None: False
+    _mk2._last_trading_day = lambda: "2026-09-11"
+    _network_called = [False]
+    def _unexpected_market_network(*_a, **_k):
+        _network_called[0] = True
+        return None
+    _mk2.crawl.get_soup = _unexpected_market_network
+    _cached_result = _mk2.fetch(50)
+    ok.append(run("장전 시세 캐시 우선 사용",
+                  len(_cached_result) == 50 and not _network_called[0]))
+    _mk2._cache_load = _old_cache_load
+    _mk2._after_close = _old_after_close
+    _mk2._last_trading_day = _old_last_day
+    _mk2.crawl.get_soup = _old_get_soup
+
+    import tempfile as _market_tmp, json as _market_json
+    _old_market_cache = _mk2._CACHE
+    with _market_tmp.TemporaryDirectory() as _market_td:
+        _mk2._CACHE = _market_td + "/market.json"
+        pathlib.Path(_mk2._CACHE).write_text(_market_json.dumps({
+            "day": "2026-09-11", "items": [{"id": "friday"}]
+        }), encoding="utf-8")
+        ok.append(run("휴장일 최근 확정 캐시 허용",
+                      bool(_mk2._cache_load("2026-09-14", max_age_days=4))))
+        ok.append(run("오래된 시세 캐시 거부",
+                      not _mk2._cache_load("2026-09-20", max_age_days=4)))
+    _mk2._CACHE = _old_market_cache
+
     _cfg = __import__("config")
     ok.append(run("슬롯이 공급 상한을 넘지 않음",
                   all(_cfg.SLOT_QUOTA[k] <= _cfg.SUPPLY_CAP[k] for k in _cfg.SLOT_QUOTA)))
