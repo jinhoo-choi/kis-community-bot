@@ -26,12 +26,24 @@ KEYWORDS = [
 ]
 
 
+def _range() -> tuple[str, str]:
+    """조회 구간 (시작일, 종료일).
+
+    하루만 보면 주말 공시를 통째로 놓친다. 월요일 실행이면 금요일치만
+    가져왔는데, 토·일에도 공시는 접수된다(특히 정정·지연 공시).
+    직전 영업일까지 거슬러 올라가되 종료일은 어제로 둬 주말을 포함한다.
+      화~금 실행 -> 어제 하루
+      월요일 실행 -> 금요일 ~ 일요일 (3일)
+    """
+    end = datetime.now(KST) - timedelta(days=1)
+    beg = end
+    while beg.weekday() >= 5:          # 토·일이면 금요일까지 내려간다
+        beg -= timedelta(days=1)
+    return beg.strftime("%Y%m%d"), end.strftime("%Y%m%d")
+
+
 def _yesterday() -> str:
-    d = datetime.now(KST) - timedelta(days=1)
-    # 월요일 실행이면 금요일 공시를 본다
-    while d.weekday() >= 5:
-        d -= timedelta(days=1)
-    return d.strftime("%Y%m%d")
+    return _range()[0]
 
 
 def fetch(limit: int = 30) -> list[dict]:
@@ -40,7 +52,10 @@ def fetch(limit: int = 30) -> list[dict]:
         crawl.report("dart", 0, 0, "API 키 미설정")
         return []
 
-    day = _yesterday()
+    beg, end = _range()
+    day = beg
+    if beg != end:
+        print(f"[dart] 주말 포함 조회 {beg} ~ {end}")
     items, page = [], 1
 
     while len(items) < limit and page <= 5:
@@ -52,8 +67,8 @@ def fetch(limit: int = 30) -> list[dict]:
                 BASE,
                 params={
                     "crtfc_key": DART_API_KEY,
-                    "bgn_de": day,
-                    "end_de": day,
+                    "bgn_de": beg,
+                    "end_de": end,
                     "corp_cls": "Y",     # Y=유가증권, K=코스닥
                     "page_no": page,
                     "page_count": 100,
