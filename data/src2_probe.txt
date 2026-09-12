@@ -21,6 +21,17 @@
     path: /research/my
     path: /research/stockEnd
     path: /research/stockList
+  --- 파라미터 조합 ---
+    [400] /research/stockList {'page': 1, 'pageSize': 20}
+    [400] /research/stockList {'page': 1, 'size': 20}
+    [400] /research/stockList {'pageNo': 1, 'pageSize': 20}
+    [400] /research/stockList {'category': 'company', 'page': 1, 'pageSize': 20}
+    [200] /research/list {'category': 'company', 'page': 1, 'pageSize': 20}
+      → {"isSuccess":true,"detailCode":"","message":"","result":[{"researchCategory":"종목분석","category":"종목분석","itemCode":"112610","itemName":"씨에스윈드","researchId":96103,"title":"무관심에서 관심의 영역으로","brokerName":"DS투자증권","writeDate":"2026-09-11","readCount":"2183","endUrl":"https://m.stock.naver.com/research/company/96103"},{"researchCategory":"종목분석","category":"종목분석","itemCode":"0017J0","itemName":"세미티에스","researchId":96102,"titl
+    [400] /research/list {'researchType': 'company', 'page': 1, 'pageSize': 20}
+    [400] /research/list {'type': 'stock', 'page': 1, 'pageSize': 20}
+    [400] /research/stockEnd {'researchId': 95624}
+    [400] /research/end {'researchId': 95624}
   --- front-api 타격 ---
     [400] application/json; char /research/end
     [400] application/json; char /research/list
