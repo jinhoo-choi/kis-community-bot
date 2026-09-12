@@ -13,11 +13,9 @@
 [tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
 [crawl] telegram_ch 0건 (정상 0건)
 [main] 수집 총 49건
-[enrich] 그라운딩 대상 12건 (수집 49건 중, 상한 40)
-[enrich] 캐시 적중 12건 → 그라운딩 0건만 호출
-[enrich] 12/12건 배경 보강 완료
+[main] 용어 설명 주입 9건
+[enrich] 선행 API 호출 없이 캐시 적용 {'ok': 11, 'none': 0}
 [main] 발송 목표 5건 / 수율 14% → 생성 상한 49건 → 기대 발송 5건
-[gate] 차단 2건 {'tier5': 2}
 [theme] 배정 취소 — 관련 섹터 없음: 한-우즈베키스탄 지방정부 협력 포럼…산업·투자 협력 논의
 [theme] 배정 취소 — 관련 섹터 없음: 중기부, '도전의 IR 프로젝트' 추진…"창업자·투자사 연결"
 [theme] 배정 취소 — 관련 섹터 없음: 정부 "견조한 경기회복세…전쟁·美관세 불확실성은 다소 확대"(종합)
@@ -25,52 +23,102 @@
 [theme] 게시판 매칭 실패 3건 생성 전 제외
 [dedup] 제외 2건 {'ID': 2}
 [main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함
-[main] 생성 대상 42건 {'disclosure': 4, 'research': 4, 'flow': 25, 'policy': 5, 'poll': 4}
+[enrich] 후보 충분 (5.0/5) → 신규 그라운딩 0건
+[main] 생성 대상 43건 {'disclosure': 4, 'research': 5, 'flow': 25, 'policy': 5, 'poll': 4}
 [main] 실제 후보 기준 기대 발송 5.0건
 [claude] SDK 1.5.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [gen] claude: 16/16건 생성
-[gen] 정규식 리젝 flow-2026-09-11-203650 ['어미단조(격식체만 3문장)']
-       └ '드림시큐리티가 23.29% 올랐습니다. 종가는 2,620원이었는데요. 거래량은 20일 평균의 61.0배를 기록했으며, 장중 저가 대비 25.6% 오른 폭을 보였습니다. 5거래일을 누적하면 29.38% 상승했습니다.'
-[gen] 정규식 리젝 pol-미래기금국채상환기준도입해야현미래세대계정은따로 ['너무김(259자>240/fact_note)', "근거없는수치['11']"]
-       └ '반도체 세수 호황을 기반으로 조성 예정인 미래대응기금의 운용 원칙을 명확히 해야 한다는 전문가 제언이 나왔습니다. 한국개발연구원과 경제·인문사회연구회가 9월 11일 공동 주최한 토론회에서 전문가들은 기금 적립액과 국채 상환 규모를 매년 정책 판단에만 맡기지 말고 명확한 연동 기준을 수립해야 한다고 지적했는데요. 아울러 미래대응기금을 현세대 계정과 미래세대 '
-[gen] 정규식 리젝 pol-농식품부농산업수출기업해외인허가애로해소지원 ['너무김(349자>240/fact_note)', "근거없는수치['11']", '어미단조(격식체만 3문장)']
-       └ "농림축산식품부는 2026년 6월 농기계·동물약품·스마트팜 등 농산업 수출기업의 해외 인허가 애로를 해소하기 위해 '농산업 글로벌 인허가 통합지원단'을 출범시켰습니다. 9월 11일 개최된 제2차 정례회의에서는 동물약품 분야 지원 성과로 국내 기업의 사료첨가제 브라질 수출을 위한 현지 제조시설 등록 승인과 제품 등록 신청이 공유되었는데요. 농식품부는 농약 분야"
-[gen] 정규식 리젝 dart-20260911900785 ['너무김(143자>120/quick_memo)', "근거없는수치['50']"]
-       └ '킵스파마가 항암 치료제 Idtrexed(CT900) 기반 제2상 임상시험계획 승인을 받았어요. 지난 3월 식품의약품안전처에 신청한 이 임상시험이 이번 달 최종 승인됐고, 국내 다기관에서 난소암·난관암·원발성 복막암 환자 50명을 대상으로 진행될 예정입니다.'
-[gen] 정규식 리젝 poll-flow-2026-09-11-356680 ['unsupported_cause_question']
-       └ '엑스게이트가 29.94% 올랐네요. 종가는 16,060원이었습니다. 거래량은 20일 평균의 15.6배를 기록했는데, 5거래일을 묶으면 누적 상승률이 40.51%에 이르렀습니다. 단기간 이 정도 상승폭이 나온 배경이 뭐라고 보시는 건가요?'
-[gen] 정규식 리젝 flow-2026-09-11-488280 ['어미단조(격식체만 3문장)']
-       └ '에스투더블유가 26.38% 올랐습니다. 거래량은 20일 평균의 26.3배를 기록했는데요. 장중 고저 차이는 저가 대비 15.6%였습니다. 5거래일 누적으로는 52.78% 상승했습니다.'
-[gen] 정규식 리젝 pol-원주시삼양식품찾아수출애로청취지원방안논의 ['너무김(242자>240/fact_note)', "근거없는수치['6458', '84']", '어미단조(격식체만 3문장)']
-       └ '삼양식품은 11일 원주시 기업애로 해결단으로부터 현장 방문을 받았습니다. 구자열 원주시장은 김동찬 대표이사 등 임직원과 간담회를 열어 수출 과정의 애로사항을 청취하고 지역 인재 채용 확대 및 상생 방안을 논의했는데요. 회사는 불닭볶음면 등을 주력으로 하는 글로벌 식품기업으로, 원주공장이 글로벌 시장 공급의 핵심 수출 전진기지 역할을 맡고 있습니다. 올해 2'
-[gen] 정규식 리젝 flow-2026-09-11-248170 ['주장과다(4개/3)']
-       └ '샘표식품이 14.76% 하락한 가운데 거래량이 20일 평균의 25.1배였습니다. 장중 저가 대비 고가가 42.5% 올랐는데요. 5거래일 누적으로는 10.78% 올랐습니다.'
-[gen] 정규식 리젝 hk-652285 ["근거없는수치['11']"]
-       └ '나노신소재가 iM증권으로부터 적정가격 80,000원을 제시받았네요. 정원석, 박정하 애널리스트가 2026년도 좋고, 2027년은 더 좋다는 리포트를 9월 11일 발간했는데요. iM증권은 투자의견으로 Buy를 붙였습니다. 두 해의 실적 궤적이 어떻게 달라질 것으로 전망되는 건지 궁금하네요.'
+[gen] 정규식 리젝 flow-2026-09-11-356680 ['어미단조(격식체만 3문장)']
+       └ '엑스게이트가 29.94% 올랐습니다. 종가는 16,060원이었는데요, 거래량은 20일 평균의 15.6배였습니다. 장중 저가 대비 26.6%의 변동폭을 보였으며, 5거래일 누적으로는 40.51% 상승했습니다.'
+[gen] 정규식 리젝 flow-2026-09-11-203650 ['수치과다(8개/check_list)']
+       └ '드림시큐리티가 2026년 9월 11일 23.29% 올랐고 종가는 2,620원이었습니다. 거래량은 20일 평균의 61.0배였습니다. 장중 고저 차이는 저가 대비 25.6%였고, 5거래일 누적 기준으로는 29.38% 올랐네요.'
+[gen] 정규식 리젝 pol-미래기금국채상환기준도입해야현미래세대계정은따로 ['너무김(275자>240/fact_note)']
+       └ '반도체 세수 호황을 바탕으로 신설 추진 중인 미래대응기금의 운용 원칙을 놓고 전문가들의 제언이 나왔습니다. 한국개발연구원과 경제·인문사회연구회가 2026년 9월 11일 공동 주최한 토론회에서 우석진 명지대 교수는 기금 적립액과 국채 상환 규모를 통화정책의 테일러 준칙처럼 명확한 연동 기준으로 정하자고 제안했는데요. 김학수 KDI 선임연구위원 등은 아일랜드 '
+[gen] 정규식 리젝 flow-2026-09-11-003350 ['상대날짜(전일)']
+       └ '한국화장품제조가 19.38% 올랐습니다. 전일 종가는 15,710원인데요. 5거래일 누적으로는 23.22% 상승했습니다.'
+[gen] 정규식 리젝 flow-2026-09-11-001820 ['상대날짜(전일)', '선정외주장(1개)']
+       └ '삼화콘덴서공업이 전일 18.76% 올랐습니다. 거래량은 20일 평균의 4.6배를 기록했네요. 장중 저가 대비 31.7%의 고저차를 보였습니다.'
+[gen] 정규식 리젝 naver-api-96103 ["근거없는수치['11']"]
+       └ "씨에스윈드에 대해 DS투자증권이 적정가격 88,000원을 제시했네요. 이 가격은 리포트에서 제시한 값이며 회사가 정한 가격이 아닙니다. DS투자증권의 투자의견은 매수인데요. 2026년 9월 11일 발간된 리포트 제목은 '무관심에서 관심의 영역으로'입니다. 증권사가 이 종목을 바라보는 관점의 변화를 담은 것으로 보입니다."
+[gen] 정규식 리젝 flow-2026-09-11-052710 ['장중범위표현오류']
+       └ '아모텍이 29.98% 올랐습니다. 거래량은 20일 평균의 9.5배를 기록했는데요. 장중 저가 대비 29.6% 범위에서 움직였고, 5거래일 누적으로는 34.01% 상승했습니다.'
+[gen] 정규식 리젝 pol-고유가미금리인상우려에환율67원오른13459원 ["근거없는수치['1345.9', '6.7']"]
+       └ '원/달러 환율은 11일 1,345.9원을 기록했는데요. 미국 금리인상 우려와 중동 지역 긴장으로 국제유가가 급등한 것이 환율 상승에 영향을 미쳤습니다. 전일 대비 6.7원 올랐습니다.'
+[gen] 정규식 리젝 flow-2026-09-11-443670 ['장중범위표현오류']
+       └ '에스피소프트가 29.99% 올랐고 종가는 4,725원이네요. 거래량은 20일 평균의 5.0배였습니다. 장중 저가 대비 32.2% 오르내렸으며, 5거래일 누적으로는 16.09% 상승했어요.'
+[gen] 정규식 리젝 dart-20260911800823 ["근거없는수치['17']"]
+       └ '금호건설이 최근 매출액 대비 9.25%에 해당하는 단일판매·공급계약을 체결했습니다. 단일판매·공급계약 공시는 회사가 맺은 계약의 금액과 기간을 알리는 공시네요. 계약 종료일은 2027년 10월 17일입니다.'
+[gen] 정규식 리젝 pol-농식품부농산업수출기업해외인허가애로해소지원 ['너무김(268자>240/fact_note)', '어미단조(격식체만 3문장)']
+       └ "농림축산식품부가 2026년 6월 출범한 '농산업 글로벌 인허가 통합지원단'의 2차 정례회의가 9월 11일 열렸습니다. 동물약품 분야에서 국내 기업의 사료첨가제 브라질 수출을 위한 현지 제조시설 등록 승인(8월 7일)과 제품 등록 신청(9월 1일)이 이뤄졌는데요. 농약 분야 수출 지원을 위해 수출용 농약 원제 제조와 해외 농업유전자원 반입 절차 가이드라인을 "
+[gen] 정규식 리젝 naver-api-96101 ["근거없는수치['11']"]
+       └ "피에스케이홀딩스가 하나증권으로부터 '거침없는 실적'이라는 제목의 리포트를 받았습니다. 이는 9월 11일 발간된 리포트네요. 투자의견은 제시되지 않았습니다."
 [gen] 정규식 리젝 flow-2026-09-11-042700 ['방향오용(올랐)']
-       └ '한미반도체가 8.70% 내려 231,000원에 마감했습니다. 거래량은 20일 평균의 1.7배로 집중되었고, 장중에는 저가 대비 4.3% 상승폭을 보이기도 했는데요. 외국인이 순매도 상위 3위에 올랐습니다.'
+       └ '한미반도체가 231,000원에 마감하며 8.70% 내렸네요. 장중 저가 대비 4.3% 상승한 폭으로 등락이었습니다. 이날 외국인이 순매도 상위 3위에 올랐습니다. 외국인의 매도 규모가 전체 수급에서 어느 정도 비중을 차지했을 것으로 보이는데요, 개별 매도량이 어느 정도였는지 궁금합니다.'
 Direct use of automatic function calling (AFC) in Models.generate_content is not recommended. Instead, we recommend to use AFC in Chat.send_message. Similarly, direct use of AFC in Models.generate_content_stream is not recommended. Instead, we recommend to use AFC in Chat.send_message_stream.
 [gen] gemini: 4/4건 생성
 [gen] 정규식 리젝 flow-2026-09-11-131290 ['방향오용(올랐)']
-       └ '티에스이 주가가 저가 대비 장중 고저 차이 15.0%를 나타냈네요. 2026년 9월 11일 종가는 260,500원으로 등락률은 -15.01%였습니다. 이날 외국인 순매매는 순매도 상위 5위에 올랐습니다. 최근 5거래일 누적 등락률은 +10.15%를 기록했는데요. 단기 흐름의 변화가 나타난 것 같습니다.'
-[gen] 정규식 리젝 pol-HD현대중공업노조4시간파업임금인상방식놓고갈등 ['너무김(258자>240/fact_note)', "근거없는수치['1000', '20', '200']", '어미단조(격식체만 3문장)']
-       └ 'HD현대중공업은 고부가가치 선박 및 군함 수주, 엔진 제작 등을 주력 사업으로 영위하는 국내 최대 조선 기업입니다. 이 회사의 노동조합이 올해 임금 및 단체협약 교섭 난항으로 11일 파업을 진행했는데요. 사측은 지난 10일 20차 교섭에서 기본급 11만 원 인상과 격려금 1,000만 원에 200% 지급 등을 담은 협상안을 제시했으나 노조는 이를 거부한 것으'
-[gen] 정규식 리젝 flow-2026-09-11-240810 ['상대날짜(전일)']
-       └ '원익IPS 종가는 110,300원입니다. 이 종가는 전일 대비 7.15% 하락한 금액인데요. 이날 원익IPS의 장중 고저 차이는 저가 대비 4.4%였습니다. 외국인 순매매 시장에서 원익IPS는 외국인 순매도 상위 1위였습니다.'
-[gen] 정규식 통과 12건 / 시도 20건
+       └ '티에스이가 15.01% 하락했습니다. 이전 5거래일 동안의 누적 등락률은 +10.15%를 기록했네요. 외국인 순매매 기준으로는 순매도 상위 5위에 올랐습니다.'
+[gen] 정규식 리젝 pol-원주시삼양식품찾아수출애로청취지원방안논의 ['어미단조(격식체만 3문장)']
+       └ '삼양식품은 불닭볶음면 등을 주력 제품으로 생산하는 글로벌 식품기업입니다. 강원 원주시의 구자열 시장은 11일 지역 향토기업인 삼양식품을 찾아 김동찬 대표이사 등 임직원과 현장 간담회를 진행했는데요. 이번 간담회는 삼양식품의 수출 과정에서 발생하는 애로사항을 청취하고 지역사회 상생 방안을 논의하기 위해 마련되었습니다. 원주시의 기업애로 해결단 현장 소통 활동'
+[gen] 정규식 리젝 flow-2026-09-11-046970 ['상대날짜(전일)']
+       └ '우리로는 7,190원으로 장을 마감했습니다. 이 종가는 전일 대비 7.31% 상승한 금액인데요. 이날 거래량은 20일 평균의 14.6배였습니다. 장중 고저 차이는 저가 대비 30.2%였습니다.'
+[gen] 정규식 리젝 flow-2026-09-11-240810 ['어미단조(격식체만 3문장)']
+       └ '원익IPS가 2026년 9월 11일 기준 -7.15%의 등락률이었고 하락했습니다. 이날 종가는 110,300원이었는데요. 장중 고저 차이는 저가 대비 4.4%였습니다. 한편 원익IPS는 외국인 순매도 상위 1위였습니다.'
+[gen] ⚠ gemini 정규식 통과 0/4 → 이번 실행 후속 작성에서 제외
+[gen] 정규식 통과 3건 / 시도 20건
 [claude] SDK 1.5.0
 [claude] SDK 1.5.0
-[judge] Claude Sonnet 교차모델 심사 12건
-[decide] 유형상한 완화로 2건 보충 (3 → 5)
-[main] 단계 생성 20/42건 → 누적 배포 가능 5/5건
+[judge] Claude Sonnet 교차모델 심사 3건
+[main] 단계 생성 20/43건 → 누적 배포 가능 2/5건
+[gen] gemini 품질 차단 물량 5건 → claude 재할당
+[gen] claude: 23/23건 생성
+[gen] 정규식 리젝 dart-20260911900785 ['너무김(197자>150/brief_report)', "근거없는수치['11', '50']"]
+       └ '킵스파마가 Idtrexed(CT900) 기반 항암 치료제의 제2상 임상시험계획(IND) 승인을 받았습니다. 식품의약품안전처로부터 이달 11일 최종 승인을 받은 것으로, 회사는 지난 3월 10일 해당 계획을 신청했네요. 엽산수용체 알파 발현이 중등도 이상인 백금저항성 난소암·난관암·원발성 복막암 환자 50명을 대상으로 국내 다기관에서 진행될 예정입니다.'
+[gen] 정규식 리젝 pol-HD현대중공업노조4시간파업임금인상방식놓고갈등 ['너무김(299자>240/fact_note)', "근거없는수치['1000', '20', '200']"]
+       └ 'HD현대중공업은 고부가가치 선박 및 군함 수주, 엔진 제작 등을 주력으로 하는 국내 최대 조선 기업인데요. 11일 올해 임금 및 단체협약 교섭 난항으로 전체 조합원 대상의 첫 4시간 부분 파업에 돌입했습니다. 노사 갈등의 핵심은 임금 인상 방식으로, 노조는 기본급 등 고정급 인상과 영업이익의 최소 30% 성과 공유를 요구하는 반면 사측은 격려금 등 변동급을'
+[gen] 정규식 리젝 flow-2026-09-11-443060 ['어미단조(격식체만 3문장)']
+       └ 'HD현대마린솔루션 종가 247,000원이었습니다. 이날 거래량은 20일 평균의 3.8배를 기록했는데요. 장중 저가 대비 10.7%의 고저 차이를 보였습니다. 5거래일 기준으로는 17.34% 상승했습니다.'
+[gen] 정규식 리젝 flow-2026-09-11-000990 ['상대날짜(전일)', '선정외주장(1개)']
+       └ 'DB하이텍이 거래량을 20일 평균의 1.6배 기록했습니다. 장중 저가 대비 6.1% 변동폭을 보였네요. 이날 종가 기준 전일 대비 8.16% 하락했습니다.'
+[gen] 정규식 리젝 flow-2026-09-11-000810 ['너무짧음(76자<80/fact_note)']
+       └ '삼성화재해상보험이 6.03% 올랐습니다. 종가는 686,000원이었는데요. 장중 고저 차이를 보면 저가 대비 9.3%의 등락폭이었습니다.'
+[gen] 정규식 리젝 flow-2026-09-11-036930 ['방향오용(상승)']
+       └ '주성엔지니어링이 209,000원에 마감해 5.43% 내렸습니다. 5거래일 누적으로는 +17.22%인데요. 이번엔 약세로 돌아섰다는 견해가 있을 수 있습니다. 장중 고저 차이가 저가 대비 10.3%였고 마감 위치가 장중 고가 대비 8.9% 낮았기 때문입니다. 다만 최근 흐름을 보면 단기 상승세가 여전한 상태에서 나타난 낙폭이라는 평가도 가능합니다. 지난 5거'
+[gen] 정규식 리젝 flow-2026-09-11-095610 ['방향오용(올랐)']
+       └ '테스가 저가 대비 8.3%의 장중 고저차를 기록했네요. 종가는 143,500원으로 마감했습니다. 외국인 순매도 상위 4위에 올랐습니다.'
+[gen] 정규식 리젝 hk-652277 ['너무김(299자>280/term_guide)']
+       └ '아모텍이 IBK투자증권 리포트의 제목이 되었어요. "고객들 줄서기가 시작되었다"는 표현으로 수요 증가를 담았는데요, 이때 나오는 \'적정가격\'이 뭔지 궁금한 분들 있을 거예요. 적정가격은 증권사가 리포트에서 제시한 값이며 회사가 정한 가격이 아닙니다. IBK투자증권이 이번 리포트에서 제시한 적정가격은 30,000원인데, 이건 분석 결과를 토대로 한 증권사의 '
+[gen] 정규식 리젝 flow-2026-09-11-440110 ['장중범위표현오류']
+       └ '파두는 9월 11일 13.62% 내렸습니다. 장중 저가 대비 12.6% 오르내렸는데요. 마감은 장중 고가 대비 11.0% 낮은 수준인 68,500원이었습니다.'
+[gen] 정규식 리젝 flow-2026-09-11-247540 ['상대날짜(전일)', '장중범위표현오류']
+       └ '에코프로비엠이 110,300원에 마감하며 7.08% 내렸습니다. 전일 거래 중 저가 대비 4.6% 오르내렸네요. 장중 고저 차이가 있었던 거래였습니다.'
+[gen] 정규식 리젝 dart-20260911800773 ['너무김(150자>120/quick_memo)', '수치과다(5개/quick_memo)']
+       └ 'LS가 교환사채권 발행결정 공시를 기재정정했어요. 교환사채는 발행회사가 보유한 다른 주식으로 바꿀 수 있는 권리가 붙은 회사채입니다. 5,000억 원 중 4,000억 원은 2026년에, 나머지 1,000억 원은 2027년에 북미 및 신규 사업 투자에 사용될 예정이에요.'
+[gen] 정규식 리젝 flow-2026-09-11-226950 ['어미단조(격식체만 3문장)']
+       └ '올릭스가 9.52% 올랐습니다. 거래량은 20일 평균의 1.9배였는데요. 장중 고가 대비 0.8% 낮은 수준에서 마감했습니다. 5거래일 누적으로는 13.97% 상승했습니다.'
+[gen] 정규식 리젝 poll-flow-2026-09-11-001820 ['선정외주장(1개)']
+       └ '삼화콘덴서공업이 18.76% 올랐는데 거래량이 20일 평균의 4.6배였네요. 장중에는 저가 대비 31.7%까지 올랐다가 마감에는 장중 고가 대비 6.8% 낮은 수준에서 마감한 모습입니다. 이렇게 변동성 큰 장중에도 거래량이 크게 늘어난 것을 보면 매매 참여층의 폭이 넓었다는 뜻인데요, 고가 대비 낮아진 종가를 어떻게 보시나요?'
+[gen] 정규식 통과 10건 / 시도 23건
+[judge] Claude Sonnet 교차모델 심사 10건
+[decide] 유형상한 완화로 1건 보충 (3 → 4)
+[decide] ⚠ 절대상한 해제로 1건 보충 (4 → 5) — 구성 목표 초과: {'flow': 1}. 비-flow 공급 부족이 원인이다.
+[main] 단계 생성 43/43건 → 누적 배포 가능 5/5건
 [assign] {'강항원 차장님': 1, '김현원 차장님': 1, '정지운 차장님': 1, '김영애 차장님': 1, '방범상 차장님': 1}
-[main] 배포 5건 / 보류 7건
-   보류 naver-api-96103 (claude) - 커뮤니티적합성 2/5 제목·수치 나열, 추가정보 부족
-   보류 poll-flow-2026-09-11-356680 (gemini) - 저점수 13.3/20 수치 나열은 적절하나 결말 질문이 원인 암시성
-   보류 flow-2026-09-11-248170 (gemini) - 커뮤니티적합성 2/5 등락률·마감위치 등 핵심 수치 누락
-   보류 hk-652285 (gemini) - fatal:독자에게 판단을 묻는 상투적 마무리
-   보류 flow-2026-09-11-240810 (claude) - 유형상한(flow)
-[tg] 테스트 채널 suffix 매칭: ...2744 (private)
-[main] filter_log data/filter_log_20260912_1806.json
-[main] stats {"ts": "2026-09-12T18:06:24+09:00", "collected": 49, "gate_blocked": 5, "gate_reasons": {"tier5": 5}, "gate_detail": {"tier5:게시판없음": 3, "tier5:글감부족": 1, "tier5:앵글없음": 1}, "enrich_ok": 12, "reject_reasons": {"policy:너무김": 4, "policy:어미단조": 3, "flow:어미단조": 2, "policy:근거없는수치['11']": 2, "flow:방향오용": 2, "disclosure:너무김": 1, "disclosure:근거없는수치['50']": 1, "poll:unsupported_cause_question": 1, "policy:근거없는수치['6458', '84']": 1, "flow:주장과다": 1, "research:근거없는수치['11']": 1, "policy:근거없는수치['1000', '20', '200']": 1, "flow:상대날짜": 1}, "cliche_tails": ["격 80,000원과 투자의견 Buy에 대해 어떻게 판단하시나요?"], "fatal_codes": {"research:독자에게 판단을 묻는 상투적 마무리": 1}, "score_axis_avg": {"factual": 4.67, "useful": 2.67, "natural": 3.5, "compliant": 4.67, "gain": 2.67, "fit": 2.67}, "fail_samples": {"fatal:독자에게 판단을 묻는 상투적 마무리": "한 적정가격 80,000원과 투자의견 Buy에 대해 어떻게 판단하시나요?", "어미단조": "% 오른 폭을 보였습니다. 5거래일을 누적하면 29.38% 상승했습니다.", "너무김": "정부가 임의로 인출하지 못하도록 장기간 제약을 두는 방안도 제안됐습니다.", "근거없는수치['11']": "정부가 임의로 인출하지 못하도록 장기간 제약을 두는 방안도 제안됐습니다.", "근거없는수치['50']": " 난소암·난관암·원발성 복막암 환자 50명을 대상으로 진행될 예정입니다.", "unsupported_cause_question": "르렀습니다. 단기간 이 정도 상승폭이 나온 배경이 뭐라고 보시는 건가요?", "근거없는수치['6458', '84']": " 연결 매출 중 해외 매출이 약 84%인 6,458억 원을 차지했습니다.", "주장과다": "가가 42.5% 올랐는데요. 5거래일 누적으로는 10.78% 올랐습니다.", "방향오용": "% 상승폭을 보이기도 했는데요. 외국인이 순매도 상위 3위에 올랐습니다.", "근거없는수치['1000', '20', '200']": "공업의 올해 상반기 연결 기준 영업이익은 1조 9,453억 원이었습니다.", "상대날짜": ". 외국인 순매매 시장에서 원익IPS는 외국인 순매도 상위 1위였습니다."}, "raw_vs_clean": {}, "hold_kinds": {"flow:유형상한": 3, "research:커뮤니티적합성": 1, "poll:저점수": 1, "flow:커뮤니티적합성": 1, "research:fatal:독자에게": 1}, "enrich_calls": 0, "generation_candidates": 42, "generation_attempted": 20, "generation_items_avoided": 22, "generated": 12, "judge_failed": 0, "delivery_attempted": 5, "delivery_failed": 0, "attempt_to_delivery_yield": 0.25, "sent": 5, "held": 7, "hold_reasons": {"커뮤니티적합성 2/5 제목·수치 나열, 추가정보 부족": 1, "저점수 13.3/20 수치 나열은 적절하나 결말 질문이 원인 암시성": 1, "커뮤니티적합성 2/5 등락률·마감위치 등 핵심 수치 누락": 1, "fatal": 1, "유형상한": 3}, "avg_score": 15.44, "by_provider": {"gemini": {"generated": 5, "sent": 1, "avg_score": 12.92}, "claude": {"generated": 7, "sent": 4, "avg_score": 14.56}}, "by_kind_funnel": {"disclosure": {"collected": 5, "gate_blocked": 1, "candidates": 4, "attempted": 1, "filter_passed": 0, "judge_failed": 0, "held": 0, "delivery_attempted": 0, "delivered": 0}, "flow": {"collected": 25, "gate_blocked": 0, "candidates": 25, "attempted": 12, "filter_passed": 8, "judge_failed": 0, "held": 4, "delivery_attempted": 4, "delivered": 4}, "policy": {"collected": 10, "gate_blocked": 3, "candidates": 5, "attempted": 4, "filter_passed": 1, "judge_failed": 0, "held": 0, "delivery_attempted": 1, "delivered": 1}, "poll": {"collected": 4, "gate_blocked": 0, "candidates": 4, "attempted": 1, "filter_passed": 1, "judge_failed": 0, "held": 1, "delivery_attempted": 0, "delivered": 0}, "research": {"collected": 5, "gate_blocked": 1, "candidates": 4, "attempted": 2, "filter_passed": 2, "judge_failed": 0, "held": 2, "delivery_attempted": 0, "delivered": 0}}, "model_fallbacks": [], "dedup": {"ID": 2}, "crawl_health": {"dart": {"got": 4, "expected": 4, "degraded": false}, "naver_research": {"got": 2, "expected": 3, "degraded": false}, "hankyung": {"got": 3, "expected": 2, "degraded": false}, "market": {"got": 234, "expected": 20, "degraded": false}, "kind_inquiry": {"got": 1, "expected": 1, "degraded": false}, "policy_rss": {"got": 10, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+[main] 배포 5건 / 보류 8건
+   보류 flow-2026-09-11-488280 (claude) - 커뮤니티적합성 2/5 거래량·고저차 등 결합사실 미언급
+   보류 hk-652285 (claude) - fatal:상투적 마무리 문구로 글을 닫음
+   보류 hk-652284 (claude) - fatal:허용된 사실 외의 주장(투자자 화제, 괴리 언급은 근거 없는 추측)
+   보류 dart-20260911000600 (claude) - 커뮤니티적합성 2/5 자금 사용목적 등 핵심 정보 누락
+   보류 poll-flow-2026-09-11-003350 (claude) - fatal:매매 타이밍을 묻는 질문이 매매 권유·경험을 전제로 함
+[tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 (TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)
+[tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 (TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)
+[tg] ⚠ 테스트 채널을 특정할 수 없어 발송하지 않습니다 (TELEGRAM_TEST_CHAT_ID 또는 test_chat_suffix 필요)
+[main] filter_log data/filter_log_20260912_2128.json
+[main] stats {"ts": "2026-09-12T21:28:45+09:00", "collected": 49, "gate_blocked": 3, "gate_reasons": {"tier5": 3}, "gate_detail": {"tier5:게시판없음": 3}, "enrich_ok": 11, "reject_reasons": {"flow:상대날짜": 5, "flow:어미단조": 4, "flow:장중범위표현오류": 4, "flow:방향오용": 4, "policy:너무김": 3, "flow:선정외주장": 2, "research:근거없는수치['11']": 2, "policy:어미단조": 2, "disclosure:너무김": 2, "flow:수치과다": 1, "policy:근거없는수치['1345.9', '6.7']": 1, "disclosure:근거없는수치['17']": 1, "disclosure:근거없는수치['11', '50']": 1, "policy:근거없는수치['1000', '20', '200']": 1, "flow:너무짧음": 1, "research:너무김": 1, "disclosure:수치과다": 1, "poll:선정외주장": 1}, "cliche_tails": ["심 있는 투자자라면 리포트 전문을 확인해 보는 것도 좋겠습니다."], "fatal_codes": {"research:상투적 마무리 문구로 글을 닫음": 1, "research:허용된 사실 외의 주장(투자자 화제, 괴리 언급은 근거 없는 추측)": 1, "poll:매매 타이밍을 묻는 질문이 매매 권유·경험을 전제로 함": 1}, "score_axis_avg": {"factual": 4.46, "useful": 2.77, "natural": 3.54, "compliant": 4.46, "gain": 2.77, "fit": 2.69}, "fail_samples": {"fatal:상투적 마무리 문구로 글을 닫음": "해요. 관심 있는 투자자라면 리포트 전문을 확인해 보는 것도 좋겠습니다.", "fatal:허용된 사실 외의 주장": " 가치평가와 시장 평가의 차이를 어떻게 볼지는 각자의 판단에 맡겨집니다.", "fatal:매매 타이밍을 묻는 질문이 매매 권유": ". 이 정도의 변동성 속에서 수익을 챙기려면 타이밍을 어떻게 잡으셨나요?", "어미단조": "6%의 변동폭을 보였으며, 5거래일 누적으로는 40.51% 상승했습니다.", "수치과다": "가 대비 25.6%였고, 5거래일 누적 기준으로는 29.38% 올랐네요.", "너무김": "세대 몫은 장기간 인출을 제한하는 통제장치를 두어야 한다고 주장했습니다.", "상대날짜": "가는 15,710원인데요. 5거래일 누적으로는 23.22% 상승했습니다.", "선정외주장": "4.6배를 기록했네요. 장중 저가 대비 31.7%의 고저차를 보였습니다.", "근거없는수치['11']": "니다. 증권사가 이 종목을 바라보는 관점의 변화를 담은 것으로 보입니다.", "장중범위표현오류": ".6% 범위에서 움직였고, 5거래일 누적으로는 34.01% 상승했습니다.", "근거없는수치['1345.9', '6.7']": "한 것이 환율 상승에 영향을 미쳤습니다. 전일 대비 6.7원 올랐습니다.", "근거없는수치['17']": " 기간을 알리는 공시네요. 계약 종료일은 2027년 10월 17일입니다.", "방향오용": " 차지했을 것으로 보이는데요, 개별 매도량이 어느 정도였는지 궁금합니다.", "근거없는수치['11', '50']": "원발성 복막암 환자 50명을 대상으로 국내 다기관에서 진행될 예정입니다.", "근거없는수치['1000', '20', '200']": "00%, 상품권 50만 원 지급안을 제시했으나 노조는 이를 거부했습니다.", "너무짧음": "었는데요. 장중 고저 차이를 보면 저가 대비 9.3%의 등락폭이었습니다."}, "raw_vs_clean": {"너무짧음": [{"raw_len": 79, "clean_len": 76, "raw_tail": "원이었는데요. 장중 고저 차이를 보면 저가 대비 9.3%의 등락폭을 기록했습니다.", "clean_tail": "000원이었는데요. 장중 고저 차이를 보면 저가 대비 9.3%의 등락폭이었습니다."}]}, "hold_kinds": {"flow:유형절대상한": 2, "flow:커뮤니티적합성": 1, "research:fatal:상투적": 1, "research:fatal:허용된": 1, "disclosure:커뮤니티적합성": 1, "poll:fatal:매매": 1, "poll:질문상한": 1}, "enrich_calls": 0, "generation_candidates": 43, "generation_attempted": 43, "generation_stages": [20, 23], "generation_items_avoided": 0, "generated": 13, "judge_failed": 0, "delivery_attempted": 5, "delivery_failed": 5, "attempt_to_delivery_yield": 0.0, "sent": 0, "held": 8, "hold_reasons": {"커뮤니티적합성 2/5 거래량·고저차 등 결합사실 미언급": 1, "fatal": 3, "커뮤니티적합성 2/5 자금 사용목적 등 핵심 정보 누락": 1, "질문상한": 1, "유형절대상한": 2}, "avg_score": null, "by_provider": {"claude": {"generated": 13, "sent": 0, "avg_score": 13.78}}, "by_persona": {"brief_report": {"attempted": 10, "filter_passed": 1, "held": 1, "delivered": 0, "avg_score": 13.3, "angles": {"reaction": 1}}, "careful_note": {"attempted": 4, "filter_passed": 2, "held": 0, "delivered": 0, "avg_score": 16.3, "angles": {"compare": 1, "ratio": 1}}, "check_list": {"attempted": 2, "filter_passed": 1, "held": 0, "delivered": 0, "avg_score": 15.3, "angles": {"duration": 1}}, "data_focus": {"attempted": 7, "filter_passed": 2, "held": 1, "delivered": 0, "avg_score": 15.0, "angles": {"amount": 2}}, "fact_note": {"attempted": 9, "filter_passed": 1, "held": 1, "delivered": 0, "avg_score": 14.7, "angles": {"reaction": 1}}, "open_talk": {"attempted": 5, "filter_passed": 3, "held": 2, "delivered": 0, "avg_score": 14.23, "angles": {"reaction": 2, "amount": 1}}, "quick_memo": {"attempted": 2, "filter_passed": 1, "held": 1, "delivered": 0, "avg_score": 12.0, "angles": {"decode": 1}}, "term_guide": {"attempted": 3, "filter_passed": 2, "held": 2, "delivered": 0, "avg_score": 9.3, "angles": {"decode": 1, "terms": 1}}, "two_view": {"attempted": 1, "filter_passed": 0, "held": 0, "delivered": 0, "avg_score": null, "angles": {}}}, "by_kind_funnel": {"disclosure": {"collected": 5, "gate_blocked": 0, "candidates": 4, "attempted": 4, "filter_passed": 1, "judge_failed": 0, "held": 1, "delivery_attempted": 0, "delivered": 0}, "flow": {"collected": 25, "gate_blocked": 0, "candidates": 25, "attempted": 25, "filter_passed": 7, "judge_failed": 0, "held": 3, "delivery_attempted": 4, "delivered": 0}, "policy": {"collected": 10, "gate_blocked": 3, "candidates": 5, "attempted": 5, "filter_passed": 0, "judge_failed": 0, "held": 0, "delivery_attempted": 0, "delivered": 0}, "poll": {"collected": 4, "gate_blocked": 0, "candidates": 4, "attempted": 4, "filter_passed": 3, "judge_failed": 0, "held": 2, "delivery_attempted": 1, "delivered": 0}, "research": {"collected": 5, "gate_blocked": 0, "candidates": 5, "attempted": 5, "filter_passed": 2, "judge_failed": 0, "held": 2, "delivery_attempted": 0, "delivered": 0}}, "llm_usage": {"pricing_as_of": "2026-09-12", "cost_scope": "token_only; grounding overage/storage excluded", "calls": 56, "input_tokens": 201698, "output_tokens": 6951, "thinking_tokens": 0, "cache_read_tokens": 0, "cache_write_tokens": 0, "grounding_queries": 0, "failed_calls": 0, "estimated_token_cost_usd": 0.278836, "unknown_cost_calls": 0, "api_attempts": 56, "cost_per_delivered_usd": null, "by_route": {"claude|claude-haiku-4-5-20251001|paid|write": {"calls": 39, "input_tokens": 161109, "output_tokens": 5560, "thinking_tokens": 0, "cache_read_tokens": 0, "cache_write_tokens": 0, "grounding_queries": 0, "failed_calls": 0, "estimated_token_cost_usd": 0.188909, "unknown_cost_calls": 0, "api_attempts": 39}, "claude|claude-sonnet-5|paid|judge": {"calls": 13, "input_tokens": 30964, "output_tokens": 1042, "thinking_tokens": 0, "cache_read_tokens": 0, "cache_write_tokens": 0, "grounding_queries": 0, "failed_calls": 0, "estimated_token_cost_usd": 0.072348, "unknown_cost_calls": 0, "api_attempts": 13}, "gemini|gemini-3.5-flash|paid|write": {"calls": 4, "input_tokens": 9625, "output_tokens": 349, "thinking_tokens": 0, "cache_read_tokens": 0, "cache_write_tokens": 0, "grounding_queries": 0, "failed_calls": 0, "estimated_token_cost_usd": 0.017579, "unknown_cost_calls": 0, "api_attempts": 4}}, "by_attempt_type": {"initial": {"calls": 56, "api_attempts": 56}}}, "model_fallbacks": ["gemini->other(quality:0/4)"], "dedup": {"ID": 2}, "crawl_health": {"dart": {"got": 4, "expected": 4, "degraded": false}, "naver_research": {"got": 2, "expected": 3, "degraded": false}, "hankyung": {"got": 3, "expected": 2, "degraded": false}, "market": {"got": 234, "expected": 20, "degraded": false}, "kind_inquiry": {"got": 1, "expected": 1, "degraded": false}, "policy_rss": {"got": 10, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}}
+Traceback (most recent call last):
+  File "/home/runner/work/kis-community-bot/kis-community-bot/main.py", line 351, in <module>
+    main()
+  File "/home/runner/work/kis-community-bot/kis-community-bot/main.py", line 307, in main
+    raise RuntimeError(f"텔레그램 부분 전송: {sent}/{len(sent_posts)}건")
+RuntimeError: 텔레그램 부분 전송: 0/5건
