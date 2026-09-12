@@ -130,6 +130,18 @@ def main():
     ok.append(run("다른 사건은 통과", not dedup.is_dup(c, seen)[0]))
     ok.append(run("dedup 키 조회·저장 일치",
                   set(dedup.keys(a)) & set(seen.keys()) == set(dedup.keys(a))))
+    dated_seen = {}
+    dated_a = {**a, "id": "dart-20260903123456", "facts": "공시일: 20260903"}
+    dated_b = {**b, "id": "naver-10", "facts": "발간: 증권사 / 2026.09.04"}
+    dedup.mark(dated_a, dated_seen, "2026-09-03")
+    ok.append(run("다른 날짜의 같은 사건유형 통과",
+                  not dedup.is_dup(dated_b, dated_seen)[0]))
+    same_title = [
+        {"id": "same-a", "stock_code": "005930", "title": "3분기 실적 발표"},
+        {"id": "same-b", "stock_code": "000660", "title": "3분기 실적 발표"},
+    ]
+    scoped, _ = dedup.filter_new(same_title, {})
+    ok.append(run("다른 종목의 동일 제목 통과", len(scoped) == 2))
 
 
     # ── 프롬프트 빌드가 예외 없이 되는지 (JSON 리터럴 + format 충돌 회귀)

@@ -273,6 +273,7 @@ def fetch_hankyung(limit: int = 8) -> list[dict]:
             opinion = ""
         analyst = tds[4].get_text(strip=True)
         broker = tds[5].get_text(strip=True)
+        written = tds[0].get_text(strip=True)
 
         out.append({
             "id": f"hk-{report_idx or re.sub(chr(92)+'W', '', title)[:20]}",
@@ -283,6 +284,7 @@ def fetch_hankyung(limit: int = 8) -> list[dict]:
             "facts": (
                 f"리포트 제목: {title}\n"
                 + (f"종목코드: {code}\n" if code else "")
+                + (f"발간일: {written}\n" if written else "")
                 + f"작성: {broker} {analyst}\n"
                 + (f"제시 적정가격: {target}원 (해당 증권사 의견)\n" if target else "")
                 + (f"투자의견: {opinion} (해당 증권사 의견)\n" if opinion else "")

@@ -34,6 +34,10 @@ EVENT_TYPES = [
 ]
 
 _NOISE = re.compile(r"[\[\]()\-–—·,.:;\"'’“”]|주식회사|㈜|\s+")
+_DATE = re.compile(
+    r"(?<!\d)(20\d{2})[.\-/년]?\s*(0[1-9]|1[0-2])[.\-/월]?\s*"
+    r"(0[1-9]|[12]\d|3[01])(?:일)?(?!\d)"
+)
 
 
 def normalize_title(t: str) -> str:
@@ -45,6 +49,18 @@ def event_type(title: str) -> str:
         if re.search(pat, title or ""):
             return name
     return ""
+
+
+def event_day(item: dict) -> str:
+    """항목이 가리키는 사건일. 날짜가 없을 때만 undated 버킷을 쓴다."""
+    for text in (item.get("facts", ""), item.get("id", "")):
+        m = _DATE.search(str(text))
+        if m:
+            return "-".join(m.groups())
+    # DART/KIND 접수번호는 YYYYMMDD 뒤에 일련번호가 이어진다.
+    m = re.search(r"(20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])",
+                  str(item.get("id", "")))
+    return "-".join(m.groups()) if m else "_undated"
 
 
 def keys(item: dict) -> list[str]:
@@ -63,13 +79,13 @@ def keys(item: dict) -> list[str]:
     if code:
         ev = event_type(item.get("title", ""))
         if ev:
-            # 같은 종목 + 같은 사건유형 = 같은 사건으로 본다
-            out.append(f"EVT::{code}::{ev}")
+            # 사건일을 빼면 같은 종목의 다음 공시까지 7일간 막힌다.
+            out.append(f"EVT::{code}::{ev}::{event_day(item)}")
         out.append(f"TTL::{code}::{normalize_title(item.get('title',''))[:40]}")
     return out
 
 
-def is_dup(item: dict, seen: dict, titles: list[str] = None,
+def is_dup(item: dict, seen: dict, titles: list[tuple[str, str]] = None,
            sim_threshold: float = 0.78) -> tuple[bool, str]:
     for k in keys(item):
         if k in seen:
@@ -78,7 +94,11 @@ def is_dup(item: dict, seen: dict, titles: list[str] = None,
     # 제목 유사도 축 — 소스마다 표현만 다른 같은 사건을 잡는다
     if titles and item.get("kind") != "poll":
         n = normalize_title(item.get("title", ""))
-        for t in titles:
+        scope = str(item.get("stock_code") or "_theme")
+        for prev_scope, t in titles:
+            # 종목이 다른데 제목만 비슷한 정기 공시·리포트를 중복으로 보지 않는다.
+            if prev_scope != scope:
+                continue
             if n and SequenceMatcher(None, n, t).ratio() >= sim_threshold:
                 return True, "SIM"
     return False, ""
@@ -109,7 +129,8 @@ def filter_new(items: list[dict], seen: dict) -> tuple[list[dict], dict]:
             continue
         passed.append(it)
         if it.get("kind") != "poll":
-            titles.append(normalize_title(it.get("title", "")))
+            scope = str(it.get("stock_code") or "_theme")
+            titles.append((scope, normalize_title(it.get("title", ""))))
         for k in keys(it):
             batch[k] = "_batch"
 
