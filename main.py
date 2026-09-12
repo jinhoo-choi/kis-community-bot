@@ -63,6 +63,16 @@ def _stage_order(items: list[dict]) -> list[dict]:
     return sorted(items, key=key)
 
 
+def _drop_no_board(items: list[dict], blocked: list[tuple[str, str]]) -> list[dict]:
+    """종목방에 근거 있게 매핑하지 못한 테마 항목을 생성 전에 제외한다."""
+    no_board = [it for it in items if it.get("no_stock_fit")]
+    if not no_board:
+        return items
+    blocked.extend((it.get("id", "?"), "tier5:게시판없음") for it in no_board)
+    print(f"[theme] 게시판 매칭 실패 {len(no_board)}건 생성 전 제외")
+    return [it for it in items if not it.get("no_stock_fit")]
+
+
 def main():
     dry = "--dry-run" in sys.argv
     s = state.prune(state.load())
@@ -121,6 +131,7 @@ def main():
     # 커뮤니티에 종목방만 있어 테마글도 어딘가에는 올라가야 한다.
     # 관련 섹터 대표주에 배정하고, 본문에서는 종목을 언급하지 않게 지시를 넣는다.
     theme_map.assign_all(resolved)
+    resolved = _drop_no_board(resolved, blocked)
 
     # 다축 dedup — 같은 사건이 DART/리서치/수급으로 중복 유입되는 것을 잡는다
     # 반복 테스트에서는 과거 이력을 무시한다(배치 내부 중복은 그대로 잡는다)

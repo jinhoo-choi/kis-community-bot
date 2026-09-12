@@ -678,8 +678,15 @@ def main():
                       str(_i.get("stock_name"))))
     _i2 = {"kind": "policy", "title": "무관한 제목", "facts": "요지: 내용"}
     _tm.assign(_i2)
-    ok.append(run("매칭 실패 시 대형주 폴백", bool(_i2.get("stock_code"))))
-    ok.append(run("본문 종목언급 금지 지시 주입", "종목명이나 종목코드를" in _i2["facts"]))
+    ok.append(run("매칭 실패 시 임의 대형주 배정 금지",
+                  not _i2.get("stock_code") and _i2.get("no_stock_fit")))
+    import main as _main_theme
+    _map_blocked = []
+    ok.append(run("게시판 없는 글은 생성 전 제외",
+                  not _main_theme._drop_no_board([_i2], _map_blocked)
+                  and _map_blocked == [("?", "tier5:게시판없음")]))
+    ok.append(run("섹터 매칭 글에 종목언급 금지 지시 주입",
+                  "종목명이나 종목코드를" in _i["facts"]))
     ok.append(run("이미 종목 있으면 미배정",
                   not _tm.assign({"kind": "policy", "stock_code": "005930", "facts": "x"})))
     ok.append(run("테마글 본문 종목언급 리젝", any("테마글종목언급" in e for e in _f2.check(

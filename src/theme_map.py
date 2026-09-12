@@ -6,11 +6,10 @@
   2) '이 정책이 이 종목에 호재'라는 암시가 되어 투자권유로 오인될 수 있다
 
 그래서 두 가지를 지킨다.
-  - 키워드로 관련 섹터를 찾아 그 대표주에 배정한다 (무작위는 최후 수단)
+  - 키워드로 관련 섹터를 찾을 수 있을 때만 대표주에 배정한다
   - **본문에서는 종목명을 언급하지 않는다.** 종목방은 게시 위치일 뿐이고
     글 내용은 산업·정책 사실에 머문다. facts 에 이 지시를 주입한다.
 """
-import random
 import re
 
 # 섹터 키워드 → 대표주(시총 상위). 코드는 tickers.listed() 로 조회한다.
@@ -33,10 +32,6 @@ SECTORS = [
     (r"AI|인공지능|데이터|클라우드", ["삼성전자", "NAVER"]),
 ]
 
-# 섹터 매칭 실패 시 쓰는 대형주 풀
-FALLBACK = ["삼성전자", "SK하이닉스", "현대차", "KB금융", "NAVER",
-            "삼성바이오로직스", "LG에너지솔루션", "기아"]
-
 NOTE = (
     "※ 이 글은 종목방에 게시되지만 특정 종목에 대한 글이 아니다.\n"
     "※ 본문에서 종목명이나 종목코드를 절대 언급하지 말 것. "
@@ -48,7 +43,7 @@ def _pick_names(text: str) -> list[str]:
     for pat, names in SECTORS:
         if re.search(pat, text, re.I):
             return names
-    return FALLBACK
+    return []
 
 
 # 종목방에 올리면 부자연스러운 유형. 지역 행사·채용·수상 같은 건
@@ -143,6 +138,8 @@ def assign(item: dict) -> bool:
         return False
     table = tickers.listed()
     if not table:
+        item["no_stock_fit"] = True
+        item["board_mapping"] = "NO_BOARD"
         return False
 
     kind, name = classify(item, table)
@@ -159,11 +156,12 @@ def assign(item: dict) -> bool:
     text = f"{item.get('title','')} {item.get('facts','')[:400]}"
     cands = [n for n in _pick_names(text) if n in table]
     if not cands:
-        cands = [n for n in FALLBACK if n in table]
-    if not cands:
+        item["no_stock_fit"] = True
+        item["board_mapping"] = "NO_BOARD"
+        print(f"[theme] 배정 취소 — 관련 섹터 없음: {item.get('title', '')[:40]}")
         return False
 
-    name = random.choice(cands)
+    name = cands[0]
     other = _other_company_subject(item, name)
     if other:
         # 경쟁사 종목방에 붙이면 안 되지만, 배정을 포기하면 종목방에 못 간다.
@@ -177,7 +175,7 @@ def assign(item: dict) -> bool:
             alt = [c for c in cands
                    if c != name and not _other_company_subject(item, c)]
             if alt:
-                name = random.choice(alt)
+                name = alt[0]
             else:
                 item["no_stock_fit"] = True
                 item["board_mapping"] = "NO_BOARD"
