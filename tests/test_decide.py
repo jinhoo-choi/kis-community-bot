@@ -910,14 +910,15 @@ def main():
                   _ki.enrich_with_market([{"stock_code": "000660", "facts": "x"}], []) == 0))
     _mk2._add_history = _orig
 
-    # 장 시작 전에는 마감 후 워밍 캐시를 먼저 써야 전종목 API 조회를 피한다.
+    # 기준일이 정확히 같은 확정 캐시는 시각·주말과 무관하게 먼저 써야
+    # 전종목 API 조회를 피한다.
     _old_cache_load = _mk2._cache_load
     _old_after_close = _mk2._after_close
     _old_last_day = _mk2._last_trading_day
     _old_get_soup = _mk2.crawl.get_soup
     _mk2._cache_load = lambda _day, max_age_days=0: [
         {"id": f"cached-{i}", "kind": "flow"} for i in range(100)]
-    _mk2._after_close = lambda now=None: False
+    _mk2._after_close = lambda now=None: True
     _mk2._last_trading_day = lambda: "2026-09-11"
     _network_called = [False]
     def _unexpected_market_network(*_a, **_k):
@@ -925,7 +926,7 @@ def main():
         return None
     _mk2.crawl.get_soup = _unexpected_market_network
     _cached_result = _mk2.fetch(50)
-    ok.append(run("장전 시세 캐시 우선 사용",
+    ok.append(run("기준일 일치 시세 캐시 우선 사용",
                   len(_cached_result) == 50 and not _network_called[0]))
     _mk2._cache_load = _old_cache_load
     _mk2._after_close = _old_after_close
@@ -1152,6 +1153,8 @@ def main():
             return _NS(text="ok", candidates=[])
     _gm._PAID_QUOTA_DISABLED.clear()
     _gm._FREE_QUOTA_DISABLED.clear()
+    _gm._PAID_TRANSPORT_DISABLED.clear()
+    _gm._FREE_TRANSPORT_DISABLED.clear()
     _gp = _gm.GeminiProvider.__new__(_gm.GeminiProvider)
     _gp.model, _gp.fallback_model, _gp.grounding = "paid", "free", False
     _gp._paid_client = _NS(models=_GeminiModels("prepayment credits are depleted"))
@@ -1167,6 +1170,21 @@ def main():
     _cfg2.GEMINI_FREE_MIN_INTERVAL = _old_interval
     _gm._PAID_QUOTA_DISABLED.clear()
     _gm._FREE_QUOTA_DISABLED.clear()
+    _gm._PAID_TRANSPORT_DISABLED.clear()
+    _gm._FREE_TRANSPORT_DISABLED.clear()
+
+    _gp2 = _gm.GeminiProvider.__new__(_gm.GeminiProvider)
+    _gp2.model, _gp2.fallback_model, _gp2.grounding = "paid", "free", False
+    _gp2._paid_client = _NS(models=_GeminiModels("ReadTimeout: timed out"))
+    _gp2._free_client = _NS(models=_GeminiModels())
+    _gp2._types = None
+    _gp2._config = lambda *_a, **_k: None
+    _gr2 = _gp2.generate("s", "u")
+    ok.append(run("Gemini 시간초과 시 회로 차단·무료 폴백",
+                  _gr2.ok and _gr2.model == "free"
+                  and _gm._PAID_TRANSPORT_DISABLED.is_set()))
+    _gm._PAID_TRANSPORT_DISABLED.clear()
+    _gm._FREE_TRANSPORT_DISABLED.clear()
 
     import tempfile as _tmp, json as _json
     from src import enrich as _en

@@ -26,6 +26,8 @@ _PERMANENT_QUOTA = ("billing", "prepayment", "credit balance", "insufficient cre
 _RETRYABLE_LIMIT = ("429", "resource_exhausted", "rate limit", "too many requests")
 _PAID_QUOTA_DISABLED = threading.Event()
 _FREE_QUOTA_DISABLED = threading.Event()
+_PAID_TRANSPORT_DISABLED = threading.Event()
+_FREE_TRANSPORT_DISABLED = threading.Event()
 _FREE_RATE_LOCK = threading.Lock()
 _FREE_NEXT_CALL = 0.0
 
@@ -49,6 +51,16 @@ def _is_permanent_quota(message: str) -> bool:
     return any(k in low for k in _PERMANENT_QUOTA)
 
 
+def _is_transport_failure(message: str) -> bool:
+    """이번 실행에서 같은 엔드포인트를 계속 기다려도 의미 없는 장애."""
+    low = message.lower()
+    return any(k in low for k in (
+        "timeout", "timed out", "readtimeout", "connecttimeout",
+        "connection reset", "connection error", "service unavailable",
+        "502", "503", "504",
+    ))
+
+
 class GeminiProvider(Provider):
     name = "gemini"
 
@@ -64,19 +76,31 @@ class GeminiProvider(Provider):
             from google import genai
             from google.genai import types
             self._types = types
+            # SDK 기본값은 요청 제한시간이 없다. 실제 운영에서 검색 그라운딩
+            # 호출이 55분 넘게 열린 채 남아 Actions 60분 제한을 소진했다.
+            http_options = types.HttpOptions(
+                timeout=int(config.GEMINI_HTTP_TIMEOUT_SEC * 1000),
+                retry_options=types.HttpRetryOptions(attempts=1),
+            )
             if api_key:
-                self._paid_client = genai.Client(api_key=api_key)
+                self._paid_client = genai.Client(
+                    api_key=api_key, http_options=http_options)
             # 무료 티어는 Google 검색 그라운딩을 지원하지 않는다.
             if fallback_api_key and not grounding:
-                self._free_client = genai.Client(api_key=fallback_api_key)
+                self._free_client = genai.Client(
+                    api_key=fallback_api_key, http_options=http_options)
 
     def available(self) -> bool:
         return self._active() is not None
 
     def _active(self):
-        if self._paid_client is not None and not _PAID_QUOTA_DISABLED.is_set():
+        if (self._paid_client is not None
+                and not _PAID_QUOTA_DISABLED.is_set()
+                and not _PAID_TRANSPORT_DISABLED.is_set()):
             return self._paid_client, self.model, "paid"
-        if self._free_client is not None and not _FREE_QUOTA_DISABLED.is_set():
+        if (self._free_client is not None
+                and not _FREE_QUOTA_DISABLED.is_set()
+                and not _FREE_TRANSPORT_DISABLED.is_set()):
             return self._free_client, self.fallback_model, "free"
         return None
 
@@ -148,6 +172,22 @@ class GeminiProvider(Provider):
                         if note not in (self.fallbacks or []):
                             self.fallbacks = (self.fallbacks or []) + [note]
                         print(f"[gemini] 유료 티어 중단 → 무료 프로젝트 {fallback[1]} 폴백")
+                        return self.generate(system, user, temperature, max_tokens)
+                    return GenResult("", self.name, active_model, ok=False, error=msg[:200])
+                if _is_transport_failure(msg):
+                    disabled = (_FREE_TRANSPORT_DISABLED if tier == "free"
+                                else _PAID_TRANSPORT_DISABLED)
+                    if not disabled.is_set():
+                        print(f"[gemini] {tier} 연결/시간초과 오류 → "
+                              "이번 실행 후속 호출 중단")
+                    disabled.set()
+                    fallback = self._active()
+                    if tier == "paid" and fallback is not None:
+                        note = f"{active_model}->{fallback[1]}(free)"
+                        if note not in (self.fallbacks or []):
+                            self.fallbacks = (self.fallbacks or []) + [note]
+                        print(f"[gemini] 유료 티어 연결 실패 → 무료 프로젝트 "
+                              f"{fallback[1]} 폴백")
                         return self.generate(system, user, temperature, max_tokens)
                     return GenResult("", self.name, active_model, ok=False, error=msg[:200])
                 retryable = any(k in msg.lower() for k in _RETRYABLE_LIMIT)

@@ -170,6 +170,10 @@ GEMINI_JUDGE_MODEL  = os.environ.get("GEMINI_JUDGE_MODEL", "gemini-3.1-flash-lit
 GEMINI_FREE_MODEL = os.environ.get("GEMINI_FREE_MODEL", "gemini-3.1-flash-lite")
 # 무료 티어의 프로젝트별 RPM을 넘기지 않도록 기본 12RPM 이하로 직렬화한다.
 GEMINI_FREE_MIN_INTERVAL = float(os.environ.get("GEMINI_FREE_MIN_INTERVAL", "5.0"))
+# 외부 호출이 응답 없이 열린 채 Actions 전체를 잡아먹지 않게 한다. SDK의
+# HttpOptions.timeout 단위는 ms라 프로바이더에서 변환한다.
+GEMINI_HTTP_TIMEOUT_SEC = max(
+    5.0, float(os.environ.get("GEMINI_HTTP_TIMEOUT_SEC", "30")))
 
 # 작성 물량 배분 (프로바이더가 하나만 살아있으면 자동으로 몰아준다)
 # 실측 평균 심사점수: claude 16.4 / gemini 4.0.

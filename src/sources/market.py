@@ -348,8 +348,8 @@ def fetch(limit: int = 12) -> list[dict]:
     # 구할 수 있는데도 화요일 캐시를 게시하는 식의 날짜 오염이 생긴다.
     cached = _cache_load(day)
     cache_need = min(limit, max(20, config.GEN_STAGE_SIZE))
-    if not _after_close() and len(cached) >= cache_need:
-        print(f"[market] 장 시작 전 확정 캐시 {len(cached)}건 사용 (필요 {limit}건)")
+    if len(cached) >= cache_need:
+        print(f"[market] 기준일 일치 확정 캐시 {len(cached)}건 사용 (필요 {limit}건)")
         crawl.report("market", len(cached), limit, "")
         return cached[:limit]
 
