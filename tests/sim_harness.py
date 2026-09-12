@@ -165,12 +165,14 @@ class FakeJudge:
     def generate(self, system, user, **kw):
         iid = _extract_id(user)
         if iid in self._low:                      # [S5] 저품질 판정
-            d = dict(factual=2, useful=2, natural=3, compliant=4, fatal=[], reason="내용 공허")
+            d = dict(factual=2, useful=2, natural=3, compliant=4,
+                     gain=2, fit=2, fatal=[], reason="내용 공허")
         elif "물렸" in user or "비중확대" in user:  # 정규식이 놓쳤을 경우 대비
             d = dict(factual=3, useful=3, natural=3, compliant=1,
-                     fatal=["1인칭 거래경험"], reason="컴플라이언스 위반")
+                     gain=2, fit=2, fatal=["1인칭 거래경험"], reason="컴플라이언스 위반")
         else:
-            d = dict(factual=5, useful=4, natural=4, compliant=5, fatal=[], reason="")
+            d = dict(factual=5, useful=4, natural=4, compliant=5,
+                     gain=4, fit=4, fatal=[], reason="")
         return GenResult(json.dumps(d, ensure_ascii=False), self.name, self.model)
 
     def generate_many(self, jobs, **kw):

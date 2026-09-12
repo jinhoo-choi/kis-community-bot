@@ -77,9 +77,19 @@ def _parse(txt: str) -> dict | None:
         return None
     try:
         d = json.loads(m.group())
+        if not isinstance(d, dict):
+            return None
         for k in ("factual", "useful", "natural", "compliant", "gain", "fit"):
-            d[k] = int(d.get(k, 0))
-        d["fatal"] = d.get("fatal") or []
+            v = d.get(k)
+            if isinstance(v, bool):
+                return None
+            d[k] = int(v)
+            if not 1 <= d[k] <= 5:
+                return None
+        fatal = d.get("fatal") or []
+        if not isinstance(fatal, list) or not all(isinstance(x, str) for x in fatal):
+            return None
+        d["fatal"] = fatal
         # 30점 만점 → 20점 환산 (기존 임계값 유지)
         raw = sum(d[k] for k in ("factual", "useful", "natural",
                                  "compliant", "gain", "fit"))
@@ -94,6 +104,7 @@ def _one(post: dict) -> dict:
     jname = cross_judge_for(post.get("provider", ""))
     if not jname:
         post["score"] = None
+        post["judge_error"] = "교차 심사자 없음"
         return post
 
     j = judges()[jname]
@@ -107,6 +118,8 @@ def _one(post: dict) -> dict:
     d = _parse(r.text)
     post["score"] = d
     post["judged_by"] = jname
+    if d is None:
+        post["judge_error"] = r.error or "심사 응답 형식 오류"
     return post
 
 

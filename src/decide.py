@@ -62,8 +62,11 @@ def decide_distribution(
 
     for p in posts:
         s = p.get("score")
-        if s is None:                       # 심사 불가 → 정규식 통과분으로 채택
-            pool.append(p)
+        if s is None:
+            # 금융사 채널은 심사 장애를 품질 통과로 해석하면 안 된다.
+            # 이전에는 Gemini quota 장애 때 score=null 50건이 그대로 발송됐다.
+            p["hold_reason"] = "심사실패:" + p.get("judge_error", "점수없음")[:60]
+            held.append(p)
         elif s.get("fatal"):
             p["hold_reason"] = "fatal:" + ",".join(s["fatal"])[:60]
             held.append(p)

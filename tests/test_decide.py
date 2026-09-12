@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.decide import decide_distribution, temperature_for
 from src.gate import is_hard_excluded
 from src import rules, entity, dedup
+from src.judge import _parse as parse_judge
 
 def P(i, code="005930", total=18, fatal=None, kind="disclosure"):
     return {"id": f"p{i}", "stock_code": code, "kind": kind, "provider": "claude",
@@ -30,6 +31,20 @@ def main():
     # 3) 저점수 컷
     sent, _ = decide_distribution([P(1, total=9)], min_score=14)
     ok.append(run("저점수 컷", len(sent) == 0))
+
+    # 심사 장애는 정규식 통과 여부와 무관하게 fail-closed 한다.
+    unjudged = P("unjudged")
+    unjudged["score"] = None
+    unjudged["judge_error"] = "quota"
+    sent, held = decide_distribution([unjudged])
+    ok.append(run("미심사 글 배포 차단",
+                  not sent and held[0]["hold_reason"].startswith("심사실패:")))
+    ok.append(run("심사 점수 범위 검증",
+                  parse_judge('{"factual":9,"useful":5,"natural":5,"compliant":5,'
+                              '"gain":5,"fit":5,"fatal":[],"reason":""}') is None))
+    ok.append(run("정상 심사 JSON 파싱",
+                  parse_judge('{"factual":5,"useful":4,"natural":4,"compliant":5,'
+                              '"gain":4,"fit":3,"fatal":[],"reason":""}') is not None))
 
     # 4) 정렬 우선: 고점수가 상한을 먼저 차지
     posts = [P(1, total=12), P(2, total=20), P(3, total=15)]
