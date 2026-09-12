@@ -35,7 +35,6 @@ ENDPOINTS = [
         ("fdpp_ocsa", "타법인증권취득자금", "원"),
         ("nstk_asstd", "신주 발행가", "원"),
         ("ic_mthn", "증자 방식", ""),
-        ("ssl_at", "상장 예정일", ""),
     ]),
     (r"무상증자", "fricDecsn", "무상증자 결정", [
         ("nstk_ostk_cnt", "발행 보통주", "주"),
@@ -255,6 +254,11 @@ def _contract_detail(item: dict) -> bool:
     return True
 
 
+def _row_for_receipt(rows: list[dict], rcept_no: str) -> dict | None:
+    """같은 회사의 다른 공시가 아니라 현재 접수번호의 행만 선택한다."""
+    return next((row for row in rows if str(row.get("rcept_no", "")) == rcept_no), None)
+
+
 def enrich_one(item: dict, day: str) -> bool:
     """공시 항목의 facts 에 정형 수치를 덧붙인다. 보강했으면 True."""
     title = item.get("title", "")
@@ -268,6 +272,9 @@ def enrich_one(item: dict, day: str) -> bool:
 
     corp = corp_codes().get(code or "")
     if not corp:
+        return False
+    rcept = (item.get("id") or "").replace("dart-", "")
+    if not rcept.isdigit():
         return False
     for pat, ep, label, fields in ENDPOINTS:
         if not re.search(pat, title):
@@ -287,7 +294,10 @@ def enrich_one(item: dict, day: str) -> bool:
             if d.get("status") != "000" or not d.get("list"):
                 return False
 
-            row = d["list"][-1]
+            row = _row_for_receipt(d["list"], rcept)
+            if row is None:
+                print(f"[dart] {ep} 접수번호 불일치 {rcept} — 상세 미사용")
+                return False
             lines = []
             for key, lab, unit in fields:
                 v = _fmt(row.get(key, ""), unit)

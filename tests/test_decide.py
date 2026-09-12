@@ -839,6 +839,17 @@ def main():
                   _ep("주요사항보고서(자기주식취득신탁계약체결결정)") == "tsstkAqTrctrCnsDecsn"))
     ok.append(run("일반 취득은 그대로",
                   _ep("주요사항보고서(자기주식취득결정)") == "tsstkAqDecsn"))
+    _piic_fields = next(f for p_, e, _l, f in _dd.ENDPOINTS if e == "piicDecsn")
+    ok.append(run("DART ssl_at 오매핑 제거",
+                  all(k != "ssl_at" for k, _l, _u in _piic_fields)))
+    _rows_by_receipt = [{"rcept_no": "20260901000001", "bd_fta": "1"},
+                        {"rcept_no": "20260901000002", "bd_fta": "2"}]
+    ok.append(run("DART 상세 접수번호 정확 매칭",
+                  _dd._row_for_receipt(_rows_by_receipt, "20260901000001")["bd_fta"] == "1"))
+    ok.append(run("DART 상세 불일치 시 사용 안 함",
+                  _dd._row_for_receipt(_rows_by_receipt, "20260901000003") is None))
+    _dart_source = pathlib.Path("src/sources/dart.py").read_text(encoding="utf-8")
+    ok.append(run("DART 시장구분 전체 조회", '"corp_cls"' not in _dart_source))
     # 공급계약은 정형 API 가 없어 원문 표를 읽는다 (프로브: 후보 3종 전부 101)
     _rows = {"판매ㆍ공급계약내용": "CLT Interface Board",
              "계약금액총액(원)": "9,686,300,000",

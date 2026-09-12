@@ -53,7 +53,6 @@ def fetch(limit: int = 30) -> list[dict]:
         return []
 
     beg, end = _range()
-    day = beg
     if beg != end:
         print(f"[dart] 주말 포함 조회 {beg} ~ {end}")
     items, page = [], 1
@@ -69,7 +68,6 @@ def fetch(limit: int = 30) -> list[dict]:
                     "crtfc_key": DART_API_KEY,
                     "bgn_de": beg,
                     "end_de": end,
-                    "corp_cls": "Y",     # Y=유가증권, K=코스닥
                     "page_no": page,
                     "page_count": 100,
                 },
@@ -119,7 +117,9 @@ def fetch(limit: int = 30) -> list[dict]:
         crawl.sleep_jitter()
 
     # 제목만으로는 글이 안 된다. 정형 API 로 핵심 수치를 채운다.
-    dart_detail.enrich_all(items, day)
+    # corp_cls 를 지정하지 않아 유가증권·코스닥·코넥스를 함께 조회한다.
+    # 주말 구간은 종료일 기준으로 상세 API 를 조회해야 토·일 접수분도 포함된다.
+    dart_detail.enrich_all(items, end)
 
     crawl.report("dart", len(items), limit, "DART API 응답 이상 또는 키 만료")
     return items
