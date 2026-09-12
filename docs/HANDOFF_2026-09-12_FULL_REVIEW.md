@@ -1,5 +1,9 @@
 # 전체 구조 개선 인수인계 (2026-09-12)
 
+> 이 문서 이후 API 비용 절감 0~4단계가 추가됐습니다. stage·보강·재작성·비용 계측의
+> 현재 동작은 [`HANDOFF_2026-09-12_CODEX_COST_IMPLEMENTATION.md`](HANDOFF_2026-09-12_CODEX_COST_IMPLEMENTATION.md)를
+> 우선합니다.
+
 Claude 후속 검토용 문서입니다. 기준 브랜치는 `main`, 검토 시작점은
 `275acbe`이며 2026-09-12 페르소나 재점검 끝점은 `fa39dff`입니다.
 

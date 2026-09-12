@@ -3,7 +3,7 @@
 | 기준 | 내용 |
 |---|---|
 | 기준일 | 2026-09-12 KST |
-| 기능 기준 | `fa39dff` |
+| 기능 기준 | `9fca3af` |
 | 적용 범위 | 후보가 생성 단계에 진입한 뒤 Persona·Angle 선택부터 텔레그램 배포 판정까지 |
 
 ## 1. 점검 결론
@@ -28,9 +28,10 @@ flowchart TD
     C --> D["Claim 선택·프롬프트 조립"]
     D --> E["Claude·Gemini 작성"]
     E --> F{"정제·결정형 필터"}
-    F -->|실패| G["다른 provider로 1회 재생성·재검사"]
+    F -->|실패| G["리젝 큐 보관·새 후보 우선"]
     F -->|통과| H["교차 LLM 심사"]
-    G --> H
+    G --> K["후보 소진·목표 미달 때만 다른 provider 재작성"]
+    K --> H
     H --> I["점수·문체·질문·말미 상한"]
     I --> J["텔레그램 성공분만 상태 저장"]
 ```
@@ -44,7 +45,7 @@ flowchart TD
 | 5 | `personas.build_messages_v2()` | 선택 밖 사실을 제거하고 Persona·Angle·금지 규칙을 하나의 프롬프트로 조립 |
 | 6 | `generator._run()` | 슬롯별 temperature로 Claude·Gemini 작성 후 정규화 |
 | 7 | `filters.check()` | 길이·질문·숫자·근거·derived fact·문법·준법 위반을 결정형으로 검사 |
-| 8 | `generator.generate()` | 리젝 글은 오류 힌트를 붙여 다른 provider로 한 번만 재생성 |
+| 8 | `generator.generate()`, `retry_rejected()` | 리젝 글을 보관하고 새 후보를 모두 쓴 뒤 목표 미달일 때만 다른 provider로 한 번 재생성 |
 | 9 | `judge.judge_all()` | 작성 모델과 다른 모델이 6축 점수와 fatal 위반을 심사 |
 | 10 | `decide.decide_distribution()` | 사실성·준법성·fit·총점과 종목/유형/페르소나/질문/말미 상한 적용 |
 
@@ -131,7 +132,7 @@ Claim은 모델이 고르지 않습니다. `claims.select()`가 Angle 우선순�
 | 질문 | `no_question=True`는 질문 마무리 차단; poll은 `?` 종결 강제 |
 | 사실 | 미선정 Claim, 입력 밖 숫자·기간 계산, 방향 오용, 무근거 정의·배경 차단 |
 | 정보가치 | 유의미한 derived fact가 있으면 값과 비교 문맥을 함께 사용해야 통과 |
-| 재생성 | 오류별 힌트를 붙여 다른 provider로 한 번만 재생성 |
+| 재생성 | 새 원본 후보를 먼저 쓰고, 후보 소진 뒤 목표 미달일 때만 오류 힌트와 함께 다른 provider로 한 번 재생성 |
 | 심사 | factual·useful·natural·compliant·gain·fit 6축; 미심사·fatal은 fail-closed |
 | 배포 다양성 | 페르소나당 최대 목표의 30%, 질문형 최대 10%, 동일 말미 최대 2건 |
 
@@ -176,12 +177,13 @@ Angle은 `amount 18`, `ratio 18`, `reaction 13`, `compare 9`, `context 1`, `dura
 | 9 | 심사 장애·모델 장애·투표 계약 충돌 | 미심사 fail-closed, provider 격리·재할당, poll 질문형 제한 | `f722dfc`, `34bf6b1`, `793cd85` |
 | 10 | 실발송에서 Gemini 절단·오판·날짜/문법 문제 | thinking 최소화, Sonnet 우선 심사, 품질 차단기, 캐시·문법 보정 | `f5fc225`, `4d10905`, `3e5abb9` |
 | 11 | 런타임 호환 그래프 우회와 페르소나별 성과 미계측 | 선택 전 COMPAT 강제, 짧은메모 계약 정렬, `by_persona` 추가 | `fa39dff` |
+| 12 | 필터 탈락분을 즉시 재작성해 새 후보보다 비싼 재호출을 우선 | fresh-first 리젝 큐, 최초 60·후속 10~60 동적 stage, stage별 통계 | `ac456f1`, `9fca3af` |
 
 ## 9. 검증 및 다음 관찰
 
 | 검증 | 결과 |
 |---|---:|
-| 단위 회귀 | 316/316 |
+| 단위 회귀 | 334/334 |
 | 설정·프롬프트 감사 | 실패 0 / 경고 0 |
 | 계약 조합 감사 | 268개 조합 중 불가 0 |
 | 런타임 표본 | 4,200회 선택 중 비호환 0 |

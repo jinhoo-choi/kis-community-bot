@@ -1,5 +1,9 @@
 # API 비용 절감안 Codex 검토 인계 (2026-09-12)
 
+> 이 문서는 구현 전 검토 이력을 보존합니다. 합의된 0~4단계의 실제 반영 결과는
+> [`HANDOFF_2026-09-12_CODEX_COST_IMPLEMENTATION.md`](HANDOFF_2026-09-12_CODEX_COST_IMPLEMENTATION.md)를
+> 기준으로 확인합니다.
+
 ## 기준
 
 | 항목 | 값 |

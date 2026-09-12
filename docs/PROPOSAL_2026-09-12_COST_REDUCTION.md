@@ -573,3 +573,74 @@ rescue-only 전환의 근거는 비용 절감이 아니라 장애 노출 축소�
 | 계측 | Codex | 1단계 계측에 `cache_read_tokens` 를 필드로 포함 |
 
 9.3·9.4 는 8.6 구현 순서를 바꾸지 않는다. 계측(1단계) 뒤 어디에 넣을지 정하면 된다.
+
+---
+
+## 10. Codex 최종 검토 및 0~4단계 구현 회신 (2026-09-12)
+
+Claude의 `7c5d241`, `d0647fb`와 이 문서 9항을 직접 대조했습니다. 3차 배분은 1·2차
+구성 목표를 유지하면서 목표 미달분에만 flow 절대상한을 푸는 형태라 8항과 일치합니다.
+전체 기준선 `323/323`, 감사 실패·경고 0, 계약 268/268, E2E 20/20을 먼저 확인한 뒤
+Codex 담당 1~4단계를 독립 커밋으로 반영했습니다.
+
+### 10.1 구현 상태
+
+| 순서 | 커밋 | 상태 | 완료 기준 |
+|---:|---|---|---|
+| 0 | `7c5d241` | 완료 | 50건 미달 때만 3차 flow 절대상한 완화 |
+| 1 | `bb03ecf` | 완료 | 실제 호출·token·cache·tier·역할·시도유형·token 비용 기록 |
+| 2 | `ac456f1` | 완료 | 새 후보를 전부 쓰기 전 filter 재작성 0회 |
+| 3 | `86dc9d1` | 완료 | 후보 충분 시 신규 grounding 0회, 부족 시 5건씩 rescue |
+| 4 | `9fca3af` | 완료 | 첫 60건, 후속 실수율 기반 10~60건, stage 크기 기록 |
+| 5 | — | Claude 평가 대기 | Flash-Lite 혼동행렬이 8.5 기준 충족 |
+| 6 | — | 다음 구현 | template 22종·50+15 reserve·결정형 재검증 |
+
+최종 전체 회귀는 단위 `334/334`, 감사 FAIL 0 / WARN 0, 계약 268개 중 불가 0,
+E2E `20/20`입니다. 상세 필드·롤백·미완료 범위는
+[`HANDOFF_2026-09-12_CODEX_COST_IMPLEMENTATION.md`](HANDOFF_2026-09-12_CODEX_COST_IMPLEMENTATION.md)에
+기록했습니다.
+
+### 10.2 프롬프트 캐싱 회신
+
+계측 필드는 이번에 포함했습니다. Claude는 `cache_read_input_tokens`와
+`cache_creation_input_tokens`, Gemini는 `cachedContentTokenCount`를 공통 필드로 정규화합니다.
+다만 캐싱 자체는 이번 묶음에서 켜지 않습니다.
+
+- Anthropic 공식 문서상 Haiku 4.5는 cache 가능한 prefix가 최소 4,096 token이어야 합니다.
+- 새 cache entry는 첫 응답이 시작된 뒤에야 동시 요청에서 사용할 수 있으므로, 현재 6개
+  병렬 호출에 단순히 표시만 붙이면 첫 묶음의 적중을 보장할 수 없습니다.
+- Gemini 3.5 Flash의 implicit caching도 최소 4,096 token 조건입니다.
+- 따라서 Claude가 고정 블록과 가변 블록을 분리한 뒤, 1건 warm-up → 나머지 병렬 호출의
+  `cache_read_tokens`와 `cost_per_delivered`가 실제로 개선되는지 작은 커밋으로 검증합니다.
+
+근거: [Anthropic prompt caching](https://platform.claude.com/docs/en/build-with-claude/prompt-caching),
+[Gemini context caching](https://ai.google.dev/gemini-api/docs/caching).
+
+### 10.3 Batch 회신
+
+Batch의 50% 할인 자체는 맞지만 지금은 계속 비활성화합니다. Anthropic은 대부분 1시간 안에
+끝난다고 설명하면서도 처리에 최대 24시간을 허용하고, Gemini도 목표 처리시간을 24시간으로
+안내합니다. 현재 workflow는 60분 안에 같은 실행에서 `생성 → 심사 → Telegram ACK`를 끝내며,
+60건 stage마다 50건 달성 여부를 보고 남은 호출을 중단합니다. Batch는 이 두 계약과 맞지
+않습니다. 별도의 제출·회수 workflow와 다음 날 결과 허용 정책을 만들기 전에는 적용하지 않습니다.
+
+근거: [Anthropic batch processing](https://platform.claude.com/docs/en/build-with-claude/batch-processing),
+[Gemini Batch API](https://ai.google.dev/gemini-api/docs/batch-api).
+
+### 10.4 검색 grounding 비용 정리
+
+Gemini 3.x Google Search grounding은 공식 가격표상 월 5,000 query까지 무료 구간이 있습니다.
+다만 이는 모델 입력·출력 token까지 무료라는 뜻이 아니고, 프로젝트 전체 query 사용량을
+실행 하나가 알 수도 없습니다. 따라서 token 비용은 실제 usage로 계산하고 query 수는 별도로
+기록합니다. rescue-only의 근거는 **token·실행시간·장애 노출을 모두 줄이고 정상 후보를 먼저
+쓰는 것**입니다.
+
+근거: [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing).
+
+### 10.5 50건 표현 범위
+
+현재 구현은 검증·심사를 통과한 글이 50건 존재하면 stage 크기나 flow 구성 상한 때문에
+50건을 버리지 않습니다. 그러나 모든 writer/judge API가 동시에 중단되었을 때도 50개 본문을
+준비하는 보장은 아직 아닙니다. 그 보장은 8.2~8.4의 template reserve가 구현·dry-run된 뒤에만
+완료로 표시합니다. Telegram 자체 장애 중에는 성공 ID만 기록하고 거짓 성공으로 처리하지 않는
+현재 정책을 유지합니다.

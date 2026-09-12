@@ -2,6 +2,9 @@
 
 > 이 문서는 최초 최소 변경 1~4의 기록입니다. 이후 전체 구조 재검토와 후속 수정은
 > [`HANDOFF_2026-09-12_FULL_REVIEW.md`](HANDOFF_2026-09-12_FULL_REVIEW.md)에 이어집니다.
+> 생성 묶음·보강·재작성의 최신 동작은
+> [`HANDOFF_2026-09-12_CODEX_COST_IMPLEMENTATION.md`](HANDOFF_2026-09-12_CODEX_COST_IMPLEMENTATION.md)를
+> 우선합니다.
 
 Claude 후속 검토용 기록입니다. 품질 기준과 생성 프롬프트는 바꾸지 않고, 이미
 비용을 쓴 결과물을 뒤에서 버리거나 동일 호출을 반복하는 네 구간만 수정했습니다.
