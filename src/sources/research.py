@@ -12,6 +12,8 @@
 import os
 import re
 
+from bs4 import BeautifulSoup
+
 from src import crawl
 
 # 폴백 순서대로 시도. 위쪽이 현재 구조, 아래쪽은 구/대체 구조.
@@ -60,6 +62,80 @@ def _naver_detail(url: str) -> str:
             out.append(f"투자의견: {op.group(1)}")
         return "\n".join(out)
     return ""
+
+
+RESEARCH_API = "https://m.stock.naver.com/front-api/research"
+_TP_API = re.compile(r"목표주가[는를]?\s*([\d,]+)\s*원")
+_OP_API = re.compile(r"투자의견\s*([A-Za-z가-힣.]+)")
+
+
+def fetch_naver_api(limit: int = 12) -> list[dict]:
+    """개편된 네이버 리서치 API. 프로브로 확정한 경로다.
+
+      목록 GET /front-api/research/list?category=company&page=1&pageSize=N
+      상세 GET /front-api/research/end?researchId={id}&category=company
+
+    구 HTML 파싱보다 낫다. itemCode 가 JSON 에 직접 들어 있어 종목 귀속이
+    정확하고, 상세 content 첫 문장에 목표주가·투자의견이 명시된다.
+    본문 자체는 리포트 저작물이라 저장하지 않는다. 수치만 뽑는다.
+    """
+    hdr = {"Accept": "application/json",
+           "Referer": "https://m.stock.naver.com/investment/research/company"}
+    try:
+        r = crawl.requests.get(f"{RESEARCH_API}/list",
+                               params={"category": "company", "page": 1,
+                                       "pageSize": max(limit, 20)},
+                               headers={**crawl.HEADERS, **hdr}, timeout=15)
+        items = r.json().get("result") or []
+    except Exception as e:
+        print(f"[research] 네이버 API 목록 실패: {e}")
+        crawl.report("naver_research", 0, limit, "API 목록 실패")
+        return []
+
+    out = []
+    for it in items[:limit]:
+        code, name = it.get("itemCode", ""), it.get("itemName", "")
+        if not re.fullmatch(r"\d{6}", code or ""):
+            continue          # 0017J0 같은 비정형 코드는 건너뛴다
+        tp = op = ""
+        try:
+            d = crawl.requests.get(f"{RESEARCH_API}/end",
+                                   params={"researchId": it["researchId"],
+                                           "category": "company"},
+                                   headers={**crawl.HEADERS, **hdr}, timeout=15)
+            html = ((d.json().get("result") or {}).get("researchContent")
+                    or {}).get("content", "")
+            text = BeautifulSoup(html, "html.parser").get_text(" ", strip=True)[:400]
+            m1, m2 = _TP_API.search(text), _OP_API.search(text)
+            tp = m1.group(1) if m1 else ""
+            op = m2.group(1) if m2 else ""
+        except Exception:
+            pass
+        crawl.sleep_jitter(0.2, 0.5)
+
+        detail = ""
+        if tp and tp.replace(",", "") != "0":
+            detail += f"제시 적정가격: {tp}원\n"
+        if op and "없음" not in op:
+            detail += f"투자의견: {op}\n"
+        out.append({
+            "id": f"naver-api-{it['researchId']}",
+            "kind": "research",
+            "stock_code": code,
+            "stock_name": name,
+            "title": it.get("title", ""),
+            "facts": (
+                f"종목: {name} ({code})\n"
+                f"리포트 제목: {it.get('title', '')}\n"
+                f"발간: {it.get('brokerName', '')} / {it.get('writeDate', '')}\n"
+                f"{detail}"
+                "※ 제시 수치는 증권사 의견이며 단정하지 말 것."
+                + ("" if detail else "\n※ 목표주가·투자의견 미제공. 추정하지 말 것.")
+            ),
+            "src": it.get("endUrl", ""),
+        })
+    crawl.report("naver_research", len(out), limit, "API 응답 구조 변경 의심")
+    return out
 
 
 def fetch_naver(limit: int = 12) -> list[dict]:
@@ -223,15 +299,11 @@ def fetch_hankyung(limit: int = 8) -> list[dict]:
     return out
 
 
-# 네이버 금융이 'Npay 증권' 으로 개편되면서 리서치 목록의 표가 사라졌다
-# (실측: 118KB 응답에 table 0개, company_read 링크 0개).
-# 시세 페이지와 같은 원인이다. 한경컨센서스는 정상이라 그쪽으로 전량 돌린다.
-# 네이버 경로는 코드를 남겨두되 기본 비활성. 복구되면 1 로 되돌리면 된다.
-USE_NAVER = os.environ.get("USE_NAVER_RESEARCH", "0") == "1"
+# 구 HTML 경로(fetch_naver)는 개편으로 죽었다. 되살릴 일이 있으면 1 로 둔다.
+USE_NAVER_HTML = os.environ.get("USE_NAVER_RESEARCH", "0") == "1"
 
 
 def fetch(limit: int = 16) -> list[dict]:
-    if not USE_NAVER:
-        return fetch_hankyung(limit)[:limit]
-    n = int(limit * 0.7)
-    return (fetch_naver(n) + fetch_hankyung(limit - n))[:limit]
+    # 구 HTML 경로는 개편으로 죽었다. API 경로와 한경을 병행한다.
+    n = limit // 2
+    return (fetch_naver_api(n) + fetch_hankyung(limit - n))[:limit]

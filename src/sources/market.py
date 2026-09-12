@@ -428,12 +428,19 @@ def fetch(limit: int = 12) -> list[dict]:
     ranks = flow_ranks()
     if ranks:
         print(f"[market] 수급 상위 {len(ranks)}종목 확보")
-    for r in rows[:limit]:
+    # 종목당 요청 2회를 직렬로 돌면서 0.4~0.9초씩 쉬고 있었다.
+    # limit 이 250이면 보강만 250 x (2요청 + 0.65초) 로 8분 넘게 걸린다.
+    # siseJson 랭킹(2,632종목)을 8워커로 이미 병렬 처리하고 있으므로
+    # 같은 방식으로 맞춘다. 워커 수를 두면 서버 부담도 일정하다.
+    def _enrich_one(r: dict) -> None:
         _add_history(r)
         _add_flow(r)
         if r["name"] in ranks:
             r["flow_rank"] = ranks[r["name"]]
-        crawl.sleep_jitter(0.4, 0.9)
+
+    targets = rows[:limit]
+    with cf.ThreadPoolExecutor(max_workers=8) as ex:
+        list(ex.map(_enrich_one, targets))
 
     out = []
     for r in rows[:limit]:
