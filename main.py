@@ -19,7 +19,7 @@ import sys
 
 import config
 from src import (state, tickers, generator, telegram_bot, enrich, judge,
-                 gate, decide, stats, dedup, crawl, assign, theme_map)
+                 gate, decide, stats, dedup, crawl, assign, theme_map, facts)
 from src.sources import dart, research, market, policy, telegram_ch, kind_inquiry
 
 
@@ -79,6 +79,11 @@ def main():
 
     raw = collect()
     print(f"[main] 수집 총 {len(raw)}건")
+
+    # 용어 설명은 보강·게이트 이전에 코드가 붙인다. 모델에게 정의를 맡기지 않는다.
+    _n_term = facts.annotate_terms(raw)
+    if _n_term:
+        print(f"[main] 용어 설명 주입 {_n_term}건")
 
     # 사실 보강을 게이트보다 먼저 한다.
     # 순서가 반대면 '보강하면 글감이 되는' 공시·리포트가 tier5(글감부족)로 미리 잘려
