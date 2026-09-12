@@ -192,9 +192,10 @@ def main():
 
     # 생성→심사→판정을 묶음 단위로 실행한다. 목표를 채우면 남은 후보는 LLM에
     # 보내지 않는다. 기존 함수와 최종 판정 기준은 그대로 재사용한다.
-    posts, sent_posts, held = [], [], []
+    posts, sent_posts, held, attempted_items = [], [], [], []
     for start in range(0, len(picked), config.GEN_STAGE_SIZE):
         stage = picked[start:start + config.GEN_STAGE_SIZE]
+        attempted_items.extend(stage)
         made = generator.generate(stage, s["recent_tone"])
         if config.ENABLE_JUDGE:
             made = judge.judge_all(made)
@@ -221,7 +222,8 @@ def main():
 
     row = stats.record(**stats.summarize(
         raw, blocked, enriched_n, posts, delivered_posts, held,
-        generator.collect_fallbacks()),
+        generator.collect_fallbacks(), generation_candidates=picked,
+        generation_attempted=attempted_items, delivery_attempted=sent_posts),
         dedup=dup_reasons, crawl_health=crawl.health())
     telegram_bot.send_summary(sent_posts, sent, row)
     print("[main] filter_log " + stats.detail_log(picked, sent_posts, held))

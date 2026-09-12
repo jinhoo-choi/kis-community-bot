@@ -87,7 +87,40 @@ def _raw_vs_clean() -> dict:
     return {k: v[:2] for k, v in out.items()}
 
 
-def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) -> dict:
+def _kind_counts(items: list[dict]) -> Counter:
+    return Counter(x.get("kind") or "?" for x in items)
+
+
+def _kind_funnel(collected, blocked, candidates, attempted, generated,
+                 delivery_attempted, sent, held) -> dict:
+    """유형별 단계 통과량. 비용·품질 병목을 같은 실행에서 비교한다."""
+    raw_kind = {x.get("id"): x.get("kind") or "?" for x in collected}
+    blocked_counts = Counter(raw_kind.get(item_id, "?") for item_id, _ in blocked)
+    stages = {
+        "collected": _kind_counts(collected),
+        "gate_blocked": blocked_counts,
+        "candidates": _kind_counts(candidates),
+        "attempted": _kind_counts(attempted),
+        "filter_passed": _kind_counts(generated),
+        "judge_failed": _kind_counts([x for x in generated if x.get("score") is None]),
+        "held": _kind_counts(held),
+        "delivery_attempted": _kind_counts(delivery_attempted),
+        "delivered": _kind_counts(sent),
+    }
+    kinds = sorted({k for counts in stages.values() for k in counts})
+    return {kind: {name: counts.get(kind, 0) for name, counts in stages.items()}
+            for kind in kinds}
+
+
+def summarize(collected, blocked, enriched, generated, sent, held, fallbacks,
+              *, generation_candidates=None, generation_attempted=None,
+              delivery_attempted=None) -> dict:
+    generation_candidates = (generated if generation_candidates is None
+                             else generation_candidates)
+    generation_attempted = (generated if generation_attempted is None
+                            else generation_attempted)
+    delivery_attempted = sent if delivery_attempted is None else delivery_attempted
+
     def avg_score(ps):
         v = [(p.get("score") or {}).get("total") for p in ps]
         v = [x for x in v if x]
@@ -134,13 +167,27 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks) ->
                                    for p in held).most_common(20)),
         # 유료 청구는 보강 성공 건수가 아니라 호출 건수에 붙는다
         "enrich_calls": __import__("src.enrich", fromlist=["CALLS"]).CALLS[0],
+        # staged generation 이 실제로 몇 항목의 LLM 호출을 피했는지 기록한다.
+        "generation_candidates": len(generation_candidates),
+        "generation_attempted": len(generation_attempted),
+        "generation_items_avoided": max(
+            0, len(generation_candidates) - len(generation_attempted)),
         "generated": len(generated),
+        "judge_failed": sum(1 for p in generated if p.get("score") is None),
+        "delivery_attempted": len(delivery_attempted),
+        "delivery_failed": max(0, len(delivery_attempted) - len(sent)),
+        "attempt_to_delivery_yield": (
+            round(len(sent) / len(generation_attempted), 4)
+            if generation_attempted else 0.0),
         "sent": len(sent),
         "held": len(held),
         "hold_reasons": dict(Counter((p.get("hold_reason") or "?").split(":")[0].split("(")[0]
                                      for p in held)),
         "avg_score": avg_score(sent),
         "by_provider": by_provider,
+        "by_kind_funnel": _kind_funnel(
+            collected, blocked, generation_candidates, generation_attempted,
+            generated, delivery_attempted, sent, held),
         "model_fallbacks": fallbacks,
     }
 

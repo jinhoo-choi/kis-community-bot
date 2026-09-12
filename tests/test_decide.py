@@ -906,6 +906,28 @@ def main():
     ok.append(run("첫 생성 묶음 유형 혼합",
                   len({x["kind"] for x in _ordered[:12]}) >= 2))
 
+    from src import stats as _stats
+    _stat_candidates = [{"id": f"c{i}", "kind": "flow"} for i in range(4)]
+    _stat_attempted = _stat_candidates[:2]
+    _stat_generated = [
+        {"id": "c0", "kind": "flow", "provider": "claude",
+         "score": {"total": 16, "fit": 3}},
+        {"id": "c1", "kind": "flow", "provider": "claude", "score": None},
+    ]
+    _stat_sent = [_stat_generated[0]]
+    _stat_row = _stats.summarize(
+        _stat_candidates, [], 0, _stat_generated, _stat_sent,
+        [_stat_generated[1]], [], generation_candidates=_stat_candidates,
+        generation_attempted=_stat_attempted, delivery_attempted=_stat_sent)
+    ok.append(run("단계 생성 절감량 계측",
+                  _stat_row["generation_items_avoided"] == 2
+                  and _stat_row["generation_attempted"] == 2))
+    ok.append(run("심사·전송 실패 계측",
+                  _stat_row["judge_failed"] == 1
+                  and _stat_row["delivery_failed"] == 0))
+    ok.append(run("유형별 퍼널 계측",
+                  _stat_row["by_kind_funnel"]["flow"]["delivered"] == 1))
+
     from src.sources import dart_detail as _dd
     ok.append(run("무수치 공시유형 차단",
                   all(_dd.NO_DETAIL_API.search(t) for t in
