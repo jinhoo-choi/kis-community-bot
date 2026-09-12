@@ -210,7 +210,8 @@ def _metadata_numbers(item: dict) -> set[str]:
     """날짜·시점은 주장 수에 넣지 않되 본문에서 그대로 인용할 수 있게 한다."""
     out = set()
     for line in item.get("facts", "").splitlines():
-        if re.match(r"^(?:기준일|공시일|발행일|기사일|발행 시각|시점)\s*:", line):
+        if re.match(r"^(?:기준일|공시일|발행일|발간일|작성일|기사일|신청일|승인일|"
+                    r"보도 시각|게시 시각|공시 시각|발행 시각|시점)\s*:", line):
             out |= _nums(line)
     return out
 

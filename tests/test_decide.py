@@ -430,6 +430,14 @@ def main():
     ok.append(run("누적 등락률 부호를 방향어로 정리",
                   "10.15% 상승했네요" in
                   _cl("5거래일 누적 등락률은 +10.15%였습니다.")))
+    ok.append(run("장중 오르내림 표현을 고저 차이로 정리",
+                  "고저 차이는 저가 대비 32.2%였습니다" in
+                  _cl("장중에는 저가 대비 32.2% 오르내렸습니다.")))
+    ok.append(run("장중 변동성 표현을 고저 차이로 정리",
+                  "고저 차이는 저가 대비 31.1%였고" in
+                  _cl("장중 저가 대비 31.1%까지 오르며 변동성을 보였는데,")))
+    ok.append(run("흐름 연결어미 마무리 정리",
+                  _cl("5거래일 누적으로는 16.09% 상승한 흐름인데요.").endswith("흐름입니다.")))
     ok.append(run("상투어 리젝(치환불가)", any("news_cliche" in e for e in
                   _f2.check("남은 과제입니다. " * 8, ""))))
     ok.append(run("주체없는 평가 차단", any("unsourced_eval" in e for e in
@@ -1387,9 +1395,14 @@ def main():
                       _f2.check("종가는 14,850원이었고 거래량도 늘었는데요.",
                                 "종가: 14,850원", "brief_report", "reaction",
                                 "brief_report"))))
+    ok.append(run("명사형 인데요 마무리도 차단",
+                  any("연결어미" in e for e in
+                      _f2.check("지난 5거래일은 상승한 흐름인데요.",
+                                "5거래일 누적 등락률: +16.09%",
+                                "careful_note", "compare", "careful_note"))))
 
     from src import claims as _claims2
-    _date_item = {"facts": "발행일: 2026-09-11\n요지: 정부가 지원안을 발표했습니다.",
+    _date_item = {"facts": "보도 시각: 2026-09-11 15:57 KST\n요지: 정부가 지원안을 발표했습니다.",
                   "angle": "context"}
     ok.append(run("근거 있는 날짜 메타데이터 숫자 허용",
                   not any("근거없는수치" in e for e in

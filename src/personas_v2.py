@@ -120,7 +120,9 @@ SLOT_W = {
                    "two_view": 1, "quick_memo": 1, "open_talk": 1},
     "research":   {"fact_note": 3, "two_view": 3, "check_list": 2, "term_guide": 2,
                    "data_focus": 2, "careful_note": 2, "brief_report": 2,
-                   "open_talk": 2, "quick_memo": 1, "timeline_note": 1},
+                   # 적정가격·투자의견을 놓고 판단을 묻는 상투 질문이 심사 fatal로
+                   # 반복됐다. 리서치는 값과 출처를 전달하고 질문형은 쓰지 않는다.
+                   "open_talk": 0, "quick_memo": 1, "timeline_note": 1},
     "flow":       {"brief_report": 3, "quick_memo": 3, "data_focus": 3, "careful_note": 2,
                    "fact_note": 2, "open_talk": 2, "check_list": 1,
                    "two_view": 1, "term_guide": 1, "timeline_note": 1},
@@ -180,6 +182,8 @@ SYSTEM_PROMPT = """당신은 한국투자증권 앱 커뮤니티에 게시될 �
   결합 사실은 개별 수치만으로는 안 보이는 값이라 이게 글의 존재 이유입니다.
   관계를 뜻하는 단어만 넣고 값은 raw 수치뿐이면 쓰나 마나입니다.
   결합값만 떼어 쓰지 말고 입력에 적힌 비교 대상과 단위를 함께 옮깁니다.
+- '장중 고저 차이: 저가 대비 X%'는 그 관계명 그대로 씁니다.
+  이를 'X% 상승했다', '오르내렸다', '변동성을 보였다'로 바꾸지 않습니다.
 - 숫자가 없는 문장을 분량 채우기용으로 만들지 않습니다. 그런 문장도 [이번 글에 쓸 사실]에서
   직접 확인되는 내용이어야 합니다.
 - 입력의 수치를 그대로 전하고 그 크기를 평가하지 마세요.

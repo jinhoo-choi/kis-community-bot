@@ -208,6 +208,9 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
         errs.append("장중범위표현오류")
     if re.search(r"저가\s*대비\s*\d+(?:\.\d+)?%\s*(?:높아|낮아).{0,15}변동성", body):
         errs.append("장중범위표현오류")
+    if re.search(r"저가\s*대비\s*\d+(?:\.\d+)?%[^.!?\n]{0,20}"
+                 r"(?:오르내렸|오르며\s*변동성)", body):
+        errs.append("장중범위표현오류")
     if re.search(r"(?:외국인|기관)\s*순매매\s*수급\s*순위", body):
         errs.append("수급표현오류")
 
@@ -216,7 +219,7 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
     period = re.search(r"(?:약\s*)?\d+\s*(?:개월|년)\s*만(?:에)?", body)
     if period and period.group() not in (facts or ""):
         errs.append("기간계산근거없음")
-    if re.search(r"는데요\s*\.$", body.strip()):
+    if re.search(r"(?:인데요|는데요)\s*\.$", body.strip()):
         errs.append("미완성(연결어미 마무리)")
 
     # 용어 정의는 입력에 정의문을 제공했을 때만 허용한다. 모델 상식으로 만든 정의는
