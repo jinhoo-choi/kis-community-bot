@@ -96,6 +96,30 @@ def probe_research_api() -> None:
     for pth in sorted(paths)[:30]:
         log(f"    path: {pth}")
 
+    # stockList/list 가 400 이다 = 경로는 맞고 파라미터가 빠졌다.
+    log("  --- 파라미터 조합 ---")
+    base0 = "https://m.stock.naver.com/front-api"
+    hdr0 = {**H, "Accept": "application/json", "Referer": page}
+    combos = [
+        ("/research/stockList", {"page": 1, "pageSize": 20}),
+        ("/research/stockList", {"page": 1, "size": 20}),
+        ("/research/stockList", {"pageNo": 1, "pageSize": 20}),
+        ("/research/stockList", {"category": "company", "page": 1, "pageSize": 20}),
+        ("/research/list", {"category": "company", "page": 1, "pageSize": 20}),
+        ("/research/list", {"researchType": "company", "page": 1, "pageSize": 20}),
+        ("/research/list", {"type": "stock", "page": 1, "pageSize": 20}),
+        ("/research/stockEnd", {"researchId": 95624}),
+        ("/research/end", {"researchId": 95624}),
+    ]
+    for c, prm in combos:
+        try:
+            rr = requests.get(base0 + c, params=prm, headers=hdr0, timeout=12)
+            log(f"    [{rr.status_code}] {c} {prm}")
+            if rr.status_code == 200:
+                log(f"      → {rr.text[:420]}")
+        except Exception as e:
+            log(f"    [ERR] {type(e).__name__} {c}")
+
     log("  --- front-api 타격 ---")
     base = "https://m.stock.naver.com/front-api"
     hdr = {**H, "Accept": "application/json", "Referer": page}
