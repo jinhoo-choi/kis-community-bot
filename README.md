@@ -1,5 +1,9 @@
 # KIS Community Post Bot
 
+> **AI가 작업을 시작하기 전에 읽을 것**
+> - [`docs/STATE.md`](docs/STATE.md) — 지금 무엇이 깨져 있는지
+> - [`docs/AI_COLLABORATION.md`](docs/AI_COLLABORATION.md) — 역할 분담과 상호 검토 규칙
+
 한국투자증권 앱 커뮤니티 활성화를 위한 **AI 게시글 생성·배포 파이프라인**.
 전일자 공시/리포트/수급/정책을 수집해 하루 50건의 게시글 초안을 만들고,
 텔레그램으로 직원에게 배포한다. **게시는 사람이 직접 하며, 게시글에는 'AI 작성' 뱃지를 부착한다.**
