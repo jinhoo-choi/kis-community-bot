@@ -3,6 +3,7 @@
 > **AI가 작업을 시작하기 전에 읽을 것**
 > - [`docs/STATE.md`](docs/STATE.md) — 지금 무엇이 깨져 있는지
 > - [`docs/AI_COLLABORATION.md`](docs/AI_COLLABORATION.md) — 역할 분담과 상호 검토 규칙
+> - [`docs/PERSONA_GENERATION_PROCESS.md`](docs/PERSONA_GENERATION_PROCESS.md) — 페르소나별 선택·생성·검수 계약과 변경 이력
 
 한국투자증권 앱 커뮤니티 활성화를 위한 **AI 게시글 생성·배포 파이프라인**.
 전일자 공시/리포트/수급/정책을 수집해 하루 50건의 게시글 초안을 만들고,
@@ -99,8 +100,10 @@
 | Gemini 무료 폴백 | `gemini-3.1-flash-lite` (작성·심사만, 검색 보강 제외) |
 
 ## 문체
-10개 통합 페르소나와 11개 Angle을 조합합니다. 각 페르소나가 문장 수·길이·숫자·
-질문 여부를 함께 소유해 축 간 모순을 줄입니다. 1인칭 투자 경험 서술은 자동 리젝됩니다.
+10개 통합 페르소나와 11개 Angle 중 데이터·슬롯·호환 그래프를 모두 만족하는 조합만
+사용합니다. 각 페르소나가 문장 수·길이·숫자·질문 여부를 함께 소유하며, 자세한 계약과
+실발송 기준선은 [`페르소나별 생성 프로세스`](docs/PERSONA_GENERATION_PROCESS.md)에 기록합니다.
+1인칭 투자 경험 서술은 자동 리젝됩니다.
 
 ## 세팅
 1. `pip install -r requirements.txt`

@@ -56,8 +56,10 @@
 
 1. `git pull` 후 `docs/STATE.md`를 먼저 읽는다
 2. 직전 인계 문서(`docs/HANDOFF_*.md`)의 **불변식 표**를 읽는다
-3. 상대가 "작업 중"으로 표시한 영역은 건드리지 않는다
-4. `./run_tests.sh`를 먼저 돌려 **현재 상태가 깨져 있는지** 확인한다
+3. 페르소나·Angle·Claim·필터를 건드리면
+   [`PERSONA_GENERATION_PROCESS.md`](PERSONA_GENERATION_PROCESS.md)의 현재 계약을 읽는다
+4. 상대가 "작업 중"으로 표시한 영역은 건드리지 않는다
+5. `./run_tests.sh`를 먼저 돌려 **현재 상태가 깨져 있는지** 확인한다
    - 이미 깨져 있으면 내 변경 탓으로 오인하지 않는다
 
 ---
