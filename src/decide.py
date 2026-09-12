@@ -114,7 +114,7 @@ def decide_distribution(
     # 실측: '아시는 분 계신가요?' 로 끝나는 글이 7건이었다.
     sent, per_s, per_k, per_t, per_e = [], Counter(), Counter(), Counter(), Counter()
 
-    def _place(p, cap_kind: bool) -> bool:
+    def _place(p, cap_kind: bool, hard_cap: bool = True) -> bool:
         """상한을 지키며 배포에 넣는다. 넣었으면 True."""
         if len(sent) >= target:
             p["hold_reason"] = "정원초과"
@@ -124,8 +124,8 @@ def decide_distribution(
             p["hold_reason"] = f"종목상한({per_stock})"
             return False
         kind = p.get("kind", "")
-        # 2차 배분에서도 풀리지 않는 절대 상한. 목표 미달은 flow 로 메우지 않는다.
-        if kind in hard_kind_cap and per_k[kind] >= hard_kind_cap[kind]:
+        # 2차까지는 풀리지 않는 절대 상한. 3차(목표 미달)에서만 해제한다.
+        if hard_cap and kind in hard_kind_cap and per_k[kind] >= hard_kind_cap[kind]:
             p["hold_reason"] = f"유형절대상한({kind})"
             return False
         if cap_kind and kind in per_kind_cap and per_k[kind] >= per_kind_cap[kind]:
@@ -175,6 +175,25 @@ def decide_distribution(
         if len(sent) > before:
             print(f"[decide] 유형상한 완화로 {len(sent) - before}건 보충 "
                   f"({before} → {len(sent)})")
+
+    # 3차: 그래도 목표에 못 미치면 절대상한까지 푼다.
+    # 사용자 우선순위가 '발송 50건'이므로 구성 목표보다 발송량이 앞선다.
+    # 다만 조용히 넘어가면 편중이 다시 보이지 않으므로 경고로 남긴다.
+    # 종목/문체/말미 상한은 3차에서도 풀지 않는다 — 그건 품질 장치다.
+    if len(sent) < target:
+        before = len(sent)
+        for p in [x for x in rest if x not in sent
+                  and x.get("hold_reason", "").startswith("유형절대상한")]:
+            if len(sent) >= target:
+                break
+            p.pop("hold_reason", None)
+            _place(p, cap_kind=False, hard_cap=False)
+        if len(sent) > before:
+            over = {k: per_k[k] - hard_kind_cap[k] for k in hard_kind_cap
+                    if per_k[k] > hard_kind_cap[k]}
+            print(f"[decide] ⚠ 절대상한 해제로 {len(sent) - before}건 보충 "
+                  f"({before} → {len(sent)}) — 구성 목표 초과: {over}. "
+                  "비-flow 공급 부족이 원인이다.")
     held.extend(x for x in rest if x not in sent)
 
     return sent, held

@@ -1460,11 +1460,23 @@ def main():
         # 말미중복 상한에 걸리지 않도록 마무리 20자를 전부 다르게 둔다
         _p["body"] = f"{i}번 종목 종가와 거래대금을 정리한 기록 {i:04d}-{i*7:05d} 입니다."
     sent, held = decide_distribution(_flow, target=50, per_stock=2)
-    ok.append(run("flow 배포 절대상한 적용",
-                  sum(1 for x in sent if x["kind"] == "flow") <= 30,
+    # 공급이 목표보다 적으면 3차 해제로도 채울 수 없고, 절대상한은 그대로 남는다
+    sent_h, _ = decide_distribution(_flow[:20], target=40, per_stock=2,
+                                    hard_kind_cap={"flow": 12})
+    ok.append(run("공급이 목표보다 적으면 있는 만큼만 배포",
+                  len(sent_h) == 20, f"{len(sent_h)}건"))
+    # 3차: flow 밖에 없으면 절대상한을 풀어서라도 50건을 채운다 (사용자 최우선 조건)
+    ok.append(run("목표 미달 시 절대상한 해제로 50건 확보", len(sent) == 50,
                   f"flow {sum(1 for x in sent if x['kind'] == 'flow')}건"))
-    ok.append(run("절대상한 보류 사유 표기",
-                  any("유형절대상한" in x.get("hold_reason", "") for x in held)))
+    # 비-flow 공급이 있으면 절대상한이 지켜져야 한다
+    _mix = [P(f"d{i}", code=f"1{i:05d}", total=19, kind="disclosure") for i in range(25)] + \
+           [P(f"g{i}", code=f"2{i:05d}", total=17, kind="flow") for i in range(40)]
+    for i, _p in enumerate(_mix):
+        _p["body"] = f"{i}번 항목을 정리한 기록 {i:04d}-{i*11:05d} 입니다."
+    sent2, _ = decide_distribution(_mix, target=50, per_stock=2)
+    ok.append(run("비-flow 공급 충분하면 절대상한 유지",
+                  sum(1 for x in sent2 if x["kind"] == "flow") <= 30,
+                  f"flow {sum(1 for x in sent2 if x['kind'] == 'flow')}건 / 총 {len(sent2)}건"))
 
     from src import facts as _facts2
     _terms = [{"kind": "disclosure", "title": "삼성전자 전환사채 발행 결정", "facts": "발행 총액: 1,000억원"},
