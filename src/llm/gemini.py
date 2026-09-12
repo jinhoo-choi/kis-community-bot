@@ -12,6 +12,7 @@
 """
 import concurrent.futures as cf
 import threading
+import time
 
 import config
 from src.llm.base import Provider, GenResult
@@ -20,8 +21,29 @@ from src.llm.base import Provider, GenResult
 # 404/not_found/deprecated 계열 오류에서만 다음 후보로 승격한다.
 _RETIRED = ("not_found", "404", "deprecated", "does not exist",
             "is not supported", "NOT_FOUND", "unsupported")
-_QUOTA_ERRORS = ("429", "RESOURCE_EXHAUSTED", "quota", "billing")
+_PERMANENT_QUOTA = ("billing", "prepayment", "credit balance", "insufficient credit",
+                    "quota has been exhausted", "payment required")
+_RETRYABLE_LIMIT = ("429", "resource_exhausted", "rate limit", "too many requests")
 _QUOTA_DISABLED = threading.Event()
+
+
+def _grounding_sources(response) -> list[dict]:
+    """SDK 응답의 Google 검색 근거 URL을 중복 없이 보존한다."""
+    out, seen = [], set()
+    for cand in getattr(response, "candidates", None) or []:
+        meta = getattr(cand, "grounding_metadata", None)
+        for chunk in getattr(meta, "grounding_chunks", None) or []:
+            web = getattr(chunk, "web", None)
+            uri = getattr(web, "uri", "") if web else ""
+            if uri and uri not in seen:
+                seen.add(uri)
+                out.append({"title": getattr(web, "title", "") or "", "url": uri})
+    return out[:10]
+
+
+def _is_permanent_quota(message: str) -> bool:
+    low = message.lower()
+    return any(k in low for k in _PERMANENT_QUOTA)
 
 
 class GeminiProvider(Provider):
@@ -71,22 +93,29 @@ class GeminiProvider(Provider):
         if _QUOTA_DISABLED.is_set():
             return GenResult("", self.name, self.model, ok=False,
                              error="Gemini disabled after quota/billing error")
-        try:
-            r = self._client.models.generate_content(
-                model=self.model,
-                contents=user,
-                config=self._config(system, temperature, max_tokens),
-            )
-            return GenResult((r.text or "").strip(), self.name, self.model)
-        except Exception as e:
-            msg = str(e)
-            if self._promote(msg):
-                return self.generate(system, user, temperature, max_tokens)
-            if any(k.lower() in msg.lower() for k in _QUOTA_ERRORS):
-                if not _QUOTA_DISABLED.is_set():
-                    print("[gemini] quota/billing 오류 → 이번 실행의 후속 호출 중단")
-                _QUOTA_DISABLED.set()
-            return GenResult("", self.name, self.model, ok=False, error=msg[:200])
+        for attempt in range(3):
+            try:
+                r = self._client.models.generate_content(
+                    model=self.model,
+                    contents=user,
+                    config=self._config(system, temperature, max_tokens),
+                )
+                return GenResult((r.text or "").strip(), self.name, self.model,
+                                 sources=_grounding_sources(r) if self.grounding else [])
+            except Exception as e:
+                msg = str(e)
+                if self._promote(msg):
+                    return self.generate(system, user, temperature, max_tokens)
+                if _is_permanent_quota(msg):
+                    if not _QUOTA_DISABLED.is_set():
+                        print("[gemini] billing/credit 오류 → 이번 실행의 후속 호출 중단")
+                    _QUOTA_DISABLED.set()
+                    return GenResult("", self.name, self.model, ok=False, error=msg[:200])
+                retryable = any(k in msg.lower() for k in _RETRYABLE_LIMIT)
+                if retryable and attempt < 2:
+                    time.sleep(1.5 * (attempt + 1))
+                    continue
+                return GenResult("", self.name, self.model, ok=False, error=msg[:200])
 
     def generate_many(self, jobs, temperature=1.0, max_tokens=700,
                       workers: int = 6) -> list[GenResult]:

@@ -946,6 +946,58 @@ def main():
                   bool(_facts3.evaluate({"vol_x": 2.0, "high": 10600, "low": 10000,
                                          "close": 10550, "ret5": 8.0}))))
 
+    # ── 프로바이더 장애·보강 캐시
+    from src.llm import gemini as _gm
+    ok.append(run("Gemini 일시 429는 전체 차단하지 않음",
+                  not _gm._is_permanent_quota("429 RESOURCE_EXHAUSTED rate limit")))
+    ok.append(run("Gemini 결제 오류만 전체 차단",
+                  _gm._is_permanent_quota("insufficient credit balance; check billing")))
+    from types import SimpleNamespace as _NS
+    _web = _NS(web=_NS(uri="https://example.com/a", title="근거"))
+    _resp = _NS(candidates=[_NS(grounding_metadata=_NS(grounding_chunks=[_web, _web]))])
+    ok.append(run("검색 근거 URL 추출·중복제거",
+                  _gm._grounding_sources(_resp) ==
+                  [{"title": "근거", "url": "https://example.com/a"}]))
+
+    import tempfile as _tmp, json as _json
+    from src import enrich as _en
+    from src.llm.base import GenResult as _GR
+    _old_path, _old_enricher = _en.CACHE_PATH, _en.enricher
+    with _tmp.TemporaryDirectory() as _td:
+        _en.CACHE_PATH = _td + "/cache.json"
+
+        class _BrokenEnricher:
+            def available(self): return True
+            def generate(self, *_a, **_k):
+                return _GR("", "gemini", "fake", ok=False, error="timeout")
+
+        _en.enricher = lambda: _BrokenEnricher()
+        _en.enrich_all([{"id": "err", "facts": "x"}], workers=1)
+        _saved = _json.load(open(_en.CACHE_PATH, encoding="utf-8"))
+        ok.append(run("보강 오류는 NONE으로 캐시하지 않음", "err" not in _saved))
+
+        class _NoneEnricher:
+            def available(self): return True
+            def generate(self, *_a, **_k): return _GR("NONE", "gemini", "fake")
+
+        _en.enricher = lambda: _NoneEnricher()
+        _en.enrich_all([{"id": "none", "facts": "x"}], workers=1)
+        _saved = _json.load(open(_en.CACHE_PATH, encoding="utf-8"))
+        ok.append(run("확인된 배경 없음만 NONE 캐시", _saved["none"]["status"] == "none"))
+    _en.CACHE_PATH, _en.enricher = _old_path, _old_enricher
+
+    from src.llm.claude import ClaudeProvider as _CP
+    import threading as _th
+    _cp = _CP("", "fake", use_batch=False)
+    _barrier, _threads = _th.Barrier(2), set()
+    def _parallel_generate(*_a, **_k):
+        _threads.add(_th.get_ident())
+        _barrier.wait(timeout=1)
+        return _GR("ok", "claude", "fake")
+    _cp.generate = _parallel_generate
+    _cp.generate_many([("s", "u")] * 4)
+    ok.append(run("Claude 동기 호출 제한 병렬화", len(_threads) >= 2))
+
     # 슬롯을 키우면 기대치가 따라 올라 전 소스가 오탐 경보를 냈다
     # (실측: market 기대 857 vs 실제 62 — 수집이 아니라 기준이 망가진 것)
     from src import crawl as _cw

@@ -153,6 +153,7 @@ USE_BATCH = os.environ.get("USE_BATCH", "0") == "1"
 # 한 번에 전량 생성하지 않고 이 단위로 생성·심사한 뒤 목표 달성 여부를 본다.
 # 50건 기준 1차 100건이며, 부족할 때만 다음 묶음을 처리한다.
 GEN_STAGE_SIZE = int(os.environ.get("GEN_STAGE_SIZE", str(max(20, TARGET_POSTS * 2))))
+CLAUDE_SYNC_WORKERS = int(os.environ.get("CLAUDE_SYNC_WORKERS", "6"))
 
 # Gemini: 3.5-flash 가 GA 주력(=gemini-flash-latest), 3.1-flash-lite 는 저비용
 GEMINI_MODEL        = GEMINI_CANDIDATES[0]

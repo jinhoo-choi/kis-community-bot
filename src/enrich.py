@@ -66,6 +66,13 @@ USER = """[종목] {stock}
 
 def _one(item: dict) -> dict:
     g = enricher()
+    if g is None or not g.available():
+        item["_enrich_error"] = "보강 프로바이더 사용 불가"
+        item["_enrich_status"] = "error"
+        item["enriched"] = False
+        item["thin_facts"] = True
+        return item
+    CALLS[0] += 1
     r = g.generate(
         SYSTEM,
         USER.format(
@@ -79,11 +86,19 @@ def _one(item: dict) -> dict:
     txt = (r.text or "").strip()
     if not r.ok:
         item["_enrich_error"] = r.error[:200]
-    if r.ok and txt and txt.upper() != "NONE" and len(txt) > 15:
+        item["_enrich_status"] = "error"
+    if r.ok and txt.upper() == "NONE":
+        item["_enrich_status"] = "none"
+    elif r.ok and txt and len(txt) > 15 and r.sources:
         item["facts"] = item["facts"] + "\n\n[검색으로 확인된 배경]\n" + txt
         item["_enrich_text"] = txt        # 캐시 저장용
+        item["enrich_sources"] = r.sources
+        item["_enrich_status"] = "ok"
         item["enriched"] = True
     else:
+        if r.ok and txt and txt.upper() != "NONE" and not r.sources:
+            item["_enrich_error"] = "검색 근거 URL 없음"
+            item["_enrich_status"] = "error"
         # 리스크봇의 _body_failed 와 같은 역할.
         # 정보가 없는 상태를 '표시'해서 이후 프롬프트에 추측 금지를 주입한다.
         item["enriched"] = False
@@ -99,11 +114,12 @@ def enrich_all(items: list[dict], workers: int = 5) -> list[dict]:
     hits, miss = [], []
     for it in items:
         c = cache.get(it.get("id", ""))
-        if c and c.get("text"):
+        if c and c.get("status") == "ok" and c.get("text") and c.get("sources"):
             it["facts"] = it["facts"] + "\n\n[검색으로 확인된 배경]\n" + c["text"]
+            it["enrich_sources"] = c["sources"]
             it["enriched"] = True
             hits.append(it)
-        elif c:                      # 이전에 '배경 없음'으로 확인된 항목
+        elif c and c.get("status") == "none":
             it["enriched"] = False
             it["thin_facts"] = True
             hits.append(it)
@@ -111,14 +127,14 @@ def enrich_all(items: list[dict], workers: int = 5) -> list[dict]:
             miss.append(it)
 
     # 키가 없어도 캐시분은 살린다 (로컬/무료 테스트에서 유용)
-    if enricher() is None:
+    g = enricher()
+    if g is None or not g.available():
         print(f"[enrich] GEMINI_API_KEY 없음 → 캐시 {len(hits)}건만 사용, "
               f"{len(miss)}건 스킵")
         for it in miss:
             it["thin_facts"] = True
         return hits + miss
 
-    CALLS[0] += len(miss)
     if hits:
         print(f"[enrich] 캐시 적중 {len(hits)}건 → 그라운딩 {len(miss)}건만 호출")
     with cf.ThreadPoolExecutor(max_workers=workers) as ex:
@@ -126,7 +142,15 @@ def enrich_all(items: list[dict], workers: int = 5) -> list[dict]:
 
     now = time.time()
     for it in miss:
-        cache[it.get("id", "")] = {"ts": now, "text": it.get("_enrich_text", "")}
+        status = it.get("_enrich_status")
+        # 전송·quota 오류를 '배경 없음'으로 캐시하면 복구 후에도 3일간 재시도하지 않는다.
+        if status in ("ok", "none"):
+            cache[it.get("id", "")] = {
+                "ts": now,
+                "status": status,
+                "text": it.get("_enrich_text", ""),
+                "sources": it.get("enrich_sources", []),
+            }
     _save_cache(cache)
     items = hits + miss
 
@@ -136,6 +160,9 @@ def enrich_all(items: list[dict], workers: int = 5) -> list[dict]:
     # 0건일 때 31건). 조용히 지나가면 원인을 필터에서 찾게 되므로 크게 알린다.
     if items and n == 0:
         errs = [x["_enrich_error"] for x in items if x.get("_enrich_error")]
-        print(f"[enrich] ⚠ 전건 실패 — 게이트 글감부족이 급증한다. "
-              f"오류 표본: {errs[0] if errs else '(응답은 왔으나 내용 없음)'}")
+        if errs:
+            print(f"[enrich] ⚠ 전건 실패 — 게이트 글감부족이 급증한다. "
+                  f"오류 표본: {errs[0]}")
+        else:
+            print("[enrich] 검색으로 확인된 추가 배경 없음")
     return items

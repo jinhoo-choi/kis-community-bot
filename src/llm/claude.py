@@ -4,6 +4,7 @@
 문서: https://docs.claude.com/en/docs/build-with-claude/batch-processing
 """
 import time
+import concurrent.futures as cf
 
 import config
 from src.llm.base import Provider, GenResult
@@ -74,7 +75,7 @@ class ClaudeProvider(Provider):
     def generate_many(self, jobs, temperature=1.0, max_tokens=700,
                       poll_sec=15, timeout_sec=600) -> list[GenResult]:
         if not self.use_batch or len(jobs) < 15:
-            return [self.generate(s, u, temperature, max_tokens) for s, u in jobs]
+            return self._sync_many(jobs, temperature, max_tokens)
 
         try:
             reqs = [{
@@ -110,4 +111,13 @@ class ClaudeProvider(Provider):
                     for i in range(len(jobs))]
         except Exception as e:
             print(f"[claude] batch 실패 → 동기 폴백: {e}")
-            return [self.generate(s, u, temperature, max_tokens) for s, u in jobs]
+            return self._sync_many(jobs, temperature, max_tokens)
+
+    def _sync_many(self, jobs, temperature, max_tokens) -> list[GenResult]:
+        """같은 실행에서 결과가 필요한 작업을 제한된 동시성으로 처리한다."""
+        if not jobs:
+            return []
+        workers = min(max(1, config.CLAUDE_SYNC_WORKERS), len(jobs))
+        with cf.ThreadPoolExecutor(max_workers=workers) as ex:
+            return list(ex.map(lambda job: self.generate(
+                job[0], job[1], temperature, max_tokens), jobs))

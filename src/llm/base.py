@@ -3,7 +3,7 @@
 Claude / Gemini 를 동일 시그니처로 호출하기 위한 얇은 어댑터.
 generator 는 이 인터페이스만 알고 있으면 되므로 프로바이더 교체·추가가 자유롭다.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -13,6 +13,7 @@ class GenResult:
     model: str
     ok: bool = True
     error: str = ""
+    sources: list[dict] = field(default_factory=list)
 
 
 class Provider:

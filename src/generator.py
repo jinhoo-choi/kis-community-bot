@@ -255,6 +255,18 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
                     [styles[id(x)][2] for x in chunk],
                     [styles[id(x)][1] for x in chunk],
                     [styles[id(x)][3] for x in chunk])
+        made_ids = {p["id"] for p in made}
+        failed = [x for x in chunk if x["id"] not in made_ids]
+        alternatives = [n for n, provider in router.writers().items()
+                        if n != name and provider.available()]
+        if failed and alternatives:
+            alt = alternatives[0]
+            print(f"[gen] {name} 생성 실패 {len(failed)}건 → {alt} 재할당")
+            made += _run(alt, failed,
+                         [styles[id(x)][0] for x in failed],
+                         [styles[id(x)][2] for x in failed],
+                         [styles[id(x)][1] for x in failed],
+                         [styles[id(x)][3] for x in failed])
         print(f"[gen] {name}: {len(made)}/{len(chunk)}건 생성")
         for p in made:
             errs = filters.check(
@@ -272,8 +284,10 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
 
     # 리젝분은 '다른 프로바이더'로 1회 재생성 (같은 모델은 같은 실수를 반복한다)
     if retry:
-        names = list(router.writers().keys())
+        names = [n for n, provider in router.writers().items() if provider.available()]
         for p in retry:
+            if not names:
+                break
             p["retry_hint"] = _hint(p.get("reject_errs", []))
             alt = next((n for n in names if n != p["provider"]), p["provider"])
             made = _run(alt, [p], [p["tone"]], [p.get("fmt", "fact_read")],
@@ -289,8 +303,7 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
 
 
 _HINTS = {
-    "수치과다": "숫자를 너무 많이 썼습니다. 숫자는 2~3개만 쓰고, "
-              "숫자가 하나도 없는 문장을 반드시 넣으세요.",
+    "수치과다": "숫자를 너무 많이 썼습니다. 선택된 핵심 사실만 남기세요.",
     "미확인표현": "'확인되지 않았다' 류 표현을 썼습니다. 그 문장을 통째로 빼고, "
                 "확인된 사실만으로 글을 완성하세요.",
     "방향오용": "등락 방향 어휘를 반대로 썼습니다. 입력의 등락률 부호를 다시 확인하세요.",

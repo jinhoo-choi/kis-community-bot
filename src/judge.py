@@ -67,6 +67,9 @@ USER = """[톤] {tone}
 [제공된 사실관계]
 {facts}
 
+[검색 근거 URL]
+{sources}
+
 [심사 대상 게시글]
 {body}"""
 
@@ -111,7 +114,10 @@ def _one(post: dict) -> dict:
     r = j.generate(
         # ※ SYSTEM 에 JSON 리터럴이 있어 .format() 을 쓰면 KeyError 로 죽는다. replace 고정.
         SYSTEM.replace("__FATAL_BLOCK__", rules.judge_block()),
-        USER.format(tone=post["tone"], facts=post["facts"][:2500], body=post["body"]),
+        USER.format(
+            tone=post["tone"], facts=post["facts"][:2500], body=post["body"],
+            sources="\n".join(x.get("url", "") for x in post.get("enrich_sources", [])) or "-",
+        ),
         temperature=0.0,
         max_tokens=300,
     )
