@@ -64,10 +64,12 @@ def fetch(limit: int = 6) -> list[dict]:
 
     table = tickers.listed()
     out = []
+    n_rows = 0
     for tr in soup.select("tr"):
         tds = tr.find_all("td")
         if len(tds) < 4:
             continue
+        n_rows += 1
         title = tds[2].get_text(" ", strip=True)
         if not INQUIRY_RE.search(title):
             continue
@@ -100,7 +102,15 @@ def fetch(limit: int = 6) -> list[dict]:
         if len(out) >= limit:
             break
 
-    crawl.report("kind_inquiry", len(out), limit, "KIND 제목 구조 변경 의심")
+    # 조회공시가 없는 날이 흔하다. 응답이 정상이면(행 파싱 성공) 0건은 정상이다.
+    # 실측: 응답 88KB, tr 101개가 정상 파싱됐는데 그날 조회공시가 없어
+    # 매 실행 '구조 변경 의심' 경고가 떴다. 진짜 장애와 구분이 안 됐다.
+    if n_rows and not out:
+        print(f"[kind] 공시 {n_rows}건 파싱, 조회공시 해당 없음 (정상)")
+        crawl.report("kind_inquiry", 0, 0, "")
+    else:
+        crawl.report("kind_inquiry", len(out), limit if n_rows else 0,
+                     "KIND 제목 구조 변경 의심")
     return out
 
 

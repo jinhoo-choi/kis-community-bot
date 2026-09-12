@@ -9,6 +9,7 @@
 크롤링 방어(부정여론봇 이식): 셀렉터 배열 폴백 + 재시도 + 랜덤 지연 + 헬스체크.
 단일 셀렉터를 박아두면 사이트 개편 당일부터 조용히 0건이 된다.
 """
+import os
 import re
 
 from src import crawl
@@ -222,6 +223,15 @@ def fetch_hankyung(limit: int = 8) -> list[dict]:
     return out
 
 
+# 네이버 금융이 'Npay 증권' 으로 개편되면서 리서치 목록의 표가 사라졌다
+# (실측: 118KB 응답에 table 0개, company_read 링크 0개).
+# 시세 페이지와 같은 원인이다. 한경컨센서스는 정상이라 그쪽으로 전량 돌린다.
+# 네이버 경로는 코드를 남겨두되 기본 비활성. 복구되면 1 로 되돌리면 된다.
+USE_NAVER = os.environ.get("USE_NAVER_RESEARCH", "0") == "1"
+
+
 def fetch(limit: int = 16) -> list[dict]:
+    if not USE_NAVER:
+        return fetch_hankyung(limit)[:limit]
     n = int(limit * 0.7)
     return (fetch_naver(n) + fetch_hankyung(limit - n))[:limit]
