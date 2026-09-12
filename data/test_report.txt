@@ -119,6 +119,11 @@ ok
   OK    실발송 상승폭 오해 표현 정리
   OK    실발송 마감 중복·거래량 비문 정리
   OK    실발송 고가 기준·고저차 어순 정리
+  OK    실발송 거래량 주어 비문 정리
+  OK    실발송 저가 상승 서술 정리
+  OK    실발송 고저차 변형·마감 중복 정리
+  OK    OHLC 장중 순서 추정 차단
+  OK    시세 인과·기술적 신호 추정 차단
   OK    흐름 연결어미 마무리 정리
   OK    상투어 리젝(치환불가)
   OK    주체없는 평가 차단
@@ -320,7 +325,7 @@ ok
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'open_talk', 'fact_note', 'careful_note', 'brief_report', 'data_focus', 'check_list'})
+  OK    flow 에서 quick_memo 미선택  ({'careful_note', 'brief_report', 'fact_note', 'open_talk', 'data_focus', 'check_list'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
   OK    미선정 비수치 사실도 프롬프트에서 제거
@@ -394,7 +399,7 @@ ok
   OK    주입된 용어로 term_word 슬롯 성립
   OK    용어 설명 중복 주입 없음
 
-340/340 passed
+345/345 passed
   OK    문장틀 22종 계약
   OK    50+15 reserve 준비  (65)
   OK    reserve 전건 원문 재검증
@@ -402,6 +407,7 @@ ok
   OK    22종이 실제 reserve에 사용됨  (22)
   OK    동일 말미 20자 2건 이하
   OK    문장틀 운영체·비문 제거
+  OK    마감 가격 문장 인접 반복 방지
 [decide] 유형상한 완화로 10건 보충 (20 → 30)
 [decide] ⚠ 절대상한 해제로 20건 보충 (30 → 50) — 구성 목표 초과: {'flow': 20}. 비-flow 공급 부족이 원인이다.
   OK    API 전면 장애 dry-run 50건  (50)
@@ -413,7 +419,7 @@ ok
   OK    같은 원본 LLM·문장틀 중복 배포 차단
   OK    문장틀 준비·보충·페르소나 통계 계측
 
-13/13 passed
+14/14 passed
 
 === 2b. 전수검사 (설정-코드 정합성) ===
 
