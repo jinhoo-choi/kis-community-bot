@@ -74,9 +74,49 @@ def _drop_no_board(items: list[dict], blocked: list[tuple[str, str]]) -> list[di
     return [it for it in items if not it.get("no_stock_fit")]
 
 
+def _prepare_items(raw: list[dict], seen: dict):
+    """게이트부터 게시판 매핑·중복 제거까지 결정형 후보 준비를 다시 계산한다."""
+    gated, blocked = gate.apply(raw)
+    resolved = []
+    for item in gated:
+        item = tickers.resolve(item)
+        item["board"] = tickers.board_of(item)
+        resolved.append(item)
+    theme_map.assign_all(resolved)
+    resolved = _drop_no_board(resolved, blocked)
+    items, dup_reasons = dedup.filter_new(
+        resolved, {} if config.IGNORE_SEEN else seen["seen"])
+    return items, blocked, resolved, dup_reasons
+
+
+def _pick_candidates(items: list[dict]) -> tuple[list[dict], dict]:
+    """유형별 생성 상한을 적용하고 stage 순서로 섞는다."""
+    picked, counts = [], {k: 0 for k in config.GEN_CAP}
+    for item in items:
+        kind = item["kind"] if item["kind"] in config.GEN_CAP else "research"
+        if counts[kind] < config.GEN_CAP[kind]:
+            counts[kind] += 1
+            picked.append(item)
+    return _stage_order(picked), counts
+
+
+def _balanced_rescue(items: list[dict], limit: int) -> list[dict]:
+    """보강 예산을 한 유형이 독식하지 않도록 배포 목표가 큰 유형부터 순환한다."""
+    by_kind = {}
+    for item in items:
+        by_kind.setdefault(item.get("kind"), []).append(item)
+    out = []
+    while len(out) < limit and any(by_kind.values()):
+        for kind in sorted(by_kind, key=lambda k: -config.DIST_CAP.get(k, 0)):
+            if by_kind[kind] and len(out) < limit:
+                out.append(by_kind[kind].pop(0))
+    return out
+
+
 def main():
     dry = "--dry-run" in sys.argv
     reset_usage()
+    enrich.CALLS[0] = 0
     s = state.prune(state.load())
 
     raw = collect()
@@ -87,37 +127,14 @@ def main():
     if _n_term:
         print(f"[main] 용어 설명 주입 {_n_term}건")
 
-    # 사실 보강을 게이트보다 먼저 한다.
-    # 순서가 반대면 '보강하면 글감이 되는' 공시·리포트가 tier5(글감부족)로 미리 잘려
-    # 수치가 확실한 flow(특징주)만 살아남는 편향이 생긴다 (실측: 3건 전부 특징주).
-    # 다만 flow(특징주)는 시세 수치가 이미 facts 에 있어 보강 없이도 게이트를 통과한다
-    # (실측: 게이트 차단 60건 중 flow 는 0건). 수집 287건 중 185건이 flow 이므로
-    # 전건 보강은 검색 그라운딩 호출을 3배 가까이 낭비한다.
-    # dry-run 은 '수집만 실행'이라고 안내하면서 보강을 돌리고 있었다 — 스킵한다.
-    # 나아가 '보강 없이도 글감이 되는' 항목은 그라운딩해도 얻는 게 없다.
-    # 실제로 필요한 건 지금 글감부족으로 잘릴 항목뿐이다.
-    if config.ENABLE_ENRICH and not dry:
-        targets = [x for x in raw
-                   if x.get("kind") != "flow" and not gate.has_substance(x)]
-        # 상한을 앞에서부터 자르면 수집 순서상 한 유형이 예산을 독식한다
-        # (naver_research 30건이 먼저 오면 공시·정책은 한 건도 못 받는다).
-        # 배포 상한이 있는 유형끼리 번갈아 뽑아 예산을 나눈다.
-        _byk = {}
-        for x in targets:
-            _byk.setdefault(x.get("kind"), []).append(x)
-        targets = []
-        while len(targets) < config.ENRICH_MAX and any(_byk.values()):
-            for k in sorted(_byk, key=lambda k: -config.DIST_CAP.get(k, 0)):
-                if _byk[k] and len(targets) < config.ENRICH_MAX:
-                    targets.append(_byk[k].pop(0))
-        _ids = {id(x) for x in targets}
-        skipped = [x for x in raw if id(x) not in _ids]
-        print(f"[enrich] 그라운딩 대상 {len(targets)}건 "
-              f"(수집 {len(raw)}건 중, 상한 {config.ENRICH_MAX})")
-        raw = enrich.enrich_all(targets) + skipped
-    elif dry:
-        print("[enrich] dry-run — 보강 스킵 (그라운딩 호출 없음)")
-    enriched_n = sum(1 for x in raw if x.get("enriched"))
+    # 캐시는 외부 호출이 아니므로 먼저 재사용한다. 신규 검색은 아래에서 후보가
+    # 실제로 부족할 때만 5건씩 수행한다.
+    thin = [x for x in raw if x.get("kind") != "flow" and not gate.has_substance(x)]
+    cache_hits = enrich.apply_cached(thin) if config.ENABLE_ENRICH else {"ok": 0, "none": 0}
+    if any(cache_hits.values()):
+        print(f"[enrich] 선행 API 호출 없이 캐시 적용 {cache_hits}")
+    if dry:
+        print("[enrich] dry-run — 신규 보강 호출 없음")
 
     # 하드 게이트 — AI 호출 이전에 구조적으로 배제
     print(f"[main] 발송 목표 {config.TARGET_POSTS}건 / 수율 {config.YIELD:.0%} "
@@ -127,38 +144,46 @@ def main():
         print(f"[main] ⚠ 공급 상한에 걸려 목표 미달 예상 "
               f"({config.EXPECTED_SENT:.0f} < {config.TARGET_POSTS}). "
               "필터가 아니라 물량 문제다.")
-    gated, blocked = gate.apply(raw)
-
-    resolved = []
-    for it in gated:
-        it = tickers.resolve(it)
-        it["board"] = tickers.board_of(it)
-        resolved.append(it)
-
-    # 커뮤니티에 종목방만 있어 테마글도 어딘가에는 올라가야 한다.
-    # 관련 섹터 대표주에 배정하고, 본문에서는 종목을 언급하지 않게 지시를 넣는다.
-    theme_map.assign_all(resolved)
-    resolved = _drop_no_board(resolved, blocked)
-
-    # 다축 dedup — 같은 사건이 DART/리서치/수급으로 중복 유입되는 것을 잡는다
-    # 반복 테스트에서는 과거 이력을 무시한다(배치 내부 중복은 그대로 잡는다)
-    items, dup_reasons = dedup.filter_new(resolved, {} if config.IGNORE_SEEN else s["seen"])
+    # 다축 dedup — 같은 사건이 DART/리서치/수급으로 중복 유입되는 것을 잡는다.
+    items, blocked, resolved, dup_reasons = _prepare_items(raw, s)
     if config.IGNORE_SEEN:
         print("[main] IGNORE_SEEN=1 — 과거 dedup 이력 무시, 상태 저장 안 함")
+
+    picked, cnt = _pick_candidates(items)
+    actual_expected = config.expected_sent(cnt)
+
+    # 캐시를 써도 유형별 기대 발송이 목표보다 작을 때만 tier5 글감부족 후보를
+    # 유형 균형 순서로 5건씩 보강한다. 매 묶음 뒤 전체 결정형 후보를 다시 계산한다.
+    if config.ENABLE_ENRICH and not dry and actual_expected < config.TARGET_POSTS:
+        reasons = dict(blocked)
+        rescue_pool = _balanced_rescue([
+            x for x in raw
+            if x.get("kind") != "flow"
+            and reasons.get(x.get("id", "")) == "tier5:글감부족"
+            and x.get("_enrich_cache_status") != "none"
+        ], config.ENRICH_MAX)
+        for start in range(0, len(rescue_pool), config.ENRICH_RESCUE_CHUNK):
+            chunk = rescue_pool[start:start + config.ENRICH_RESCUE_CHUNK]
+            print(f"[enrich] 후보 부족 rescue {start + 1}~{start + len(chunk)}"
+                  f"/{len(rescue_pool)}건")
+            enrich.enrich_all(chunk, workers=min(config.ENRICH_RESCUE_CHUNK, len(chunk)))
+            items, blocked, resolved, dup_reasons = _prepare_items(raw, s)
+            picked, cnt = _pick_candidates(items)
+            actual_expected = config.expected_sent(cnt)
+            print(f"[enrich] rescue 뒤 기대 발송 {actual_expected:.1f}"
+                  f"/{config.TARGET_POSTS}건")
+            if actual_expected >= config.TARGET_POSTS:
+                break
+    elif config.ENABLE_ENRICH and not dry:
+        print(f"[enrich] 후보 충분 ({actual_expected:.1f}/{config.TARGET_POSTS})"
+              " → 신규 그라운딩 0건")
+
+    enriched_n = sum(1 for x in raw if x.get("enriched"))
 
     degraded = crawl.degraded_sources()
     if degraded:
         print(f"[main] ⚠ 수집 이상 소스: {degraded}")
 
-    picked, cnt = [], {k: 0 for k in config.GEN_CAP}
-    for it in items:
-        k = it["kind"] if it["kind"] in config.GEN_CAP else "research"
-        # OVERGEN_RATE 를 여기서 또 곱하면 이중 적용이 된다. GEN_CAP 이 최종값이다.
-        if cnt[k] < config.GEN_CAP[k]:
-            cnt[k] += 1
-            picked.append(it)
-    picked = _stage_order(picked)
-    actual_expected = config.expected_sent(cnt)
     print(f"[main] 생성 대상 {len(picked)}건 {cnt}")
     print(f"[main] 실제 후보 기준 기대 발송 {actual_expected:.1f}건")
     if actual_expected < config.TARGET_POSTS * 0.8:

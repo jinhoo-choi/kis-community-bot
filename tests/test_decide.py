@@ -1059,6 +1059,16 @@ def main():
                   {x["id"] for x in _ordered} == {x["id"] for x in _mix}))
     ok.append(run("첫 생성 묶음 유형 혼합",
                   len({x["kind"] for x in _ordered[:12]}) >= 2))
+    _rescue_mix = ([{"id": f"rd{i}", "kind": "disclosure"} for i in range(8)]
+                   + [{"id": f"rr{i}", "kind": "research"} for i in range(3)]
+                   + [{"id": f"rp{i}", "kind": "policy"} for i in range(3)])
+    _rescued = _pipeline._balanced_rescue(_rescue_mix, 5)
+    ok.append(run("보강 rescue가 5건 상한과 유형 균형 유지",
+                  len(_rescued) == 5
+                  and len({x["kind"] for x in _rescued}) >= 2
+                  and sum(x["kind"] == "disclosure" for x in _rescued) < 5))
+    ok.append(run("보강 rescue 기본 묶음은 5건",
+                  _cfg.ENRICH_RESCUE_CHUNK == 5))
 
     from src import stats as _stats
     _stat_candidates = [{"id": f"c{i}", "kind": "flow"} for i in range(4)]
@@ -1297,6 +1307,30 @@ def main():
     _old_path, _old_enricher = _en.CACHE_PATH, _en.enricher
     with _tmp.TemporaryDirectory() as _td:
         _en.CACHE_PATH = _td + "/cache.json"
+
+        _now = __import__("time").time()
+        with open(_en.CACHE_PATH, "w", encoding="utf-8") as _f:
+            _json.dump({
+                "ok-live": {"ts": _now - 2 * 86400, "status": "ok",
+                            "text": "확인된 배경 사실입니다.",
+                            "sources": ["https://example.com/source"]},
+                "none-old": {"ts": _now - 2 * 86400, "status": "none",
+                             "text": "", "sources": []},
+                "ok-old": {"ts": _now - 8 * 86400, "status": "ok",
+                           "text": "오래된 사실입니다.",
+                           "sources": ["https://example.com/old"]},
+            }, _f, ensure_ascii=False)
+        _live_cache = _en._load_cache()
+        ok.append(run("보강 성공 7일·NONE 1일 TTL 분리",
+                      "ok-live" in _live_cache
+                      and "none-old" not in _live_cache
+                      and "ok-old" not in _live_cache))
+        _cached_item = {"id": "ok-live", "facts": "기존 사실"}
+        _cached_counts = _en.apply_cached([_cached_item])
+        ok.append(run("보강 캐시는 외부 호출 없이 선행 적용",
+                      _cached_counts == {"ok": 1, "none": 0}
+                      and _cached_item.get("enriched") is True
+                      and "확인된 배경 사실입니다." in _cached_item["facts"]))
 
         class _BrokenEnricher:
             def available(self): return True

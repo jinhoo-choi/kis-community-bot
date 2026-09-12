@@ -18,7 +18,10 @@ from src.llm.base import record_usage
 # 09-05~06 이틀간 22회 실행에서 대상은 거의 동일한 항목들이었다.
 # 항목 id 로 캐시하면 재실행 비용이 0 이 된다. 원문이 바뀌지 않는 자료라 안전하다.
 CACHE_PATH = "data/enrich_cache.json"
-CACHE_TTL = 3 * 86400        # 자료는 며칠이면 낡는다
+CACHE_TTL_BY_STATUS = {
+    "ok": 7 * 86400,        # 같은 원문에서 확인된 사실은 일주일 재사용
+    "none": 1 * 86400,      # 오늘 없던 배경은 다음 날 다시 확인
+}
 
 
 def _load_cache() -> dict:
@@ -28,7 +31,9 @@ def _load_cache() -> dict:
     except Exception:
         return {}
     now = time.time()
-    return {k: v for k, v in c.items() if now - v.get("ts", 0) < CACHE_TTL}
+    return {k: v for k, v in c.items()
+            if v.get("status") in CACHE_TTL_BY_STATUS
+            and now - v.get("ts", 0) < CACHE_TTL_BY_STATUS[v["status"]]}
 
 
 def _save_cache(c: dict) -> None:
@@ -112,19 +117,40 @@ def _one(item: dict) -> dict:
 CALLS = [0]   # 실행당 그라운딩 호출 수. 청구액 역산에 필요하다.
 
 
+def _apply_cached(item: dict, cached: dict) -> bool:
+    status = cached.get("status")
+    if status == "ok" and cached.get("text") and cached.get("sources"):
+        if cached["text"] not in item.get("facts", ""):
+            item["facts"] = (item.get("facts", "")
+                             + "\n\n[검색으로 확인된 배경]\n" + cached["text"])
+        item["enrich_sources"] = cached["sources"]
+        item["enriched"] = True
+    elif status == "none":
+        item["enriched"] = False
+        item["thin_facts"] = True
+    else:
+        return False
+    item["_enrich_cache_status"] = status
+    return True
+
+
+def apply_cached(items: list[dict]) -> dict:
+    """외부 호출 없이 유효 캐시만 적용하고 상태별 적중 수를 돌려준다."""
+    cache = _load_cache()
+    counts = {"ok": 0, "none": 0}
+    for item in items:
+        cached = cache.get(item.get("id", ""))
+        if cached and _apply_cached(item, cached):
+            counts[cached["status"]] += 1
+    return counts
+
+
 def enrich_all(items: list[dict], workers: int = 5) -> list[dict]:
     cache = _load_cache()
     hits, miss = [], []
     for it in items:
         c = cache.get(it.get("id", ""))
-        if c and c.get("status") == "ok" and c.get("text") and c.get("sources"):
-            it["facts"] = it["facts"] + "\n\n[검색으로 확인된 배경]\n" + c["text"]
-            it["enrich_sources"] = c["sources"]
-            it["enriched"] = True
-            hits.append(it)
-        elif c and c.get("status") == "none":
-            it["enriched"] = False
-            it["thin_facts"] = True
+        if c and _apply_cached(it, c):
             hits.append(it)
         else:
             miss.append(it)

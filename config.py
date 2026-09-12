@@ -217,7 +217,8 @@ MAX_PER_STOCK = int(os.environ.get("MAX_PER_STOCK", "2"))
 
 # 교차 심사
 ENABLE_ENRICH = os.environ.get("ENABLE_ENRICH", "1") == "1"
-# enrich 는 Gemini 검색 그라운딩이라 항목당 단가가 높다.
+# enrich 는 Gemini 검색 그라운딩이라 항목당 단가가 높다. 정상 후보가 목표를
+# 채우면 호출하지 않고, 부족할 때만 ENRICH_RESCUE_CHUNK 단위로 사용한다.
 # 실측: 2일간 1,376회 호출로 유료 청구 5만원이 발생했다. 폭주 방지용 상한.
 # 테스트에서는 더 조인다. 캐시가 채워지면 실호출은 여기서 다시 줄어든다.
 # 실청구 역산: 그라운딩 1회 약 35원. 월 22영업일 기준
@@ -227,6 +228,7 @@ ENABLE_ENRICH = os.environ.get("ENABLE_ENRICH", "1") == "1"
 # 10 으로 조였더니 공시 9 / 정책 5 밖에 안 남아 배포가 22건에 그쳤다(실측 #67,#68).
 # 반복 실행은 캐시 적중으로 호출이 0 이라 테스트 상한을 높여도 비용이 늘지 않는다.
 ENRICH_MAX = int(os.environ.get("ENRICH_MAX", "40" if TEST_MODE else "20"))
+ENRICH_RESCUE_CHUNK = max(1, int(os.environ.get("ENRICH_RESCUE_CHUNK", "5")))
 
 ENABLE_JUDGE  = os.environ.get("ENABLE_JUDGE", "1") == "1"
 MIN_JUDGE_SCORE = int(os.environ.get("MIN_JUDGE_SCORE", "14"))   # 20점 환산
