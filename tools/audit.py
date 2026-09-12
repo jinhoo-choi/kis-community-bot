@@ -83,7 +83,12 @@ for slot, w in SLOT_W.items():
     if sum(w.values()) == 0:
         fail(f"v2 {slot}: 전건 가중치 0")
     live = [k for k, v in w.items() if v > 0]
-    if len(live) < 4:
+    if slot == "poll":
+        if any(PERSONAS[k]["no_question"] for k in live):
+            fail("v2 poll: 질문 금지 페르소나가 활성화됨")
+        else:
+            ok(f"v2 poll: 질문형 페르소나 {len(live)}종")
+    elif len(live) < 4:
         warn(f"v2 {slot}: 선택 가능 페르소나 {len(live)}종뿐")
 ok("v2 슬롯 가중치 정합")
 

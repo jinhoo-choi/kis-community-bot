@@ -128,7 +128,8 @@ def _slot_n(facts: str) -> int:
 
 
 def check(body: str, facts: str, fmt: str = None, angle: str = None,
-          length: str = None, theme_stock: str = None) -> list[str]:
+          length: str = None, theme_stock: str = None,
+          require_question: bool = False) -> list[str]:
     """위반 사유 리스트 반환. 빈 리스트면 통과."""
     errs = []
 
@@ -221,5 +222,7 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
         from src import personas as _P
         if _P.no_question(fmt) and body.rstrip().endswith("?"):
             errs.append(f"질문마무리금지({fmt})")
+    if require_question and not body.rstrip().endswith("?"):
+        errs.append("질문마무리필수(poll)")
 
     return errs

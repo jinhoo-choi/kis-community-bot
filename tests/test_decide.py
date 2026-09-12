@@ -191,7 +191,9 @@ def main():
 
 
     # ── 2026-09-03 실측 오탐 회귀 (연합뉴스 RSS 정치·인사·헤드라인 유입)
-    from src.sources.policy import is_relevant
+    from src.sources.policy import is_relevant, _fresh_published_at
+    from datetime import datetime as _policy_datetime
+    from config import KST as _POLICY_KST
     bad = [
         "추미애 1차 추경서 예산 누락분 보강했어야…도의회도 책임",
         "총학생회장단 만난 박홍근, 청년 성장단계별 종합투자 추진",
@@ -210,6 +212,15 @@ def main():
     for t, d in good:
         r, why = is_relevant(t, d)
         ok.append(run(f"정책기사 통과: {t[:14]}", r, why))
+    _policy_now = _policy_datetime(2026, 9, 12, 12, 0, tzinfo=_POLICY_KST)
+    ok.append(run("최근 RSS 발행시각 통과",
+                  _fresh_published_at("Sat, 12 Sep 2026 01:00:00 +0000",
+                                      _policy_now) is not None))
+    ok.append(run("48시간 지난 RSS 제외",
+                  _fresh_published_at("Thu, 10 Sep 2026 01:00:00 +0000",
+                                      _policy_now) is None))
+    ok.append(run("발행시각 없는 RSS 제외",
+                  _fresh_published_at("", _policy_now) is None))
 
 
     # ── KIND 상장목록 파싱 (2026-09-03 실측 구조 회귀)
@@ -633,6 +644,15 @@ def main():
                   all(_PM.num_cap(k) > _P2v.claim_cap(k) for k in _P2v.PERSONAS)))
     ok.append(run("접근자 숫자상한", _PM.num_cap("quick_memo") == 4))
     ok.append(run("v2 슬롯 가중치 0 허용(정책×수치중심)", _SW2["policy"]["data_focus"] == 0))
+    _poll_styles = [p for p, w in _SW2["poll"].items() if w > 0]
+    ok.append(run("투표 슬롯은 질문형 페르소나만 허용",
+                  _poll_styles == ["open_talk"]
+                  and all(not _P2[p]["no_question"] for p in _poll_styles)))
+    ok.append(run("투표 본문 질문 마무리 필수",
+                  any("질문마무리필수" in e for e in _f2.check(
+                      "정부가 반도체 지원안을 발표했습니다. 적용 범위를 정리했습니다.",
+                      "제목: 정부 반도체 지원안", "open_talk", "context", "open_talk",
+                      require_question=True))))
     _s2, _ = _PM.build_messages_v2({"kind": "flow", "title": "t", "facts": "등락률: 20.32%"},
                                    "brief_report", "reaction")
     ok.append(run("v2 프롬프트 미치환 없음",

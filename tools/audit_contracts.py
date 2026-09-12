@@ -214,7 +214,11 @@ def check_scenarios() -> None:
         per_slot[slot] = alive
     for slot, alive in per_slot.items():
         personas = {p for p, _ in alive}
-        if len(personas) < 3:
+        if slot == "poll" and personas and all(
+                not PERSONAS[p]["no_question"] for p in personas):
+            ok(f"슬롯 '{slot}': 질문형 조합 {len(alive)}개 / "
+               f"페르소나 {len(personas)}종")
+        elif len(personas) < 3:
             fail(f"슬롯 '{slot}': 성립 페르소나 {len(personas)}종 — 문체가 쏠린다")
         else:
             ok(f"슬롯 '{slot}': 조합 {len(alive)}개 / 페르소나 {len(personas)}종")

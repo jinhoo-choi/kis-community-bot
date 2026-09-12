@@ -13,12 +13,17 @@ korea.kr(정책브리핑·기재부·금융위·산업부)은 GitHub Actions 의
       정부 보도자료가 아니므로 '발표'가 아닌 '보도'로 취급한다.
 """
 import re
+from datetime import datetime, timedelta
+from email.utils import parsedate_to_datetime
 from xml.etree import ElementTree as ET
 
 import requests
 
-from config import USER_AGENT
+from config import KST, USER_AGENT
 from src import crawl
+
+# 일일 봇에서 이보다 오래된 종합 뉴스는 새 정책 소재로 취급하지 않는다.
+MAX_AGE = timedelta(hours=48)
 
 FEEDS = [
     ("연합뉴스 경제", "https://www.yna.co.kr/rss/economy.xml"),
@@ -86,6 +91,42 @@ PERSON_LED = re.compile(
 )
 
 
+def _published_at(raw: str) -> datetime | None:
+    """RFC 2822/ISO 형식의 RSS 발행 시각을 KST aware datetime 으로 바꾼다."""
+    raw = (raw or "").strip()
+    if not raw:
+        return None
+    try:
+        dt = parsedate_to_datetime(raw)
+    except (TypeError, ValueError, OverflowError):
+        try:
+            dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=KST)
+    return dt.astimezone(KST)
+
+
+def _feed_date(item) -> str:
+    """네임스페이스가 붙은 dc:date까지 포함해 발행시각 태그를 찾는다."""
+    for child in item:
+        tag = child.tag.rsplit("}", 1)[-1].lower()
+        if tag in ("pubdate", "date", "published", "updated") and child.text:
+            return child.text
+    return ""
+
+
+def _fresh_published_at(raw: str, now: datetime | None = None) -> datetime | None:
+    published = _published_at(raw)
+    if published is None:
+        return None
+    now = (now or datetime.now(KST)).astimezone(KST)
+    age = now - published
+    # RSS 서버와 러너의 가벼운 시계 차이는 허용하되 미래 기사도 통과시키지 않는다.
+    return published if -timedelta(hours=2) <= age <= MAX_AGE else None
+
+
 def is_relevant(title: str, desc: str = "") -> tuple[bool, str]:
     """(수집여부, 제외사유). 순수 함수 — 테스트가 이 함수를 직접 호출한다."""
     blob = f"{title} {desc}"
@@ -120,7 +161,12 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
             print(f"[policy] {dept} 실패: {type(e).__name__}")
         return False
 
+    stale = 0
     for it in root.iter("item"):
+        published = _fresh_published_at(_feed_date(it))
+        if published is None:
+            stale += 1
+            continue
         title = (it.findtext("title") or "").strip()
         desc = re.sub(r"<[^>]+>", "", it.findtext("description") or "").strip()
         okay, _why = is_relevant(title, desc)
@@ -134,6 +180,7 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
             "title": title,
             "facts": (
                 f"출처: {dept}\n"
+                f"보도 시각: {published.strftime('%Y-%m-%d %H:%M KST')}\n"
                 f"제목: {title}\n"
                 f"요지: {desc[:500]}\n"
                 f"※ 수혜 종목을 특정하거나 추천하지 말 것. 산업/테마 수준으로만 언급.\n"
@@ -143,6 +190,8 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
         })
         if len(out) >= limit:
             return True
+    if stale:
+        print(f"[policy] {dept} 오래됐거나 발행시각 없는 항목 {stale}건 제외")
     return True
 
 

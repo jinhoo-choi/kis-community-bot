@@ -271,7 +271,8 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
         for p in made:
             errs = filters.check(
                 p["body"], p["facts"], p.get("fmt"), p.get("angle"), p.get("length"),
-                p.get("stock_name") if p.get("theme_assigned") else None)
+                p.get("stock_name") if p.get("theme_assigned") else None,
+                p.get("kind") == "poll")
             if errs:
                 # 본문을 함께 남겨야 '이 리젝이 타당했는지' 사후 검토가 된다
                 print(f"[gen] 정규식 리젝 {p['id']} {errs}")
@@ -295,7 +296,8 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
             if made and not filters.check(
                     made[0]["body"], p["facts"], p.get("fmt"), p.get("angle"),
                     p.get("length"),
-                    p.get("stock_name") if p.get("theme_assigned") else None):
+                    p.get("stock_name") if p.get("theme_assigned") else None,
+                    p.get("kind") == "poll"):
                 posts.append(made[0])
 
     print(f"[gen] 정규식 통과 {len(posts)}건 / 시도 {len(items)}건")
@@ -310,6 +312,7 @@ _HINTS = {
     "너무김": "너무 깁니다. 문장 수를 줄이고 곁가지 내용을 버리세요.",
     "너무짧음": "너무 짧습니다. 사실을 하나 더 넣되 숫자를 늘리지는 마세요.",
     "질문마무리금지": "질문으로 끝냈습니다. 마지막 사실에서 그냥 끊으세요.",
+    "질문마무리필수": "토론 발제글입니다. 마지막 문장을 구체적인 질문으로 끝내세요.",
     "stock_ending": "'지켜봐야 한다' 류 상투적 마무리를 썼습니다. 그 문장을 빼세요.",
     "완충표현": "'~것 같습니다', '~로 보입니다'를 너무 많이 썼습니다. 한 번까지만 쓰세요.",
     "어미반복": "같은 종결어미가 반복됩니다. 어미를 섞으세요.",

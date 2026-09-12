@@ -129,9 +129,11 @@ SLOT_W = {
     "policy":     {"term_guide": 3, "two_view": 3, "check_list": 3, "fact_note": 2,
                    "timeline_note": 2, "open_talk": 2, "careful_note": 2,
                    "brief_report": 1, "data_focus": 0, "quick_memo": 1},
-    "poll":       {"open_talk": 3, "two_view": 3, "check_list": 2, "quick_memo": 1,
-                   "fact_note": 1, "term_guide": 1, "brief_report": 1,
-                   "data_focus": 1, "careful_note": 1, "timeline_note": 1},
+    # poll 은 make_polls()가 질문 마무리를 계약한다. 질문 금지 페르소나를
+    # 섞으면 생성 프롬프트 내부에서 서로 모순되므로 발제형만 허용한다.
+    "poll":       {"open_talk": 3, "two_view": 0, "check_list": 0, "quick_memo": 0,
+                   "fact_note": 0, "term_guide": 0, "brief_report": 0,
+                   "data_focus": 0, "careful_note": 0, "timeline_note": 0},
     "theme":      {"term_guide": 3, "two_view": 3, "fact_note": 2, "open_talk": 2,
                    "check_list": 2, "careful_note": 2, "timeline_note": 1,
                    "brief_report": 1, "data_focus": 0, "quick_memo": 1},
