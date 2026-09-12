@@ -82,19 +82,21 @@ ok
   OK    60자 통과
   OK    300자 초과 리젝
   OK    카드 태그 미절단
-  OK    본문만 절단  (3080자)
+  OK    본문만 절단  (3092자)
   OK    복사블록 language 지정
   OK    1행 카테고리
   OK    2행 담당
+  OK    3행 생성 경로
   OK    카드에 URL 전문 없음
   OK    인라인 버튼 생성
   OK    종목 없으면 버튼 없음
 [tg] 실패 fail: fail
   OK    부분 전송은 성공 글만 반환
   OK    목표 기준 요약 0/50 표기
-  OK    3행부터 복사블록
+  OK    4행부터 복사블록
   OK    종목건은 종목명+코드 표기  (카테고리 : 공시 · 삼성전자 (005930))
   OK    테마건은 카테고리만  (카테고리 : 정책)
+  OK    문장틀 생성 경로 표기
   OK    방향오용 차단
   OK    provider/심사점수 미노출
   OK    실배포 회귀 차단: 신문체  (['literary_style'])
@@ -113,6 +115,10 @@ ok
   OK    누적 등락률 부호를 방향어로 정리
   OK    장중 오르내림 표현을 고저 차이로 정리
   OK    장중 변동성 표현을 고저 차이로 정리
+  OK    실발송 저가상승 오해 표현 정리
+  OK    실발송 상승폭 오해 표현 정리
+  OK    실발송 마감 중복·거래량 비문 정리
+  OK    실발송 고가 기준·고저차 어순 정리
   OK    흐름 연결어미 마무리 정리
   OK    상투어 리젝(치환불가)
   OK    주체없는 평가 차단
@@ -314,7 +320,7 @@ ok
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'open_talk', 'brief_report', 'data_focus', 'check_list', 'fact_note', 'careful_note'})
+  OK    flow 에서 quick_memo 미선택  ({'brief_report', 'careful_note', 'open_talk', 'data_focus', 'fact_note', 'check_list'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
   OK    미선정 비수치 사실도 프롬프트에서 제거
@@ -388,7 +394,25 @@ ok
   OK    주입된 용어로 term_word 슬롯 성립
   OK    용어 설명 중복 주입 없음
 
-334/334 passed
+340/340 passed
+  OK    문장틀 22종 계약
+  OK    50+15 reserve 준비  (65)
+  OK    reserve 전건 원문 재검증
+  OK    동일 문장틀 하루 3건 이하  (Counter({'flow_template_01': 3, 'flow_template_02': 3, 'flow_template_03': 3, 'flow_template_04': 3, 'flow_template_05': 3, 'flow_template_06': 3, 'flow_template_07': 3, 'flow_template_08': 3, 'flow_template_09': 3, 'flow_template_10': 3, 'flow_template_11': 3, 'flow_template_12': 3, 'flow_template_13': 3, 'flow_template_14': 3, 'flow_template_15': 3, 'flow_template_16': 3, 'flow_template_17': 3, 'flow_template_18': 3, 'flow_template_19': 3, 'flow_template_20': 3, 'flow_template_21': 3, 'flow_template_22': 2}))
+  OK    22종이 실제 reserve에 사용됨  (22)
+  OK    동일 말미 20자 2건 이하
+[decide] 유형상한 완화로 10건 보충 (20 → 30)
+[decide] ⚠ 절대상한 해제로 20건 보충 (30 → 50) — 구성 목표 초과: {'flow': 20}. 비-flow 공급 부족이 원인이다.
+  OK    API 전면 장애 dry-run 50건  (50)
+  OK    보장 모드 문장틀 문체별 17건 이하  (Counter({'data_focus': 17, 'fact_note': 17, 'brief_report': 16}))
+  OK    boolean 플래그로 본문 변조 우회 불가
+[decide] 유형상한 완화로 10건 보충 (20 → 30)
+[decide] ⚠ 절대상한 해제로 20건 보충 (30 → 50) — 구성 목표 초과: {'flow': 20}. 비-flow 공급 부족이 원인이다.
+  OK    정상 모드 LLM 35 + 문장틀 15  (Counter({'claude': 35, 'template': 15}))
+  OK    같은 원본 LLM·문장틀 중복 배포 차단
+  OK    문장틀 준비·보충·페르소나 통계 계측
+
+12/12 passed
 
 === 2b. 전수검사 (설정-코드 정합성) ===
 
@@ -500,7 +524,7 @@ FAIL 0 / WARN 0
        └ '두산에너빌리티 원전 수주 소식이 나왔네요. 저는 이거 물렸는데 이번엔 좀 오르려나요. 체코 건 이후로 분위기가 달라진 건 맞습니다. 다만 확정된 수치는 없습니다. 어떻게 보시나요.'
 [gen] 정규식 리젝 v2 ['trade_advice', 'price_target']
        └ '카카오 광고매출 회복 얘기가 나옵니다. 지금 비중확대 하세요. 목표가 6만원 갑니다. 반드시 오릅니다. 지금이 기회입니다. 다들 어떻게 보시나요.'
-[gen] 정규식 리젝 v3 ["미확인수치['8742', '452', '1530']", "근거없는수치['1530', '452', '8742']", '어미단조(격식체만 3문장)']
+[gen] 정규식 리젝 v3 ["미확인수치['8742', '1530', '452']", "근거없는수치['1530', '452', '8742']", '어미단조(격식체만 3문장)']
        └ 'LG에너지솔루션이 어제 2.30% 올랐습니다. 거래대금은 8,742억원이었고 외국인이 1,530억 순매수했습니다. 수주잔고도 452조원까지 늘었다고 합니다. 배터리 업황이 돌아서는 걸까요.'
 [gen] 정규식 통과 9건 / 시도 13건
 
