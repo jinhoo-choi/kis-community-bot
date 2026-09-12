@@ -120,6 +120,51 @@ def probe_research_api() -> None:
         except Exception as e:
             log(f"    [ERR] {type(e).__name__} {c}")
 
+    # 목록에서 researchId 를 얻어 상세에서 목표가/투자의견을 찾는다.
+    # 게이트가 '제시 적정가격|투자의견' 을 요구하므로 이게 없으면 제목뿐이라
+    # 통과율이 낮다. 기존 네이버 경로의 가치가 여기 있었다.
+    log("  --- 상세(목표가) 탐색 ---")
+    base1 = "https://m.stock.naver.com/front-api"
+    hdr1 = {**H, "Accept": "application/json", "Referer": page}
+    try:
+        lst = requests.get(base1 + "/research/list",
+                           params={"category": "company", "page": 1, "pageSize": 5},
+                           headers=hdr1, timeout=12).json()["result"]
+    except Exception as e:
+        log(f"    목록 실패 {e}")
+        lst = []
+    if lst:
+        it = lst[0]
+        rid = it["researchId"]
+        log(f"    대상 researchId={rid} {it['itemName']} / {it.get('endUrl')}")
+        for c, prm in [("/research/end", {"researchId": rid, "category": "company"}),
+                       ("/research/end", {"id": rid, "category": "company"}),
+                       ("/research/company/" + str(rid), {}),
+                       ("/research/detail", {"researchId": rid}),
+                       ("/research/stockEnd", {"researchId": rid,
+                                               "itemCode": it.get("itemCode")})]:
+            try:
+                rr = requests.get(base1 + c, params=prm, headers=hdr1, timeout=12)
+                log(f"    [{rr.status_code}] {c} {prm}")
+                if rr.status_code == 200:
+                    log(f"      → {rr.text[:500]}")
+            except Exception as e:
+                log(f"    [ERR] {type(e).__name__} {c}")
+        # endUrl 페이지 자체도 본다
+        eu = it.get("endUrl")
+        if eu:
+            try:
+                rr = requests.get(eu, headers=H, timeout=15)
+                sp = BeautifulSoup(rr.text, "html.parser")
+                txt = sp.get_text(" ", strip=True)
+                log(f"    endUrl HTTP {rr.status_code} / 텍스트 {len(txt)}자")
+                for kw in ("목표가", "목표주가", "적정주가", "투자의견"):
+                    i = txt.find(kw)
+                    if i >= 0:
+                        log(f"      '{kw}' 주변: {txt[max(0, i - 30):i + 70]}")
+            except Exception as e:
+                log(f"    [ERR endUrl] {type(e).__name__}")
+
     log("  --- front-api 타격 ---")
     base = "https://m.stock.naver.com/front-api"
     hdr = {**H, "Accept": "application/json", "Referer": page}
