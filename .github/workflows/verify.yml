@@ -44,6 +44,10 @@ on:
         description: '시세 소스 복구 탐색 (네이버 개편 대응, LLM 호출 없음)'
         type: boolean
         default: false
+      probe_src2:
+        description: '리서치·KIND 장애 원인 프로브 (LLM 호출 없음)'
+        type: boolean
+        default: false
       board_style:
         description: '토론방 고반응/대조군 구조 분석 (약 15분, LLM 호출 없음)'
         type: boolean
@@ -231,6 +235,14 @@ jobs:
           pip install -q -r requirements.txt
           python tools/probe_source.py || true
 
+      - name: Probe research/KIND
+        if: ${{ !cancelled() && inputs.probe_src2 }}
+        env:
+          TZ: Asia/Seoul
+        run: |
+          pip install -q -r requirements.txt
+          python tools/probe_src2.py || true
+
       - name: Summary & commit
         if: always()
         run: |
@@ -246,6 +258,7 @@ jobs:
           git add -f data/research_probe.txt || true
           git add -f data/flow_probe.txt || true
           git add -f data/source_probe.txt || true
+          git add -f data/src2_probe.txt || true
           git add -f data/board_probe.txt || true
           git add -f data/board_dist.json || true
           git add -f data/board_style.json || true
