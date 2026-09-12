@@ -81,6 +81,7 @@ jobs:
           USE_BATCH:             ${{ inputs.use_batch || 'auto' }}
           IGNORE_SEEN:           ${{ inputs.ignore_seen && '1' || '0' }}
           CLAUDE_MODEL:      ${{ vars.CLAUDE_MODEL || 'claude-haiku-4-5-20251001' }}
+          CLAUDE_BACKUP_JUDGE_MODEL: ${{ vars.CLAUDE_BACKUP_JUDGE_MODEL || 'claude-sonnet-5' }}
           GEMINI_MODEL:      ${{ vars.GEMINI_MODEL || 'gemini-3.5-flash' }}
           GEMINI_JUDGE_MODEL: ${{ vars.GEMINI_JUDGE_MODEL || 'gemini-3.1-flash-lite' }}
           GEMINI_FREE_MODEL: ${{ vars.GEMINI_FREE_MODEL || 'gemini-3.1-flash-lite' }}

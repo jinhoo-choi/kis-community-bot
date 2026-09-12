@@ -1207,6 +1207,43 @@ def main():
     _cp.generate_many([("s", "u")] * 4)
     ok.append(run("Claude 동기 호출 제한 병렬화", len(_threads) >= 2))
 
+    # Gemini 유료·무료 티어가 모두 막혀도 동일 Haiku 자기심사는 하지 않는다.
+    # Sonnet 5는 temperature를 거부하므로 sampling parameter 없이 호출해야 한다.
+    _sonnet = _CP.__new__(_CP)
+    _sonnet.model, _sonnet._no_temp = "claude-sonnet-5", False
+    _sent_kw = {}
+    class _ClaudeMessages:
+        def create(self, **kw):
+            _sent_kw.update(kw)
+            return _NS(content=[])
+    _sonnet._client = _NS(messages=_ClaudeMessages())
+    _sonnet._create("s", "u", 0.0, 300)
+    ok.append(run("Claude Sonnet 심사는 temperature 없이 실행",
+                  "temperature" not in _sent_kw
+                  and _sent_kw.get("thinking") == {"type": "disabled"}))
+
+    from src import judge as _judge2
+    _old_judges, _old_cross = _judge2.judges, _judge2.cross_judge_for
+    _valid_score = ('{"factual":5,"useful":4,"natural":4,"compliant":5,'
+                    '"gain":4,"fit":3,"fatal":[],"reason":"정상"}')
+    class _FakeJudge:
+        def __init__(self, result): self.result = result
+        def available(self): return True
+        def generate(self, *_a, **_k): return self.result
+    _judge_pool = {
+        "gemini": _FakeJudge(_GR("", "gemini", "paid", ok=False,
+                                         error="billing")),
+        "claude_backup": _FakeJudge(_GR(_valid_score, "claude", "sonnet")),
+    }
+    _judge2.judges = lambda: _judge_pool
+    _judge2.cross_judge_for = lambda _writer: "gemini"
+    _judged = _judge2._one({"provider": "claude", "tone": "fact_note",
+                            "facts": "종가: 1,000원", "body": "검증 가능한 본문입니다."})
+    ok.append(run("Gemini 심사 실패 시 Sonnet 교차모델 재심사",
+                  _judged.get("score") is not None
+                  and _judged.get("judged_by") == "claude_backup"))
+    _judge2.judges, _judge2.cross_judge_for = _old_judges, _old_cross
+
     # 슬롯을 키우면 기대치가 따라 올라 전 소스가 오탐 경보를 냈다
     # (실측: market 기대 857 vs 실제 62 — 수집이 아니라 기준이 망가진 것)
     from src import crawl as _cw

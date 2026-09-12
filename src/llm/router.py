@@ -47,6 +47,14 @@ def judges() -> dict:
         p["claude"] = c
     if g.available():
         p["gemini"] = g
+    # 무료 Gemini 키까지 없거나 소진된 경우의 마지막 안전망. 작성 Haiku와 다른
+    # Sonnet만 허용해 동일 모델 자기심사는 하지 않는다. 정상 때는 Gemini가 우선이다.
+    if (c.available()
+            and config.CLAUDE_BACKUP_JUDGE_MODEL != config.CLAUDE_JUDGE_MODEL):
+        backup = ClaudeProvider(config.ANTHROPIC_API_KEY,
+                                config.CLAUDE_BACKUP_JUDGE_MODEL, use_batch=False)
+        if backup.available():
+            p["claude_backup"] = backup
     return p
 
 

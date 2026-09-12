@@ -104,28 +104,39 @@ def _parse(txt: str) -> dict | None:
 
 
 def _one(post: dict) -> dict:
-    jname = cross_judge_for(post.get("provider", ""))
-    if not jname:
+    writer = post.get("provider", "")
+    first = cross_judge_for(writer)
+    if not first:
         post["score"] = None
         post["judge_error"] = "교차 심사자 없음"
         return post
 
-    j = judges()[jname]
-    r = j.generate(
-        # ※ SYSTEM 에 JSON 리터럴이 있어 .format() 을 쓰면 KeyError 로 죽는다. replace 고정.
-        SYSTEM.replace("__FATAL_BLOCK__", rules.judge_block()),
-        USER.format(
-            tone=post["tone"], facts=post["facts"][:2500], body=post["body"],
-            sources="\n".join(x.get("url", "") for x in post.get("enrich_sources", [])) or "-",
-        ),
-        temperature=0.0,
-        max_tokens=300,
-    )
-    d = _parse(r.text)
-    post["score"] = d
-    post["judged_by"] = jname
-    if d is None:
-        post["judge_error"] = r.error or "심사 응답 형식 오류"
+    pool = judges()
+    names = [first] + [n for n, p in pool.items()
+                       if n != writer and n != first and p.available()]
+    errors = []
+    for jname in names:
+        j = pool[jname]
+        r = j.generate(
+            # ※ SYSTEM 에 JSON 리터럴이 있어 .format() 을 쓰면 KeyError 로 죽는다. replace 고정.
+            SYSTEM.replace("__FATAL_BLOCK__", rules.judge_block()),
+            USER.format(
+                tone=post["tone"], facts=post["facts"][:2500], body=post["body"],
+                sources="\n".join(x.get("url", "") for x in post.get("enrich_sources", [])) or "-",
+            ),
+            temperature=0.0,
+            max_tokens=300,
+        )
+        d = _parse(r.text)
+        if d is not None:
+            post["score"] = d
+            post["judged_by"] = jname
+            post.pop("judge_error", None)
+            return post
+        errors.append(f"{jname}:{r.error or '형식오류'}")
+    post["score"] = None
+    post["judged_by"] = names[-1]
+    post["judge_error"] = " | ".join(errors)[:180]
     return post
 
 
@@ -134,4 +145,8 @@ def judge_all(posts: list[dict], workers: int = 6) -> list[dict]:
         print("[judge] 프로바이더가 1개뿐 → 교차 심사 스킵")
         return posts
     with cf.ThreadPoolExecutor(max_workers=workers) as ex:
-        return list(ex.map(_one, posts))
+        out = list(ex.map(_one, posts))
+    backup_n = sum(p.get("judged_by") == "claude_backup" for p in out)
+    if backup_n:
+        print(f"[judge] ⚠ Gemini 심사 불가 → Claude Sonnet 교차모델 심사 {backup_n}건")
+    return out

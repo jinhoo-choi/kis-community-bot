@@ -50,6 +50,11 @@ class ClaudeProvider(Provider):
         """설치된 SDK 가 temperature 를 안 받는 경우가 있어(실측) 방어적으로 호출한다."""
         kw = dict(model=self.model, max_tokens=max_tokens, system=system,
                   messages=[{"role": "user", "content": user}])
+        # Sonnet 5는 비기본 sampling parameter를 거부하고 adaptive thinking이 기본이다.
+        # JSON 심사는 짧고 결정적이어야 하므로 thinking을 끄고 temperature를 보내지 않는다.
+        if self.model == "claude-sonnet-5":
+            return self._client.messages.create(
+                thinking={"type": "disabled"}, **kw)
         if self._no_temp:                 # 한 번 확인했으면 매번 재시도하지 않는다
             return self._client.messages.create(**kw)
         try:
@@ -83,7 +88,9 @@ class ClaudeProvider(Provider):
                 "params": {
                     "model": self.model, "max_tokens": max_tokens, "system": s,
                     "messages": [{"role": "user", "content": u}],
-                    **({} if self._no_temp else {"temperature": temperature}),
+                    **({"thinking": {"type": "disabled"}}
+                       if self.model == "claude-sonnet-5"
+                       else ({} if self._no_temp else {"temperature": temperature})),
                 },
             } for i, (s, u) in enumerate(jobs)]
 

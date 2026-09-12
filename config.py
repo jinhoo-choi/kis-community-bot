@@ -151,6 +151,8 @@ GEMINI_CANDIDATES = [
 
 CLAUDE_MODEL       = CLAUDE_CANDIDATES[0]
 CLAUDE_JUDGE_MODEL = os.environ.get("CLAUDE_JUDGE_MODEL", "claude-haiku-4-5-20251001")
+# Gemini 계열이 전부 멈췄을 때만 쓰는 교차모델 심사자. 같은 Haiku의 자기심사는 금지한다.
+CLAUDE_BACKUP_JUDGE_MODEL = os.environ.get("CLAUDE_BACKUP_JUDGE_MODEL", "claude-sonnet-5")
 # Batch API 는 비동기 대량 작업용이다. 이 파이프라인은 같은 실행에서 결과가
 # 필요하므로 600초 대기 뒤 동기 재호출이 발생했다. 명시적으로 켤 때만 사용한다.
 USE_BATCH = os.environ.get("USE_BATCH", "0") == "1"
