@@ -470,7 +470,6 @@ def fetch(limit: int = 12) -> list[dict]:
                 f"등락률: {r['pct']:.2f}%\n"
                 + ("" if r.get("eok_approx")
                    else f"거래대금: {r['eok']:,.0f}억원\n")
-                + (f"{r['flow_rank']}\n" if r.get("flow_rank") else "")
                 + facts.DERIVED_HEADER + "\n"
                 + "".join(f"· {lbl}\n" for lbl in derived)
                 + "※ 결합 사실은 코드가 계산한 값이다. 최소 하나는 본문에 그대로 써야 한다.\n"

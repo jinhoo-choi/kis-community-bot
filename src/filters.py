@@ -68,16 +68,13 @@ def _needs_relation(body: str, facts_text: str = "") -> list[str]:
 
     결합 사실은 개별 raw 수치만으로는 드러나지 않는 비교·비중·위치다
     (평균 대비 배수, 5거래일 누적, 고가 대비 마감 위치, 수급 순위).
-    그 수치 중 하나라도 본문에 등장하면 통과시킨다.
+    같은 수치뿐 아니라 관계 문맥까지 본문에 등장해야 통과시킨다.
     """
     from src import facts as _facts
     derived = _facts.derived_values(facts_text)
     if not derived:
         return []                      # 결합 사실이 없는 소재는 요구하지 않는다
-    nums = set(re.findall(r"\d[\d,]*\.?\d*", body))
-    if len(nums) < 3:
-        return []
-    return [] if (nums & set(derived)) else ["결합사실미사용"]
+    return [] if _facts.uses_derived(body, facts_text) else ["결합사실미사용"]
 
 
 def _ending_variety(body: str) -> list[str]:

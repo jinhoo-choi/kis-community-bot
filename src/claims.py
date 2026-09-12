@@ -129,8 +129,9 @@ def block(item: dict, use_n: int = 3, angle: str = "") -> str:
     return (
         "[이번 글에 쓸 사실 — 아래 것만 씁니다]\n"
         + "\n".join(lines)
-        + "\n\n입력에 다른 수치가 있어도 이번 글에는 쓰지 마세요. 고르는 일은 이미 끝났습니다.\n"
-        + "각 문장은 위 사실 중 하나에 근거하거나, 숫자 없는 서술이어야 합니다.\n"
+        + "\n\n입력에 다른 사실이 있어도 이번 글에는 쓰지 마세요. 고르는 일은 이미 끝났습니다.\n"
+        + "숫자가 없는 문장도 위 사실에서 직접 확인되는 내용이어야 합니다. "
+          "평가·정의·배경을 새로 보태지 마세요.\n"
         + "특히 아래는 이 글에서 다룰 수 있는 종류의 주장이 아닙니다.\n"
         + "\n".join(f"- {t}" for t in FORBIDDEN_TYPES)
     )
@@ -151,7 +152,7 @@ def facts_view(item: dict, n: int, angle: str = "") -> str:
     drop_pats = [pat for cid, _l, pat, _f in CLAIM_SPECS if cid not in keep]
     out = []
     for line in facts.splitlines():
-        if any(re.search(pat, line) for pat in drop_pats) and re.search(r"\d", line):
+        if any(re.search(pat, line) for pat in drop_pats):
             continue
         out.append(line)
     return "\n".join(out)
@@ -206,13 +207,18 @@ def _codes(item: dict) -> set[str]:
 
 def grounding_errors(body: str, item: dict, cap: int) -> list[str]:
     """근거 검사. 숫자 개수가 아니라 인용한 주장 수로 판정한다."""
-    cs = build(item)
-    if not cs:
+    all_cs = build(item)
+    if not all_cs:
         return []
-    hit, ungrounded = used(body, cs, _codes(item))
+    selected = (select(item, cap, item.get("angle", ""))
+                if item.get("angle") else all_cs)
+    hit, ungrounded = used(body, all_cs, _codes(item))
+    selected_ids = {c["id"] for c in selected}
     errs = []
     if len(hit) > cap:
         errs.append(f"주장과다({len(hit)}개/{cap})")
+    elif hit - selected_ids:
+        errs.append(f"선정외주장({len(hit - selected_ids)}개)")
     if ungrounded:
         errs.append(f"근거없는수치{sorted(ungrounded)[:3]}")
     return errs

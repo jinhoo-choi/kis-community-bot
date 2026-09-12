@@ -549,6 +549,17 @@ def main():
         _f_many, "fact_read", "reaction", "quick_memo"))))
     ok.append(run("근거없는 수치 차단", any("근거없는수치" in e for e in _f2.check(
         "거래대금은 8,742억원이었습니다.", _f_many, "fact_read", "reaction", "quick_memo"))))
+    from src import facts as _facts3
+    _derived_facts = ("등락률: 3.20%\n" + _facts3.DERIVED_HEADER
+                      + "\n· 거래량: 20일 평균의 3.2배")
+    ok.append(run("같은 숫자만 쓴 결합사실 우회 차단",
+                  not _facts3.uses_derived("등락률은 3.2%였습니다.", _derived_facts)))
+    ok.append(run("결합값과 관계를 함께 쓰면 통과",
+                  _facts3.uses_derived("거래량은 20일 평균의 3.2배였습니다.", _derived_facts)))
+    ok.append(run("숫자 1개 글도 결합사실 검사",
+                  any("결합사실미사용" in e for e in _f2.check(
+                      "삼성전자의 등락률은 3.2%였습니다. 확인된 수치만 정리한 내용입니다.",
+                      _derived_facts, "fact_note", "reaction", "short"))))
     ok.append(run("한 주장의 복수 숫자는 1개로", not any("주장과다" in e for e in _f2.check(
         "1 대 1.8702948. 우성이 우성유통을 흡수합병하기로 결정했습니다.",
         "합병 비율: 1 대 1.8702948", "fact_read", "ratio", "quick_memo"))))
@@ -921,6 +932,19 @@ def main():
                       {"title": "[기재정정]주요사항보고서(유상증자결정)"})[0]))
     ok.append(run("num_cap 이 claim_cap 이상",
                   all(_pn.num_cap(p_) > _cc(p_) for p_ in _PV)))
+    ok.append(run("미선정 비수치 사실도 프롬프트에서 제거",
+                  "공시명:" not in _cl2.facts_view(
+                      {"facts": "공시명: 공급계약\n등락률: 5.20%"}, 1, "reaction")))
+    _selected_item = {"facts": "등락률: 5.20%\n종가: 12,000원", "angle": "reaction"}
+    ok.append(run("미선정 주장 수치 사용 차단",
+                  any("선정외주장" in e for e in
+                      _cl2.grounding_errors("종가는 12,000원입니다.", _selected_item, 1))))
+    ok.append(run("평범한 관계값은 글감에서 제외",
+                  not _facts3.evaluate({"vol_x": 1.0, "high": 10010, "low": 10000,
+                                        "close": 10005, "ret5": 1.0})))
+    ok.append(run("유의미한 관계값은 글감으로 인정",
+                  bool(_facts3.evaluate({"vol_x": 2.0, "high": 10600, "low": 10000,
+                                         "close": 10550, "ret5": 8.0}))))
 
     # 슬롯을 키우면 기대치가 따라 올라 전 소스가 오탐 경보를 냈다
     # (실측: market 기대 857 vs 실제 62 — 수집이 아니라 기준이 망가진 것)

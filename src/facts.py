@@ -159,6 +159,31 @@ def derived_values(facts_text: str) -> list[str]:
     return out
 
 
+_DERIVED_ANCHORS = [
+    ("거래량:", r"20일\s*평균|평균[^.\n]{0,12}배"),
+    ("장중 고저 차이:", r"장중|고저|저가[^.\n]{0,12}고가"),
+    ("마감 위치:", r"고가\s*대비|마감\s*위치"),
+    ("5거래일 누적", r"5거래일|누적"),
+    ("외국인 ", r"외국인"),
+    ("기관 ", r"기관"),
+    ("공매도 비중:", r"공매도"),
+    ("수급 순위:", r"수급|외국인|기관"),
+]
+
+
+def uses_derived(body: str, facts_text: str) -> bool:
+    """결합값과 그 관계 문맥을 함께 썼는지 확인한다."""
+    body_nums = {n.replace(",", "") for n in re.findall(r"\d[\d,]*\.?\d*", body)}
+    for line in facts_text.splitlines():
+        if not line.startswith("· "):
+            continue
+        anchor = next((pat for label, pat in _DERIVED_ANCHORS if label in line), "")
+        line_nums = {n.replace(",", "") for n in derived_values(line)}
+        if anchor and body_nums & line_nums and re.search(anchor, body):
+            return True
+    return False
+
+
 def evaluate(r: dict) -> list[str]:
     """게시글 입력에 넣을 관찰값. **판단 라벨을 붙이지 않는다.**
 
@@ -167,17 +192,22 @@ def evaluate(r: dict) -> list[str]:
     판단이 필요한 곳은 Angle 선정 같은 내부 로직이며, 그건 rank() 가 담당한다.
     """
     out = []
-    if r.get("vol_x"):
-        out.append(f"거래량: 20일 평균의 {r['vol_x']:.1f}배")
+    vol_x = r.get("vol_x")
+    if vol_x and (vol_x <= 0.5 or vol_x >= 1.5):
+        out.append(f"거래량: 20일 평균의 {vol_x:.1f}배")
 
     hi, lo, cl = r.get("high"), r.get("low"), r.get("close")
     if hi and lo and lo > 0:
-        out.append(f"장중 고저 차이: 저가 대비 {(hi - lo) / lo * 100:.1f}%")
+        range_pct = (hi - lo) / lo * 100
+        if range_pct >= 3.0:
+            out.append(f"장중 고저 차이: 저가 대비 {range_pct:.1f}%")
     if hi and cl:
-        out.append(f"마감 위치: 장중 고가 대비 {(hi - cl) / hi * 100:.1f}% 낮은 수준")
+        close_gap = (hi - cl) / hi * 100
+        if abs(r.get("pct") or 0) >= 3.0 and (close_gap <= 1.0 or close_gap >= 5.0):
+            out.append(f"마감 위치: 장중 고가 대비 {close_gap:.1f}% 낮은 수준")
 
     # 누적수익률과 변동성은 다른 개념이다. '변동이 컸다'로 서술하지 않는다.
-    if r.get("ret5") is not None:
+    if r.get("ret5") is not None and abs(r["ret5"]) >= 5.0:
         out.append(f"5거래일 누적 등락률: {r['ret5']:+.2f}%")
 
     tv = r.get("eok") or r.get("value_eok")
@@ -186,17 +216,20 @@ def evaluate(r: dict) -> list[str]:
         if not v:
             continue
         side = "순매수" if v > 0 else "순매도"
-        line = f"{who} {side}: {abs(v)/1e8:,.0f}억원"
-        if tv:
-            line += f" (거래대금 대비 {abs(v)/1e8 / tv * 100:.1f}%)"
-        out.append(line)
+        share = abs(v) / 1e8 / tv * 100 if tv else 0
+        if share >= 5.0:
+            out.append(f"{who} {side}: {abs(v)/1e8:,.0f}억원 "
+                       f"(거래대금 대비 {share:.1f}%)")
 
     sr = r.get("short_ratio")
-    if sr is not None:
-        line = f"공매도 비중: 거래대금 대비 {sr:.1f}%"
-        if r.get("short_avg40"):
-            line += f" (40거래일 평균 {r['short_avg40']:.1f}%의 {sr/r['short_avg40']:.1f}배)"
-        out.append(line)
+    avg40 = r.get("short_avg40")
+    if sr is not None and avg40:
+        rel = sr / avg40
+        if rel <= 0.5 or rel >= 1.5:
+            out.append(f"공매도 비중: 거래대금 대비 {sr:.1f}% "
+                       f"(40거래일 평균 {avg40:.1f}%의 {rel:.1f}배)")
+    if r.get("flow_rank"):
+        out.append(f"수급 순위: {r['flow_rank']}")
     return out
 
 
