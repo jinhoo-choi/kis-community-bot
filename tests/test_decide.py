@@ -785,6 +785,20 @@ def main():
     ok.append(run("슬롯이 공급 상한을 넘지 않음",
                   all(_cfg.SLOT_QUOTA[k] <= _cfg.SUPPLY_CAP[k] for k in _cfg.SLOT_QUOTA)))
     ok.append(run("기대 발송 산출됨", _cfg.EXPECTED_SENT > 0))
+    ok.append(run("수집 상한이 생성 상한을 충족",
+                  all(_cfg.COLLECT_CAP[k] >= _cfg.GEN_CAP[k] for k in _cfg.GEN_CAP)))
+    ok.append(run("기본 설정 목표 공급 가능",
+                  _cfg.EXPECTED_SENT >= _cfg.TARGET_POSTS))
+
+    import main as _pipeline
+    _mix = ([{"id": f"d{i}", "kind": "disclosure"} for i in range(8)]
+            + [{"id": f"f{i}", "kind": "flow"} for i in range(30)]
+            + [{"id": f"r{i}", "kind": "research"} for i in range(8)])
+    _ordered = _pipeline._stage_order(_mix)
+    ok.append(run("단계 생성 순서가 후보를 보존",
+                  {x["id"] for x in _ordered} == {x["id"] for x in _mix}))
+    ok.append(run("첫 생성 묶음 유형 혼합",
+                  len({x["kind"] for x in _ordered[:12]}) >= 2))
 
     from src.sources import dart_detail as _dd
     ok.append(run("무수치 공시유형 차단",

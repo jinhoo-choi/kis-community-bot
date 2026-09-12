@@ -24,10 +24,10 @@ from src.sources import dart, research, market, policy, telegram_ch, kind_inquir
 
 
 def collect() -> list[dict]:
-    q = config.SLOT_QUOTA
+    q = config.COLLECT_CAP
     items = []
-    # SLOT_QUOTA 에 이미 목표/수율과 공급 상한이 반영돼 있다. 여기서 다시
-    # OVERGEN_RATE 를 곱하면 flow 60건이 428건으로 이중 증폭된다.
+    # 후보 수집과 LLM 생성을 분리한다. 충분한 후보를 모으되 LLM 은 아래에서
+    # GEN_STAGE_SIZE 단위로만 호출한다. OVERGEN_RATE 를 다시 곱하지 않는다.
     items += dart.fetch(q["disclosure"])
     items += research.fetch(q["research"])
     flow_items = market.fetch(q["flow"])
@@ -47,6 +47,20 @@ def collect() -> list[dict]:
     items += telegram_ch.fetch(max(1, q["policy"] // 2))
     items += policy.make_polls(items, q["poll"])
     return items
+
+
+def _stage_order(items: list[dict]) -> list[dict]:
+    """한 생성 묶음이 특정 소스에 쏠리지 않도록 유형별 후보를 고르게 섞는다."""
+    order = {k: i for i, k in enumerate(config.GEN_CAP)}
+    used = {k: 0 for k in config.GEN_CAP}
+
+    def key(it):
+        k = it["kind"] if it.get("kind") in config.GEN_CAP else "research"
+        used[k] += 1
+        # 각 유형의 전체 생성 상한에서 현재 항목이 차지하는 상대 위치.
+        return used[k] / max(config.GEN_CAP[k], 1), order[k]
+
+    return sorted(items, key=key)
 
 
 def main():
@@ -125,7 +139,13 @@ def main():
         if cnt[k] < config.GEN_CAP[k]:
             cnt[k] += 1
             picked.append(it)
+    picked = _stage_order(picked)
+    actual_expected = config.expected_sent(cnt)
     print(f"[main] 생성 대상 {len(picked)}건 {cnt}")
+    print(f"[main] 실제 후보 기준 기대 발송 {actual_expected:.1f}건")
+    if actual_expected < config.TARGET_POSTS * 0.8:
+        print(f"[main] ⚠ 실제 후보 부족 ({actual_expected:.1f} < "
+              f"{config.TARGET_POSTS}). 전량 생성해도 목표 미달 가능성이 높다.")
 
     if dry:
         print("\n───── 수집 표본 ─────")
