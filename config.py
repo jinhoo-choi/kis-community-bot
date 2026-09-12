@@ -223,6 +223,10 @@ ENRICH_MAX = int(os.environ.get("ENRICH_MAX", "40" if TEST_MODE else "20"))
 
 ENABLE_JUDGE  = os.environ.get("ENABLE_JUDGE", "1") == "1"
 MIN_JUDGE_SCORE = int(os.environ.get("MIN_JUDGE_SCORE", "14"))   # 20점 환산
+# 총점만 보면 사실성 2점도 다른 축으로 상쇄될 수 있다. 금융 게시글은 사실성과
+# 준법성 중 하나라도 낮으면 총점과 무관하게 보류한다.
+MIN_FACTUAL_SCORE = int(os.environ.get("MIN_FACTUAL_SCORE", "4"))
+MIN_COMPLIANT_SCORE = int(os.environ.get("MIN_COMPLIANT_SCORE", "4"))
 # community_fit 하한. 심사가 '이 종목을 보는 사람이 새로 얻는 게 없다'고 판정했는데
 # 총점만 넘어 배포되던 문제(실측: 5건 전건 fit 2~3점인데 전건 배포)를 막는다.
 MIN_FIT = int(os.environ.get("MIN_FIT", "3"))

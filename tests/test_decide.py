@@ -32,6 +32,17 @@ def main():
     sent, _ = decide_distribution([P(1, total=9)], min_score=14)
     ok.append(run("저점수 컷", len(sent) == 0))
 
+    _fact_low = P("fact-low", total=20)
+    _fact_low["score"].update(factual=3, compliant=5)
+    sent, held = decide_distribution([_fact_low])
+    ok.append(run("총점과 무관하게 사실성 하한 적용",
+                  not sent and held[0]["hold_reason"].startswith("사실성")))
+    _comp_low = P("comp-low", total=20)
+    _comp_low["score"].update(factual=5, compliant=3)
+    sent, held = decide_distribution([_comp_low])
+    ok.append(run("총점과 무관하게 준법성 하한 적용",
+                  not sent and held[0]["hold_reason"].startswith("준법성")))
+
     # 심사 장애는 정규식 통과 여부와 무관하게 fail-closed 한다.
     unjudged = P("unjudged")
     unjudged["score"] = None
@@ -403,6 +414,13 @@ def main():
     from src.generator import clean as _cl
     ok.append(run("상투어 치환('기록했습니다')",
                   "이었습니다" in _cl("거래대금은 942억원을 기록했습니다.")))
+    ok.append(run("R&D 기호 보존", "R&D" in _cl("사옥 및 R&D 센터로 활용합니다.")))
+    ok.append(run("하락 부호·방향 중복 정리",
+                  "-4.66% 내렸" not in _cl("LG가 -4.66% 내렸어요.")
+                  and "4.66% 내렸" in _cl("LG가 -4.66% 내렸어요.")))
+    ok.append(run("종가 뒤 음수 등락률 문장 정리",
+                  _cl("제주반도체는 75,200원에 -4.57% 마감했습니다.") ==
+                  "제주반도체는 4.57% 내려 75,200원에 마감했습니다."))
     ok.append(run("상투어 리젝(치환불가)", any("news_cliche" in e for e in
                   _f2.check("남은 과제입니다. " * 8, ""))))
     ok.append(run("주체없는 평가 차단", any("unsourced_eval" in e for e in
@@ -794,7 +812,9 @@ def main():
     ok.append(run("종목·기준일 줄은 보존", "12.41%" in _u4))
     for _bad in ["기대감이 반영된 것으로 보입니다.",
                  "반도체 업황 수혜가 예상됩니다.",
-                 "수익 구조를 안정화하려는 전략으로 보입니다."]:
+                 "수익 구조를 안정화하려는 전략으로 보입니다.",
+                 "마감 무렵 일부 차익실현이 나온 형태입니다.",
+                 "개별 거래일 움직임은 들쭉날쭉했습니다."]:
         ok.append(run(f"범위이탈 차단: {_bad[:10]}",
                       any("claim_out_of_scope" in e
                           for e in _f2.check(_bad * 4, "x", "fact_note", "reaction",
@@ -1128,6 +1148,10 @@ def main():
     ok.append(run("평범한 관계값은 글감에서 제외",
                   not _facts3.evaluate({"vol_x": 1.0, "high": 10010, "low": 10000,
                                         "close": 10005, "ret5": 1.0})))
+    ok.append(run("고가 동일 마감에 0.0% 낮음 미생성",
+                  not any("마감 위치" in x for x in
+                          _facts3.evaluate({"high": 13000, "low": 10000,
+                                            "close": 13000, "pct": 29.9}))))
     ok.append(run("유의미한 관계값은 글감으로 인정",
                   bool(_facts3.evaluate({"vol_x": 2.0, "high": 10600, "low": 10000,
                                          "close": 10550, "ret5": 8.0}))))
@@ -1144,6 +1168,13 @@ def main():
     ok.append(run("검색 근거 URL 추출·중복제거",
                   _gm._grounding_sources(_resp) ==
                   [{"title": "근거", "url": "https://example.com/a"}]))
+    from google.genai import types as _gtypes
+    _gcfg_provider = _gm.GeminiProvider.__new__(_gm.GeminiProvider)
+    _gcfg_provider._types = _gtypes
+    _gcfg_provider.grounding = False
+    _gcfg = _gcfg_provider._config("s", 0.4, 700, "gemini-3.5-flash")
+    ok.append(run("Gemini 3.5 사고수준 minimal",
+                  _gcfg.thinking_config.thinking_level == _gtypes.ThinkingLevel.MINIMAL))
     class _GeminiModels:
         def __init__(self, error=""):
             self.error = error
@@ -1202,6 +1233,19 @@ def main():
         _en.enrich_all([{"id": "err", "facts": "x"}], workers=1)
         _saved = _json.load(open(_en.CACHE_PATH, encoding="utf-8"))
         ok.append(run("보강 오류는 NONE으로 캐시하지 않음", "err" not in _saved))
+
+        _probe_calls = [0]
+        class _ProbeBroken:
+            def available(self): return True
+            def generate(self, *_a, **_k):
+                _probe_calls[0] += 1
+                return _GR("검색 도구 없는 답", "gemini", "fake", sources=[])
+        _en.enricher = lambda: _ProbeBroken()
+        _probe_items = [{"id": f"probe-{i}", "facts": "x"} for i in range(7)]
+        _probe_out = _en.enrich_all(_probe_items, workers=2)
+        ok.append(run("보강 첫 묶음 전멸 시 후속 호출 차단",
+                      _probe_calls[0] == 2
+                      and all(x.get("thin_facts") for x in _probe_out)))
 
         class _NoneEnricher:
             def available(self): return True
@@ -1262,6 +1306,25 @@ def main():
                   and _judged.get("judged_by") == "claude_backup"))
     _judge2.judges, _judge2.cross_judge_for = _old_judges, _old_cross
 
+    from src.llm import router as _router2
+    _old_router_judges = _router2.judges
+    _router2.judges = lambda: {
+        "claude": _FakeJudge(_GR(_valid_score, "claude", "haiku")),
+        "gemini": _FakeJudge(_GR(_valid_score, "gemini", "flash")),
+        "claude_backup": _FakeJudge(_GR(_valid_score, "claude", "sonnet")),
+    }
+    ok.append(run("Claude 작성물은 Sonnet 교차모델 우선 심사",
+                  _router2.cross_judge_for("claude") == "claude_backup"))
+    _router2.judges = _old_router_judges
+
+    _g2._DEGRADED_WRITERS.clear()
+    _g2._QUALITY_FALLBACKS.clear()
+    ok.append(run("작성자 품질 0/10이면 후속 회로 차단",
+                  _g2._record_writer_quality("gemini", 10, 0)
+                  and "gemini" in _g2._DEGRADED_WRITERS))
+    _g2._DEGRADED_WRITERS.clear()
+    _g2._QUALITY_FALLBACKS.clear()
+
     # 슬롯을 키우면 기대치가 따라 올라 전 소스가 오탐 경보를 냈다
     # (실측: market 기대 857 vs 실제 62 — 수집이 아니라 기준이 망가진 것)
     from src import crawl as _cw
@@ -1286,6 +1349,16 @@ def main():
     ok.append(run("진짜 방향오용은 잡음",
                   bool(_de("로보티즈가 올랐네요. 이 정도 낙폭이면 뭔가 있는데요.",
                            "등락률: 12.44%"))))
+    _dated_facts = "기준일: 2026-09-11\n등락률: -4.57%\n종가: 75,200원"
+    ok.append(run("기준일 있으면 오늘 표현 차단",
+                  any("상대날짜(오늘)" in e for e in
+                      _f2.check("제주반도체가 오늘 4.57% 내렸습니다. 종가는 75,200원입니다.",
+                                _dated_facts, "brief_report", "reaction", "brief_report"))))
+    ok.append(run("종가를 출발가처럼 쓴 문장 차단",
+                  any("종가표현오류" in e for e in
+                      _f2.check("라온시큐어가 9,380원에서 6.59% 올랐습니다.",
+                                "종가: 9,380원\n등락률: 6.59%",
+                                "brief_report", "reaction", "brief_report"))))
 
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)

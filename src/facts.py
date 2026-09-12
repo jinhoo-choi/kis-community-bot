@@ -204,7 +204,10 @@ def evaluate(r: dict) -> list[str]:
             out.append(f"장중 고저 차이: 저가 대비 {range_pct:.1f}%")
     if hi and cl:
         close_gap = (hi - cl) / hi * 100
-        if abs(r.get("pct") or 0) >= 3.0 and (close_gap <= 1.0 or close_gap >= 5.0):
+        # 0.0%를 '고가 대비 낮은 수준'이라고 쓰면 의미와 문장이 모두 틀어진다.
+        # 소수 첫째 자리에서 0.0이 되지 않는 값부터 노출한다.
+        if (abs(r.get("pct") or 0) >= 3.0
+                and ((0.05 <= close_gap <= 1.0) or close_gap >= 5.0)):
             out.append(f"마감 위치: 장중 고가 대비 {close_gap:.1f}% 낮은 수준")
 
     # 누적수익률과 변동성은 다른 개념이다. '변동이 컸다'로 서술하지 않는다.

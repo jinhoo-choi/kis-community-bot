@@ -44,6 +44,7 @@ SYSTEM = """당신은 금융 데이터 리서처입니다. 글을 쓰지 말고 
 주어진 공시/리포트 항목에 대해 검색으로 확인 가능한 배경 사실만 정리합니다.
 
 [규칙]
+- 반드시 Google 검색 도구를 사용합니다. 검색 근거 URL이 없는 답은 사용하지 않습니다.
 - 확인된 사실만. 추정·전망·의견은 절대 쓰지 않습니다.
 - 각 항목은 한 줄. 최대 5줄.
 - 수치에는 반드시 기준일을 붙입니다.
@@ -137,8 +138,28 @@ def enrich_all(items: list[dict], workers: int = 5) -> list[dict]:
 
     if hits:
         print(f"[enrich] 캐시 적중 {len(hits)}건 → 그라운딩 {len(miss)}건만 호출")
-    with cf.ThreadPoolExecutor(max_workers=workers) as ex:
-        miss = list(ex.map(_one, miss))
+    # 한꺼번에 전부 submit 하면 Google 검색 도구가 작동하지 않는 날에도 40건을
+    # 모두 과금한다. 첫 worker 묶음에 정상 응답(ok/NONE)이 하나도 없으면
+    # 프로바이더 경로 자체가 망가진 것으로 보고 이번 실행의 나머지를 건너뛴다.
+    done = []
+    for start in range(0, len(miss), workers):
+        chunk = miss[start:start + workers]
+        with cf.ThreadPoolExecutor(max_workers=workers) as ex:
+            chunk = list(ex.map(_one, chunk))
+        done.extend(chunk)
+        healthy = any(x.get("_enrich_status") in ("ok", "none") for x in chunk)
+        if start == 0 and not healthy and start + len(chunk) < len(miss):
+            rest = miss[start + len(chunk):]
+            for it in rest:
+                it["_enrich_status"] = "skipped"
+                it["_enrich_error"] = "보강 첫 묶음 유효 응답 0 — 후속 호출 중단"
+                it["enriched"] = False
+                it["thin_facts"] = True
+            print(f"[enrich] ⚠ 첫 {len(chunk)}건 유효 응답 0 → "
+                  f"나머지 {len(rest)}건 호출 중단")
+            done.extend(rest)
+            break
+    miss = done
 
     now = time.time()
     for it in miss:

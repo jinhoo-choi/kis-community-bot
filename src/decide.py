@@ -33,6 +33,8 @@ def decide_distribution(
     per_stock: int = None,
     per_kind_cap: dict = None,
     min_score: int = None,
+    min_factual: int = None,
+    min_compliant: int = None,
 ) -> tuple[list[dict], list[dict]]:
     """(배포, 보류) 반환.
 
@@ -56,6 +58,10 @@ def decide_distribution(
     # 목표 50건을 혼자 채운다 (실측: 배포 50건 중 flow 35건).
     per_kind_cap = per_kind_cap if per_kind_cap is not None else config.DIST_CAP
     min_score = min_score if min_score is not None else config.MIN_JUDGE_SCORE
+    min_factual = (min_factual if min_factual is not None
+                   else config.MIN_FACTUAL_SCORE)
+    min_compliant = (min_compliant if min_compliant is not None
+                     else config.MIN_COMPLIANT_SCORE)
 
     held = []
     pool = []
@@ -69,6 +75,12 @@ def decide_distribution(
             held.append(p)
         elif s.get("fatal"):
             p["hold_reason"] = "fatal:" + ",".join(s["fatal"])[:60]
+            held.append(p)
+        elif s.get("factual") is not None and s["factual"] < min_factual:
+            p["hold_reason"] = f"사실성 {s['factual']}/5"
+            held.append(p)
+        elif s.get("compliant") is not None and s["compliant"] < min_compliant:
+            p["hold_reason"] = f"준법성 {s['compliant']}/5"
             held.append(p)
         elif s.get("fit") is not None and s["fit"] < config.MIN_FIT:
             p["hold_reason"] = f"커뮤니티적합성 {s['fit']}/5 {s.get('reason','')}"

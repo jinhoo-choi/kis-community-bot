@@ -148,5 +148,5 @@ def judge_all(posts: list[dict], workers: int = 6) -> list[dict]:
         out = list(ex.map(_one, posts))
     backup_n = sum(p.get("judged_by") == "claude_backup" for p in out)
     if backup_n:
-        print(f"[judge] ⚠ Gemini 심사 불가 → Claude Sonnet 교차모델 심사 {backup_n}건")
+        print(f"[judge] Claude Sonnet 교차모델 심사 {backup_n}건")
     return out

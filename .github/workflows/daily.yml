@@ -90,6 +90,8 @@ jobs:
           ENABLE_ENRICH:     ${{ vars.ENABLE_ENRICH || '1' }}
           ENABLE_JUDGE:      ${{ vars.ENABLE_JUDGE || '1' }}
           MIN_JUDGE_SCORE:   ${{ vars.MIN_JUDGE_SCORE || '14' }}
+          MIN_FACTUAL_SCORE: ${{ vars.MIN_FACTUAL_SCORE || '4' }}
+          MIN_COMPLIANT_SCORE: ${{ vars.MIN_COMPLIANT_SCORE || '4' }}
           MAX_PER_STOCK:     ${{ vars.MAX_PER_STOCK || '2' }}
           TARGET_POSTS:      ${{ inputs.target_posts || vars.TARGET_POSTS || '50' }}
           TZ: Asia/Seoul

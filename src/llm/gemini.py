@@ -128,13 +128,19 @@ class GeminiProvider(Provider):
         self.model = nxt
         return True
 
-    def _config(self, system, temperature, max_tokens):
+    def _config(self, system, temperature, max_tokens, model=""):
         t = self._types
         kw = dict(
             system_instruction=system,
             temperature=temperature,
             max_output_tokens=max_tokens,
         )
+        # Gemini 3 계열은 사고가 기본 ON이고 max_output_tokens가 사고 토큰까지
+        # 포함한다. 운영 실측에서 700 토큰을 사고에 소진해 본문이 20~40자에서
+        # 잘렸다. 3.5 Flash는 minimal, latest/그 외는 호환성이 넓은 low를 쓴다.
+        level = (t.ThinkingLevel.MINIMAL if "3.5-flash" in (model or "")
+                 else t.ThinkingLevel.LOW)
+        kw["thinking_config"] = t.ThinkingConfig(thinking_level=level)
         if self.grounding:
             # Google 검색 그라운딩 — 사실 보강 단계에서만 켠다
             kw["tools"] = [t.Tool(google_search=t.GoogleSearch())]
@@ -153,7 +159,7 @@ class GeminiProvider(Provider):
                 r = client.models.generate_content(
                     model=active_model,
                     contents=user,
-                    config=self._config(system, temperature, max_tokens),
+                    config=self._config(system, temperature, max_tokens, active_model),
                 )
                 return GenResult((r.text or "").strip(), self.name, active_model,
                                  sources=_grounding_sources(r) if self.grounding else [])

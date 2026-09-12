@@ -84,7 +84,7 @@ def _fix_cliche(b: str) -> str:
 # 한글·영숫자·기본 문장부호 외의 문자는 생성 오류다 (실측: "규모라면 ꤼ 의미")
 _JUNK = re.compile(
     r"[^\uAC00-\uD7A3\u3131-\u318E0-9A-Za-z\s"
-    r".,!?%~·:;()\[\]{}'\"/\-+＋−–—…‘’“”]"
+    r".,!?%~·:;()\[\]{}'\"/&\-+＋−–—…‘’“”]"
 )
 
 
@@ -95,10 +95,40 @@ def clean(body: str) -> str:
     for pat in _STRIP_PATTERNS:
         b = re.sub(pat, "", b, flags=re.M)
     b = _fix_cliche(b)
+    # 방향어와 부호를 동시에 쓰는 중복을 기계적으로 정리한다.
+    # '-4.66% 내렸다'는 사실은 맞지만 사람 문장으로는 '4.66% 내렸다'가 맞다.
+    b = re.sub(r"-(\d+(?:\.\d+)?)%(?=\s*(?:하락|내렸|내려|떨어졌|빠졌))",
+               r"\1%", b)
+    b = re.sub(r"\+(\d+(?:\.\d+)?)%(?=\s*(?:상승|올랐|올라|뛰었))",
+               r"\1%", b)
+    b = re.sub(
+        r"(\d[\d,]*원)에\s*-(\d+(?:\.\d+)?)%\s*마감(했습니다|했어요|했네요)",
+        r"\2% 내려 \1에 마감\3", b)
     # 따옴표로 통째로 감싼 출력
     if len(b) > 2 and b[0] in "\"'" and b[-1] == b[0]:
         b = b[1:-1]
     return b.strip()
+
+
+# 한 실행 안에서 정규식 통과율이 사실상 0인 작성자를 계속 호출하지 않는다.
+# 2026-09-12 실발송: Gemini 직접/재생성 39건이 전부 리젝됐다.
+_DEGRADED_WRITERS: set[str] = set()
+_QUALITY_FALLBACKS: list[str] = []
+_QUALITY_MIN_SAMPLES = 4
+_QUALITY_MIN_PASS_RATE = 0.10
+
+
+def _record_writer_quality(name: str, attempted: int, passed: int) -> bool:
+    """통과율이 임계값 미만이면 후속 생성에서 제외. 제외됐으면 True."""
+    if attempted < _QUALITY_MIN_SAMPLES or passed / attempted >= _QUALITY_MIN_PASS_RATE:
+        return False
+    _DEGRADED_WRITERS.add(name)
+    note = f"{name}->other(quality:{passed}/{attempted})"
+    if note not in _QUALITY_FALLBACKS:
+        _QUALITY_FALLBACKS.append(note)
+    print(f"[gen] ⚠ {name} 정규식 통과 {passed}/{attempted} → "
+          "이번 실행 후속 작성에서 제외")
+    return True
 
 
 # 이미 쓴 축의 억제 계수. 1.0 으로 낮추는 정도로는 편중이 남았다
@@ -247,6 +277,16 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
     for i, it in enumerate(items):
         styles[id(it)] = pick_style(it, recent, used_now, allow_uncertainty=(i < n_unc))
     buckets = router.split_by_ratio(items)
+    # 앞 생성 단계에서 품질 회로가 열린 프로바이더 물량은 살아 있는 작성자에게
+    # 넘긴다. provider.available()은 HTTP 성공만 보므로 내용 품질 장애는 못 잡는다.
+    for bad in list(_DEGRADED_WRITERS):
+        displaced = buckets.pop(bad, [])
+        healthy = [n for n, p in router.writers().items()
+                   if n not in _DEGRADED_WRITERS and p.available()]
+        if displaced and healthy:
+            buckets.setdefault(healthy[0], []).extend(displaced)
+            print(f"[gen] {bad} 품질 차단 물량 {len(displaced)}건 → "
+                  f"{healthy[0]} 재할당")
 
     posts, retry = [], []
     for name, chunk in buckets.items():
@@ -268,6 +308,7 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
                          [styles[id(x)][1] for x in failed],
                          [styles[id(x)][3] for x in failed])
         print(f"[gen] {name}: {len(made)}/{len(chunk)}건 생성")
+        quality_pass = 0
         for p in made:
             errs = filters.check(
                 p["body"], p["facts"], p.get("fmt"), p.get("angle"), p.get("length"),
@@ -282,10 +323,14 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
                 retry.append(p)
             else:
                 posts.append(p)
+                if p.get("provider") == name:
+                    quality_pass += 1
+        _record_writer_quality(name, len(chunk), quality_pass)
 
     # 리젝분은 '다른 프로바이더'로 1회 재생성 (같은 모델은 같은 실수를 반복한다)
     if retry:
-        names = [n for n, provider in router.writers().items() if provider.available()]
+        names = [n for n, provider in router.writers().items()
+                 if provider.available() and n not in _DEGRADED_WRITERS]
         for p in retry:
             if not names:
                 break
@@ -331,7 +376,7 @@ def _hint(errs: list[str]) -> str:
 
 
 def collect_fallbacks() -> list[str]:
-    out = []
+    out = list(_QUALITY_FALLBACKS)
     for p in router.writers().values():
         out += (p.fallbacks or [])
     return out

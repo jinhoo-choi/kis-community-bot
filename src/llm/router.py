@@ -84,5 +84,8 @@ def split_by_ratio(items: list) -> dict[str, list]:
 def cross_judge_for(writer: str) -> str | None:
     """작성자와 다른 프로바이더를 심사자로 지정. 없으면 None."""
     j = {n: p for n, p in judges().items() if p.available()}
-    other = [n for n in j if n != writer]
-    return other[0] if other else None
+    # 실발송 검증에서 Gemini judge가 근거 없는 '차익실현'을 factual 5점으로
+    # 통과시키고 정상 리서치 문장을 fatal로 오판했다. 작성 Haiku와 다른 모델인
+    # Sonnet 5를 먼저 쓰고, 실패할 때 Gemini/Haiku로 내려간다.
+    preferred = ["claude_backup", "gemini", "claude"]
+    return next((n for n in preferred if n in j and n != writer), None)
