@@ -66,9 +66,12 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}
+          # 유료 잔액 소진 시 사용할 별도 무료 티어 프로젝트 키(같은 결제계정 키 금지)
+          GEMINI_FREE_API_KEY: ${{ secrets.GEMINI_FREE_API_KEY }}
           # 테스트 전용 키. 등록돼 있으면 test_mode 실행에서 이쪽을 쓴다.
           ANTHROPIC_API_KEY_TEST: ${{ secrets.ANTHROPIC_API_KEY_TEST }}
           GEMINI_API_KEY_TEST:    ${{ secrets.GEMINI_API_KEY_TEST }}
+          GEMINI_FREE_API_KEY_TEST: ${{ secrets.GEMINI_FREE_API_KEY_TEST }}
           DART_API_KEY:      ${{ secrets.DART_API_KEY }}
           TELEGRAM_TOKEN:    ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID:      ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -80,6 +83,8 @@ jobs:
           CLAUDE_MODEL:      ${{ vars.CLAUDE_MODEL || 'claude-haiku-4-5-20251001' }}
           GEMINI_MODEL:      ${{ vars.GEMINI_MODEL || 'gemini-3.5-flash' }}
           GEMINI_JUDGE_MODEL: ${{ vars.GEMINI_JUDGE_MODEL || 'gemini-3.1-flash-lite' }}
+          GEMINI_FREE_MODEL: ${{ vars.GEMINI_FREE_MODEL || 'gemini-3.1-flash-lite' }}
+          GEMINI_FREE_MIN_INTERVAL: ${{ vars.GEMINI_FREE_MIN_INTERVAL || '5.0' }}
           ENABLE_ENRICH:     ${{ vars.ENABLE_ENRICH || '1' }}
           ENABLE_JUDGE:      ${{ vars.ENABLE_JUDGE || '1' }}
           MIN_JUDGE_SCORE:   ${{ vars.MIN_JUDGE_SCORE || '14' }}
@@ -134,6 +139,8 @@ jobs:
           git add -f data/enrich_cache.json 2>/dev/null || true
           # 상장사 목록 캐시. KIND 403 시 이게 없으면 종목 귀속이 무너진다
           git add -f data/listed_cache.json 2>/dev/null || true
+          # 지정일 일별시세로 만든 확정 캐시. 다음 장전 실행의 2,600회 재조회를 줄인다
+          git add -f data/market_cache.json 2>/dev/null || true
           git add -f data/test_report.txt || true
           git add -f data/posts_latest.json data/run_log.txt || true
           git diff --staged --quiet || git commit -m "chore: update state $(date +%F)"

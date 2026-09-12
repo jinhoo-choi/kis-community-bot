@@ -163,6 +163,11 @@ def _fmt(val: str, unit: str) -> str:
         return ""
     if len(v) > 90:
         v = v[:90].rstrip() + "…"
+    # DART 합병비율은 1.0000000 : 0.0000000처럼 고정 소수점으로 온다.
+    # 값은 바꾸지 않고 불필요한 0만 제거해 사람이 읽는 표기로 만든다.
+    if not unit and re.fullmatch(r"\d+(?:\.\d+)?\s*:\s*\d+(?:\.\d+)?", v):
+        left, right = (x.strip() for x in v.split(":"))
+        v = f"{float(left):g} : {float(right):g}"
     # 숫자면 천 단위 구분, 억/조 단위로 읽기 쉽게
     if unit == "원" and re.fullmatch(r"[\d,]+", v):
         n = int(v.replace(",", ""))

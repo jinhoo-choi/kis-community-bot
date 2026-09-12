@@ -52,14 +52,14 @@ BIG_MOVE_PCT = 5.0
 BIG_MOVE_MIN_EOK = 30
 
 
-def _last_trading_day() -> str:
+def _last_trading_day(now=None) -> str:
     """순위 페이지가 지금 보여주는 데이터의 기준일.
 
     무조건 '어제' 로 잡으면 장 마감 후 수집 시 하루가 밀린다.
     실측(#80): 09-08 16:06 에 수집한 09-08 종가 데이터를 '9월 7일' 로 적었다.
     마감(15:30) 이후에는 당일이 기준일이다.
     """
-    now = datetime.now(KST)
+    now = now or datetime.now(KST)
     d = now if (now.weekday() < 5 and _after_close(now)) else now - timedelta(days=1)
     while d.weekday() >= 5:
         d -= timedelta(days=1)
@@ -76,13 +76,13 @@ def _after_close(now=None) -> bool:
     return now.hour * 60 + now.minute >= config.MARKET_CLOSE_MIN
 
 
-def _cache_save(day: str, items: list[dict]) -> None:
+def _cache_save(day: str, items: list[dict], confirmed: bool = False) -> None:
     if len(items) < 10:
         return
     # 장중에 저장하면 오늘 장중 데이터가 '어제 확정치' 로 둔갑한다.
     # 실측 확인: 09:09 에 _last_trading_day() 는 09-08 을 주는데
     # 페이지는 09-09 장중 데이터를 준다.
-    if not (datetime.now(KST).weekday() < 5 and _after_close()):
+    if not confirmed and not (datetime.now(KST).weekday() < 5 and _after_close()):
         print("[market] 장 마감 전이라 캐시를 저장하지 않는다 "
               "(장중 데이터가 전일 확정치로 둔갑한다)")
         return
@@ -344,10 +344,9 @@ def fetch(limit: int = 12) -> list[dict]:
     day = _last_trading_day()
     # 정규 실행은 장 시작 전이다. 전날 마감 후 워밍 워크플로가 저장한 확정
     # 캐시가 충분하면 네이버 순위 페이지와 상장 전종목 siseJson을 다시 훑지 않는다.
-    # 최근 캐시는 휴장/장애 fallback 으로만 쓰고, 정상 거래일의 최신 데이터보다
-    # 먼저 반환하지 않는다.
+    # 최근 캐시는 휴장/장애 fallback 으로만 쓴다. 먼저 반환하면 금요일 시세를
+    # 구할 수 있는데도 화요일 캐시를 게시하는 식의 날짜 오염이 생긴다.
     cached = _cache_load(day)
-    recent_cached = cached or _cache_load(day, max_age_days=4)
     cache_need = min(limit, max(20, config.GEN_STAGE_SIZE))
     if not _after_close() and len(cached) >= cache_need:
         print(f"[market] 장 시작 전 확정 캐시 {len(cached)}건 사용 (필요 {limit}건)")
@@ -429,23 +428,20 @@ def fetch(limit: int = 12) -> list[dict]:
             print(f"[market] ⚠ 0건 파싱 — {url}")
         crawl.sleep_jitter()
 
-    # 휴장일/장전에는 순위 페이지가 빈다. 이때 최근 확정 캐시가 있으면
-    # 상장 전종목 siseJson을 2,600회 다시 조회하기 전에 사용한다.
-    if not rows and recent_cached:
-        print(f"[market] 순위 페이지가 비어 확정 캐시 {len(recent_cached)}건 사용")
-        crawl.report("market", len(recent_cached), limit, "")
-        return recent_cached[:limit]
-
     # 순위 페이지가 개편으로 죽으면(th 0개) 전종목 일별시세로 랭킹을 직접 만든다.
     # 아이템 생성 루프 앞에 둬야 뒤 단계가 그대로 처리한다.
+    from_daily = False
     if not rows:
         rows = _rank_from_daily(day, max(limit, 60))
         if rows:
             ok = 1
+            from_daily = True
 
     if ok == 0 or not rows:
+        recent_cached = _cache_load(day, max_age_days=4)
         if recent_cached:
-            print(f"[market] 실시간 수집 실패 — 확정 캐시 {len(recent_cached)}건 사용")
+            print(f"[market] 기준일 시세 수집 실패 — 최근 확정 캐시 "
+                  f"{len(recent_cached)}건 사용")
             crawl.report("market", len(recent_cached), limit, "")
             return recent_cached[:limit]
         crawl.report("market", 0, limit, "네이버 시세 페이지 로드 실패")
@@ -520,6 +516,7 @@ def fetch(limit: int = 12) -> list[dict]:
 
     # 원본 rows 는 확보됐지만 소재 게이트를 통과한 out 이 없을 수 있다.
     # 이 경우는 수집 장애가 아니라 조건 충족 종목이 없는 정상적인 0건이다.
-    _cache_save(day, out)
+    # 전종목 일별시세 경로는 날짜를 지정해 가져오므로 장전에도 확정 캐시로 저장 가능하다.
+    _cache_save(day, out, confirmed=from_daily)
     crawl.report("market", len(out), limit, "조건 충족 종목 없음")
     return out

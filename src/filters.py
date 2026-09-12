@@ -172,6 +172,11 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
         errs.append("수치선두")
     if first and len(first) < 12:
         errs.append(f"선두파손({first[:12]})")
+    # 종목명 뒤에 수치만 던진 문장도 길이는 충족하지만 문장으로 성립하지 않는다.
+    # 실측: "다이나믹솔루션 160억원.", "에넥스 2,000,000주입니다."
+    if re.fullmatch(r"[가-힣A-Za-z0-9&·]+\s+[\d,.]+\s*(?:원|억원|주|%)"
+                    r"(?:입니다|이네요|네요)?[.!?]", first):
+        errs.append("선두파손(명사+수치)")
     # 같은 수치가 첫 문장과 둘째 문장에 그대로 반복되는 사례
     # (실측: "4.4% 장중 저가 대비 고가가 4.4%였습니다.")
     _n1 = re.findall(r"\d[\d,]*\.?\d*", first)
@@ -184,6 +189,25 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
     hallu = [x for x in _numbers(body) if x not in allow and len(x) >= 3]
     if hallu:
         errs.append(f"미확인수치{hallu[:3]}")
+
+    # 기준일을 정확히 알고 있는데 상대 날짜로 바꾸면 주말·휴장일에 거짓이 된다.
+    if re.search(r"기준일:\s*\d{4}-\d{2}-\d{2}", facts or ""):
+        rel = re.search(r"어제|전일|전날|지난\s*거래일|지난거래일", body)
+        if rel:
+            errs.append(f"상대날짜({rel.group()})")
+
+    # 용어 정의는 입력에 정의문을 제공했을 때만 허용한다. 모델 상식으로 만든 정의는
+    # 맞더라도 이 글의 근거가 아니다.
+    if fmt == "term_guide" and "용어 설명:" not in (facts or ""):
+        errs.append("용어근거없음")
+
+    if re.search(r"\d+\.\d{5,}\s*:\s*\d+\.\d{5,}", body):
+        errs.append("비율표기미정리")
+
+    # '결정' 공시를 이미 완료된 사건으로 바꾸지 않는다.
+    if re.search(r"(?:증자|사채|주식).{0,20}결정", facts or "") and re.search(
+            r"(?:주|사채)를\s*(?:발행|모집)(?:했습니다|했어요|하였습니다)", body):
+        errs.append("결정공시완료형")
 
     errs += _direction_errors(body, facts)
     # 테마글은 게시 위치로만 종목방을 쓴다. 본문에 종목명이 들어가면

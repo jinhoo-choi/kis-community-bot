@@ -13,6 +13,11 @@ ANTHROPIC_API_KEY = (os.environ.get("ANTHROPIC_API_KEY_TEST")
 GEMINI_API_KEY = (os.environ.get("GEMINI_API_KEY_TEST")
                   if os.environ.get("TEST_MODE", "0") == "1" else "") \
     or os.environ.get("GEMINI_API_KEY", "")
+# 유료 Gemini 결제계정과 분리된 무료 티어 프로젝트 키.
+# 같은 프로젝트/결제계정의 다른 키는 선불잔액 소진 시 함께 중단되므로 대안이 아니다.
+GEMINI_FREE_API_KEY = (os.environ.get("GEMINI_FREE_API_KEY_TEST")
+                       if os.environ.get("TEST_MODE", "0") == "1" else "") \
+    or os.environ.get("GEMINI_FREE_API_KEY", "")
 DART_API_KEY      = os.environ.get("DART_API_KEY", "")
 TELEGRAM_TOKEN    = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID  = os.environ.get("TELEGRAM_CHAT_ID", "")
@@ -159,6 +164,10 @@ CLAUDE_SYNC_WORKERS = int(os.environ.get("CLAUDE_SYNC_WORKERS", "6"))
 GEMINI_MODEL        = GEMINI_CANDIDATES[0]
 GEMINI_ENRICH_MODEL = os.environ.get("GEMINI_ENRICH_MODEL", "gemini-3.5-flash")
 GEMINI_JUDGE_MODEL  = os.environ.get("GEMINI_JUDGE_MODEL", "gemini-3.1-flash-lite")
+# 무료 티어는 검색 그라운딩에 쓰지 않고 작성·교차심사 폴백에만 쓴다.
+GEMINI_FREE_MODEL = os.environ.get("GEMINI_FREE_MODEL", "gemini-3.1-flash-lite")
+# 무료 티어의 프로젝트별 RPM을 넘기지 않도록 기본 12RPM 이하로 직렬화한다.
+GEMINI_FREE_MIN_INTERVAL = float(os.environ.get("GEMINI_FREE_MIN_INTERVAL", "5.0"))
 
 # 작성 물량 배분 (프로바이더가 하나만 살아있으면 자동으로 몰아준다)
 # 실측 평균 심사점수: claude 16.4 / gemini 4.0.

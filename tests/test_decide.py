@@ -212,6 +212,10 @@ def main():
     for t, d in good:
         r, why = is_relevant(t, d)
         ok.append(run(f"정책기사 통과: {t[:14]}", r, why))
+    _corp_news = "다이나믹솔루션, 파마앤바이오 신기술조합 주식 160억 취득"
+    _corp_ok, _corp_why = is_relevant(_corp_news, "바이오 기업 투자 결정")
+    ok.append(run("개별기업 기사는 정책 슬롯 차단",
+                  not _corp_ok and _corp_why == "개별기업사건", _corp_why))
     _policy_now = _policy_datetime(2026, 9, 12, 12, 0, tzinfo=_POLICY_KST)
     ok.append(run("최근 RSS 발행시각 통과",
                   _fresh_published_at("Sat, 12 Sep 2026 01:00:00 +0000",
@@ -221,6 +225,16 @@ def main():
                                       _policy_now) is None))
     ok.append(run("발행시각 없는 RSS 제외",
                   _fresh_published_at("", _policy_now) is None))
+    _policy_monday = _policy_datetime(2026, 9, 14, 6, 11, tzinfo=_POLICY_KST)
+    ok.append(run("월요일 정책 RSS 금요일부터 포함",
+                  _fresh_published_at("Fri, 11 Sep 2026 00:00:00 +0000",
+                                      _policy_monday) is not None))
+    from src.sources import dart as _dart_date
+    ok.append(run("월요일 DART 금~일 조회",
+                  _dart_date._range(_policy_monday) == ("20260911", "20260913")))
+    from src.sources import market as _market_date
+    ok.append(run("월요일 장전 시세는 금요일 기준",
+                  _market_date._last_trading_day(_policy_monday) == "2026-09-11"))
 
 
     # ── KIND 상장목록 파싱 (2026-09-03 실측 구조 회귀)
@@ -335,6 +349,16 @@ def main():
     ok.append(run("부분 전송은 성공 글만 반환",
                   [p["id"] for p in _delivered] == ["ok"]))
     _tg.TELEGRAM_TOKEN, _tg._post, _tg.time.sleep = _old_token, _old_post, _old_sleep
+
+    _summary_payload = []
+    _tg.TELEGRAM_TOKEN = "test"
+    _tg._post = lambda _method, payload: _summary_payload.append(payload)
+    _tg.send_summary([], 0, target=50)
+    ok.append(run("목표 기준 요약 0/50 표기",
+                  bool(_summary_payload)
+                  and "배포 미달" in _summary_payload[0]["text"]
+                  and "0/50건" in _summary_payload[0]["text"]))
+    _tg.TELEGRAM_TOKEN, _tg._post = _old_token, _old_post
 
     ok.append(run("3행부터 복사블록", _lines[2].startswith("<pre><code")))
     ok.append(run("종목건은 종목명+코드 표기", "삼성전자 (005930)" in _lines[0], _lines[0]))
@@ -462,6 +486,9 @@ def main():
                                       "[검색으로 확인된 배경]\n- 팬오션은 벌크선사"})))
     ok.append(run("적정가격 있으면 통과", _hs2(
         {"kind": "research", "facts": "리포트 제목: 실적 반등\n제시 적정가격: 33,000원"})))
+    ok.append(run("적정가격 리포트에 안전한 Angle 존재",
+                  "terms" in _ang.available(
+                      {"kind": "research", "facts": "리포트 제목: 실적 반등\n제시 적정가격: 33,000원"})))
 
 
     # ── 축 편중 억제 (실측: 5건 중 short_note 3, context 3)
@@ -635,7 +662,7 @@ def main():
                   all({"min", "max", "num_cap", "no_question", "sentences"} <= set(v)
                       for v in _P2.values())))
     # 공통 접근자가 페르소나 스펙을 정확히 흡수하는가
-    ok.append(run("접근자 길이 반영", _PM.len_bounds("quick_memo") == (35, 120)))
+    ok.append(run("접근자 길이 반영", _PM.len_bounds("quick_memo") == (55, 120)))
     ok.append(run("미등록 페르소나는 기본값", _PM.len_bounds("없는페르소나") == (50, 300)))
     from src import personas_v2 as _P2v
     # num_cap 은 claim_cap 에서 파생된다. 주장 하나가 숫자 둘을 데려오므로
@@ -653,6 +680,37 @@ def main():
                       "정부가 반도체 지원안을 발표했습니다. 적용 범위를 정리했습니다.",
                       "제목: 정부 반도체 지원안", "open_talk", "context", "open_talk",
                       require_question=True))))
+    _flow_facts = ("기준일: 2026-09-11\n종가: 4,115원\n등락률: 13.05%\n"
+                   "거래대금: 500억원\n거래량: 20일 평균의 1.7배")
+    ok.append(run("시세 상대날짜 차단",
+                  any("상대날짜" in e for e in _f2.check(
+                      "빛과전자가 어제 4,115원으로 마감했습니다. "
+                      "거래량은 20일 평균의 1.7배였네요.",
+                      _flow_facts, "fact_note", "ratio", "fact_note"))))
+    ok.append(run("근거 없는 원인 질문 차단",
+                  "unsupported_cause_question" in _f2.check(
+                      "빛과전자가 13.05% 올랐습니다. 거래량은 20일 평균의 1.7배였는데요. "
+                      "어떤 수급 요인이 작용했다고 생각하시나요?",
+                      _flow_facts, "open_talk", "ratio", "open_talk", require_question=True)))
+    ok.append(run("추세·수급 평가 차단",
+                  "claim_out_of_scope" in _f2.check(
+                      "가온전선이 11.87% 올랐습니다. 상승 추세지만 수급은 우호적이지 않네요.",
+                      "등락률: 11.87%", "two_view", "reaction", "two_view")))
+    ok.append(run("명사+수치 문장 파편 차단",
+                  any("선두파손(명사+수치)" in e for e in _f2.check(
+                      "다이나믹솔루션 160억원. 주식 취득 관련 보도입니다. 자세한 내용입니다.",
+                      "양수 금액: 160억원", "brief_report", "amount", "brief_report"))))
+    ok.append(run("근거 없는 용어해설 차단",
+                  "용어근거없음" in _f2.check(
+                      "엔투텍이 전환사채 발행을 결정했습니다. "
+                      "전환사채는 주식으로 바뀌는 채권입니다. 전환가액은 1,413원이에요.",
+                      "공시명: 전환사채 발행 결정\n전환가액: 1,413원",
+                      "term_guide", "decode", "term_guide")))
+    ok.append(run("결정 공시 완료형 차단",
+                  "결정공시완료형" in _f2.check(
+                      "루멘스가 유상증자를 결정했습니다. 보통주 3,571,428주를 발행했습니다.",
+                      "공시명: 유상증자 결정\n발행 보통주: 3,571,428주",
+                      "fact_note", "amount", "fact_note")))
     _s2, _ = _PM.build_messages_v2({"kind": "flow", "title": "t", "facts": "등락률: 20.32%"},
                                    "brief_report", "reaction")
     ok.append(run("v2 프롬프트 미치환 없음",
@@ -887,6 +945,34 @@ def main():
                       not _mk2._cache_load("2026-09-20", max_age_days=4)))
     _mk2._CACHE = _old_market_cache
 
+    # 정확한 기준일 일별시세를 만들 수 있으면 오래된 캐시보다 우선해야 한다.
+    _old_market = {n: getattr(_mk2, n) for n in
+                   ("_cache_load", "_after_close", "_last_trading_day",
+                    "_rank_from_daily", "flow_ranks", "_add_history",
+                    "_add_flow", "_cache_save")}
+    _old_soup = _mk2.crawl.get_soup
+    _mk2._cache_load = lambda _day, max_age_days=0: (
+        [] if max_age_days == 0 else [{"id": "stale", "kind": "flow"}])
+    _mk2._after_close = lambda now=None: False
+    _mk2._last_trading_day = lambda now=None: "2026-09-11"
+    _mk2.crawl.get_soup = lambda *_a, **_k: None
+    _mk2._rank_from_daily = lambda _day, _limit: [{
+        "code": "005930", "name": "삼성전자", "market": "KOSPI",
+        "close": 1000.0, "pct": 5.0, "eok": 300.0, "vol_x": 2.0,
+        "day_used": "20260911",
+    }]
+    _mk2.flow_ranks = lambda: {}
+    _mk2._add_history = lambda _r: None
+    _mk2._add_flow = lambda _r: None
+    _mk2._cache_save = lambda *_a, **_k: None
+    _exact_market = _mk2.fetch(1)
+    ok.append(run("정확한 시세가 오래된 캐시보다 우선",
+                  len(_exact_market) == 1
+                  and _exact_market[0]["id"].startswith("flow-2026-09-11")))
+    for _n, _v in _old_market.items():
+        setattr(_mk2, _n, _v)
+    _mk2.crawl.get_soup = _old_soup
+
     _cfg = __import__("config")
     ok.append(run("슬롯이 공급 상한을 넘지 않음",
                   all(_cfg.SLOT_QUOTA[k] <= _cfg.SUPPLY_CAP[k] for k in _cfg.SLOT_QUOTA)))
@@ -985,6 +1071,8 @@ def main():
                   == "otcprStkInvscrInhDecsn"))
     # 원문 값의 줄바꿈이 한 줄 형식을 깨뜨린다
     ok.append(run("줄바꿈 접힘", "\n" not in _dd._fmt("토지 및 건물\n경기도 성남시", "")))
+    ok.append(run("DART 고정소수 합병비율 정리",
+                  _dd._fmt("1.0000000 : 0.0000000", "") == "1 : 0"))
 
     # 함수 안 재import 가 모듈 전역을 가려 UnboundLocalError 를 냈다 (실측: 워크플로 실패).
     # 유닛테스트로는 안 잡힌다 — 네트워크 함수라 호출되지 않기 때문이다. 정적으로 잡는다.
@@ -1055,6 +1143,30 @@ def main():
     ok.append(run("검색 근거 URL 추출·중복제거",
                   _gm._grounding_sources(_resp) ==
                   [{"title": "근거", "url": "https://example.com/a"}]))
+    class _GeminiModels:
+        def __init__(self, error=""):
+            self.error = error
+        def generate_content(self, **_kw):
+            if self.error:
+                raise RuntimeError(self.error)
+            return _NS(text="ok", candidates=[])
+    _gm._PAID_QUOTA_DISABLED.clear()
+    _gm._FREE_QUOTA_DISABLED.clear()
+    _gp = _gm.GeminiProvider.__new__(_gm.GeminiProvider)
+    _gp.model, _gp.fallback_model, _gp.grounding = "paid", "free", False
+    _gp._paid_client = _NS(models=_GeminiModels("prepayment credits are depleted"))
+    _gp._free_client = _NS(models=_GeminiModels())
+    _gp._types = None
+    _gp._config = lambda *_a, **_k: None
+    _old_interval = _cfg2.GEMINI_FREE_MIN_INTERVAL
+    _cfg2.GEMINI_FREE_MIN_INTERVAL = 0
+    _gr = _gp.generate("s", "u")
+    ok.append(run("Gemini 유료 소진 시 무료 프로젝트 폴백",
+                  _gr.ok and _gr.model == "free"
+                  and _gm._PAID_QUOTA_DISABLED.is_set()))
+    _cfg2.GEMINI_FREE_MIN_INTERVAL = _old_interval
+    _gm._PAID_QUOTA_DISABLED.clear()
+    _gm._FREE_QUOTA_DISABLED.clear()
 
     import tempfile as _tmp, json as _json
     from src import enrich as _en

@@ -213,7 +213,8 @@ def send_brief(posts: list[dict], stats_row: dict = None):
                           "text": "\n".join(lines), "disable_web_page_preview": True})
 
 
-def send_summary(posts: list[dict], sent: int, stats_row: dict = None):
+def send_summary(posts: list[dict], sent: int, stats_row: dict = None,
+                 target: int = None):
     """배포 후 운영 요약. 임원·관리자용 지표는 여기에만 모은다."""
     if not TELEGRAM_TOKEN:
         return
@@ -225,8 +226,10 @@ def send_summary(posts: list[dict], sent: int, stats_row: dict = None):
     scored = [x for x in scored if x]
     avg = f"{sum(scored)/len(scored):.1f}/20" if scored else "미측정"
 
+    target = config.TARGET_POSTS if target is None else target
+    result = "배포 완료" if sent >= target else "배포 미달"
     lines = [
-        f"<b>배포 완료</b>  {sent}/{len(posts)}건 전송",
+        f"<b>{result}</b>  {sent}/{target}건 전송 (선정 {len(posts)}건)",
         f"담당: {assign.summary(posts)}",
         f"유형: " + (", ".join(f"{k} {v}" for k, v in c.items()) or "-"),
         f"문체: {len({(p.get('tone'), p.get('angle')) for p in posts})}가지 조합",

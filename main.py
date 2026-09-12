@@ -225,7 +225,7 @@ def main():
         generator.collect_fallbacks(), generation_candidates=picked,
         generation_attempted=attempted_items, delivery_attempted=sent_posts),
         dedup=dup_reasons, crawl_health=crawl.health())
-    telegram_bot.send_summary(sent_posts, sent, row)
+    telegram_bot.send_summary(sent_posts, sent, row, config.TARGET_POSTS)
     print("[main] filter_log " + stats.detail_log(picked, sent_posts, held))
     if degraded:
         telegram_bot.send_warning(f"수집 이상 소스: {', '.join(degraded)}")
@@ -238,6 +238,11 @@ def main():
         state.save(s)
     if sent != len(sent_posts):
         raise RuntimeError(f"텔레그램 부분 전송: {sent}/{len(sent_posts)}건")
+    if sent < config.TARGET_POSTS:
+        telegram_bot.send_warning(
+            f"발송 목표 미달: {sent}/{config.TARGET_POSTS}건. "
+            "후보·필터·심사자 상태를 확인하세요.")
+        raise RuntimeError(f"발송 목표 미달: {sent}/{config.TARGET_POSTS}건")
 
 
 def _install_log_mask():
@@ -251,7 +256,8 @@ def _install_log_mask():
     import sys as _sys
 
     keys = [v for v in (config.DART_API_KEY, config.ANTHROPIC_API_KEY,
-                        config.GEMINI_API_KEY, config.TELEGRAM_TOKEN)
+                        config.GEMINI_API_KEY, config.GEMINI_FREE_API_KEY,
+                        config.TELEGRAM_TOKEN)
             if v and len(v) >= 12]
     pat = _re.compile("|".join(_re.escape(k) for k in keys)) if keys else None
 

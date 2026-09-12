@@ -16,7 +16,9 @@ from src.llm.gemini import GeminiProvider
 def writers() -> dict:
     p = {}
     c = ClaudeProvider(config.ANTHROPIC_API_KEY, config.CLAUDE_MODEL, config.USE_BATCH)
-    g = GeminiProvider(config.GEMINI_API_KEY, config.GEMINI_MODEL)
+    g = GeminiProvider(config.GEMINI_API_KEY, config.GEMINI_MODEL,
+                       fallback_api_key=config.GEMINI_FREE_API_KEY,
+                       fallback_model=config.GEMINI_FREE_MODEL)
     if c.available():
         p["claude"] = c
     if g.available():
@@ -38,7 +40,9 @@ def judges() -> dict:
     """심사는 저비용 모델로."""
     p = {}
     c = ClaudeProvider(config.ANTHROPIC_API_KEY, config.CLAUDE_JUDGE_MODEL, use_batch=False)
-    g = GeminiProvider(config.GEMINI_API_KEY, config.GEMINI_JUDGE_MODEL)
+    g = GeminiProvider(config.GEMINI_API_KEY, config.GEMINI_JUDGE_MODEL,
+                       fallback_api_key=config.GEMINI_FREE_API_KEY,
+                       fallback_model=config.GEMINI_FREE_MODEL)
     if c.available():
         p["claude"] = c
     if g.available():

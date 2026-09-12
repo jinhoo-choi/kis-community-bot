@@ -26,7 +26,7 @@ KEYWORDS = [
 ]
 
 
-def _range() -> tuple[str, str]:
+def _range(now=None) -> tuple[str, str]:
     """조회 구간 (시작일, 종료일).
 
     하루만 보면 주말 공시를 통째로 놓친다. 월요일 실행이면 금요일치만
@@ -35,7 +35,7 @@ def _range() -> tuple[str, str]:
       화~금 실행 -> 어제 하루
       월요일 실행 -> 금요일 ~ 일요일 (3일)
     """
-    end = datetime.now(KST) - timedelta(days=1)
+    end = (now or datetime.now(KST)) - timedelta(days=1)
     beg = end
     while beg.weekday() >= 5:          # 토·일이면 금요일까지 내려간다
         beg -= timedelta(days=1)

@@ -24,6 +24,7 @@ from src import crawl
 
 # 일일 봇에서 이보다 오래된 종합 뉴스는 새 정책 소재로 취급하지 않는다.
 MAX_AGE = timedelta(hours=48)
+MONDAY_MAX_AGE = timedelta(hours=72)  # 월요일 06시 실행은 금~일 구간을 포함
 
 FEEDS = [
     ("연합뉴스 경제", "https://www.yna.co.kr/rss/economy.xml"),
@@ -51,9 +52,9 @@ EXCLUDE = [
 # 정책·산업 성격이 분명해야 통과시킨다 (단순 키워드 포함만으로는 부족)
 POLICY_SIGNALS = [
     "발표", "추진", "도입", "시행", "확대", "지원", "규제", "완화", "개편",
-    "투자", "육성", "대책", "방안", "계획", "협약", "체결", "수주", "전망",
-    "인상", "인하", "동결", "결정",
+    "육성", "대책", "방안", "계획", "인상", "인하", "동결",
 ]
+AUTHORITY_SIGNALS = ["투자", "협약", "체결", "전망", "결정"]
 
 KEYWORDS = [
     "금리", "물가", "수출", "반도체", "배터리", "이차전지", "원전", "방산",
@@ -67,9 +68,21 @@ ANCHORS = [
     "정부", "부처", "기획재정부", "금융위", "금감원", "산업부", "중기부",
     "과기정통부", "국토부", "한국은행", "한은", "코트라", "공정위", "국세청",
     "반도체", "배터리", "이차전지", "자동차", "조선", "철강", "화학", "원전",
-    "바이오", "제약", "통신", "유통", "건설", "항공", "방산", "기업", "업계",
-    "수출", "환율", "금리", "물가", "증시", "시장",
+    "바이오", "제약", "통신", "유통", "건설", "항공", "방산", "업계",
+    "수출", "환율", "금리", "물가", "증시",
 ]
+
+PUBLIC_AUTHORITY = [
+    "정부", "부처", "기획재정부", "금융위", "금감원", "산업부", "중기부",
+    "과기정통부", "국토부", "한국은행", "한은", "코트라", "공정위", "국세청",
+]
+
+# 개별 회사의 자본거래·계약·실적은 DART/리서치 슬롯의 영역이다. 산업 키워드가
+# 우연히 들어갔다고 정책글로 중복 수집하지 않는다.
+COMPANY_EVENT = re.compile(
+    r"주식|지분|취득|양수|양도|매각|인수|합병|증자|사채|공급.?계약|수주|"
+    r"실적|매출|영업이익|목표주가|상장"
+)
 
 # 증권사 의견 기사. 커뮤니티에 AI가 목표주가를 옮기는 것은 어떤 톤이든 위험하다.
 BROKER_OPINION = re.compile(
@@ -123,8 +136,9 @@ def _fresh_published_at(raw: str, now: datetime | None = None) -> datetime | Non
         return None
     now = (now or datetime.now(KST)).astimezone(KST)
     age = now - published
+    max_age = MONDAY_MAX_AGE if now.weekday() == 0 else MAX_AGE
     # RSS 서버와 러너의 가벼운 시계 차이는 허용하되 미래 기사도 통과시키지 않는다.
-    return published if -timedelta(hours=2) <= age <= MAX_AGE else None
+    return published if -timedelta(hours=2) <= age <= max_age else None
 
 
 def is_relevant(title: str, desc: str = "") -> tuple[bool, str]:
@@ -142,9 +156,13 @@ def is_relevant(title: str, desc: str = "") -> tuple[bool, str]:
         return False, "증권사의견"
     if PARTISAN.search(blob):
         return False, "정당·정쟁"
+    has_authority = any(a in blob for a in PUBLIC_AUTHORITY)
+    if COMPANY_EVENT.search(title) and not has_authority:
+        return False, "개별기업사건"
     if not any(k in blob for k in KEYWORDS):
         return False, "키워드없음"
-    if not any(x in blob for x in POLICY_SIGNALS):
+    if not (any(x in blob for x in POLICY_SIGNALS)
+            or (has_authority and any(x in blob for x in AUTHORITY_SIGNALS))):
         return False, "정책신호없음"
     if not any(a in blob for a in ANCHORS):
         return False, "기관·산업앵커없음"

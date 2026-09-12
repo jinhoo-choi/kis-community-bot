@@ -47,6 +47,7 @@ CLAIM_SPECS = [
     ("contract",  "계약 내용",     r"계약 내용[:\s]*([^\n]+)", "{}"),
     ("region",    "공급 지역",     r"공급 지역[:\s]*([^\n]+)", "{}"),
     ("sector",    "회사 사업내용", r"(?:주력|영위)[^\n]*", "{}"),
+    ("term_def",  "용어 설명",     r"용어 설명[:\s]*([^\n]+)", "{}"),
     ("policy",    "정책·발표 내용", r"요지[:\s]*([^\n]{10,200})", "{}"),
 ]
 
@@ -86,10 +87,10 @@ ANGLE_PREF = {
     "compare":     ["vol_ratio", "ret5", "range", "close_pos"],
     "ratio":       ["ratio_mg", "scale_vs", "stake", "conv_prc", "vol_ratio", "rate"],
     "amount":      ["issue_amt", "scale_vs", "turnover", "shares", "target"],
-    "terms":       ["conv_prc", "rate", "ratio_mg", "counterpart", "opinion", "maturity"],
+    "terms":       ["conv_prc", "rate", "ratio_mg", "counterpart", "opinion", "target", "maturity"],
     "purpose":     ["purpose", "contract", "counterpart", "issue_amt", "event"],
     "duration":    ["maturity", "ret5", "event"],
-    "decode":      ["event", "contract", "term_word", "sector", "region"],
+    "decode":      ["term_def", "event", "contract", "sector", "region"],
     "inquiry":     ["inquiry", "event", "change"],
     "uncertainty": ["event", "change"],
     "context":     ["sector", "policy", "event"],
