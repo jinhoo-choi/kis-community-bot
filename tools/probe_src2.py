@@ -56,6 +56,64 @@ def probe_research() -> None:
             log(f"  본문 앞부분: {txt}")
 
 
+def probe_research_api() -> None:
+    """개편 페이지의 리서치 API 를 번들에서 찾는다.
+
+    토론방 본문을 찾을 때 통한 방법이다. base 는 front-api 로 확인됐다.
+    """
+    log("\n══ 1b. 리서치 API 탐색 ══")
+    page = "https://m.stock.naver.com/investment/research/company"
+    r = requests.get(page, headers=H, timeout=20)
+    soup = BeautifulSoup(r.text, "html.parser")
+
+    nd = soup.find("script", id="__NEXT_DATA__")
+    bid = ""
+    if nd and nd.string:
+        import json as _j
+        try:
+            j = _j.loads(nd.string)
+            bid = j.get("buildId", "")
+            log(f"  buildId={bid} page={j.get('page')}")
+        except Exception:
+            pass
+
+    srcs = [x["src"] for x in soup.find_all("script", src=True)
+            if "_next/static" in x["src"]]
+    log(f"  JS 청크 {len(srcs)}개")
+    paths = set()
+    for js in srcs[:30]:
+        ju = js if js.startswith("http") else "https://m.stock.naver.com" + js
+        try:
+            t = requests.get(ju, headers=H, timeout=20).text
+        except Exception:
+            continue
+        for m in re.finditer(r"url:\s*[\"'`]([^\"'`]{4,90})[\"'`]", t):
+            pth = m.group(1)
+            if re.search(r"research|report|analysis|consensus", pth, re.I):
+                paths.add(pth)
+        for m in re.finditer(r"[\"'`](/research[a-zA-Z0-9/_\-{}$.]*)[\"'`]", t):
+            paths.add(m.group(1))
+    for pth in sorted(paths)[:30]:
+        log(f"    path: {pth}")
+
+    log("  --- front-api 타격 ---")
+    base = "https://m.stock.naver.com/front-api"
+    hdr = {**H, "Accept": "application/json", "Referer": page}
+    cands = sorted(p2 for p2 in paths if p2.startswith("/"))[:12]
+    cands += ["/research/company?page=1&pageSize=20",
+              "/research/companyList?page=1&pageSize=20",
+              "/investment/research/company?page=1&pageSize=20"]
+    for c in cands:
+        try:
+            rr = requests.get(base + c, headers=hdr, timeout=12)
+            ct = rr.headers.get("content-type", "")[:22]
+            log(f"    [{rr.status_code}] {ct:22} {c}")
+            if rr.status_code == 200 and "json" in ct:
+                log(f"      → {rr.text[:300]}")
+        except Exception as e:
+            log(f"    [ERR] {type(e).__name__} {c}")
+
+
 def probe_kind() -> None:
     log("\n══ 2. KIND 조회공시 ══")
     url = "https://kind.krx.co.kr/disclosure/todaydisclosure.do"
@@ -92,6 +150,7 @@ def probe_kind() -> None:
 
 def main() -> None:
     probe_research()
+    probe_research_api()
     probe_kind()
     with open("data/src2_probe.txt", "w", encoding="utf-8") as f:
         f.write("\n".join(OUT))
