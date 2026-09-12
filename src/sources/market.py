@@ -449,6 +449,12 @@ def fetch(limit: int = 12) -> list[dict]:
         if bad:
             print(f"[market] ⚠ {r['name']} 제외 — {', '.join(bad)}")
             continue
+        # 소재 게이트 — 결합 사실이 하나도 없으면 아무리 잘 써도 raw 나열이 된다.
+        # 외부 검토 지적: 품질 문제를 작성 모델에게 다 떠넘기면 안 된다.
+        # 생성 전에 걸러 LLM 호출과 심사 비용을 아낀다.
+        derived = facts.evaluate(r)
+        if not derived:
+            continue
         direction = "상승" if r["pct"] > 0 else "하락"
         out.append({
             "id": f"flow-{day}-{r['code']}",
@@ -465,8 +471,10 @@ def fetch(limit: int = 12) -> list[dict]:
                 + ("" if r.get("eok_approx")
                    else f"거래대금: {r['eok']:,.0f}억원\n")
                 + (f"{r['flow_rank']}\n" if r.get("flow_rank") else "")
-                + "".join(f"{lbl}\n" for lbl in facts.evaluate(r))
-                + "※ '평가' 항목은 코드가 계산한 관찰 결과다. 그대로 인용하되 원인으로 해석하지 말 것.\n"
+                + facts.DERIVED_HEADER + "\n"
+                + "".join(f"· {lbl}\n" for lbl in derived)
+                + "※ 결합 사실은 코드가 계산한 값이다. 최소 하나는 본문에 그대로 써야 한다.\n"
+                + "※ 그대로 인용하되 원인으로 해석하지 말 것.\n"
                 + "※ 등락 사유는 데이터에 없음. 원인을 추측해 단정하지 말 것."
             ),
             "src": f"https://finance.naver.com/item/main.naver?code={r['code']}",

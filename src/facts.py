@@ -137,6 +137,28 @@ def has_both_sides(item: dict) -> bool:
 # ── 코드가 하는 정량 평가 ────────────────────────────────────
 # 모델에게 판단시키지 않는다. 서술적 사실만 라벨로 붙인다.
 
+# 외부 검토 지적: fit 3점을 '관계 표현을 썼는가' 로 정의하면 키워드만 끼워넣는
+# 우회가 생긴다(Goodhart). '코드가 계산한 결합 사실(derived fact)을 실제로
+# 전달했는가' 로 정의해야 한다. evaluate() 의 출력이 바로 그 derived fact 다.
+# 개별 raw 수치(종가·등락률)만으로는 드러나지 않는 비교·비중·위치를 담는다.
+DERIVED_HEADER = "[결합 사실 — 개별 수치만으로는 안 보이는 것]"
+
+
+def derived_values(facts_text: str) -> list[str]:
+    """facts 의 결합 사실 블록에서 수치만 뽑는다. 본문 사용 여부 판정용."""
+    out = []
+    for line in facts_text.splitlines():
+        if not line.startswith("· "):
+            continue
+        # '20일 평균', '5거래일' 의 앞 숫자는 기간 단위지 결합 사실의 값이 아니다.
+        # 이걸 값으로 세면 "5거래일 흐름 가운데" 한 마디로 우회된다.
+        for m in re.finditer(r"(\d[\d,]*\.?\d*)(\s*(?:거래일|일|개월|년)?)", line):
+            if m.group(2).strip():
+                continue
+            out.append(m.group(1))
+    return out
+
+
 def evaluate(r: dict) -> list[str]:
     """게시글 입력에 넣을 관찰값. **판단 라벨을 붙이지 않는다.**
 

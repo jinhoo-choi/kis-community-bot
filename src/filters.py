@@ -59,20 +59,25 @@ def _hedge_errors(body: str) -> list[str]:
     return [f"완충표현{n}회"] if n >= 3 else []
 
 
-# 수치 사이의 관계를 짚었는지. 심사 fit 이 3점을 받는 최소 조건이다.
-# 지시만으로는 안 지켜진다 — 실측에서 어미는 바뀌었는데 나열형이 그대로 남았다.
-_RELATION = re.compile(
-    r"대부분|절반|비중|차지|만든 (셈|것)|평균의\s*[\d.]+\s*배|"
-    r"평소보다|대비\s*[\d.]+%|고가 대비|저가 대비|누적|상위\s*\d+위|"
-    r"에서 (끝|마감)|만에|가운데")
+def _needs_relation(body: str, facts_text: str = "") -> list[str]:
+    """코드가 계산한 결합 사실을 실제로 썼는지 본다.
 
+    외부 검토 지적: '관계 표현 키워드가 있는가' 로 검사하면 모델이
+    "5거래일 누적 흐름 가운데 거래량은 3.2배였습니다" 처럼 단어만 끼워넣어
+    통과한다(Goodhart). 키워드가 아니라 **특정 사실의 사용 여부**를 봐야 한다.
 
-def _needs_relation(body: str) -> list[str]:
-    """수치가 여럿인데 관계 서술이 없으면 시세 나열이다."""
-    nums = re.findall(r"\d[\d,]*\.?\d*", body)
-    if len(set(nums)) < 3:
+    결합 사실은 개별 raw 수치만으로는 드러나지 않는 비교·비중·위치다
+    (평균 대비 배수, 5거래일 누적, 고가 대비 마감 위치, 수급 순위).
+    그 수치 중 하나라도 본문에 등장하면 통과시킨다.
+    """
+    from src import facts as _facts
+    derived = _facts.derived_values(facts_text)
+    if not derived:
+        return []                      # 결합 사실이 없는 소재는 요구하지 않는다
+    nums = set(re.findall(r"\d[\d,]*\.?\d*", body))
+    if len(nums) < 3:
         return []
-    return [] if _RELATION.search(body) else ["수치나열(관계없음)"]
+    return [] if (nums & set(derived)) else ["결합사실미사용"]
 
 
 def _ending_variety(body: str) -> list[str]:
@@ -199,7 +204,7 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
     else:
         errs += _number_overuse(body, length, _slot_n(facts))
     errs += _ending_variety(body)
-    errs += _needs_relation(body)
+    errs += _needs_relation(body, facts)
 
     # 미확인 표현은 uncertainty 앵글에서만 허용한다.
     # "정보가 없다"는 안전한 문장이라 모델이 습관적으로 쓰고, 그게 50건 중 20건에
