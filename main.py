@@ -205,10 +205,11 @@ def main():
         json.dump(sent_posts, f, ensure_ascii=False, indent=1)
 
     telegram_bot.send_brief(sent_posts)
-    sent = telegram_bot.send_all(sent_posts)
+    delivered_posts = telegram_bot.send_all(sent_posts)
+    sent = len(delivered_posts)
 
     row = stats.record(**stats.summarize(
-        raw, blocked, enriched_n, posts, sent_posts, held,
+        raw, blocked, enriched_n, posts, delivered_posts, held,
         generator.collect_fallbacks()),
         dedup=dup_reasons, crawl_health=crawl.health())
     telegram_bot.send_summary(sent_posts, sent, row)
@@ -217,11 +218,13 @@ def main():
         telegram_bot.send_warning(f"수집 이상 소스: {', '.join(degraded)}")
     print("[main] stats " + json.dumps(row, ensure_ascii=False))
 
-    for p_ in sent_posts:
+    for p_ in delivered_posts:
         dedup.mark(p_, s["seen"], __import__("datetime").datetime.now(config.KST).strftime("%Y-%m-%d"))
     if not config.IGNORE_SEEN:
-        state.mark(s, sent_posts)
+        state.mark(s, delivered_posts)
         state.save(s)
+    if sent != len(sent_posts):
+        raise RuntimeError(f"텔레그램 부분 전송: {sent}/{len(sent_posts)}건")
 
 
 def _install_log_mask():

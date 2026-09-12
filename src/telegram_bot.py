@@ -145,13 +145,14 @@ def _post(method: str, payload: dict):
     return None
 
 
-def send_all(posts: list[dict]) -> int:
+def send_all(posts: list[dict]) -> list[dict]:
+    """전송에 성공한 게시글만 반환한다."""
     if not TELEGRAM_TOKEN:
         print("[tg] TELEGRAM_TOKEN 없음 → 스킵")
-        return 0
+        return []
 
     total = len(posts)
-    sent = 0
+    sent = []
     for i, p in enumerate(posts, 1):
         _payload = {
             "parse_mode": "HTML",
@@ -182,7 +183,7 @@ def send_all(posts: list[dict]) -> int:
             r = _post("sendMessage", _payload)
 
         if r is not None and r.ok:
-            sent += 1
+            sent.append(p)
         elif r is not None:
             print(f"[tg] 실패 {p['id']}: {r.text[:300]}")
         time.sleep(config.TG_SEND_INTERVAL)

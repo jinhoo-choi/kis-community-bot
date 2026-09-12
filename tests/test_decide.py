@@ -293,6 +293,26 @@ def main():
                   bool(_b) and "openData=005930" in
                   _b["inline_keyboard"][0][0]["url"]))
     ok.append(run("종목 없으면 버튼 없음", _btn({"kind": "policy"}) is None))
+
+    # 부분 전송 시 성공한 항목만 반환해야 state/dedup 에 기록할 수 있다.
+    class _Resp:
+        def __init__(self, success):
+            self.ok = success
+            self.status_code = 200 if success else 500
+            self.text = "ok" if success else "fail"
+
+    _old_token, _old_post, _old_sleep = _tg.TELEGRAM_TOKEN, _tg._post, _tg.time.sleep
+    _tg.TELEGRAM_TOKEN = "test"
+    _responses = iter([_Resp(True), _Resp(False)])
+    _tg._post = lambda *_a, **_k: next(_responses)
+    _tg.time.sleep = lambda *_a: None
+    _delivery = [{"id": "ok", "kind": "policy", "body": "가" * 60},
+                 {"id": "fail", "kind": "policy", "body": "나" * 60}]
+    _delivered = _tg.send_all(_delivery)
+    ok.append(run("부분 전송은 성공 글만 반환",
+                  [p["id"] for p in _delivered] == ["ok"]))
+    _tg.TELEGRAM_TOKEN, _tg._post, _tg.time.sleep = _old_token, _old_post, _old_sleep
+
     ok.append(run("3행부터 복사블록", _lines[2].startswith("<pre><code")))
     ok.append(run("종목건은 종목명+코드 표기", "삼성전자 (005930)" in _lines[0], _lines[0]))
     _t = _tg.card({"kind": "policy", "assignee": "이책임", "body": "가" * 60})

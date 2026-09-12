@@ -51,7 +51,7 @@ def setup():
 
     # 텔레그램 캡처
     import src.telegram_bot as tg
-    tg.send_all = lambda posts: (SENT.extend(posts), len(posts))[1]
+    tg.send_all = lambda posts: (SENT.extend(posts), list(posts))[1]
     tg.send_summary = lambda posts, sent: None
     tg.send_warning = lambda t: WARNINGS.append(t)
 
