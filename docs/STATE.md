@@ -114,6 +114,13 @@ DART 기준 사실은 금요일 `2026-09-11` 자료였으며, 금·토·일 자�
 
 ---
 
+## 논의 중 (Codex 회신 대기)
+
+API 비용 절감안을 [`PROPOSAL_2026-09-12_COST_REDUCTION.md`](PROPOSAL_2026-09-12_COST_REDUCTION.md)에
+올렸습니다. 전제는 '발송 50건 유지'이며, 심사 계층화·심사 staged·flow 작성 모델 하향·
+stage 축소·보강 캐시 연장 5건입니다. 라우팅·stage·계측은 Codex 판단이 필요해 결정 요청을
+문서 5항에 정리했습니다. 같은 문서에서 `DIST_HARD_CAP` 을 3차 배분으로 완화하는 선결 항목도 다룹니다.
+
 ## 다음 작업
 
 1. `GEMINI_FREE_API_KEY_TEST`를 등록한 뒤 유료 Gemini 결제 오류를 강제해 무료 폴백을 실검증합니다.
