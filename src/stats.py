@@ -115,13 +115,15 @@ def _kind_funnel(collected, blocked, candidates, attempted, generated,
 
 def summarize(collected, blocked, enriched, generated, sent, held, fallbacks,
               *, generation_candidates=None, generation_attempted=None,
-              generation_stages=None, delivery_attempted=None) -> dict:
+              generation_stages=None, delivery_attempted=None,
+              template_reserve=None) -> dict:
     generation_candidates = (generated if generation_candidates is None
                              else generation_candidates)
     generation_attempted = (generated if generation_attempted is None
                             else generation_attempted)
     delivery_attempted = sent if delivery_attempted is None else delivery_attempted
     generation_stages = [] if generation_stages is None else generation_stages
+    template_reserve = [] if template_reserve is None else template_reserve
 
     def avg_score(ps):
         v = [(p.get("score") or {}).get("total") for p in ps]
@@ -129,8 +131,9 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks,
         return round(sum(v) / len(v), 2) if v else None
 
     by_provider = {}
-    for name in {p.get("provider") for p in generated if p.get("provider")}:
-        grp = [p for p in generated if p.get("provider") == name]
+    prepared = generated + template_reserve
+    for name in {p.get("provider") for p in prepared if p.get("provider")}:
+        grp = [p for p in prepared if p.get("provider") == name]
         by_provider[name] = {
             "generated": len(grp),
             "sent": sum(1 for p in sent if p.get("provider") == name),
@@ -143,13 +146,15 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks,
         p.get("_selected_persona") for p in generation_attempted
         if p.get("_selected_persona"))
     persona_names = set(attempted_persona) | {
-        p.get("tone") for p in generated if p.get("tone")}
+        p.get("tone") for p in prepared if p.get("tone")}
     by_persona = {}
     for name in sorted(persona_names):
         grp = [p for p in generated if p.get("tone") == name]
+        template_grp = [p for p in template_reserve if p.get("tone") == name]
         by_persona[name] = {
             "attempted": attempted_persona.get(name, 0),
             "filter_passed": len(grp),
+            "template_prepared": len(template_grp),
             "held": sum(1 for p in held if p.get("tone") == name),
             "delivered": sum(1 for p in sent if p.get("tone") == name),
             "avg_score": avg_score(grp),
@@ -195,11 +200,15 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks,
         "generation_items_avoided": max(
             0, len(generation_candidates) - len(generation_attempted)),
         "generated": len(generated),
+        "template_reserve": len(template_reserve),
+        "template_fallback_count": sum(
+            p.get("provider") == "template" for p in sent),
         "judge_failed": sum(1 for p in generated if p.get("score") is None),
         "delivery_attempted": len(delivery_attempted),
         "delivery_failed": max(0, len(delivery_attempted) - len(sent)),
         "attempt_to_delivery_yield": (
-            round(len(sent) / len(generation_attempted), 4)
+            round(sum(p.get("provider") != "template" for p in sent)
+                  / len(generation_attempted), 4)
             if generation_attempted else 0.0),
         "sent": len(sent),
         "held": len(held),

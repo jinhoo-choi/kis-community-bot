@@ -8,6 +8,7 @@ import re
 from collections import Counter
 
 import config
+from src import template_reserve
 
 
 # 물음표 없이도 질문이다. 실측(#79): 10건 중 4건이 질문형인데
@@ -71,6 +72,15 @@ def decide_distribution(
     pool = []
 
     for p in posts:
+        if p.get("provider") == "template":
+            template_errs = template_reserve.validation_errors(p)
+            if template_errs:
+                p["hold_reason"] = "문장틀검증실패:" + ",".join(template_errs)[:120]
+                held.append(p)
+            else:
+                p.pop("hold_reason", None)
+                pool.append(p)
+            continue
         s = p.get("score")
         if s is None:
             # 금융사 채널은 심사 장애를 품질 통과로 해석하면 안 된다.
@@ -99,7 +109,15 @@ def decide_distribution(
     # 심사에서 '데이터 나열' 로 깎이고(실측 98건), 공시·리포트·정책은
     # 품질이 좋지만 공급이 적다. 그래서 좋은 것부터 채우고 flow 로 메운다.
     pool.sort(key=lambda x: (_PRIORITY.get(x.get("kind", ""), 9),
+                             x.get("provider") == "template",
                              -(x.get("score") or {}).get("total", 0)))
+
+    # 평시에는 LLM 승인본 70% 이상을 우선하고 template은 최대 30%(50건이면
+    # 15건)만 쓴다. 유효 LLM 공급이 그보다 적으면 50건 보장 모드로 전환한다.
+    llm_pool_n = sum(p.get("provider") != "template" for p in pool)
+    guarantee_mode = llm_pool_n < template_reserve.normal_llm_target(target)
+    template_limit = (target if guarantee_mode
+                      else template_reserve.normal_template_limit(target))
 
     # 한 페르소나가 배포를 독식하면 피드가 단조로워진다.
     # 실측: brief_report 계약이 전역 규칙과 충돌해 통째로 리젝되자
@@ -112,13 +130,31 @@ def decide_distribution(
     per_question_cap = max(1, round(target * 0.1))
     # 같은 페르소나 안에서도 마무리 문구가 복제된다.
     # 실측: '아시는 분 계신가요?' 로 끝나는 글이 7건이었다.
-    sent, per_s, per_k, per_t, per_e = [], Counter(), Counter(), Counter(), Counter()
+    sent = []
+    per_s, per_k, per_t, per_e = Counter(), Counter(), Counter(), Counter()
+    per_tt, per_tid, used_sources = Counter(), Counter(), set()
+    template_sent = 0
 
-    def _place(p, cap_kind: bool, hard_cap: bool = True) -> bool:
+    def _place(p, cap_kind: bool, hard_cap: bool = True,
+               template_guarantee: bool = False) -> bool:
         """상한을 지키며 배포에 넣는다. 넣었으면 True."""
+        nonlocal template_sent
         if len(sent) >= target:
             p["hold_reason"] = "정원초과"
             return False
+        is_template = p.get("provider") == "template"
+        source_id = p.get("source_id") or p.get("id")
+        if source_id and source_id in used_sources:
+            p["hold_reason"] = "소재중복"
+            return False
+        if is_template:
+            tid = p.get("template_id", "")
+            if template_sent >= (target if template_guarantee else template_limit):
+                p["hold_reason"] = "문장틀상한"
+                return False
+            if not tid or per_tid[tid] >= 3:
+                p["hold_reason"] = "문장틀반복상한"
+                return False
         code = p.get("stock_code") or "_theme"
         if code != "_theme" and per_s[code] >= per_stock:
             p["hold_reason"] = f"종목상한({per_stock})"
@@ -137,9 +173,15 @@ def decide_distribution(
             if per_t["_q"] >= per_question_cap:
                 p["hold_reason"] = "질문상한"
                 return False
-        if tone and per_t[tone] >= per_tone_cap:
-            p["hold_reason"] = f"문체상한({tone})"
-            return False
+        if tone:
+            if is_template and template_guarantee:
+                cap = template_reserve.guarantee_tone_limit(target)
+                if per_tt[tone] >= cap:
+                    p["hold_reason"] = f"문장틀문체상한({tone})"
+                    return False
+            elif per_t[tone] >= per_tone_cap:
+                p["hold_reason"] = f"문체상한({tone})"
+                return False
         body = p.get("body", "").strip()
         ending = body[-20:] if len(body) >= 20 else ""
         if ending and per_e[ending] >= 2:
@@ -153,13 +195,19 @@ def decide_distribution(
             per_t["_q"] += 1
         if ending:
             per_e[ending] += 1
+        if source_id:
+            used_sources.add(source_id)
+        if is_template:
+            template_sent += 1
+            per_tt[tone] += 1
+            per_tid[p.get("template_id", "")] += 1
         sent.append(p)
         return True
 
     # 1차: 유형 상한을 지켜 배분한다
     rest = []
     for p in pool:
-        if not _place(p, cap_kind=True):
+        if not _place(p, cap_kind=True, template_guarantee=guarantee_mode):
             rest.append(p)
 
     # 2차: 목표에 못 미치면 유형 상한만 풀어 flow 로 메운다.
@@ -170,7 +218,7 @@ def decide_distribution(
             if len(sent) >= target:
                 break
             p.pop("hold_reason", None)
-            if not _place(p, cap_kind=False):
+            if not _place(p, cap_kind=False, template_guarantee=guarantee_mode):
                 continue
         if len(sent) > before:
             print(f"[decide] 유형상한 완화로 {len(sent) - before}건 보충 "
@@ -187,13 +235,28 @@ def decide_distribution(
             if len(sent) >= target:
                 break
             p.pop("hold_reason", None)
-            _place(p, cap_kind=False, hard_cap=False)
+            _place(p, cap_kind=False, hard_cap=False,
+                   template_guarantee=guarantee_mode)
         if len(sent) > before:
             over = {k: per_k[k] - hard_kind_cap[k] for k in hard_kind_cap
                     if per_k[k] > hard_kind_cap[k]}
             print(f"[decide] ⚠ 절대상한 해제로 {len(sent) - before}건 보충 "
                   f"({before} → {len(sent)}) — 구성 목표 초과: {over}. "
                   "비-flow 공급 부족이 원인이다.")
+
+    # LLM pool은 35건 이상이었어도 종목·문체·말미 상한 때문에 실제 선택이
+    # 부족할 수 있다. 그 경우에만 평시 15건 상한을 보장 모드로 올린다.
+    if len(sent) < target and not guarantee_mode:
+        before = len(sent)
+        for p in [x for x in rest if x.get("provider") == "template"
+                  and x not in sent]:
+            if len(sent) >= target:
+                break
+            p.pop("hold_reason", None)
+            _place(p, cap_kind=False, hard_cap=False, template_guarantee=True)
+        if len(sent) > before:
+            print(f"[decide] ⚠ 배분 부족 보장 모드로 문장틀 "
+                  f"{len(sent) - before}건 보충 ({before} → {len(sent)})")
     held.extend(x for x in rest if x not in sent)
 
     return sent, held

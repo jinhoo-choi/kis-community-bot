@@ -47,6 +47,7 @@ python3 -m pyflakes src tools main.py config.py 2>/dev/null \
 echo
 echo "=== 2. unit (decide / gate / entity / dedup / rules) ==="
 python3 tests/test_decide.py
+python3 tests/test_template_reserve.py
 echo
 echo "=== 2b. 전수검사 (설정-코드 정합성) ==="
 python3 tools/audit.py

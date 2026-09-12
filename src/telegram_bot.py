@@ -1,13 +1,14 @@
 """텔레그램으로 직원 채널에 배포.
 
-카드는 세 줄이다.
+카드는 네 줄이다.
 
     카테고리 : 공시 · 삼성전자 (005930)
     담당 : 김선임
+    생성 경로 : LLM / 검증 문장틀
     [회색 복사 블록]
 
 빼기로 한 것과 이유
-  - 원문 링크 / 진행 순번 / provider / 심사 점수
+  - 원문 링크 / 진행 순번 / provider 상세명 / 심사 점수
       담당자가 게시할 때 쓰지 않는 정보다. 운영 지표는 run_stats.jsonl 에 남는다.
   - AI 생성·출처·투자책임 고지와 그 안내 문구
       한국투자 앱이 게시 시 자동으로 붙인다. 카드에 적으면 노이즈다.
@@ -60,8 +61,9 @@ def buttons(p: dict) -> dict | None:
 def card(p: dict, idx: int = 0, total: int = 0) -> str:
     """배포 카드.
 
-    담당자가 필요한 건 세 가지뿐이다: 어떤 종류인지 / 내 것인지 / 무엇을 복사하는지.
-    나머지(원문 링크, 심사 점수, 고지 문구 안내)는 전부 뺐다.
+    담당자가 필요한 건 네 가지뿐이다: 어떤 종류인지 / 내 것인지 /
+    검증 문장틀인지 LLM인지 / 무엇을 복사하는지.
+    나머지(원문 링크, 모델 상세명, 심사 점수, 고지 문구 안내)는 전부 뺐다.
     고지 문구는 한국투자 앱이 게시 시 자동으로 붙이므로 여기서 설명할 필요가 없다.
     """
     kind = KIND_LABEL.get(p.get("kind"), p.get("kind", ""))
@@ -77,11 +79,13 @@ def card(p: dict, idx: int = 0, total: int = 0) -> str:
     if len(body) > BODY_LIMIT:
         body = body[:BODY_LIMIT].rstrip() + "…"
 
+    route = "검증 문장틀" if p.get("provider") == "template" else "LLM"
     # 딥링크는 인라인 버튼으로만 보낸다. URL 전문을 본문에 두면
     # 복사 영역이 지저분해지고 담당자가 쓸 일도 없다(실사용 확인).
     return (
         f"카테고리 : {cat}\n"
         f"담당 : {who}\n"
+        f"생성 경로 : {route}\n"
         f'<pre><code class="language-복사">{_esc(body)}</code></pre>'
     )
 

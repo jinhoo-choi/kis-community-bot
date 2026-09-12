@@ -20,7 +20,8 @@ import sys
 
 import config
 from src import (state, tickers, generator, telegram_bot, enrich, judge,
-                 gate, decide, stats, dedup, crawl, assign, theme_map, facts)
+                 gate, decide, stats, dedup, crawl, assign, theme_map, facts,
+                 template_reserve)
 from src.sources import dart, research, market, policy, telegram_ch, kind_inquiry
 from src.llm.base import reset_usage
 
@@ -203,6 +204,18 @@ def main():
         print(f"[main] ⚠ 실제 후보 부족 ({actual_expected:.1f} < "
               f"{config.TARGET_POSTS}). 전량 생성해도 목표 미달 가능성이 높다.")
 
+    # API 호출 전에 검증 가능한 flow 원본으로 50+15 reserve를 만든다.
+    # LLM은 이 원본을 교체해 품질을 높이는 경로이며, 실패해도 준비량을 줄이지 않는다.
+    reserve_goal = config.TARGET_POSTS + template_reserve.RESERVE_EXTRA
+    reserve = template_reserve.build(picked, reserve_goal)
+    reserve_probe, _ = decide.decide_distribution(
+        [dict(p) for p in reserve], target=config.TARGET_POSTS)
+    reserve_ready = len(reserve_probe) >= config.TARGET_POSTS
+    print(f"[template] 결정형 reserve {len(reserve)}/{reserve_goal}건"
+          f" → 배분 dry-run {len(reserve_probe)}/{config.TARGET_POSTS}건")
+    if not reserve_ready:
+        print("[template] ⚠ 50건 보장 reserve 미달 — 검증 사실 공급을 확인하세요")
+
     if dry:
         print("\n───── 수집 표본 ─────")
         for it in picked[:15]:
@@ -233,11 +246,19 @@ def main():
         print("\n───── 크롤링 헬스 ─────")
         print(json.dumps(crawl.health(), ensure_ascii=False, indent=1))
         print(f"\n───── dedup ─────\n {dup_reasons}")
+        print(f"\n───── template reserve ─────\n "
+              f"준비 {len(reserve)}/{reserve_goal}, dry-run {len(reserve_probe)}/"
+              f"{config.TARGET_POSTS}")
         return
 
     # 생성→심사→판정을 묶음 단위로 실행한다. 목표를 채우면 남은 후보는 LLM에
     # 보내지 않는다. 기존 함수와 최종 판정 기준은 그대로 재사용한다.
     posts, sent_posts, held, attempted_items, stage_sizes = [], [], [], [], []
+    # 정상 모드에서는 최종 50건 중 LLM 승인본 70%(35건)를 확보하면 멈추고,
+    # 남은 최대 15건을 reserve로 채운다. reserve가 준비되지 않았으면 기존처럼
+    # LLM 승인본만으로 전체 목표를 추적한다.
+    llm_target = (template_reserve.normal_llm_target(config.TARGET_POSTS)
+                  if reserve_ready else config.TARGET_POSTS)
     start = 0
     next_size = min(config.GEN_STAGE_SIZE, len(picked))
     while start < len(picked) and next_size:
@@ -251,18 +272,18 @@ def main():
         posts.extend(made)
         sent_posts, held = decide.decide_distribution(posts)
         print(f"[main] 단계 생성 {start}/{len(picked)}건"
-              f" → 누적 배포 가능 {len(sent_posts)}/{config.TARGET_POSTS}건")
-        if len(sent_posts) >= config.TARGET_POSTS:
+              f" → LLM 승인 가능 {len(sent_posts)}/{llm_target}건")
+        if len(sent_posts) >= llm_target:
             break
         next_size = _next_stage_size(
             len(picked) - start,
-            config.TARGET_POSTS - len(sent_posts),
+            llm_target - len(sent_posts),
             len(attempted_items),
             len(sent_posts),
         )
     # 정규식 리젝분을 즉시 재호출하면 아직 쓰지 않은 원본보다 비싼 두 번째 시도를
     # 먼저 하게 된다. 전체 원본 후보를 소진하고도 목표가 모자랄 때만 한 번 재작성한다.
-    if len(sent_posts) < config.TARGET_POSTS:
+    if len(sent_posts) < llm_target and not reserve_ready:
         remade = generator.retry_rejected()
         if config.ENABLE_JUDGE:
             remade = judge.judge_all(remade)
@@ -271,6 +292,14 @@ def main():
             sent_posts, held = decide.decide_distribution(posts)
             print(f"[main] 후보 소진 후 재작성 → 누적 배포 가능 "
                   f"{len(sent_posts)}/{config.TARGET_POSTS}건")
+
+    # 최종 판정은 LLM과 reserve를 한 pool에서 다시 수행한다. decide가 LLM을
+    # 우선하며, 같은 원본의 LLM/문장틀이 동시에 뽑히지 않게 막는다.
+    if reserve:
+        sent_posts, held = decide.decide_distribution(posts + reserve)
+        template_n = sum(p.get("provider") == "template" for p in sent_posts)
+        print(f"[template] 최종 문장틀 보충 {template_n}건 / "
+              f"LLM {len(sent_posts) - template_n}건")
     # 담당자 배정은 최종 배포분이 확정된 뒤에 한다.
     # 보류될 글까지 배정하면 담당자별 건수가 실제와 달라진다.
     sent_posts = assign.assign(sent_posts)
@@ -290,7 +319,7 @@ def main():
         raw, blocked, enriched_n, posts, delivered_posts, held,
         generator.collect_fallbacks(), generation_candidates=picked,
         generation_attempted=attempted_items, generation_stages=stage_sizes,
-        delivery_attempted=sent_posts),
+        delivery_attempted=sent_posts, template_reserve=reserve),
         dedup=dup_reasons, crawl_health=crawl.health())
     telegram_bot.send_summary(sent_posts, sent, row, config.TARGET_POSTS)
     print("[main] filter_log " + stats.detail_log(picked, sent_posts, held))
