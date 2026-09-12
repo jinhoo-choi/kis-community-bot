@@ -1436,6 +1436,44 @@ def main():
     _g2._DEGRADED_WRITERS.clear()
     _g2._QUALITY_FALLBACKS.clear()
 
+    # 정규식 탈락 직후 재작성하면 아직 안 쓴 원본 후보보다 두 번째 호출을 먼저 쓴다.
+    _old_gen_parts = (_g2.pick_style, _g2.router.split_by_ratio,
+                      _g2.router.writers, _g2._run, _g2.filters.check)
+    _old_rejected = list(_g2.REJECTED)
+    _g2.REJECTED.clear()
+    _gen_calls = []
+    class _AvailableWriter:
+        def available(self): return True
+    _g2.pick_style = lambda *_a, **_k: (
+        "fact_note", "reaction", "fact_note", "fact_note")
+    _g2.router.split_by_ratio = lambda items: {"claude": items}
+    _g2.router.writers = lambda: {
+        "claude": _AvailableWriter(), "gemini": _AvailableWriter()}
+    def _fake_run(name, items, tones, fmts=None, angs=None, lens=None,
+                  attempt_type="initial"):
+        _gen_calls.append((attempt_type, name, len(items)))
+        body = "bad" if attempt_type == "initial" else "good"
+        return [{**it, "body": body, "provider": name, "model": "fake",
+                 "tone": tones[i], "fmt": (fmts or ["fact_read"])[i],
+                 "angle": (angs or [""])[i], "length": (lens or ["medium"])[i]}
+                for i, it in enumerate(items)]
+    _g2._run = _fake_run
+    _g2.filters.check = lambda body, *_a, **_k: ["리젝"] if body == "bad" else []
+    _fresh_item = {"id": "fresh-first", "kind": "disclosure", "facts": "수치: 1"}
+    _first_pass = _g2.generate([_fresh_item], {})
+    ok.append(run("정규식 리젝 즉시 재작성 금지",
+                  not _first_pass
+                  and [x[0] for x in _gen_calls] == ["initial"]
+                  and len(_g2.REJECTED) == 1))
+    _late_retry = _g2.retry_rejected()
+    ok.append(run("원본 후보 소진 뒤 한 번만 재작성",
+                  len(_late_retry) == 1
+                  and _gen_calls[-1][:2] == ("filter_rewrite", "gemini")
+                  and not _g2.retry_rejected()))
+    (_g2.pick_style, _g2.router.split_by_ratio, _g2.router.writers,
+     _g2._run, _g2.filters.check) = _old_gen_parts
+    _g2.REJECTED[:] = _old_rejected
+
     # 슬롯을 키우면 기대치가 따라 올라 전 소스가 오탐 경보를 냈다
     # (실측: market 기대 857 vs 실제 62 — 수집이 아니라 기준이 망가진 것)
     from src import crawl as _cw

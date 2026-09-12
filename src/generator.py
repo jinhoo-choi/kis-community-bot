@@ -352,7 +352,7 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
             print(f"[gen] {bad} 품질 차단 물량 {len(displaced)}건 → "
                   f"{healthy[0]} 재할당")
 
-    posts, retry = [], []
+    posts = []
     for name, chunk in buckets.items():
         made = _run(name, chunk,
                     [styles[id(x)][0] for x in chunk],
@@ -384,34 +384,57 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
                 print(f"[gen] 정규식 리젝 {p['id']} {errs}")
                 print(f"       └ {p['body'][:200]!r}")
                 p["reject_errs"] = errs
-                REJECTED.append(dict(p))
-                retry.append(p)
+                rejected = dict(p)
+                rejected["_rewrite_attempted"] = False
+                REJECTED.append(rejected)
             else:
                 posts.append(p)
                 if p.get("provider") == name:
                     quality_pass += 1
         _record_writer_quality(name, len(chunk), quality_pass)
 
-    # 리젝분은 '다른 프로바이더'로 1회 재생성 (같은 모델은 같은 실수를 반복한다)
-    if retry:
-        names = [n for n, provider in router.writers().items()
-                 if provider.available() and n not in _DEGRADED_WRITERS]
-        for p in retry:
-            if not names:
-                break
-            p["retry_hint"] = _hint(p.get("reject_errs", []))
-            alt = next((n for n in names if n != p["provider"]), p["provider"])
-            made = _run(alt, [p], [p["tone"]], [p.get("fmt", "fact_read")],
-                        [p.get("angle", "")], [p.get("length", "medium")],
-                        attempt_type="filter_rewrite")
-            if made and not filters.check(
-                    made[0]["body"], p["facts"], p.get("fmt"), p.get("angle"),
-                    p.get("length"),
-                    p.get("stock_name") if p.get("theme_assigned") else None,
-                    p.get("kind") == "poll"):
-                posts.append(made[0])
-
     print(f"[gen] 정규식 통과 {len(posts)}건 / 시도 {len(items)}건")
+    return posts
+
+
+def retry_rejected() -> list[dict]:
+    """미사용 원본 후보를 모두 소진한 뒤에만 정규식 리젝분을 한 번 다시 쓴다."""
+    pending = [p for p in REJECTED if not p.get("_rewrite_attempted")]
+    if not pending:
+        return []
+    names = [n for n, provider in router.writers().items()
+             if provider.available() and n not in _DEGRADED_WRITERS]
+    if not names:
+        print(f"[gen] 재작성 대기 {len(pending)}건이나 정상 작성자 없음")
+        return []
+
+    groups = {}
+    for p in pending:
+        p["_rewrite_attempted"] = True
+        p["retry_hint"] = _hint(p.get("reject_errs", []))
+        alt = next((n for n in names if n != p.get("provider")), names[0])
+        groups.setdefault(alt, []).append(p)
+
+    posts = []
+    for name, chunk in groups.items():
+        made = _run(name, chunk,
+                    [p["tone"] for p in chunk],
+                    [p.get("fmt", "fact_read") for p in chunk],
+                    [p.get("angle", "") for p in chunk],
+                    [p.get("length", "medium") for p in chunk],
+                    attempt_type="filter_rewrite")
+        for p in made:
+            errs = filters.check(
+                p["body"], p["facts"], p.get("fmt"), p.get("angle"), p.get("length"),
+                p.get("stock_name") if p.get("theme_assigned") else None,
+                p.get("kind") == "poll")
+            if errs:
+                p["reject_errs"] = errs
+                p["_rewrite_attempted"] = True
+                REJECTED.append(dict(p))
+            else:
+                posts.append(p)
+    print(f"[gen] 후보 소진 후 재작성 {len(posts)}/{len(pending)}건 통과")
     return posts
 
 

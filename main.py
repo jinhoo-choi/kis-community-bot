@@ -212,6 +212,17 @@ def main():
               f" → 누적 배포 가능 {len(sent_posts)}/{config.TARGET_POSTS}건")
         if len(sent_posts) >= config.TARGET_POSTS:
             break
+    # 정규식 리젝분을 즉시 재호출하면 아직 쓰지 않은 원본보다 비싼 두 번째 시도를
+    # 먼저 하게 된다. 전체 원본 후보를 소진하고도 목표가 모자랄 때만 한 번 재작성한다.
+    if len(sent_posts) < config.TARGET_POSTS:
+        remade = generator.retry_rejected()
+        if config.ENABLE_JUDGE:
+            remade = judge.judge_all(remade)
+        if remade:
+            posts.extend(remade)
+            sent_posts, held = decide.decide_distribution(posts)
+            print(f"[main] 후보 소진 후 재작성 → 누적 배포 가능 "
+                  f"{len(sent_posts)}/{config.TARGET_POSTS}건")
     # 담당자 배정은 최종 배포분이 확정된 뒤에 한다.
     # 보류될 글까지 배정하면 담당자별 건수가 실제와 달라진다.
     sent_posts = assign.assign(sent_posts)
