@@ -60,7 +60,7 @@ def main():
 
     # 대조군: 이미 운영에서 동작하는 엔드포인트. 이게 비면 호출 방식 자체가 문제다.
     ctrl = _get(LIST, {"crtfc_key": DART_API_KEY, "bgn_de": bgn,
-                       "end_de": end.strftime("%Y%m%d"), "corp_cls": "Y",
+                       "end_de": end.strftime("%Y%m%d"),
                        "page_count": 100, "last_reprt_at": "N"})
     crow = next((x for x in ctrl.get("list", [])
                  if "전환사채권발행결정" in x.get("report_nm", "")
@@ -80,7 +80,7 @@ def main():
 
     for kw, eps in CANDIDATES:
         lst = _get(LIST, {"crtfc_key": DART_API_KEY, "bgn_de": bgn,
-                          "end_de": end.strftime("%Y%m%d"), "corp_cls": "Y",
+                          "end_de": end.strftime("%Y%m%d"),
                           "page_count": 100, "last_reprt_at": "N"})
         rows = [x for x in lst.get("list", []) if kw in x.get("report_nm", "")]
         lines.append(f"\n## {kw} — 최근 10일 {len(rows)}건")
@@ -107,10 +107,10 @@ def main():
     # 정형 API 가 없는 유형은 원문(document)에서 뽑는 수밖에 없다.
     # 파서를 기억으로 쓰지 않도록, 차단 표본의 원문 라벨을 그대로 덤프한다.
     lines.append("\n\n# 원문 라벨 덤프 (정형 API 미대상 유형)")
-    for kw in ("유형자산취득", "영업양수", "타법인주식", "신탁계약에의한취득",
-               "주식병합", "감자"):
+    for kw in ("타법인주식및출자증권취득", "신탁계약에의한취득", "감자결정",
+               "주식병합", "최대주주변경을수반하는주식", "청약결과"):
         lst = _get(LIST, {"crtfc_key": DART_API_KEY, "bgn_de": bgn,
-                          "end_de": end.strftime("%Y%m%d"), "corp_cls": "Y",
+                          "end_de": end.strftime("%Y%m%d"),
                           "page_count": 100, "last_reprt_at": "N"})
         rows = [x for x in lst.get("list", []) if kw in x.get("report_nm", "")]
         lines.append(f"\n## {kw} — {len(rows)}건")
