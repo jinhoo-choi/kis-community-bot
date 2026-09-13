@@ -98,6 +98,13 @@ ANGLE_PREF = {
 }
 
 
+# 유형별로 '이게 빠지면 글이 성립하지 않는' 주장. 앵글 우선순위보다 앞선다.
+# 실측(#110): 공시 보류 사유에 '발행총액 200억 누락, 정보량 부족',
+# '용도자금 오인 표현, 정보량 부족' 이 반복됐다. purpose 계열 앵글에서
+# issue_amt 가 우선순위 4번째라 n=2~3 에 잘려 '얼마'가 빠진 채 나갔다.
+ANCHOR_TYPES = {"disclosure": ["issue_amt"]}
+
+
 def select(item: dict, n: int, angle: str = "") -> list[dict]:
     """이번 글에서 쓸 주장을 **코드가 고른다**.
 
@@ -111,7 +118,9 @@ def select(item: dict, n: int, angle: str = "") -> list[dict]:
     if len(cs) <= n:
         return cs
     order = {c["type"]: i for i, c in enumerate(cs)}
-    pref = [t for t in ANGLE_PREF.get(angle, []) if t in order]
+    anchor = [t for t in ANCHOR_TYPES.get(item.get("kind", ""), []) if t in order]
+    pref = anchor + [t for t in ANGLE_PREF.get(angle, [])
+                     if t in order and t not in anchor]
     rest = [c["type"] for c in cs if c["type"] not in pref]
     # 앵글 우선분 뒤는 항목마다 다른 지점에서 시작해 글마다 조합이 갈리게 한다.
     # 고정 순서면 같은 유형 50건이 전부 등락률·종가·거래대금이 된다.
