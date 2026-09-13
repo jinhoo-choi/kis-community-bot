@@ -24,6 +24,10 @@ on:
         description: '리서치 상세 페이지 구조 덤프 (LLM 호출 없음)'
         type: boolean
         default: false
+      probe_dart_ep:
+        description: 'DART 정형 API 엔드포인트 후보 실호출 확인 (LLM 호출 없음)'
+        type: boolean
+        default: false
       probe_flow:
         description: '수급(외국인/기관) 페이지 구조 덤프 (LLM 호출 없음)'
         type: boolean
@@ -183,6 +187,15 @@ jobs:
           pip install -q -r requirements.txt
           python tools/probe_research.py || true
 
+      - name: Probe DART endpoints
+        if: ${{ !cancelled() && inputs.probe_dart_ep }}
+        env:
+          TZ: Asia/Seoul
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+        run: |
+          pip install -q -r requirements.txt
+          python tools/probe_dart_endpoints.py || true
+
       - name: Probe flow pages
         if: ${{ !cancelled() && inputs.probe_flow }}
         env:
@@ -256,6 +269,7 @@ jobs:
           git add -f data/verify.txt
           git add -f data/voice_sample.txt || true
           git add -f data/research_probe.txt || true
+          git add -f data/dart_ep_probe.txt || true
           git add -f data/flow_probe.txt || true
           git add -f data/source_probe.txt || true
           git add -f data/src2_probe.txt || true
