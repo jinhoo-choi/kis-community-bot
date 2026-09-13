@@ -6,6 +6,3 @@ TELEGRAM_TOKEN   : OK  @commwrite_bot (comwritebot)
 CHAT 후보        : private    ******2744  진후
   update 개수    : 1
   update 종류    : ['message']
-DART_API_KEY     : OK (해당일 공시 없음)  총 0건
-ANTHROPIC_KEY    : OK
-GEMINI_KEY       : OK
