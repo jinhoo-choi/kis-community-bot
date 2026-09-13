@@ -126,6 +126,27 @@ def _resolve_by_suffix() -> str:
     return _resolved_suffix
 
 
+def target_ready() -> tuple[bool, str]:
+    """발송 대상을 특정할 수 있는지 생성 전에 확인한다.
+
+    실측(#112·#114): 본문을 50건/5건 다 만든 뒤 전송 단계에서 채널을 못 찾아
+    발송 0건으로 끝났다. 만든 글은 버려지고 생성 비용만 남았다
+    (계측 구간 실패 3회 합계 $0.61). 돈을 쓰기 전에 막는다.
+    """
+    if not TELEGRAM_TOKEN:
+        return False, "TELEGRAM_TOKEN 없음"
+    chat, is_test = config.target_chat()
+    if chat:
+        return True, ""
+    if is_test and _resolve_by_suffix():
+        return True, ""
+    if is_test:
+        return False, ("테스트 채널을 특정할 수 없음 — TELEGRAM_TEST_CHAT_ID 시크릿 또는 "
+                       "test_chat_suffix 입력이 필요합니다. suffix 는 getUpdates 24시간 "
+                       "보관 한계가 있어, 봇에게 새 메시지를 보낸 뒤 재실행해야 합니다.")
+    return False, "TELEGRAM_CHAT_ID 없음"
+
+
 def _post(method: str, payload: dict):
     chat, is_test = config.target_chat()
     if is_test and not chat:
