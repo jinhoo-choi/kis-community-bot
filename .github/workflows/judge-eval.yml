@@ -1,0 +1,73 @@
+name: judge-eval-104
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Download fixed #102 filter log
+        uses: actions/download-artifact@v4
+        with:
+          name: filter-log-34681905042
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 34681905042
+          path: /tmp/judge-eval-source
+
+      - name: Install dependencies
+        run: pip install -q -r requirements.txt
+
+      - name: Evaluate Sonnet and Flash-Lite
+        env:
+          TZ: Asia/Seoul
+          TEST_MODE: '1'
+          TARGET_POSTS: '50'
+          USE_BATCH: '0'
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_API_KEY_TEST: ${{ secrets.ANTHROPIC_API_KEY_TEST }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY_TEST: ${{ secrets.GEMINI_API_KEY_TEST }}
+          GEMINI_FREE_API_KEY: ${{ secrets.GEMINI_FREE_API_KEY }}
+          GEMINI_FREE_API_KEY_TEST: ${{ secrets.GEMINI_FREE_API_KEY_TEST }}
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          GEMINI_FREE_MIN_INTERVAL: ${{ vars.GEMINI_FREE_MIN_INTERVAL || '5.0' }}
+          MIN_JUDGE_SCORE: ${{ vars.MIN_JUDGE_SCORE || '14' }}
+          MIN_FACTUAL_SCORE: ${{ vars.MIN_FACTUAL_SCORE || '4' }}
+          MIN_COMPLIANT_SCORE: ${{ vars.MIN_COMPLIANT_SCORE || '4' }}
+          MIN_FIT: ${{ vars.MIN_FIT || '3' }}
+        run: |
+          SOURCE=$(find /tmp/judge-eval-source -name 'filter_log_*.json' -print -quit)
+          test -n "$SOURCE"
+          python -u tools/evaluate_judges.py --filter-log "$SOURCE"
+
+      - name: Add report to job summary
+        if: always()
+        run: |
+          if [ -f data/judge_eval_104/summary.md ]; then
+            cat data/judge_eval_104/summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload evaluation bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: judge-eval-104-${{ github.run_id }}
+          path: data/judge_eval_104
+          retention-days: 30
+          if-no-files-found: warn
