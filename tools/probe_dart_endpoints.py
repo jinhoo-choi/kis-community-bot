@@ -21,7 +21,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from config import DART_API_KEY, USER_AGENT
-from src.sources.dart_detail import corp_codes
+from src.sources.dart_detail import corp_codes, _doc_rows
 
 BASE = "https://opendart.fss.or.kr/api/{}.json"
 LIST = "https://opendart.fss.or.kr/api/list.json"
@@ -103,6 +103,29 @@ def main():
                 lines.append("     keys: " + ", ".join(sorted(got[0].keys())))
                 lines.append("     sample: " + json.dumps(
                     got[0], ensure_ascii=False)[:400])
+
+    # 정형 API 가 없는 유형은 원문(document)에서 뽑는 수밖에 없다.
+    # 파서를 기억으로 쓰지 않도록, 차단 표본의 원문 라벨을 그대로 덤프한다.
+    lines.append("\n\n# 원문 라벨 덤프 (정형 API 미대상 유형)")
+    for kw in ("유형자산취득", "영업양수", "타법인주식", "신탁계약에의한취득",
+               "주식병합", "감자"):
+        lst = _get(LIST, {"crtfc_key": DART_API_KEY, "bgn_de": bgn,
+                          "end_de": end.strftime("%Y%m%d"), "corp_cls": "Y",
+                          "page_count": 100, "last_reprt_at": "N"})
+        rows = [x for x in lst.get("list", []) if kw in x.get("report_nm", "")]
+        lines.append(f"\n## {kw} — {len(rows)}건")
+        if not rows:
+            continue
+        rcept = str(rows[0].get("rcept_no", ""))
+        lines.append(f"   {rows[0]['report_nm'][:50]} / {rows[0].get('corp_name')} "
+                     f"rcept={rcept}")
+        try:
+            drows = _doc_rows(rcept)
+            lines.append(f"   원문 라벨 {len(drows)}개")
+            for k, v in list(drows.items())[:25]:
+                lines.append(f"     {k[:40]:42s} = {str(v)[:60]}")
+        except Exception as e:
+            lines.append(f"   원문 파싱 실패: {type(e).__name__} {str(e)[:80]}")
 
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text("\n".join(lines), encoding="utf-8")
