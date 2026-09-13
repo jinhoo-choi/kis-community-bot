@@ -3,7 +3,7 @@
 > **작업 시작 전 이 파일을 먼저 읽습니다.** 작업 종료 시 갱신합니다.
 > 협업 규칙은 [`AI_COLLABORATION.md`](AI_COLLABORATION.md) 참조.
 
-**최종 갱신:** 2026-09-13 / Claude (인계 검토 완료 + 브랜치 정책 확정)
+**최종 갱신:** 2026-09-13 / Claude (비-flow 공급 진단 + PR #5~#8 대기)
 
 **기능 기준:** `455ca90`
 
@@ -180,6 +180,33 @@ Claude 제안, Codex 검토, Claude 2차 회신과 최종 조율안을 모두 �
 PR 회귀 CI(`pr-tests.yml`)는 PR로 올려 둔 상태이며, 병합 전까지 PR은 자동 검증 없이
 열립니다. 그 전 PR은 작업자가 `./run_tests.sh` 결과를 PR 본문에 적습니다.
 
+## 열려 있는 PR (병합 대기)
+
+`#110`(50건) 퍼널을 유형별로 분해한 결과, flow 96% 편중의 원인은 유형 상한이 아니라
+**비-flow 유형이 게이트·필터·심사에서 죽는 것**이었습니다. 진단과 조치를 PR로 나눴습니다.
+
+| 유형 | 수집 | 게이트차단 | 생성시도 | 필터통과 | 보류 | 발송 |
+|---|---:|---:|---:|---:|---:|---:|
+| flow | 234 | 0 | 104 | 60 | 77 | 48 |
+| research | 52 | 5 | 27 | 12 | **12** | **0** |
+| disclosure | 49 | **23** | 19 | 6 | 5 | 1 |
+| policy | 12 | 5 | 5 | 1 | 0 | 1 |
+
+| PR | 내용 | 근거 |
+|---|---|---|
+| [#5](https://github.com/jinhoo-choi/kis-community-bot/pull/5) | `pr-tests.yml` — PR 회귀 CI | `pull_request` 트리거가 없어 PR 자동 검증이 0이었음 |
+| [#6](https://github.com/jinhoo-choi/kis-community-bot/pull/6) | facts 날짜 인용을 근거없는수치로 리젝하지 않음 | 정규식 리젝 1위 `research:근거없는수치['11']` 10건 + 공시 1건 |
+| [#7](https://github.com/jinhoo-choi/kis-community-bot/pull/7) | 게이트 차단을 `filter_log`에 건별 기록 (측정 전용) | 차단 23건의 제목·facts가 남지 않아 과차단 판단 불가 |
+| [#8](https://github.com/jinhoo-choi/kis-community-bot/pull/8) | 공시는 금액 주장(`issue_amt`)을 항상 선정 | 공시 보류 5건 전부 `커뮤니티적합성 2/5`, 코멘트에 금액 누락 반복 |
+
+병합 순서는 **#5 → #6 → #7 → #8** 입니다. #6과 #8은 같은 `src/claims.py`를 건드리지만
+수정 지점이 달라 충돌하지 않습니다. 자기 PR 자기 머지 금지 규칙에 따라 Claude는 병합하지
+않았습니다. 상세 진단은 #6에 포함된
+`docs/HANDOFF_2026-09-13_NONFLOW_SUPPLY.md`에 있습니다.
+
+**보류 1건**: 리서치 심사 `사실성 3/5` 보류 8건은 심사 축 정의를 바꾸는 일이라 Flash-Lite
+평가와 변수가 겹칩니다. 104건 평가 판정 이후에 착수합니다.
+
 ## 다음 작업
 
 0. `pr-tests.yml` PR을 병합해 PR 자동 회귀를 켭니다. 이후 코드 PR은 CI 초록일 때만 병합합니다.
@@ -190,7 +217,9 @@ PR 회귀 CI(`pr-tests.yml`)는 PR로 올려 둔 상태이며, 병합 전까지 
 3. 사용자가 `@commwrite_bot`에 새 메시지를 보낸 뒤 `verify.yml`에서 suffix `2744` ACK를
    먼저 확인하고, 성공한 경우에만 테스트 채널 5건 운영 회귀를 실행합니다.
 4. 프롬프트 캐싱은 고정 prefix 분리와 warm-up 뒤 cache read token으로 판단합니다.
-5. flow 96% 편중은 공시·리서치의 필터·심사 통과율과 함께 별도 품질 과제로 다룹니다.
+5. #5~#8 병합 후 테스트 채널 50건을 한 번 실행합니다. 세 수정의 효과와 게이트 차단
+   23건의 정체(`filter_log`의 `gate_blocked` 행)가 같은 실행에서 함께 나옵니다.
+   실행 전후로 `by_kind_funnel`의 research·disclosure `delivered`를 비교합니다.
 6. Batch는 60분 workflow·단계 중단과 충돌하므로 현재 비활성 상태를 유지합니다.
 
 ---
