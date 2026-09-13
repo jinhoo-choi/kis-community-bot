@@ -1,7 +1,11 @@
-# DART 엔드포인트 프로브 2026-09-13 14:39
+# DART 엔드포인트 프로브 2026-09-13 14:48
+
+## [대조군] 전환사채 cvbdIsDecsn
+   최근 10일 표본 없음
 
 ## 영업양수 — 최근 10일 1건
    표본: 영업양수결정(종속회사의주요경영사항)               / 우양피앤엘
+   corp_code=00133618 stock=002420 rcept=20260911800779
    - bsnInhDecsn                  status=013 조회된 데이타가 없습니다. rows=0
    - bsnTrfDecsn                  status=013 조회된 데이타가 없습니다. rows=0
 
@@ -9,6 +13,7 @@
 
 ## 유형자산취득 — 최근 10일 1건
    표본: 유형자산취득결정               / LG씨엔에스
+   corp_code=00139834 stock=064400 rcept=20260911800638
    - astInhtrfEtcPtbkOpt          status=013 조회된 데이타가 없습니다. rows=0
    - tgastInhDecsn                status=013 조회된 데이타가 없습니다. rows=0
 
@@ -18,6 +23,7 @@
 
 ## 교환사채 — 최근 10일 2건
    표본: [기재정정]교환사채권발행결정               / LS
+   corp_code=00105952 stock=006260 rcept=20260911800773
    - exbdIsDecsn                  status=013 조회된 데이타가 없습니다. rows=0
 
 ## 자기주식취득 — 최근 10일 0건
