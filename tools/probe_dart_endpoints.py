@@ -58,6 +58,26 @@ def main():
     lines = [f"# DART 엔드포인트 프로브 {end:%Y-%m-%d %H:%M}"]
     codes = corp_codes()
 
+    # 대조군: 이미 운영에서 동작하는 엔드포인트. 이게 비면 호출 방식 자체가 문제다.
+    ctrl = _get(LIST, {"crtfc_key": DART_API_KEY, "bgn_de": bgn,
+                       "end_de": end.strftime("%Y%m%d"), "corp_cls": "Y",
+                       "page_count": 100, "last_reprt_at": "N"})
+    crow = next((x for x in ctrl.get("list", [])
+                 if "전환사채권발행결정" in x.get("report_nm", "")
+                 and "정정" not in x.get("report_nm", "")), None)
+    lines.append("\n## [대조군] 전환사채 cvbdIsDecsn")
+    if crow:
+        cc = crow.get("corp_code") or codes.get(crow.get("stock_code", ""), "")
+        d = _get(BASE.format("cvbdIsDecsn"), {
+            "crtfc_key": DART_API_KEY, "corp_code": cc,
+            "bgn_de": bgn, "end_de": end.strftime("%Y%m%d")})
+        lines.append(f"   {crow.get('corp_name')} corp_code={cc or '(없음)'} "
+                     f"status={d.get('status')} rows={len(d.get('list') or [])}")
+        if d.get("list"):
+            lines.append("   keys: " + ", ".join(sorted(d["list"][0].keys())))
+    else:
+        lines.append("   최근 10일 표본 없음")
+
     for kw, eps in CANDIDATES:
         lst = _get(LIST, {"crtfc_key": DART_API_KEY, "bgn_de": bgn,
                           "end_de": end.strftime("%Y%m%d"), "corp_cls": "Y",
@@ -69,6 +89,9 @@ def main():
         row = rows[0]
         corp = row.get("corp_code") or codes.get(row.get("stock_code", ""), "")
         lines.append(f"   표본: {row['report_nm'][:50]} / {row.get('corp_name')}")
+        # 013(데이터 없음)이 '그 유형이 없어서'인지 'corp_code 가 비어서'인지 갈라야 한다
+        lines.append(f"   corp_code={corp or '(없음)'} "
+                     f"stock={row.get('stock_code') or '-'} rcept={row.get('rcept_no')}")
         for ep in eps:
             d = _get(BASE.format(ep), {
                 "crtfc_key": DART_API_KEY, "corp_code": corp,
