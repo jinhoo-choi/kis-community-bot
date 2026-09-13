@@ -206,9 +206,23 @@ def _codes(item: dict) -> set[str]:
     return out
 
 
+# 날짜 표기 자체를 찾는다. 라벨 목록으로는 못 잡는다.
+_DATE_RE = re.compile(r"(\d{4})\s*[-./년]\s*(\d{1,2})\s*[-./월]\s*(\d{1,2})")
+
+
 def _metadata_numbers(item: dict) -> set[str]:
-    """날짜·시점은 주장 수에 넣지 않되 본문에서 그대로 인용할 수 있게 한다."""
+    """날짜·시점은 주장 수에 넣지 않되 본문에서 그대로 인용할 수 있게 한다.
+
+    실측(#110): 라벨 화이트리스트가 '리포트 발간일', '계약 종료일' 처럼 조금만
+    다른 표기를 놓쳐, 본문의 '9월 11일'·'2027년 10월 17일' 이 근거없는수치로
+    리젝됐다. 리서치 생성 10건과 공시 1건이 이 한 가지로 버려졌다.
+    라벨이 무엇이든 facts 안의 날짜 구성요소는 시점 표기로 본다.
+    """
     out = set()
+    for m in _DATE_RE.finditer(item.get("facts", "")):
+        for g in m.groups():
+            out.add(g)
+            out.add(g.lstrip("0") or g)
     for line in item.get("facts", "").splitlines():
         if re.match(r"^(?:기준일|공시일|발행일|발간일|작성일|기사일|신청일|승인일|"
                     r"보도 시각|게시 시각|공시 시각|발행 시각|시점)\s*:", line):
