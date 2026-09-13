@@ -1748,6 +1748,47 @@ def main():
                   "issue_amt" not in [c["type"] for c in
                                       _claims.select(dict(_dis, kind="flow"), 2, "purpose")]))
 
+    # 게이트 차단은 집계만 남아 과차단 판단이 불가능했다. 건별 제목·facts 를 남긴다
+    import os as _os, json as _json
+    from src import stats as _st
+    _p = _st.detail_log([], [], [], blocked=[("d1", "tier5:글감부족")],
+                        collected=[{"id": "d1", "kind": "disclosure",
+                                    "title": "OO전자 대량보유상황보고서",
+                                    "facts": "제출인: 홍길동"}])
+    _rows = _json.load(open(_p, encoding="utf-8"))
+    _os.remove(_p)
+    _g = [r for r in _rows if r["result"] == "gate_blocked"]
+    ok.append(run("게이트 차단 건별 기록", len(_g) == 1
+                  and _g[0]["reason"] == "tier5:글감부족"
+                  and _g[0]["title"].startswith("OO전자")
+                  and "제출인" in _g[0]["facts"]))
+    # #110 실측: 날짜 라벨이 화이트리스트와 조금만 달라도 본문 날짜가 근거없는수치로 리젝됐다
+    from src import claims as _cl
+    _rep = {"stock_code": "112610", "kind": "research", "angle": "",
+            "facts": "발간 증권사: OO증권\n리포트 발간일: 2026-09-11\n투자의견: 제시되지 않음"}
+    ok.append(run("리포트 발간일 인용 허용",
+                  not any("근거없는수치" in e for e in _cl.grounding_errors(
+                      "OO증권이 9월 11일 해당 리포트를 발간했네요. 투자의견은 제공되지 않았습니다.",
+                      _rep, 3))))
+    _con = {"stock_code": "005930", "kind": "disclosure", "angle": "",
+            "facts": "계약 상대: OO사\n계약 종료일: 2027-10-17\n계약 금액: 1,200억원"}
+    ok.append(run("계약 종료일 인용 허용",
+                  not any("근거없는수치" in e for e in _cl.grounding_errors(
+                      "계약 기간을 알리는 공시네요. 계약 종료일은 2027년 10월 17일입니다.",
+                      _con, 3))))
+    # 날짜 형식만 흉내낸 값은 시점으로 풀리면 안 된다 (PR #6 리뷰 지적)
+    _seq = {"stock_code": "005930", "kind": "disclosure", "angle": "",
+            "facts": "관리번호: 2026-99-77\n버전: 2026.99.99\n계약 금액: 100억원"}
+    ok.append(run("유효하지 않은 날짜는 계속 차단",
+                  any("근거없는수치" in e for e in _cl.grounding_errors(
+                      "관련 수치는 99입니다.", _seq, 3))))
+    ok.append(run("긴 숫자의 일부를 날짜로 잡지 않음",
+                  not _cl._metadata_numbers(
+                      {"facts": "일련번호: 12026-09-115"})))
+    # 날짜가 아닌 숫자는 계속 막혀야 한다
+    ok.append(run("facts 에 없는 수치는 계속 차단",
+                  any("근거없는수치" in e for e in _cl.grounding_errors(
+                      "계약 금액이 전년 대비 47% 늘었네요.", _con, 3))))
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 

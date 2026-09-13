@@ -322,7 +322,7 @@ def main():
         delivery_attempted=sent_posts, template_reserve=reserve),
         dedup=dup_reasons, crawl_health=crawl.health())
     telegram_bot.send_summary(sent_posts, sent, row, config.TARGET_POSTS)
-    print("[main] filter_log " + stats.detail_log(picked, sent_posts, held))
+    print("[main] filter_log " + stats.detail_log(picked, sent_posts, held, blocked, raw))
     if degraded:
         telegram_bot.send_warning(f"수집 이상 소스: {', '.join(degraded)}")
     print("[main] stats " + json.dumps(row, ensure_ascii=False))

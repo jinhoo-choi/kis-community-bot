@@ -225,7 +225,8 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks,
     }
 
 
-def detail_log(items: list[dict], sent: list[dict], held: list[dict]) -> str:
+def detail_log(items: list[dict], sent: list[dict], held: list[dict],
+               blocked: list[tuple] = None, collected: list[dict] = None) -> str:
     """건별 통과/탈락 사유 로그 (인사이트봇 filter_log 패턴).
     집계만으로는 '왜 이 글이 안 나갔는지'를 못 본다. 튜닝은 건별 사유에서 나온다."""
     import json as _j
@@ -234,6 +235,15 @@ def detail_log(items: list[dict], sent: list[dict], held: list[dict]) -> str:
     from src.generator import REJECTED
     sent_ids = {p["id"] for p in sent}
     rows = []
+    # 게이트 차단은 집계(tier5:글감부족 26건)만 남아서 과차단인지 판단할 수 없었다.
+    # 판단하려면 제목과 facts 원문이 필요하다.
+    by_id = {x.get("id"): x for x in (collected or [])}
+    for bid, why in (blocked or []):
+        it = by_id.get(bid, {})
+        rows.append({"id": bid, "result": "gate_blocked", "reason": why,
+                     "kind": it.get("kind"), "stock": it.get("stock_name"),
+                     "title": (it.get("title") or "")[:60],
+                     "facts": (it.get("facts") or "")[:300]})
     for p in REJECTED:
         rows.append({"id": p.get("id"), "result": "rejected",
                      "reason": ",".join(p.get("reject_errs", [])),
