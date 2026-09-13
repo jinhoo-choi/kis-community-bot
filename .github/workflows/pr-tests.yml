@@ -1,0 +1,44 @@
+name: pr-tests
+
+# PR 에서 회귀를 자동으로 돌린다.
+# 이게 없으면 PR 은 머지 클릭만 늘고 검증은 사람 손에 남는다.
+# 시크릿을 쓰지 않으므로 유료 호출도, Telegram 발송도 발생하지 않는다.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Tests
+        run: |
+          mkdir -p data
+          set -o pipefail
+          ./run_tests.sh 2>&1 | tee data/test_report.txt
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-test-report-${{ github.run_id }}
+          path: data/test_report.txt
+          retention-days: 7
