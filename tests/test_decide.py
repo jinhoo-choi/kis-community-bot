@@ -912,8 +912,10 @@ def main():
     _cs = _cl2.build(_it3)
     ok.append(run("claim 추출", len(_cs) == 4, str([c["type"] for c in _cs])))
     ok.append(run("claim 블록 생성", "이번 글에 쓸 사실" in _cl2.block(_it3)))
+    # 결합 사실 앵커 도입 후 reaction 에서도 거래량 배수가 1건 들어간다.
+    # 미선정 확인은 앵커·앵글 어느 쪽도 아닌 거래대금으로 한다.
     ok.append(run("미선정 주장은 블록에 없음",
-                  "3.2배" not in _cl2.block(_it3, 3, "reaction")))
+                  "942" not in _cl2.block(_it3, 3, "reaction")))
     ok.append(run("금지 claim type 명시", "등락의 원인" in _cl2.block(_it3)))
     from src.personas import build_messages_v2 as _bm2
     _s3, _ = _bm2(_it3, "quick_memo", "reaction")
@@ -922,7 +924,7 @@ def main():
     _s4, _u4 = _bm2(_it3, "quick_memo", "reaction")
     _keep = {c["value"].split()[0] for c in _cl2.select(_it3, 3, "reaction")}
     ok.append(run("미선정 수치는 사실관계에도 없음",
-                  "3.2배" not in _u4, _u4[-160:]))
+                  "942" not in _u4, _u4[-160:]))
     ok.append(run("종목·기준일 줄은 보존", "12.41%" in _u4))
     for _bad in ["기대감이 반영된 것으로 보입니다.",
                  "반도체 업황 수혜가 예상됩니다.",
@@ -1876,6 +1878,23 @@ def main():
     ok.append(run("대상 미특정이면 사전 차단", _r1[0] is False and bool(_r1[1])))
     ok.append(run("테스트 채널 지정되면 통과", _r2[0] is True))
     ok.append(run("토큰 없으면 사전 차단", _r3[0] is False))
+
+    # 결합 사실이 하나도 안 골라지면 본문이 종가·등락률 나열로 끝난다 (실측 리젝 3건)
+    from src import claims as _c4, filters as _fl4
+    _fw = {"kind": "flow", "angle": "reaction",
+           "facts": "종가: 10,800원\n등락률: 5.90%\n거래대금: 900억원\n"
+                    "· 거래량: 20일 평균의 3.2배\n· 5거래일 누적 등락률: +12.00%\n"
+                    "· 연속 흐름: 3거래일 연속 상승"}
+    ok.append(run("결합 사실 최소 1건 선정",
+                  all(any(c["type"] in _c4.DERIVED_TYPES
+                          for c in _c4.select(_fw, n, "reaction")) for n in (2, 3)),
+                  str([c["type"] for c in _c4.select(_fw, 2, "reaction")])))
+    # 코드가 계산한 확정값을 추측처럼 말하면 사실 왜곡이다
+    ok.append(run("수치 문장의 완충 표현 차단",
+                  _fl4._hedge_errors("이동평균 대비 43.2% 위에 위치해 있는 것 같습니다.")
+                  == ["사실헤지"]))
+    ok.append(run("수치 없는 완충 1회는 허용",
+                  not _fl4._hedge_errors("앞으로의 흐름은 지켜봐야 할 것 같습니다.")))
 
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)

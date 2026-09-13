@@ -53,10 +53,24 @@ _ENDING = re.compile(
     r"(습니다|네요|어요|예요|에요|인데요|더군요|거든요|겠죠|하죠|합니다|입니다)\s*[.!?]")
 
 
+# 수치가 들어간 문장에 붙은 완충 표현. 횟수와 무관하게 막는다.
+# 실측: "이동평균 대비 43.2% 위에 위치해 있는 것 같습니다" — 코드가 계산한
+# 확정값을 추측처럼 말한 것이라 사실 왜곡이다. 의견 완충과 성격이 다르다.
+_FACT_HEDGE = re.compile(
+    r"[^.!?\n]*\d[\d,.]*\s*(?:%|원|배|주|억원)[^.!?\n]*"
+    r"(?:것\s*같|로 보입니다|인 듯|듯합니다|것으로 보|보이네요)")
+
+
 def _hedge_errors(body: str) -> list[str]:
     """완충 표현 남발. 개별로는 자연스러운데 반복되면 기계 티가 난다."""
+    out = []
+    m = _FACT_HEDGE.search(body)
+    if m:
+        out.append("사실헤지")
     n = len(_HEDGE.findall(body))
-    return [f"완충표현{n}회"] if n >= 3 else []
+    if n >= 3:
+        out.append(f"완충표현{n}회")
+    return out
 
 
 def _needs_relation(body: str, facts_text: str = "") -> list[str]:
