@@ -263,6 +263,13 @@ def main():
         print("[main] filter_log " + stats.detail_log([], [], [], blocked, raw))
         return
 
+    # 전송 대상을 못 찾는 상태면 여기서 멈춘다. 뒤로 가면 생성 비용만 쓰고 버린다.
+    _ok, _why = telegram_bot.target_ready()
+    if not _ok:
+        print(f"[main] ⛔ 발송 대상 미확인 — 생성 전에 중단합니다: {_why}")
+        print("[main] LLM 호출 0건. 대상 설정 후 재실행하세요.")
+        sys.exit(1)
+
     # 생성→심사→판정을 묶음 단위로 실행한다. 목표를 채우면 남은 후보는 LLM에
     # 보내지 않는다. 기존 함수와 최종 판정 기준은 그대로 재사용한다.
     posts, sent_posts, held, attempted_items, stage_sizes = [], [], [], [], []

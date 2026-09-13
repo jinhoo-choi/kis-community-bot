@@ -1852,6 +1852,30 @@ def main():
     ok.append(run("임계 미만 글감은 열지 않음",
                   not any(k in "\n".join(_q) for k in ("시가 대비 마감", "시가 출발",
                                                        "20일 이동평균 대비"))))
+    # 발송 대상을 못 찾으면 생성 전에 멈춰야 한다 (#112·#114: 만들고 버린 비용 $0.61)
+    import config as _cfg
+    from src import telegram_bot as _tg
+    _save = (_tg.TELEGRAM_TOKEN, _cfg.TELEGRAM_CHAT_ID,
+             _cfg.TELEGRAM_TEST_CHAT_ID, _cfg.TEST_MODE,
+             _cfg.TELEGRAM_TEST_CHAT_SUFFIX, _tg._resolved_suffix)
+    try:
+        _tg.TELEGRAM_TOKEN = "t"
+        _cfg.TEST_MODE = True
+        _cfg.TELEGRAM_TEST_CHAT_ID = ""
+        _cfg.TELEGRAM_TEST_CHAT_SUFFIX = ""
+        _tg._resolved_suffix = None
+        _r1 = _tg.target_ready()
+        _cfg.TELEGRAM_TEST_CHAT_ID = "-1001234"
+        _r2 = _tg.target_ready()
+        _tg.TELEGRAM_TOKEN = ""
+        _r3 = _tg.target_ready()
+    finally:
+        (_tg.TELEGRAM_TOKEN, _cfg.TELEGRAM_CHAT_ID, _cfg.TELEGRAM_TEST_CHAT_ID,
+         _cfg.TEST_MODE, _cfg.TELEGRAM_TEST_CHAT_SUFFIX,
+         _tg._resolved_suffix) = _save
+    ok.append(run("대상 미특정이면 사전 차단", _r1[0] is False and bool(_r1[1])))
+    ok.append(run("테스트 채널 지정되면 통과", _r2[0] is True))
+    ok.append(run("토큰 없으면 사전 차단", _r3[0] is False))
 
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
