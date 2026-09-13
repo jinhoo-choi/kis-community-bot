@@ -212,6 +212,9 @@ ok
   OK    투표 본문 질문 마무리 필수
   OK    시세 상대날짜 차단
   OK    근거 없는 원인 질문 차단
+  OK    실발송 원인 질문 차단: 어떤 계기가 있
+  OK    실발송 원인 질문 차단: 순수 수급의 결
+  OK    실발송 주관적 변동성 차단
   OK    추세·수급 평가 차단
   OK    명사+수치 문장 파편 차단
   OK    근거 없는 용어해설 차단
@@ -325,7 +328,7 @@ ok
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'careful_note', 'brief_report', 'fact_note', 'open_talk', 'data_focus', 'check_list'})
+  OK    flow 에서 quick_memo 미선택  ({'data_focus', 'careful_note', 'brief_report', 'fact_note', 'open_talk', 'check_list'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
   OK    미선정 비수치 사실도 프롬프트에서 제거
@@ -399,7 +402,7 @@ ok
   OK    주입된 용어로 term_word 슬롯 성립
   OK    용어 설명 중복 주입 없음
 
-345/345 passed
+348/348 passed
   OK    문장틀 22종 계약
   OK    50+15 reserve 준비  (65)
   OK    reserve 전건 원문 재검증
