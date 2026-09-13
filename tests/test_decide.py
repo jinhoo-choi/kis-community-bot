@@ -1701,6 +1701,38 @@ def main():
     ok.append(run("용어 설명 중복 주입 없음",
                   _terms[0]["facts"].count("용어 설명:") == 1))
 
+    # Flash-Lite는 factual/compliant/fatal만 탈락에 쓰고, 현재 Sonnet 최종
+    # 승인 기준과 분리한다. natural/fit 저점만으로 사전 탈락시키면 안 된다.
+    from tools.evaluate_judges import (
+        confusion_metrics as _eval_matrix,
+        flash_rejects as _flash_rejects,
+        score_is_production_pass as _sonnet_pass,
+    )
+    _base_score = {"factual": 5, "useful": 4, "natural": 4,
+                   "compliant": 5, "gain": 4, "fit": 3,
+                   "fatal": [], "total": 16.7}
+    ok.append(run("Flash 선별은 natural·fit 단독 저점에 fail-open",
+                  not _flash_rejects({**_base_score, "natural": 1, "fit": 1})))
+    ok.append(run("Flash 선별은 factual 하한 미달 차단",
+                  _flash_rejects({**_base_score, "factual": 3})))
+    ok.append(run("Sonnet 최종승인은 fit·총점까지 적용",
+                  _sonnet_pass(_base_score)
+                  and not _sonnet_pass({**_base_score, "fit": 2})))
+    _pairs = [
+        {"sonnet_score": {**_base_score, "fatal": ["x"]},
+         "flash_score": {**_base_score, "factual": 3}},
+        {"sonnet_score": {**_base_score, "fatal": ["x"]},
+         "flash_score": _base_score},
+        {"sonnet_score": _base_score,
+         "flash_score": {**_base_score, "compliant": 3}},
+        {"sonnet_score": _base_score, "flash_score": _base_score},
+    ]
+    _matrix = _eval_matrix(_pairs)
+    ok.append(run("104건 평가 혼동행렬 정의 고정",
+                  _matrix["fatal_recall"] == 0.5
+                  and _matrix["false_reject_rate"] == 0.5
+                  and _matrix["sonnet_fatal_after_flash_pass"] == 1))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
