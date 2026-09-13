@@ -805,6 +805,18 @@ def main():
                       "빛과전자가 13.05% 올랐습니다. 거래량은 20일 평균의 1.7배였는데요. "
                       "어떤 수급 요인이 작용했다고 생각하시나요?",
                       _flow_facts, "open_talk", "ratio", "open_talk", require_question=True)))
+    for _bad_question in ["어떤 계기가 있었다고 보시나요?",
+                          "순수 수급의 결과라고 생각하시나요?"]:
+        ok.append(run(f"실발송 원인 질문 차단: {_bad_question[:8]}",
+                      "unsupported_cause_question" in _f2.check(
+                          "빛과전자가 13.05% 올랐습니다. " + _bad_question,
+                          _flow_facts, "open_talk", "ratio", "open_talk",
+                          require_question=True)))
+    ok.append(run("실발송 주관적 변동성 차단",
+                  "claim_out_of_scope" in _f2.check(
+                      "장중 고저 차이는 저가 대비 11.5%였습니다. "
+                      "변동성이 컸던 것으로 보입니다.",
+                      _flow_facts, "fact_note", "reaction", "fact_note")))
     ok.append(run("추세·수급 평가 차단",
                   "claim_out_of_scope" in _f2.check(
                       "가온전선이 11.87% 올랐습니다. 상승 추세지만 수급은 우호적이지 않네요.",
