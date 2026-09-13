@@ -113,6 +113,14 @@ ANGLE_PREF = {
 ANCHOR_TYPES = {"disclosure": ["issue_amt"]}
 
 
+# 결합 사실 계열. 하나도 선정되지 않으면 본문이 종가·등락률만 말하게 되고
+# filters 의 '결합사실미사용' 에 걸린다. 실측(5건 실행): 글감을 늘린 직후
+# 이 리젝이 3건 새로 생겼다 — 후보가 늘자 회전 구간에서 결합 사실이 통째로
+# 밀려났기 때문이다.
+DERIVED_TYPES = ("vol_ratio", "range", "close_pos", "ret5",
+                 "open_pos", "gap", "extreme", "streak", "ma20")
+
+
 def select(item: dict, n: int, angle: str = "") -> list[dict]:
     """이번 글에서 쓸 주장을 **코드가 고른다**.
 
@@ -127,6 +135,14 @@ def select(item: dict, n: int, angle: str = "") -> list[dict]:
         return cs
     order = {c["type"]: i for i, c in enumerate(cs)}
     anchor = [t for t in ANCHOR_TYPES.get(item.get("kind", ""), []) if t in order]
+    # 결합 사실이 있는데 하나도 안 고르면 글이 종가·등락률 나열로 끝난다.
+    # 앵글 우선분 중 결합 사실이 있으면 그것을, 없으면 첫 결합 사실을 앵커로 둔다.
+    if not any(t in DERIVED_TYPES for t in anchor):
+        pref_d = [t for t in ANGLE_PREF.get(angle, [])
+                  if t in order and t in DERIVED_TYPES]
+        cand = pref_d or [c["type"] for c in cs if c["type"] in DERIVED_TYPES]
+        if cand:
+            anchor = anchor + [cand[0]]
     pref = anchor + [t for t in ANGLE_PREF.get(angle, [])
                      if t in order and t not in anchor]
     rest = [c["type"] for c in cs if c["type"] not in pref]
