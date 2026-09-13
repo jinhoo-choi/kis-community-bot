@@ -192,6 +192,32 @@ CONTRACT_FIELDS = [
 ]
 
 
+# 거래소 수시공시(접수번호 8 대역)는 주요사항보고서 정형 API 대상이 아니다.
+# 실측(2026-09-13 프로브): corp_code 는 정상인데 bsnInhDecsn·astInhtrfEtcPtbkOpt 등이
+# 전부 status=013 이었다. 반면 원문(document)에는 수치가 그대로 있다.
+# 라벨은 기억이 아니라 프로브가 덤프한 실제 값이다 (data/dart_ep_probe.txt).
+DOC_TYPES = [
+    (r"유형자산\s*취득", "유형자산 취득 결정", [
+        ("취득물건명", "취득 자산", ""),
+        ("취득가액", "취득 금액", "원"),
+        ("자산총액대비", "자산총액 대비", "%"),
+        ("거래상대", "계약 상대", ""),
+        ("취득목적", "취득 목적", ""),
+        ("취득예정일자", "취득 예정일", ""),
+    ]),
+    (r"영업양수", "영업양수 결정", [
+        ("양수영업주요내용", "양수 내용", ""),
+        ("양수가액", "양수 금액", "원"),
+        ("양수목적", "취득 목적", ""),
+        ("양수예정일자", "양수 예정일", ""),
+        ("회사명", "계약 상대", ""),
+        # '상대 회사' 라는 표기는 claims 의 counterpart 패턴에 걸려
+        # 관계 문구가 상대 회사명으로 잡힌다. 표기를 갈라 둔다.
+        ("회사와의관계", "거래 상대 관계", ""),
+    ]),
+]
+
+
 def _norm(t: str) -> str:
     """앞 번호와 공백을 떼고 라벨만 남긴다 ('2. 계약내역' -> '계약내역')."""
     return re.sub(r"\s+", "", re.sub(r"^[\-\d.\s]+", "", t or ""))
@@ -223,6 +249,41 @@ def _doc_rows(rcept_no: str) -> dict:
         if len(cells) >= 2:
             out[_norm(cells[-2])] = cells[-1].strip()
     return out
+
+
+def _doc_type_detail(item: dict, label: str, fields: list) -> bool:
+    """정형 API 가 없는 거래소 공시를 원문 표에서 보강한다.
+
+    추출·표기 규칙은 _contract_detail 과 같다. 유형별로 다른 것은 라벨 표뿐이다.
+    """
+    rcept = (item.get("id") or "").replace("dart-", "")
+    if not rcept.isdigit():
+        return False
+    try:
+        rows = _doc_rows(rcept)
+    except Exception as e:
+        print(f"[dart] 원문 파싱 실패 {rcept}: {type(e).__name__}")
+        return False
+
+    lines = []
+    for src_label, disp, unit in fields:
+        key = _norm(src_label)
+        hit = [k for k in rows if key in k]
+        v = _fmt(rows[hit[-1]], unit) if hit else ""
+        if v:
+            lines.append(f"- {disp}: {v}")
+    if not lines:
+        return False
+
+    item["facts"] = (
+        item["facts"].rstrip()
+        + f"\n\n[{label} 상세 — 공시 원문]\n"
+        + "\n".join(lines)
+        + "\n※ 위 수치는 공시 원문 값이다. 그대로 쓰되 계산하거나 합산하지 말 것."
+        + "\n※ 실적·주가에 언제 얼마나 반영될지는 공시에 없다. 추정하지 말 것."
+    )
+    item["dart_detail"] = "document"
+    return True
 
 
 def _contract_detail(item: dict) -> bool:
@@ -274,6 +335,9 @@ def enrich_one(item: dict, day: str) -> bool:
     # 정형 API 가 없어 원문을 읽는 유일한 유형. 미보강 7건 중 5건이 이것이었다.
     if re.search(r"단일판매|공급계약", title):
         return _contract_detail(item)
+    for pat, label, fields in DOC_TYPES:
+        if re.search(pat, title):
+            return _doc_type_detail(item, label, fields)
 
     corp = corp_codes().get(code or "")
     if not corp:
