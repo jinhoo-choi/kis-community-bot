@@ -278,5 +278,12 @@ jobs:
           git add -f data/board_style.json || true
           git add -f data/market_cache.json || true
           git diff --staged --quiet || git commit -m "chore: verify keys $(date +%FT%H%M)"
-          git pull --rebase -q origin main || true
-          git push
+          # 다른 실행·사람이 같은 순간에 push 하면 non-fast-forward 로 죽는다
+          # (실측 2026-09-13: dry-run·verify 의 Commit 단계가 이 사유로 실패).
+          # 상태 커밋이 실패하면 발송 이력이 저장되지 않아 다음 날 중복 발송 위험이 있다.
+          for i in 1 2 3; do
+            git pull --rebase -q origin main || true
+            git push && break
+            echo "push 재시도 $i"
+            sleep $((i * 5))
+          done
