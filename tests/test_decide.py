@@ -1825,6 +1825,33 @@ def main():
                                 "20260911")
     ok.append(run("추출 0건이면 보강 실패로 처리", _empty is False))
 
+    # 특징주 글감 확장: 같은 날 수치만 쓰면 46건이 전부 닮는다 (실측 #110)
+    from src import facts as _f3, claims as _c3
+    _r = {"open": 10000, "close": 10800, "prev_close": 9500, "high": 11000,
+          "low": 9900, "pct": 5.9, "vol_x": 3.2, "ret5": 12.0,
+          "hi_days": 45, "streak": 3, "ma20_gap": 14.2}
+    _d = _f3.evaluate(_r)
+    _joined = "\n".join(_d)
+    ok.append(run("시간축·장중 위치 글감 생성",
+                  all(k in _joined for k in ("시가 대비 마감", "시가 출발",
+                                             "최고 종가", "연속 상승",
+                                             "20일 이동평균 대비")),
+                  f"{len(_d)}종"))
+    _it3 = {"kind": "flow", "angle": "compare",
+            "facts": "종가: 10,800원\n등락률: 5.90%\n" + "\n".join("· " + x for x in _d)}
+    _types = [c["type"] for c in _c3.build(_it3)]
+    ok.append(run("새 글감이 claim 으로 성립",
+                  all(t in _types for t in ("open_pos", "extreme", "streak", "ma20"))))
+    ok.append(run("새 글감 인용이 근거없는수치로 리젝되지 않음",
+                  not any("근거없는수치" in e for e in _c3.grounding_errors(
+                      "OO가 5.90% 올랐습니다. 최근 45거래일 중 최고 종가였습니다.",
+                      _it3, 4))))
+    # 임계 미만이면 열지 않는다 — 모든 종목에 붙으면 다시 똑같아진다
+    _q = _f3.evaluate({"open": 10000, "close": 10100, "prev_close": 9990,
+                       "high": 10150, "low": 9990, "pct": 1.1, "ma20_gap": 2.0})
+    ok.append(run("임계 미만 글감은 열지 않음",
+                  not any(k in "\n".join(_q) for k in ("시가 대비 마감", "시가 출발",
+                                                       "20일 이동평균 대비"))))
     # 발송 대상을 못 찾으면 생성 전에 멈춰야 한다 (#112·#114: 만들고 버린 비용 $0.61)
     import config as _cfg
     from src import telegram_bot as _tg

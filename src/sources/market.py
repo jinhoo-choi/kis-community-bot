@@ -267,6 +267,28 @@ def _add_history(r: dict):
             avg = sum(vols) / len(vols)
             if avg > 0:
                 r["vol_x"] = int(last[5]) / avg
+
+        # 이미 받아온 45일 종가로 시간축 값을 만든다. 추가 호출은 없다.
+        # 실측: 발송 46건이 등락률·종가·거래량배수·5거래일 네 값의 재배열이었다.
+        # 같은 날 수치만으로는 글이 갈리지 않는다.
+        closes = [int(x[4]) for x in rows if x[4]]
+        if len(closes) >= 20:
+            cur = closes[-1]
+            past = closes[:-1]
+            r["hi_days"] = len(closes) if cur > max(past) else 0
+            r["lo_days"] = len(closes) if cur < min(past) else 0
+            ma20 = sum(closes[-20:]) / 20
+            if ma20 > 0:
+                r["ma20_gap"] = (cur - ma20) / ma20 * 100
+            # 연속 상승/하락 일수 — 부호가 바뀌기 전까지 센다
+            streak, sign = 0, 0
+            for a, b in zip(reversed(closes[:-1]), reversed(closes[1:])):
+                d = (b > a) - (b < a)
+                if d == 0 or (sign and d != sign):
+                    break
+                sign, streak = d, streak + 1
+            if streak >= 2:
+                r["streak"] = streak * sign
     except Exception:
         pass
 
