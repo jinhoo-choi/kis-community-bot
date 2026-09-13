@@ -1747,6 +1747,15 @@ def main():
                   not any("근거없는수치" in e for e in _cl.grounding_errors(
                       "계약 기간을 알리는 공시네요. 계약 종료일은 2027년 10월 17일입니다.",
                       _con, 3))))
+    # 날짜 형식만 흉내낸 값은 시점으로 풀리면 안 된다 (PR #6 리뷰 지적)
+    _seq = {"stock_code": "005930", "kind": "disclosure", "angle": "",
+            "facts": "관리번호: 2026-99-77\n버전: 2026.99.99\n계약 금액: 100억원"}
+    ok.append(run("유효하지 않은 날짜는 계속 차단",
+                  any("근거없는수치" in e for e in _cl.grounding_errors(
+                      "관련 수치는 99입니다.", _seq, 3))))
+    ok.append(run("긴 숫자의 일부를 날짜로 잡지 않음",
+                  not _cl._metadata_numbers(
+                      {"facts": "일련번호: 12026-09-115"})))
     # 날짜가 아닌 숫자는 계속 막혀야 한다
     ok.append(run("facts 에 없는 수치는 계속 차단",
                   any("근거없는수치" in e for e in _cl.grounding_errors(

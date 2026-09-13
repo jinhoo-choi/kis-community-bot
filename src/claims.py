@@ -12,6 +12,7 @@
 원인·수급주체 추정·업황수혜·기대감·전망은 claim type 자체를 두지 않는다.
 """
 import re
+import datetime as _dt
 import zlib as _zlib
 
 # (claim_id, 라벨, facts 에서 뽑는 정규식, 값 포맷)
@@ -207,7 +208,9 @@ def _codes(item: dict) -> set[str]:
 
 
 # 날짜 표기 자체를 찾는다. 라벨 목록으로는 못 잡는다.
-_DATE_RE = re.compile(r"(\d{4})\s*[-./년]\s*(\d{1,2})\s*[-./월]\s*(\d{1,2})")
+# 숫자 경계를 요구한다. 경계가 없으면 더 긴 숫자의 일부를 날짜로 오인한다.
+_DATE_RE = re.compile(
+    r"(?<!\d)(\d{4})\s*[-./년]\s*(\d{1,2})\s*[-./월]\s*(\d{1,2})(?!\d)")
 
 
 def _metadata_numbers(item: dict) -> set[str]:
@@ -220,7 +223,13 @@ def _metadata_numbers(item: dict) -> set[str]:
     """
     out = set()
     for m in _DATE_RE.finditer(item.get("facts", "")):
-        for g in m.groups():
+        y, mo, d = m.groups()
+        try:
+            # 형식만 보면 '관리번호: 2026-99-77' 의 99·77 까지 시점으로 풀린다.
+            _dt.date(int(y), int(mo), int(d))
+        except ValueError:
+            continue
+        for g in (y, mo, d):
             out.add(g)
             out.add(g.lstrip("0") or g)
     for line in item.get("facts", "").splitlines():
