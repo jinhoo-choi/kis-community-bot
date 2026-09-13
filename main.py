@@ -249,6 +249,10 @@ def main():
         print(f"\n───── template reserve ─────\n "
               f"준비 {len(reserve)}/{reserve_goal}, dry-run {len(reserve_probe)}/"
               f"{config.TARGET_POSTS}")
+        # 차단 표본은 소스당 1건만 찍힌다. 어떤 공시가 왜 잘렸는지 전수로 보려면
+        # 건별 기록이 필요하다. dry-run 은 LLM·전송 호출이 없으므로 비용 0 으로
+        # 게이트 과차단 여부를 판정할 수 있다.
+        print("[main] filter_log " + stats.detail_log([], [], [], blocked, raw))
         return
 
     # 생성→심사→판정을 묶음 단위로 실행한다. 목표를 채우면 남은 후보는 LLM에
