@@ -230,6 +230,14 @@ def main():
             _bycnt[(_src(bid), why)] += 1
         for (sc, why), n in sorted(_bycnt.items(), key=lambda x: -x[1]):
             print(f"  {sc:10s} {why:20s} {n}건")
+        # 표본 1건으로는 어떤 공시 유형이 반복해서 잘리는지 모른다.
+        # 보강 대상(정형 API 미지원 유형)을 정하려면 차단 목록 전체가 필요하다.
+        _tmap = {x["id"]: x for x in raw}
+        print("  --- 차단 목록 ---")
+        for bid, why in blocked:
+            _it = _tmap.get(bid, {})
+            print(f"  {why:18s} [{_it.get('kind', '?'):10s}] "
+                  f"{(_it.get('title') or '')[:46]}")
         # 소스별 표본 1건의 facts 를 그대로 본다 — 판정식이 뭘 못 본 건지 확인용
         _seen = set()
         _bmap = {b: w for b, w in blocked}
