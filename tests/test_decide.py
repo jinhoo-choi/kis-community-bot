@@ -1733,6 +1733,21 @@ def main():
                   and _matrix["false_reject_rate"] == 0.5
                   and _matrix["sonnet_fatal_after_flash_pass"] == 1))
 
+    # 공시는 '얼마'가 빠지면 커뮤니티 가치가 없다 (#110 보류: 발행총액 누락)
+    from src import claims as _claims
+    _dis = {"kind": "disclosure", "angle": "purpose",
+            "facts": "공시명: 유상증자 결정\n자금 용도: 시설자금\n계약 상대: OO사\n"
+                     "발행 총액: 200억원\n발행 보통주: 1,200,000주\n납입일: 2026-10-15"}
+    ok.append(run("공시는 금액 주장을 항상 선정",
+                  all("issue_amt" in [c["type"] for c in _claims.select(_dis, n, "purpose")]
+                      for n in (2, 3)),
+                  str([c["type"] for c in _claims.select(_dis, 2, "purpose")])))
+    ok.append(run("금액 고정이 앵글 우선분을 밀어내지 않음",
+                  "purpose" in [c["type"] for c in _claims.select(_dis, 2, "purpose")]))
+    ok.append(run("특징주에는 금액 고정 미적용",
+                  "issue_amt" not in [c["type"] for c in
+                                      _claims.select(dict(_dis, kind="flow"), 2, "purpose")]))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
