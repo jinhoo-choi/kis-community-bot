@@ -1789,6 +1789,42 @@ def main():
     ok.append(run("facts 에 없는 수치는 계속 차단",
                   any("근거없는수치" in e for e in _cl.grounding_errors(
                       "계약 금액이 전년 대비 47% 늘었네요.", _con, 3))))
+    # 정형 API 가 없는 거래소 공시(접수번호 8 대역)는 원문 표에서 뽑는다.
+    # 라벨은 2026-09-13 프로브가 덤프한 실제 값이다.
+    from unittest import mock as _mock
+    from src.sources import dart_detail as _dd
+    from src import gate as _gate
+    from src import claims as _claims2
+    _tg_rows = {"취득물건명": "GPU 및 인프라 설비", "취득가액(원)": "381,400,000,000",
+                "자산총액대비(%)": "7.2", "거래상대": "한국휴렛팩커드 유한회사 등",
+                "취득목적": "AI Factory 구축", "취득예정일자": "2027-06-30"}
+    _tg = {"id": "dart-20260911800638", "kind": "disclosure",
+           "title": "유형자산취득결정", "facts": "공시명: 유형자산취득결정"}
+    with _mock.patch.object(_dd, "_doc_rows", lambda r: _tg_rows):
+        _ok_tg = _dd.enrich_one(_tg, "20260911")
+    ok.append(run("유형자산취득 원문 보강", _ok_tg and "3,814억원" in _tg["facts"]))
+    ok.append(run("보강 후 게이트 통과", _gate.has_substance(_tg)))
+
+    _bs_rows = {"양수영업주요내용": "경동오토필드 운영사업 일체",
+                "양수가액(원)": "140,000,000,000", "양수목적": "신규 사업 진출",
+                "양수예정일자": "2026-09-15", "회사명": "주식회사 케이피이",
+                "회사와의관계": "최대주주의 특수관계인"}
+    _bs = {"id": "dart-20260911800779", "kind": "disclosure", "angle": "",
+           "title": "영업양수결정(종속회사의주요경영사항)", "facts": "공시명: 영업양수결정"}
+    with _mock.patch.object(_dd, "_doc_rows", lambda r: _bs_rows):
+        _dd.enrich_one(_bs, "20260911")
+    _types = [c["type"] for c in _claims2.build(_bs)]
+    ok.append(run("영업양수 금액 주장 성립", "issue_amt" in _types))
+    ok.append(run("상대 회사명이 counterpart 로 잡힘",
+                  any(c["type"] == "counterpart" and "케이피이" in c["value"]
+                      for c in _claims2.build(_bs))))
+    # 라벨이 하나도 없으면 보강했다고 하지 않는다 (빈 값 주입 방지)
+    with _mock.patch.object(_dd, "_doc_rows", lambda r: {"무관라벨": "x"}):
+        _empty = _dd.enrich_one({"id": "dart-9", "kind": "disclosure",
+                                 "title": "유형자산취득결정", "facts": "공시명: x"},
+                                "20260911")
+    ok.append(run("추출 0건이면 보강 실패로 처리", _empty is False))
+
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
