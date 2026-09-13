@@ -282,6 +282,27 @@ def evaluate(r: dict) -> list[str]:
         if rel <= 0.5 or rel >= 1.5:
             out.append(f"공매도 비중: 거래대금 대비 {sr:.1f}% "
                        f"(40거래일 평균 {avg40:.1f}%의 {rel:.1f}배)")
+    # 같은 날 수치만 쓰면 글이 전부 닮는다. 시간축·장중 위치 값을 함께 연다.
+    # 모두 이미 받아온 데이터에서 계산한 값이라 추가 호출이 없다.
+    op, cl2, prev = r.get("open"), r.get("close"), r.get("prev_close")
+    if op and cl2 and abs((cl2 - op) / op * 100) >= 3.0:
+        d = "높은" if cl2 > op else "낮은"
+        out.append(f"시가 대비 마감: {abs((cl2 - op) / op * 100):.1f}% {d} 수준")
+    if op and prev and abs((op - prev) / prev * 100) >= 3.0:
+        d = "높게" if op > prev else "낮게"
+        out.append(f"시가 출발: 전일 종가 대비 {abs((op - prev) / prev * 100):.1f}% {d}")
+    if r.get("hi_days"):
+        out.append(f"종가 위치: 최근 {r['hi_days']}거래일 중 최고 종가")
+    elif r.get("lo_days"):
+        out.append(f"종가 위치: 최근 {r['lo_days']}거래일 중 최저 종가")
+    if r.get("streak"):
+        n = abs(r["streak"])
+        out.append(f"연속 흐름: {n}거래일 연속 "
+                   f"{'상승' if r['streak'] > 0 else '하락'}")
+    if r.get("ma20_gap") is not None and abs(r["ma20_gap"]) >= 10.0:
+        d = "위" if r["ma20_gap"] > 0 else "아래"
+        out.append(f"20일 이동평균 대비: {abs(r['ma20_gap']):.1f}% {d}")
+
     if r.get("flow_rank"):
         out.append(f"수급 순위: {r['flow_rank']}")
     return out

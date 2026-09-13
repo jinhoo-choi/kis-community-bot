@@ -24,6 +24,13 @@ CLAIM_SPECS = [
     ("range",     "장중 고저차",   r"장중 고저 차이[:\s]*저가 대비\s*([\d.]+)%", "저가 대비 {}%"),
     ("close_pos", "마감 위치",     r"마감 위치[:\s]*장중 고가 대비\s*([\d.]+)%", "장중 고가 대비 {}% 낮음"),
     ("ret5",      "5거래일 누적",  r"5거래일 누적 등락률[:\s]*([-+]?[\d.]+)\s*%", "{}%"),
+    # 아래 넷은 결합 사실에만 있는 시간축·장중 위치 값이다.
+    # spec 이 없으면 본문이 인용해도 근거없는수치로 리젝된다.
+    ("open_pos",  "시가 대비 마감", r"시가 대비 마감[:\s]*([\d.]+\s*%\s*[가-힣]+ 수준)", "{}"),
+    ("gap",       "시가 출발",     r"시가 출발[:\s]*(전일 종가 대비[^\n]+)", "{}"),
+    ("extreme",   "종가 위치",     r"종가 위치[:\s]*(최근[^\n]+)", "{}"),
+    ("streak",    "연속 흐름",     r"연속 흐름[:\s]*(\d+거래일 연속 [가-힣]+)", "{}"),
+    ("ma20",      "이동평균 대비", r"20일 이동평균 대비[:\s]*([\d.]+\s*%\s*[가-힣]+)", "{}"),
     ("frgn",      "외국인 순매매", r"외국인 (순매[수도][^\n]*)", "{}"),
     ("inst",      "기관 순매매",   r"기관 (순매[수도][^\n]*)", "{}"),
     ("short",     "공매도 비중",   r"공매도 비중[:\s]*([^\n]+)", "{}"),
@@ -84,13 +91,14 @@ def build(item: dict) -> list[dict]:
 
 # 앵글별 우선 주장. "이 글이 알려줄 하나"에 직결되는 것부터 고른다.
 ANGLE_PREF = {
-    "reaction":    ["change", "close", "turnover"],
-    "compare":     ["vol_ratio", "ret5", "range", "close_pos"],
-    "ratio":       ["ratio_mg", "scale_vs", "stake", "conv_prc", "vol_ratio", "rate"],
+    "reaction":    ["change", "close", "turnover", "gap"],
+    "compare":     ["vol_ratio", "ret5", "range", "close_pos", "ma20", "extreme"],
+    "ratio":       ["ratio_mg", "scale_vs", "stake", "conv_prc", "vol_ratio", "rate",
+                    "ma20"],
     "amount":      ["issue_amt", "scale_vs", "turnover", "shares", "target"],
     "terms":       ["conv_prc", "rate", "ratio_mg", "counterpart", "opinion", "target", "maturity"],
     "purpose":     ["purpose", "contract", "counterpart", "issue_amt", "event"],
-    "duration":    ["maturity", "ret5", "event"],
+    "duration":    ["maturity", "ret5", "event", "streak", "extreme"],
     "decode":      ["term_def", "event", "contract", "sector", "region"],
     "inquiry":     ["inquiry", "event", "change"],
     "uncertainty": ["event", "change"],
