@@ -1733,6 +1733,20 @@ def main():
                   and _matrix["false_reject_rate"] == 0.5
                   and _matrix["sonnet_fatal_after_flash_pass"] == 1))
 
+    # 게이트 차단은 집계만 남아 과차단 판단이 불가능했다. 건별 제목·facts 를 남긴다
+    import os as _os, json as _json
+    from src import stats as _st
+    _p = _st.detail_log([], [], [], blocked=[("d1", "tier5:글감부족")],
+                        collected=[{"id": "d1", "kind": "disclosure",
+                                    "title": "OO전자 대량보유상황보고서",
+                                    "facts": "제출인: 홍길동"}])
+    _rows = _json.load(open(_p, encoding="utf-8"))
+    _os.remove(_p)
+    _g = [r for r in _rows if r["result"] == "gate_blocked"]
+    ok.append(run("게이트 차단 건별 기록", len(_g) == 1
+                  and _g[0]["reason"] == "tier5:글감부족"
+                  and _g[0]["title"].startswith("OO전자")
+                  and "제출인" in _g[0]["facts"]))
     # #110 실측: 날짜 라벨이 화이트리스트와 조금만 달라도 본문 날짜가 근거없는수치로 리젝됐다
     from src import claims as _cl
     _rep = {"stock_code": "112610", "kind": "research", "angle": "",
@@ -1760,7 +1774,6 @@ def main():
     ok.append(run("facts 에 없는 수치는 계속 차단",
                   any("근거없는수치" in e for e in _cl.grounding_errors(
                       "계약 금액이 전년 대비 47% 늘었네요.", _con, 3))))
-
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
