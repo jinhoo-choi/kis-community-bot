@@ -110,7 +110,11 @@ ANGLE_PREF = {
 # 실측(#110): 공시 보류 사유에 '발행총액 200억 누락, 정보량 부족',
 # '용도자금 오인 표현, 정보량 부족' 이 반복됐다. purpose 계열 앵글에서
 # issue_amt 가 우선순위 4번째라 n=2~3 에 잘려 '얼마'가 빠진 채 나갔다.
-ANCHOR_TYPES = {"disclosure": ["issue_amt"]}
+# 실측(2026-09-14 #113): research 는 filter_passed 29건 전건 보류였다. 보류 사유가
+# '제목 재진술 수준, 정보 부족'(fit 1~2) 16건 + 사실성 9건으로, 쓸 수 있는 유일한
+# 리포트 고유 사실인 target/opinion 이 terms 앵글 우선순위 5~6번째라 n=2~3 에
+# 잘리고 event(리포트 제목)만 남았다. 공시의 issue_amt 와 같은 실패다.
+ANCHOR_TYPES = {"disclosure": ["issue_amt"], "research": ["target", "opinion"]}
 
 
 # 결합 사실 계열. 하나도 선정되지 않으면 본문이 종가·등락률만 말하게 되고
