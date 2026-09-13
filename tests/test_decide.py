@@ -817,6 +817,13 @@ def main():
                       "장중 고저 차이는 저가 대비 11.5%였습니다. "
                       "변동성이 컸던 것으로 보입니다.",
                       _flow_facts, "fact_note", "reaction", "fact_note")))
+    ok.append(run("실발송 잔여 원인·변동성 차단",
+                  {"claim_out_of_scope", "unsupported_cause_question"}.issubset(
+                      _f2.check(
+                          "변동성이 상당했던 것 같습니다. 관련 뉴스나 호재를 "
+                          "확인해본 분들 계신가요?",
+                          _flow_facts, "open_talk", "reaction", "open_talk",
+                          require_question=True))))
     ok.append(run("추세·수급 평가 차단",
                   "claim_out_of_scope" in _f2.check(
                       "가온전선이 11.87% 올랐습니다. 상승 추세지만 수급은 우호적이지 않네요.",
