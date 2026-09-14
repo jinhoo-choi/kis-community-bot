@@ -235,7 +235,8 @@ def validation_errors(post: dict) -> list[str]:
     item = {**post, "angle": ""}
     errs.extend(f"template_filter:{e}" for e in filters.check(
         body, post.get("facts", ""), post.get("fmt"), None,
-        post.get("length")))
+        post.get("length"), None, False,
+        post.get("kind", ""), post.get("stock_code")))
     errs.extend(f"template_grounding:{e}" for e in
                 claims.grounding_errors(body, item, 3))
     if not facts.uses_derived(body, post.get("facts", "")):

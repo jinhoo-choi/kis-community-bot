@@ -1752,7 +1752,7 @@ def main():
 
     # 리포트도 같은 실패를 했다(#121): target/opinion 이 terms 앵글 5~6순위라
     # n=2~3 에 잘리고 제목만 남아 filter_passed 29건이 전건 보류됐다.
-    from src import gate as _gate, facts as _f
+    from src import gate as _gate, facts as _f, filters as _filters
     def _res(body):
         it = {"kind": "research", "facts": body}
         _f.annotate_terms([it])
@@ -1775,6 +1775,45 @@ def main():
                   str([(c["type"], c["value"][:20]) for c in _claims.build(_r_none)])))
     ok.append(run("용어설명만으로는 리포트 게이트 미통과",
                   _gate.has_substance(_r_both) and not _gate.has_substance(_r_none)))
+
+    # 필터가 kind 를 잃으면 ANCHOR_TYPES 가 필터 경로에서만 빠져, 프롬프트가
+    # 쓰라고 시킨 주장이 '선정외주장' 으로 리젝된다 (실측 #121: 17건).
+    _sup = ("공시명: 단일판매·공급계약체결\n종목: A (000660)\n계약 금액: 200억원\n"
+            "계약 상대: B사\n최근 매출액 대비: 11.5%\n계약 내용: 반도체 장비 공급\n"
+            "공급 지역: 국내\n만기: 2029-12-31\n")
+    ok.append(run("프롬프트와 필터의 주장 선정이 일치",
+                  all([c["type"] for c in _claims.select(
+                          {"kind": "disclosure", "facts": _sup, "angle": a}, 3, a)]
+                      == [c["type"] for c in _claims.select(
+                          {"facts": _sup, "angle": a, "kind": "disclosure"}, 3, a)]
+                      for a in ("terms", "decode", "context", "reaction"))))
+    _anchored = _filters.check(
+        "A가 B사와 반도체 장비 공급 계약을 맺었다고 하네요. 계약 금액은 200억원입니다. "
+        "공급 지역은 국내라고 합니다.",
+        _sup, None, "reaction", "careful_note", None, False, "disclosure", "000660")
+    ok.append(run("앵커 주장을 써도 선정외주장 미발생",
+                  not any(e.startswith("선정외주장") for e in _anchored),
+                  str(_anchored)))
+
+    # 기간 단위는 지표 이름의 일부지 주장의 값이 아니다.
+    # 실측 #121: flow:근거없는수치['20'] 12건, 캐시 197건 재현 시 24건.
+    _fl = {"kind": "flow", "stock_code": "356680",
+           "facts": ("기준일: 2026-09-11\n종목: A (356680)\n종가: 16,060원\n"
+                     "등락률: 29.94%\n" + _f.DERIVED_HEADER + "\n"
+                     "· 거래량: 20일 평균의 15.6배\n"
+                     "· 20일 이동평균 대비: 34.3% 위\n")}
+    _, _ung = _claims.used("거래량은 20일 평균의 15.6배였고 20일 이동평균 대비 34.3% 위입니다.",
+                           _claims.build(_fl),
+                           _claims._codes(_fl) | _claims._metadata_numbers(_fl))
+    ok.append(run("기간 단위는 근거없는수치가 아님", not _ung, str(sorted(_ung))))
+
+    # 한 숫자를 여러 claim 이 가지면 주장 하나가 둘로 세어진다.
+    _dup = [{"id": "C1", "type": "range", "value": "저가 대비 29.6%"},
+            {"id": "C2", "type": "open_pos", "value": "29.6% 높은 수준"}]
+    _hit, _ = _claims.used("장중 고저 차이는 저가 대비 29.6%였습니다.", _dup,
+                           prefer={"C1"})
+    ok.append(run("같은 숫자를 공유하는 주장은 중복 계수하지 않음",
+                  _hit == {"C1"}, str(sorted(_hit))))
 
     # 게이트 차단은 집계만 남아 과차단 판단이 불가능했다. 건별 제목·facts 를 남긴다
     import os as _os, json as _json

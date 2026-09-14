@@ -441,7 +441,7 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
             errs = filters.check(
                 p["body"], p["facts"], p.get("fmt"), p.get("angle"), p.get("length"),
                 p.get("stock_name") if p.get("theme_assigned") else None,
-                p.get("kind") == "poll")
+                p.get("kind") == "poll", p.get("kind", ""), p.get("stock_code"))
             if errs:
                 # 본문을 함께 남겨야 '이 리젝이 타당했는지' 사후 검토가 된다
                 print(f"[gen] 정규식 리젝 {p['id']} {errs}")
@@ -490,7 +490,7 @@ def retry_rejected() -> list[dict]:
             errs = filters.check(
                 p["body"], p["facts"], p.get("fmt"), p.get("angle"), p.get("length"),
                 p.get("stock_name") if p.get("theme_assigned") else None,
-                p.get("kind") == "poll")
+                p.get("kind") == "poll", p.get("kind", ""), p.get("stock_code"))
             if errs:
                 p["reject_errs"] = errs
                 p["_rewrite_attempted"] = True

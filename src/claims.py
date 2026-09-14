@@ -213,17 +213,29 @@ def _nums(text: str) -> set[str]:
             if len(n.replace(",", "")) >= 2}
 
 
-def used(body: str, cs: list[dict], extra_allow: set = frozenset()) -> tuple[set[str], set[str]]:
+def used(body: str, cs: list[dict], extra_allow: set = frozenset(),
+         prefer: set = frozenset()) -> tuple[set[str], set[str]]:
     """(사용된 claim id, 근거 없는 숫자).
 
     본문 숫자가 어떤 claim 의 값에 포함되면 그 claim 을 인용한 것으로 본다.
     어느 claim 에도 없는 숫자는 근거가 없다.
+
+    같은 숫자를 여러 claim 이 가질 수 있다 (실측: 197건 중 4건. 장중 고저차와
+    시가 대비 마감이 둘 다 29.6%). 그대로 세면 주장 하나를 둘로 세어
+    주장과다·선정외주장 오탐이 난다. prefer(선정된 claim id) 에 귀속 가능한
+    숫자는 그쪽으로만 센다.
     """
     body_nums = _nums(body)
     hit, matched = set(), set()
+    claimed = set()
+    for c in cs:
+        if c["id"] in prefer and body_nums & _nums(c["value"]):
+            claimed |= body_nums & _nums(c["value"])
     for c in cs:
         cn = _nums(c["value"])
         inter = body_nums & cn
+        if inter and c["id"] not in prefer and inter <= claimed:
+            continue                      # 선정된 claim 이 이미 설명하는 숫자다
         if inter:
             hit.add(c["id"])
             matched |= inter
@@ -276,6 +288,15 @@ def _metadata_numbers(item: dict) -> set[str]:
         if re.match(r"^(?:기준일|공시일|발행일|발간일|작성일|기사일|신청일|승인일|"
                     r"보도 시각|게시 시각|공시 시각|발행 시각|시점)\s*:", line):
             out |= _nums(line)
+    # 기간 단위는 값이 아니라 지표 이름의 일부다. '20일 이동평균 대비: 34.3%' 에서
+    # 주장의 값은 34.3 이고 20 은 지표명이다. facts.derived_values 도 같은 이유로
+    # 기간 단위를 값에서 제외한다. 여기에만 빠져 있어 본문이 지표명을 그대로
+    # 인용하면 근거없는수치로 리젝됐다 (실측 #121: flow:근거없는수치['20'] 12건,
+    # 캐시 197건 재현 시 24건).
+    for m in re.finditer(r"(?<!\d)(\d+)\s*(?:거래일|일|개월|년)(?!\d)",
+                         item.get("facts", "")):
+        out.add(m.group(1))
+        out.add(m.group(1).lstrip("0") or m.group(1))
     return out
 
 
@@ -286,8 +307,9 @@ def grounding_errors(body: str, item: dict, cap: int) -> list[str]:
         return []
     selected = (select(item, cap, item.get("angle", ""))
                 if item.get("angle") else all_cs)
-    hit, ungrounded = used(body, all_cs, _codes(item) | _metadata_numbers(item))
     selected_ids = {c["id"] for c in selected}
+    hit, ungrounded = used(body, all_cs, _codes(item) | _metadata_numbers(item),
+                           prefer=selected_ids)
     errs = []
     if len(hit) > cap:
         errs.append(f"주장과다({len(hit)}개/{cap})")
