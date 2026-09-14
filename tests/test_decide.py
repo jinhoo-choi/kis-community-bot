@@ -1815,6 +1815,23 @@ def main():
     ok.append(run("같은 숫자를 공유하는 주장은 중복 계수하지 않음",
                   _hit == {"C1"}, str(sorted(_hit))))
 
+    # 보도자료는 '1천490억원' 처럼 자릿수를 한글로 끊어 쓴다.
+    # 실측 #122: policy 근거없는수치 ['490'] 등 3건이 이것 때문이었다.
+    ok.append(run("한글 자릿수 표기가 facts 수치와 매칭",
+                  _claims._nums("1천490억원") == {"1490"}
+                  and _claims._nums("7천400억원") == {"7400"}
+                  and _claims._nums("50억원") == {"50"},
+                  str(sorted(_claims._nums("1천490억원")))))
+
+    # 담당자가 자기 카드를 찾기 어렵다는 실사용 피드백 → 이름 내림차순 발송.
+    # 안정 정렬이라 같은 담당자 안에서는 배정 순서(같은 종목 인접)가 유지된다.
+    _ps = [{"assignee": "김OO", "stock_name": "A"}, {"assignee": "박OO", "stock_name": "B"},
+           {"assignee": "", "stock_name": "C"}, {"assignee": "김OO", "stock_name": "D"}]
+    _ps.sort(key=lambda p: p.get("assignee") or "", reverse=True)
+    ok.append(run("담당자 이름 내림차순 정렬, 미지정은 맨 뒤",
+                  [p["stock_name"] for p in _ps] == ["B", "A", "D", "C"],
+                  str([p["stock_name"] for p in _ps])))
+
     # 게이트 차단은 집계만 남아 과차단 판단이 불가능했다. 건별 제목·facts 를 남긴다
     import os as _os, json as _json
     from src import stats as _st
