@@ -335,7 +335,12 @@ def main():
     # 담당자 배정은 최종 배포분이 확정된 뒤에 한다.
     # 보류될 글까지 배정하면 담당자별 건수가 실제와 달라진다.
     sent_posts = assign.assign(sent_posts)
-    print(f"[main] 배포 {len(sent_posts)}건 / 보류 {len(held)}건")
+    # 담당자별로 카드가 흩어져 있으면 자기 건을 찾기 어렵다는 실사용 피드백.
+    # 이름 내림차순으로 묶어 보낸다. 안정 정렬이라 같은 담당자 안에서는
+    # 배정 순서(= 같은 종목끼리 인접)가 유지된다. 미지정은 맨 뒤로 간다.
+    sent_posts.sort(key=lambda p: p.get("assignee") or "", reverse=True)
+    print(f"[main] 배포 {len(sent_posts)}건 / 보류 {len(held)}건 "
+          f"(담당자 이름 내림차순 정렬)")
     for h in held[:5]:
         print(f"   보류 {h['id']} ({h.get('provider')}) - {h.get('hold_reason','')}")
 

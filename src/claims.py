@@ -12,6 +12,7 @@
 원인·수급주체 추정·업황수혜·기대감·전망은 claim type 자체를 두지 않는다.
 """
 import re
+import re as _re_mod
 import datetime as _dt
 import zlib as _zlib
 
@@ -208,8 +209,18 @@ def facts_view(item: dict, n: int, angle: str = "") -> str:
 _NUM = re.compile(r"\d[\d,]*\.?\d*")
 
 
+# 보도자료·RSS 는 '1천490억원' 처럼 자릿수를 한글로 끊어 쓴다. 그대로 파싱하면
+# 490 만 남아 facts 의 1490 과 매칭되지 않고 근거없는수치로 리젝된다
+# (실측 #122: policy 근거없는수치 ['490'], ['50','700','7400'], ['74.1'] 3건).
+_KO_DIGIT = _re_mod.compile(r"(?<!\d)(\d{1,3})천(\d{1,3})(?!\d)")
+
+
+def _normalize(text: str) -> str:
+    return _KO_DIGIT.sub(lambda m: m.group(1) + m.group(2).zfill(3), text or "")
+
+
 def _nums(text: str) -> set[str]:
-    return {n.replace(",", "").rstrip(".") for n in _NUM.findall(text or "")
+    return {n.replace(",", "").rstrip(".") for n in _NUM.findall(_normalize(text))
             if len(n.replace(",", "")) >= 2}
 
 
