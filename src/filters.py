@@ -206,7 +206,13 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
 
     # 기준일을 정확히 알고 있는데 상대 날짜로 바꾸면 주말·휴장일에 거짓이 된다.
     if re.search(r"기준일:\s*\d{4}-\d{2}-\d{2}", facts or ""):
-        rel = re.search(r"오늘|금일|어제|전일|전날|지난\s*거래일|지난거래일", body)
+        # facts 가 직접 '전일 종가 대비' 로 주는 값(시가 출발)은 예외다. 코드가 준
+        # 표현을 본문에서 쓴 것까지 리젝하면 룰이 서로 충돌한다.
+        # 실측(#113): 정규식 리젝 1위가 flow:상대날짜 60건이었고 전건 이 충돌이다.
+        rel_words = r"오늘|금일|어제|전날|지난\s*거래일|지난거래일"
+        if "전일" not in (facts or ""):
+            rel_words += "|전일"
+        rel = re.search(rel_words, body)
         if rel:
             errs.append(f"상대날짜({rel.group()})")
 

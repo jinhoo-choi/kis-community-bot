@@ -168,7 +168,16 @@ def main():
 
     # 캐시를 써도 유형별 기대 발송이 목표보다 작을 때만 tier5 글감부족 후보를
     # 유형 균형 순서로 5건씩 보강한다. 매 묶음 뒤 전체 결정형 후보를 다시 계산한다.
-    if config.ENABLE_ENRICH and not dry and actual_expected < config.TARGET_POSTS:
+    # flow 는 공급이 많아 총량만 보면 항상 '충분'이 되고, 정작 부족한 비-flow 는
+    # 영영 보강되지 않는다. 실측(#113): policy 12건 중 11건이 tier5 로 죽었는데
+    # 총 기대 발송이 50/50 이라 rescue 가 0회였고 flow 48건(96%)으로 메웠다.
+    # 목표는 DIST_CAP 합(38)이 아니라 flow 절대상한에서 역산한다. 도달 불가능한
+    # 목표를 쓰면 매 실행 보강 예산을 전량 소모한다.
+    nonflow_target = config.TARGET_POSTS - config.DIST_HARD_CAP.get("flow", 0)
+    nonflow_expected = config.expected_sent({k: v for k, v in cnt.items() if k != "flow"})
+    if config.ENABLE_ENRICH and not dry and (
+            actual_expected < config.TARGET_POSTS
+            or nonflow_expected < nonflow_target):
         reasons = dict(blocked)
         rescue_pool = _balanced_rescue([
             x for x in raw
@@ -184,9 +193,13 @@ def main():
             items, blocked, resolved, dup_reasons = _prepare_items(raw, s)
             picked, cnt = _pick_candidates(items)
             actual_expected = config.expected_sent(cnt)
+            nonflow_expected = config.expected_sent(
+                {k: v for k, v in cnt.items() if k != "flow"})
             print(f"[enrich] rescue 뒤 기대 발송 {actual_expected:.1f}"
-                  f"/{config.TARGET_POSTS}건")
-            if actual_expected >= config.TARGET_POSTS:
+                  f"/{config.TARGET_POSTS}건 (비-flow {nonflow_expected:.1f}"
+                  f"/{nonflow_target})")
+            if (actual_expected >= config.TARGET_POSTS
+                    and nonflow_expected >= nonflow_target):
                 break
     elif config.ENABLE_ENRICH and not dry:
         print(f"[enrich] 후보 충분 ({actual_expected:.1f}/{config.TARGET_POSTS})"
