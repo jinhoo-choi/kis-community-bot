@@ -1750,6 +1750,32 @@ def main():
                   "issue_amt" not in [c["type"] for c in
                                       _claims.select(dict(_dis, kind="flow"), 2, "purpose")]))
 
+    # 리포트도 같은 실패를 했다(#121): target/opinion 이 terms 앵글 5~6순위라
+    # n=2~3 에 잘리고 제목만 남아 filter_passed 29건이 전건 보류됐다.
+    from src import gate as _gate, facts as _f
+    def _res(body):
+        it = {"kind": "research", "facts": body}
+        _f.annotate_terms([it])
+        return it
+    _r_both = _res("종목: A (000000)\n리포트 제목: 실적 개선\n발간: X증권 / 2026.09.11\n"
+                   "제시 적정가격: 30,000원\n투자의견: Buy\n※ 단정하지 말 것.")
+    _r_none = _res("종목: B (000001)\n리포트 제목: 성장 지속\n발간: Y증권 / 2026.09.11\n"
+                   "※ 제시 수치는 증권사 의견이며 단정하지 말 것.\n"
+                   "※ 목표주가·투자의견 미제공. 추정하지 말 것.")
+    ok.append(run("리포트는 목표가·투자의견을 항상 선정",
+                  all({"target", "opinion"} <= {c["type"] for c in
+                                                _claims.select(_r_both, n, a)}
+                      for n in (2, 3) for a in ("terms", "reaction")),
+                  str([c["type"] for c in _claims.select(_r_both, 2, "terms")])))
+    # 값이 없는데 주장이 생기면 앵커가 그 가짜 값을 프롬프트에 고정시킨다.
+    # '※ 목표주가·투자의견 미제공' 주석과 '용어 설명: 투자의견은 …' 줄이 원인이었다.
+    ok.append(run("값 없는 리포트에 가짜 목표가·투자의견 미생성",
+                  not ({"target", "opinion"} & {c["type"]
+                                                for c in _claims.build(_r_none)}),
+                  str([(c["type"], c["value"][:20]) for c in _claims.build(_r_none)])))
+    ok.append(run("용어설명만으로는 리포트 게이트 미통과",
+                  _gate.has_substance(_r_both) and not _gate.has_substance(_r_none)))
+
     # 게이트 차단은 집계만 남아 과차단 판단이 불가능했다. 건별 제목·facts 를 남긴다
     import os as _os, json as _json
     from src import stats as _st
