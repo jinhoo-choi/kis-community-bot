@@ -143,7 +143,8 @@ def _slot_n(facts: str) -> int:
 
 def check(body: str, facts: str, fmt: str = None, angle: str = None,
           length: str = None, theme_stock: str = None,
-          require_question: bool = False) -> list[str]:
+          require_question: bool = False, kind: str = "",
+          stock_code: str = None) -> list[str]:
     """위반 사유 리스트 반환. 빈 리스트면 통과."""
     errs = []
 
@@ -266,7 +267,11 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
     # 개수 세기는 claim 과 어긋나 "1 대 1.8702948" 이 2개로 계산됐다.
     from src import claims as _cl, personas as _P2
     _cap = _P2.claim_cap(length) if length else 4
-    _g = _cl.grounding_errors(body, {"facts": facts, "angle": angle}, _cap)
+    # kind 를 빼고 넘기면 claims 의 ANCHOR_TYPES 가 필터 경로에서만 적용되지
+    # 않아, 프롬프트가 쓰라고 시킨 주장이 '선정외주장' 으로 리젝된다
+    # (실측 #121: 선정외주장 17건). stock_code 도 근거 숫자 판정에 쓰인다.
+    _g = _cl.grounding_errors(body, {"facts": facts, "angle": angle,
+                                     "kind": kind, "stock_code": stock_code}, _cap)
     if _g:
         errs += _g
     else:
