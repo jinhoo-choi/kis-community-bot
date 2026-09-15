@@ -1773,6 +1773,20 @@ def main():
                   not ({"target", "opinion"} & {c["type"]
                                                 for c in _claims.build(_r_none)}),
                   str([(c["type"], c["value"][:20]) for c in _claims.build(_r_none)])))
+    # 목표가·투자의견을 쓰면 출처 표기가 의무다(filters 출처없는목표주가).
+    # 앵커가 broker 를 밀어내 '한 증권사로부터' 로 쓰이면 그대로 리젝된다
+    # (실측 #122: research:출처없는목표주가 3건, #121 에는 없던 리젝).
+    _rf = ("종목: A (090430)\n리포트 제목: 실적 개선\n발간: 미래에셋증권 / 2026.09.11\n"
+           "제시 적정가격: 190,000원\n투자의견: Buy\n※ 단정하지 말 것.")
+    _ri = {"kind": "research", "stock_code": "090430", "facts": _rf}
+    ok.append(run("목표가 선정 시 발간 증권사가 함께 선정",
+                  all("broker" in [c["type"] for c in _claims.select(_ri, n, "terms")]
+                      for n in (2, 3)),
+                  str([c["type"] for c in _claims.select(_ri, 2, "terms")])))
+    ok.append(run("네이버 '발간:' 형식도 broker 로 인식",
+                  any(c["type"] == "broker" and "미래에셋증권" in c["value"]
+                      for c in _claims.build(_ri))))
+
     ok.append(run("용어설명만으로는 리포트 게이트 미통과",
                   _gate.has_substance(_r_both) and not _gate.has_substance(_r_none)))
 
