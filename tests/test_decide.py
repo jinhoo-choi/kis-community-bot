@@ -1832,6 +1832,39 @@ def main():
                   [p["stock_name"] for p in _ps] == ["B", "A", "D", "C"],
                   str([p["stock_name"] for p in _ps])))
 
+    # 리포트·정책은 소재가 종목방 잡담과 결이 달라 fit 축에서 구조적으로 깎인다.
+    # 실측 #122: 배포 50건이 특징주 45 + 공시 5, 리포트·정책 0건.
+    import config as _cfg
+    ok.append(run("완화 대상 유형만 fit·총점 하한이 낮음",
+                  _cfg.min_fit_for("research") == 2 and _cfg.min_fit_for("policy") == 2
+                  and _cfg.min_fit_for("flow") == 3
+                  and _cfg.min_score_for("research") == 13
+                  and _cfg.min_score_for("flow") == 14))
+    ok.append(run("사실성·준법성은 완화 대상이 아님",
+                  _cfg.MIN_FACTUAL_SCORE == 4 and _cfg.MIN_COMPLIANT_SCORE == 4))
+
+    def _scored(kind, fit, total):
+        return {"id": f"{kind}-{fit}-{total}", "kind": kind, "body": "본문",
+                "stock_name": "A", "provider": "claude",
+                "score": {"fit": fit, "total": total, "factual": 5, "compliant": 5}}
+    _sent, _held = decide_distribution(
+        [_scored("research", 2, 13), _scored("policy", 2, 13),
+         _scored("flow", 2, 13), _scored("flow", 3, 14)], target=10)
+    _ids = {p["id"] for p in _sent}
+    ok.append(run("리포트·정책 fit 2/총점 13 은 배포, 특징주 동일 점수는 보류",
+                  {"research-2-13", "policy-2-13"} <= _ids
+                  and "flow-2-13" not in _ids and "flow-3-14" in _ids,
+                  str(sorted(_ids))))
+    # 우선 배치: 같은 조건이면 리포트·정책이 특징주보다 앞선다
+    ok.append(run("완화 유형이 특징주보다 앞에 배치",
+                  [p["kind"] for p in _sent].index("research")
+                  < [p["kind"] for p in _sent].index("flow"),
+                  str([p["kind"] for p in _sent])))
+    # 보류 사유에 총점을 남겨야 다음 실행에서 완화 폭을 판단할 수 있다
+    ok.append(run("fit 보류 사유에 총점 기록",
+                  any("총점" in (p.get("hold_reason") or "") for p in _held),
+                  str([p.get("hold_reason") for p in _held])))
+
     # 게이트 차단은 집계만 남아 과차단 판단이 불가능했다. 건별 제목·facts 를 남긴다
     import os as _os, json as _json
     from src import stats as _st

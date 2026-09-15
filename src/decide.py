@@ -34,6 +34,7 @@ def decide_distribution(
     per_stock: int = None,
     per_kind_cap: dict = None,
     min_score: int = None,
+    min_fit: int = None,
     min_factual: int = None,
     min_compliant: int = None,
     hard_kind_cap: dict = None,
@@ -59,6 +60,7 @@ def decide_distribution(
     # SLOT_QUOTA(생성 대상 배분)를 배포 상한으로 쓰면 안 된다. flow 가 120 이라
     # 목표 50건을 혼자 채운다 (실측: 배포 50건 중 flow 35건).
     per_kind_cap = per_kind_cap if per_kind_cap is not None else config.DIST_CAP
+    min_score_arg = min_score
     min_score = min_score if min_score is not None else config.MIN_JUDGE_SCORE
     min_factual = (min_factual if min_factual is not None
                    else config.MIN_FACTUAL_SCORE)
@@ -96,10 +98,18 @@ def decide_distribution(
         elif s.get("compliant") is not None and s["compliant"] < min_compliant:
             p["hold_reason"] = f"준법성 {s['compliant']}/5"
             held.append(p)
-        elif s.get("fit") is not None and s["fit"] < config.MIN_FIT:
-            p["hold_reason"] = f"커뮤니티적합성 {s['fit']}/5 {s.get('reason','')}"
+        # 리포트·정책은 소재가 종목방 잡담과 결이 달라 fit 축에서 구조적으로 깎인다.
+        # 유형별 하한을 둬서 이 둘이 피드에 남게 한다 (실측 #122: 배포 50건 중
+        # 특징주 45, 리포트·정책 0). min_score 인자를 명시로 넘긴 호출은
+        # 그 값을 그대로 존중한다 — 테스트가 임계를 고정해 검증하기 때문이다.
+        elif (s.get("fit") is not None
+              and s["fit"] < (config.min_fit_for(p.get("kind", ""))
+                              if min_fit is None else min_fit)):
+            p["hold_reason"] = (f"커뮤니티적합성 {s['fit']}/5 "
+                                f"(총점 {s.get('total','-')}/20) {s.get('reason','')}")
             held.append(p)
-        elif s.get("total", 0) < min_score:
+        elif s.get("total", 0) < (config.min_score_for(p.get("kind", ""))
+                                  if min_score_arg is None else min_score_arg):
             p["hold_reason"] = f"저점수 {s['total']}/20 {s.get('reason','')}"
             held.append(p)
         else:
