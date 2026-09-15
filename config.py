@@ -243,6 +243,28 @@ MIN_COMPLIANT_SCORE = int(os.environ.get("MIN_COMPLIANT_SCORE", "4"))
 # 총점만 넘어 배포되던 문제(실측: 5건 전건 fit 2~3점인데 전건 배포)를 막는다.
 MIN_FIT = int(os.environ.get("MIN_FIT", "3"))
 
+# 유형별 완화. 실측 #122: 배포 50건이 특징주 45 + 공시 5 였고 리포트·정책은 0건이다.
+# 피드가 시세 나열 일색이 된다는 운영 피드백이 나왔다.
+# 리포트·정책은 소재 자체가 종목방 잡담과 결이 달라 fit 축에서 구조적으로 깎인다
+# (#122 보류 27건 중 fit 2점이 25건). flow 는 공급이 남으므로 완화하지 않는다.
+# 완화 폭이 곧 품질 하한이라 유형별로만 열고, 환경변수로 즉시 되돌릴 수 있게 둔다.
+_RELAXED_KINDS = ("research", "policy", "theme")
+MIN_FIT_BY_KIND = {k: int(os.environ.get("MIN_FIT_RELAXED", "2"))
+                   for k in _RELAXED_KINDS}
+# fit 만 낮추면 대부분 총점 문턱에서 다시 걸린다 — #122 축 평균 합이 20점 환산
+# 13.2 로 이미 MIN_JUDGE_SCORE(14) 아래다. 가점 1점에 해당하는 총점 하한을 함께 둔다.
+MIN_JUDGE_SCORE_BY_KIND = {k: int(os.environ.get("MIN_JUDGE_SCORE_RELAXED", "13"))
+                           for k in _RELAXED_KINDS}
+# 사실성·준법성은 완화 대상이 아니다. 금융 게시글에서 이 둘은 타협하지 않는다.
+
+
+def min_fit_for(kind: str) -> int:
+    return MIN_FIT_BY_KIND.get(kind, MIN_FIT)
+
+
+def min_score_for(kind: str) -> int:
+    return MIN_JUDGE_SCORE_BY_KIND.get(kind, MIN_JUDGE_SCORE)
+
 # --- 크롤링 매너 ---
 REQUEST_DELAY = 1.2         # 초
 USER_AGENT = "kis-community-bot/1.0 (internal content pipeline)"
