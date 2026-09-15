@@ -149,8 +149,16 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
     errs = []
 
     for name, pat in RULES:
-        if re.search(pat, body, re.MULTILINE):
-            errs.append(name)
+        m = re.search(pat, body, re.MULTILINE)
+        if not m:
+            continue
+        # claim_out_of_scope 는 '봇이 스스로 만든 주장' 을 막는 규칙이다.
+        # 코드가 준 사실을 그대로 인용한 것까지 막으면 룰이 서로 충돌한다.
+        # 실측 #122: 리포트 제목 '코스피 장세 수혜주' 를 인용했는데 정규식의
+        # '수혜(가|를|주)' 에 걸려 리젝됐다(2건). 제목은 봇의 주장이 아니다.
+        if name == "claim_out_of_scope" and m.group() in (facts or ""):
+            continue
+        errs.append(name)
 
     # 길이 기준은 Length 축에 연동한다.
     # Length 를 도입하면서 프롬프트 지시(3문장 120자 / 6~7문장 250자)와
