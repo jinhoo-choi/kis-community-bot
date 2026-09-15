@@ -55,6 +55,9 @@ echo
 echo "=== 2c. 계약 정합성 (전역 규칙 x 페르소나 x Angle x 필터) ==="
 python3 tools/audit_contracts.py
 echo
+echo "=== 2d. 파이프라인 정합성 (facts 생성 x 게이트 x claim x 필터) ==="
+python3 tools/audit_pipeline.py
+echo
 echo "=== 3. E2E 시뮬레이션 ==="
 python3 tests/test_e2e.py
 echo

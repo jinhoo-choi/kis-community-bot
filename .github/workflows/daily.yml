@@ -55,14 +55,42 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      # 스케줄러 지연이 크다(실측: #121 +114분, #122 는 예정 시각에 안 들어와
+      # 수동 실행했다). 그 사이 수동 실행으로 그날 물량을 이미 내보냈는데
+      # 지연된 정기 실행이 뒤늦게 들어오면 같은 날 두 번 발송된다.
+      # 실측 2026-09-15: #122 수동 50건 발송 22분 뒤 #123 정기 실행이 50건을
+      # 더 내보내 담당자에게 하루 100건이 갔다(비용 $2.79).
+      # 직전 실행 기록(run_stats.jsonl 은 매 실행이 커밋한다)의 날짜가 오늘이면
+      # 정기 실행은 건너뛴다. 수동 실행은 의도된 것이므로 건너뛰지 않는다.
+      - name: Skip if already run today
+        id: guard
+        env:
+          TZ: Asia/Seoul
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          LAST=$(tail -n 1 data/run_stats.jsonl 2>/dev/null \
+                 | python3 -c "import sys,json;print(json.load(sys.stdin)['ts'][:10])" \
+                 2>/dev/null || echo "")
+          TODAY=$(date +%F)
+          if [ "$LAST" = "$TODAY" ]; then
+            echo "::warning::오늘 $TODAY 이미 실행됨 — 지연된 정기 실행을 건너뛴다"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Tests
         id: tests
+        if: steps.guard.outputs.skip != 'true' 
         run: |
           mkdir -p data
           set -o pipefail
           ./run_tests.sh 2>&1 | tee data/test_report.txt
 
       - name: Generate & distribute
+        if: steps.guard.outputs.skip != 'true'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}

@@ -52,7 +52,9 @@ CLAIM_SPECS = [
     ("opinion",   "투자의견",      r"투자의견:\s*([^\n]+)", "{}"),
     # 한경은 '작성: X증권 홍길동', 네이버는 '발간: X증권 / 2026.09.11' 이다.
     # '작성:' 만 보면 네이버 리포트에는 broker 주장이 아예 생기지 않는다.
-    ("broker",    "발간 증권사",   r"(?:작성|발간)[:\s]*([^\n/]+)", "{}"),
+    # '발간일:' 을 먼저 잡으면 broker 가 날짜가 된다(한경은 발간일·작성 두 줄을
+    # 모두 쓰고 발간일이 앞에 온다). 실측: broker='일: 2026.09.10'.
+    ("broker",    "발간 증권사",   r"(?:작성|발간)(?!일)[:\s]*([^\n/]+)", "{}"),
     ("inquiry",   "조회공시 답변", r"답변 성격[:\s]*([^\n]+)", "{}"),
     ("scale_vs",  "규모 비교",     r"(?:최근 매출액 대비|자산총액 대비|발행주식 대비)"
                                     r"[:\s]*([\d.]+)\s*%", "{}%"),
@@ -77,9 +79,27 @@ FORBIDDEN_TYPES = [
 ]
 
 
+def _claimable(facts: str) -> str:
+    """주장 추출 대상 텍스트. ※ 주의문 줄은 뺀다.
+
+    ※ 줄은 모델에게 주는 경고지 인용할 사실이 아니다. 그런데 spec 이 그 안의
+    단어를 잡아 경고문 자체가 주장 값이 된다.
+    실측 #123: '※ 계약금액이 매출에 언제 얼마나 반영될지는 공시에 없다' 에서
+    issue_amt = '이 매출에 언제 얼마나 반영될지는 공시에 없다. 추정하지 말 것.'
+    이 만들어졌다. issue_amt 는 공시 앵커라 이 값이 프롬프트에 강제로 들어갔다.
+    PR #19 의 리포트 가짜 주장과 같은 계열이고, 그때는 콜론 필수화로 개별
+    대응했지만 여기서 한 번에 막는다.
+
+    facts_view 는 원본 facts 를 그대로 훑으므로 ※ 줄은 프롬프트에 남는다.
+    경고문이 사라지는 것이 아니라, 경고문이 '쓸 사실' 로 승격되지 않을 뿐이다.
+    """
+    return "\n".join(l for l in (facts or "").splitlines()
+                      if not l.lstrip().startswith("※"))
+
+
 def build(item: dict) -> list[dict]:
     """입력에서 허용 주장 목록을 만든다."""
-    facts = item.get("facts", "")
+    facts = _claimable(item.get("facts", ""))
     out, seen = [], set()
     for cid, label, pat, fmt in CLAIM_SPECS:
         m = re.search(pat, facts)
@@ -204,7 +224,10 @@ def facts_view(item: dict, n: int, angle: str = "") -> str:
     drop_pats = [pat for cid, _l, pat, _f in CLAIM_SPECS if cid not in keep]
     out = []
     for line in facts.splitlines():
-        if any(re.search(pat, line) for pat in drop_pats):
+        # ※ 주의문은 어떤 경우에도 지우지 않는다. 미선정 spec 에 우연히 걸려
+        # 경고문이 통째로 사라지면 모델이 추정 금지 지시를 받지 못한다.
+        if not line.lstrip().startswith("※") and any(
+                re.search(pat, line) for pat in drop_pats):
             continue
         out.append(line)
     return "\n".join(out)
