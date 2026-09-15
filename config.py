@@ -249,13 +249,18 @@ MIN_FIT = int(os.environ.get("MIN_FIT", "3"))
 # (#122 보류 27건 중 fit 2점이 25건). flow 는 공급이 남으므로 완화하지 않는다.
 # 완화 폭이 곧 품질 하한이라 유형별로만 열고, 환경변수로 즉시 되돌릴 수 있게 둔다.
 _RELAXED_KINDS = ("research", "policy", "theme")
-MIN_FIT_BY_KIND = {k: int(os.environ.get("MIN_FIT_RELAXED", "2"))
+# 운영 판단: 리포트·정책은 **지어낸 내용만 없으면** 품질이 다소 낮아도 내보낸다.
+# 피드 다양성이 개별 글의 완성도보다 중요하다는 결정이다.
+# fit 은 1~5 척도라 1 이면 사실상 해제, 총점 하한도 0 으로 끈다.
+# 남는 관문이 곧 할루시네이션 방어선이고, 이쪽은 그대로 둔다:
+#   - 정규식 필터 (미확인수치·근거없는수치·선정외주장·결합사실미사용) — 심사 이전 단계
+#   - 심사 fatal (입력에 없는 주장·원인 추측·평가 주체 누락)
+#   - MIN_FACTUAL_SCORE 4 / MIN_COMPLIANT_SCORE 4
+# flow 는 공급이 남으므로 완화하지 않는다.
+MIN_FIT_BY_KIND = {k: int(os.environ.get("MIN_FIT_RELAXED", "1"))
                    for k in _RELAXED_KINDS}
-# fit 만 낮추면 대부분 총점 문턱에서 다시 걸린다 — #122 축 평균 합이 20점 환산
-# 13.2 로 이미 MIN_JUDGE_SCORE(14) 아래다. 가점 1점에 해당하는 총점 하한을 함께 둔다.
-MIN_JUDGE_SCORE_BY_KIND = {k: int(os.environ.get("MIN_JUDGE_SCORE_RELAXED", "13"))
+MIN_JUDGE_SCORE_BY_KIND = {k: int(os.environ.get("MIN_JUDGE_SCORE_RELAXED", "0"))
                            for k in _RELAXED_KINDS}
-# 사실성·준법성은 완화 대상이 아니다. 금융 게시글에서 이 둘은 타협하지 않는다.
 
 
 def min_fit_for(kind: str) -> int:

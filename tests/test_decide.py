@@ -1835,11 +1835,12 @@ def main():
     # 리포트·정책은 소재가 종목방 잡담과 결이 달라 fit 축에서 구조적으로 깎인다.
     # 실측 #122: 배포 50건이 특징주 45 + 공시 5, 리포트·정책 0건.
     import config as _cfg
-    ok.append(run("완화 대상 유형만 fit·총점 하한이 낮음",
-                  _cfg.min_fit_for("research") == 2 and _cfg.min_fit_for("policy") == 2
+    ok.append(run("완화 대상 유형은 fit·총점 문턱 해제",
+                  _cfg.min_fit_for("research") == 1 and _cfg.min_fit_for("policy") == 1
+                  and _cfg.min_score_for("research") == 0
                   and _cfg.min_fit_for("flow") == 3
-                  and _cfg.min_score_for("research") == 13
                   and _cfg.min_score_for("flow") == 14))
+    # 남는 관문이 곧 할루시네이션 방어선이다. 완화해도 이쪽은 유지돼야 한다.
     ok.append(run("사실성·준법성은 완화 대상이 아님",
                   _cfg.MIN_FACTUAL_SCORE == 4 and _cfg.MIN_COMPLIANT_SCORE == 4))
 
@@ -1848,13 +1849,23 @@ def main():
                 "stock_name": "A", "provider": "claude",
                 "score": {"fit": fit, "total": total, "factual": 5, "compliant": 5}}
     _sent, _held = decide_distribution(
-        [_scored("research", 2, 13), _scored("policy", 2, 13),
+        [_scored("research", 1, 10), _scored("policy", 1, 10),
          _scored("flow", 2, 13), _scored("flow", 3, 14)], target=10)
     _ids = {p["id"] for p in _sent}
-    ok.append(run("리포트·정책 fit 2/총점 13 은 배포, 특징주 동일 점수는 보류",
-                  {"research-2-13", "policy-2-13"} <= _ids
+    ok.append(run("리포트·정책은 저점수여도 배포, 특징주 동일 점수는 보류",
+                  {"research-1-10", "policy-1-10"} <= _ids
                   and "flow-2-13" not in _ids and "flow-3-14" in _ids,
                   str(sorted(_ids))))
+    # 완화는 fit·총점에만 적용된다. 지어낸 내용은 유형과 무관하게 막아야 한다.
+    _h = [_scored("research", 5, 20), _scored("research", 5, 20),
+          _scored("research", 5, 20)]
+    _h[0]["score"]["fatal"] = ["입력에 없는 주장"]
+    _h[1]["score"]["factual"] = 3
+    _h[2]["score"]["compliant"] = 3
+    _s2, _hd2 = decide_distribution(_h, target=10)
+    ok.append(run("완화 유형도 fatal·사실성·준법성 미달은 보류",
+                  not _s2 and len(_hd2) == 3,
+                  str([p.get("hold_reason") for p in _hd2])))
     # 우선 배치: 같은 조건이면 리포트·정책이 특징주보다 앞선다
     ok.append(run("완화 유형이 특징주보다 앞에 배치",
                   [p["kind"] for p in _sent].index("research")
