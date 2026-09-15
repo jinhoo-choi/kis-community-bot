@@ -50,7 +50,9 @@ CLAIM_SPECS = [
     # 투자의견은 …' 줄까지 값으로 잡아, 값이 없는 리포트에 가짜 주장이 생긴다.
     ("target",    "제시 적정가격", r"제시 적정가격:\s*([^\n]+)", "{}"),
     ("opinion",   "투자의견",      r"투자의견:\s*([^\n]+)", "{}"),
-    ("broker",    "발간 증권사",   r"작성[:\s]*([^\n]+)", "{}"),
+    # 한경은 '작성: X증권 홍길동', 네이버는 '발간: X증권 / 2026.09.11' 이다.
+    # '작성:' 만 보면 네이버 리포트에는 broker 주장이 아예 생기지 않는다.
+    ("broker",    "발간 증권사",   r"(?:작성|발간)[:\s]*([^\n/]+)", "{}"),
     ("inquiry",   "조회공시 답변", r"답변 성격[:\s]*([^\n]+)", "{}"),
     ("scale_vs",  "규모 비교",     r"(?:최근 매출액 대비|자산총액 대비|발행주식 대비)"
                                     r"[:\s]*([\d.]+)\s*%", "{}%"),
@@ -160,6 +162,13 @@ def select(item: dict, n: int, angle: str = "") -> list[dict]:
     off = (seed % len(rest)) if rest else 0
     picked = pref + rest[off:] + rest[:off]
     keep = picked[:n]
+    # 목표가·투자의견을 쓰는 순간 출처 표기가 의무가 된다(filters 출처없는목표주가).
+    # 앵커가 broker 를 밀어내면 모델은 '한 증권사로부터' 라고 쓰고 그대로 리젝된다
+    # (실측 #122: research:출처없는목표주가 3건, #121 에는 없던 리젝이다).
+    # 출처는 주장이 아니라 귀속이므로 n 에 포함시키지 않는다 — 종목코드·날짜와 같다.
+    if (item.get("kind") == "research" and "broker" in order
+            and ("target" in keep or "opinion" in keep)):
+        keep = keep + ["broker"]
     return [c for c in cs if c["type"] in keep]
 
 
