@@ -50,6 +50,9 @@ CLAIM_SPECS = [
     # 투자의견은 …' 줄까지 값으로 잡아, 값이 없는 리포트에 가짜 주장이 생긴다.
     ("target",    "제시 적정가격", r"제시 적정가격:\s*([^\n]+)", "{}"),
     ("opinion",   "투자의견",      r"투자의견:\s*([^\n]+)", "{}"),
+    # 리포트 요지. 제목·목표가만으로는 '제목만 반복' 이 돼 fit 이 1~2점에 머문다
+    # (#124 리서치 10건 전건). 요지를 주장으로 등록해 본문의 근거가 되게 한다.
+    ("gist",      "리포트 요지",   r"리포트 요지[:\s]*([^\n]+)", "{}"),
     # 한경은 '작성: X증권 홍길동', 네이버는 '발간: X증권 / 2026.09.11' 이다.
     # '작성:' 만 보면 네이버 리포트에는 broker 주장이 아예 생기지 않는다.
     # '발간일:' 을 먼저 잡으면 broker 가 날짜가 된다(한경은 발간일·작성 두 줄을
@@ -64,7 +67,7 @@ CLAIM_SPECS = [
     ("region",    "공급 지역",     r"공급 지역[:\s]*([^\n]+)", "{}"),
     ("sector",    "회사 사업내용", r"(?:주력|영위)[^\n]*", "{}"),
     ("term_def",  "용어 설명",     r"용어 설명[:\s]*([^\n]+)", "{}"),
-    ("policy",    "정책·발표 내용", r"요지[:\s]*([^\n]{10,200})", "{}"),
+    ("policy",    "정책·발표 내용", r"(?m)^요지[:\s]*([^\n]{10,200})", "{}"),
 ]
 
 # claim type 자체를 두지 않는 것들. 목록에 없으므로 쓸 수 없다.
@@ -117,18 +120,17 @@ def build(item: dict) -> list[dict]:
 
 # 앵글별 우선 주장. "이 글이 알려줄 하나"에 직결되는 것부터 고른다.
 ANGLE_PREF = {
-    "reaction":    ["change", "close", "turnover", "gap"],
-    "compare":     ["vol_ratio", "ret5", "range", "close_pos", "ma20", "extreme"],
-    "ratio":       ["ratio_mg", "scale_vs", "stake", "conv_prc", "vol_ratio", "rate",
-                    "ma20"],
-    "amount":      ["issue_amt", "scale_vs", "turnover", "shares", "target"],
-    "terms":       ["conv_prc", "rate", "ratio_mg", "counterpart", "opinion", "target", "maturity"],
-    "purpose":     ["purpose", "contract", "counterpart", "issue_amt", "event"],
-    "duration":    ["maturity", "ret5", "event", "streak", "extreme"],
-    "decode":      ["term_def", "event", "contract", "sector", "region"],
+    "reaction":    ["change", "gist", "close", "turnover", "gap"],
+    "compare":     ["vol_ratio", "gist", "ret5", "range", "close_pos", "ma20", "extreme"],
+    "ratio":       ["ratio_mg", "gist", "scale_vs", "stake", "conv_prc", "vol_ratio", "rate", "ma20"],
+    "amount":      ["issue_amt", "gist", "scale_vs", "turnover", "shares", "target"],
+    "terms":       ["conv_prc", "gist", "rate", "ratio_mg", "counterpart", "opinion", "target", "maturity"],
+    "purpose":     ["purpose", "gist", "contract", "counterpart", "issue_amt", "event"],
+    "duration":    ["maturity", "gist", "ret5", "event", "streak", "extreme"],
+    "decode":      ["term_def", "gist", "event", "contract", "sector", "region"],
     "inquiry":     ["inquiry", "event", "change"],
     "uncertainty": ["event", "change"],
-    "context":     ["sector", "policy", "event"],
+    "context":     ["sector", "gist", "policy", "event"],
 }
 
 
@@ -140,7 +142,12 @@ ANGLE_PREF = {
 # '제목 재진술 수준, 정보 부족'(fit 1~2) 16건 + 사실성 9건으로, 쓸 수 있는 유일한
 # 리포트 고유 사실인 target/opinion 이 terms 앵글 우선순위 5~6번째라 n=2~3 에
 # 잘리고 event(리포트 제목)만 남았다. 공시의 issue_amt 와 같은 실패다.
-ANCHOR_TYPES = {"disclosure": ["issue_amt"], "research": ["target", "opinion"]}
+# 순서가 곧 우선순위다. keep = picked[:n] 이라 앞쪽이 낮은 cap 에서도 살아남는다.
+# 요지를 맨 앞에 둔다 — 정보량이 가장 크고, 목표가로 시작하면 모든 리포트 글이
+# '적정가격 X원' 한 형태로 수렴한다(#124 실측). 투자의견은 'Buy' 한 단어라 맨 뒤.
+# 요지가 없는 경로(한경)에서는 자동으로 target·opinion 이 앞으로 당겨진다.
+ANCHOR_TYPES = {"disclosure": ["issue_amt"],
+                "research": ["gist", "target", "opinion"]}
 
 
 # 결합 사실 계열. 하나도 선정되지 않으면 본문이 종가·등락률만 말하게 되고
