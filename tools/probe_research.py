@@ -9,6 +9,7 @@
 """
 import re
 import sys
+import time
 
 import requests
 from bs4 import BeautifulSoup
@@ -22,6 +23,61 @@ H = {"User-Agent": "Mozilla/5.0", "Referer": "https://finance.naver.com/"}
 def log(s: str = "") -> None:
     print(s)
     OUT.append(s)
+
+
+def probe_naver_api_content(n: int = 5) -> None:
+    """front-api 상세 content 에 어떤 수치 사실이 들어 있는지 본다.
+
+    research.py 는 content 앞 400자에서 목표가·투자의견만 뽑고 버린다
+    (본문은 리포트 저작물이라 저장하지 않는다는 기존 결정).
+    fit 이 구조적으로 1~2점인 원인이 이 밀도 부족이라, 본문 문장이 아니라
+    **수치 사실**을 더 뽑을 수 있는지 확인한다. 어떤 지표가 어떤 표기로
+    나오는지 모르면 패턴을 못 짠다 — 추측하지 않고 덤프한다.
+    """
+    log("\n── 0. 네이버 front-api 상세 content 수치 ──")
+    api = "https://m.stock.naver.com/front-api/research"
+    hdr = {**H, "Accept": "application/json",
+           "Referer": "https://m.stock.naver.com/investment/research/company"}
+    try:
+        r = requests.get(f"{api}/list",
+                         params={"category": "company", "page": 1, "pageSize": 20},
+                         headers=hdr, timeout=20)
+        items = r.json().get("result") or []
+    except Exception as e:
+        log(f"  목록 실패: {e}")
+        return
+    log(f"  목록 {len(items)}건")
+    shown = 0
+    for it in items:
+        if shown >= n:
+            break
+        try:
+            d = requests.get(f"{api}/end",
+                             params={"researchId": it["researchId"],
+                                     "category": "company"},
+                             headers=hdr, timeout=20)
+            html = ((d.json().get("result") or {}).get("researchContent")
+                    or {}).get("content", "")
+        except Exception as e:
+            log(f"  상세 실패: {e}")
+            continue
+        if not html:
+            continue
+        text = BeautifulSoup(html, "html.parser").get_text(" ", strip=True)
+        shown += 1
+        log(f"\n  [{it.get('itemName')}] {it.get('title','')[:40]}")
+        log(f"    content 길이 {len(text):,}자")
+        # 수치가 붙은 어구만 뽑는다. 문장 전체는 남기지 않는다.
+        units = re.findall(r"[가-힣A-Za-z%()\s]{0,12}[\d,.]+\s*"
+                           r"(?:억원|조원|원|%|배|만주|명|건|년|분기)", text)
+        log(f"    수치 어구 {len(units)}개 (앞 25개)")
+        for u in units[:25]:
+            log(f"      · {u.strip()}")
+        # 지표 이름만 따로 — 어떤 항목이 표기되는지 알아야 패턴을 짠다
+        labels = re.findall(r"(매출액|영업이익|순이익|EPS|BPS|PER|PBR|ROE|EBITDA|"
+                            r"영업이익률|배당수익률|목표주가|적정주가|시가총액)", text)
+        log(f"    지표 라벨: {sorted(set(labels))}")
+        time.sleep(0.4)
 
 
 def probe_naver_detail(n: int = 3) -> None:
@@ -102,6 +158,7 @@ def probe_hk_detail(n: int = 2) -> None:
 
 
 def main() -> None:
+    probe_naver_api_content()
     probe_naver_detail()
     probe_hk_detail()
     with open("data/research_probe.txt", "w", encoding="utf-8") as f:
