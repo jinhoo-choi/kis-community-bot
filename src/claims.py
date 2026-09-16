@@ -189,7 +189,12 @@ def select(item: dict, n: int, angle: str = "") -> list[dict]:
     if (item.get("kind") == "research" and "broker" in order
             and ("target" in keep or "opinion" in keep)):
         keep = keep + ["broker"]
-    return [c for c in cs if c["type"] in keep]
+    # 고른 순서대로 돌려준다. CLAIM_SPECS 순서로 돌려주면 블록 맨 위가 늘
+    # change·close(스펙 앞쪽)라, 앵글이 무엇이든 모델이 등락률부터 쓴다.
+    # 실측 #123: claim 조합은 43건에 28가지인데 첫 문장은 전건이 '<종목> + 등락률'
+    # 한 형태였다. 여기서 순서를 주면 앵글 수만큼 진입이 갈린다.
+    by_type = {c["type"]: c for c in cs}
+    return [by_type[t] for t in keep if t in by_type]
 
 
 def block(item: dict, use_n: int = 3, angle: str = "") -> str:
@@ -198,9 +203,12 @@ def block(item: dict, use_n: int = 3, angle: str = "") -> str:
     if not cs:
         return ""
     lines = [f"- {c['label']}: {c['value']}" for c in cs]
+    # 첫 줄이 이 글의 진입점이다. 지정하지 않으면 모델이 늘 등락률로 시작한다.
+    lead = f"\n첫 문장은 '{cs[0]['label']}' 로 시작합니다. 나머지는 그다음에 씁니다.\n"
     return (
         "[이번 글에 쓸 사실 — 아래 것만 씁니다]\n"
         + "\n".join(lines)
+        + lead
         + "\n\n입력에 다른 사실이 있어도 이번 글에는 쓰지 마세요. 고르는 일은 이미 끝났습니다.\n"
         + "숫자가 없는 문장도 위 사실에서 직접 확인되는 내용이어야 합니다. "
           "평가·정의·배경을 새로 보태지 마세요.\n"

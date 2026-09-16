@@ -10,6 +10,7 @@
 코드가 라벨을 붙여 facts 에 넣어주면 모델은 인용만 하면 된다.
 라벨은 서술적 사실에 한정한다 — 원인·전망·투자판단은 넣지 않는다.
 """
+import os
 import re
 
 # 국내 주식 일일 가격제한폭. 초과분은 버린다.
@@ -83,12 +84,20 @@ GLOSSARY = [
 TERM_KINDS = ("disclosure", "research", "inquiry", "policy")
 
 
+# 같은 설명이 여러 글에 반복되면 피드가 사전이 된다. 한 용어당 상한을 둔다.
+# 실측 #124: 리서치 10건 중 9건에 '적정가격은 증권사가 …' 가 그대로 들어갔다.
+# 쓸 사실이 목표가·투자의견 둘뿐이라 모델이 나머지를 설명으로 채운 결과다.
+TERM_REPEAT_CAP = int(os.environ.get("TERM_REPEAT_CAP", "3"))
+
+
 def annotate_terms(items: list[dict]) -> int:
     """확정 사전에 있는 용어가 나오면 설명 한 줄을 facts 에 붙인다. 붙인 건수 반환.
 
-    여러 개를 붙이면 글이 사전이 된다. 항목당 하나만 붙인다.
+    여러 개를 붙이면 글이 사전이 된다. 항목당 하나만 붙이고,
+    같은 용어는 이번 회차에 TERM_REPEAT_CAP 건까지만 붙인다.
     """
     n = 0
+    used: dict[str, int] = {}
     for it in items:
         if it.get("kind") not in TERM_KINDS:
             continue
@@ -97,10 +106,14 @@ def annotate_terms(items: list[dict]) -> int:
             continue
         text = f"{it.get('title', '')}\n{facts}"
         for word, desc in GLOSSARY:
-            if word in text:
-                it["facts"] = (facts.rstrip() + f"\n용어 설명: {desc}").strip()
-                n += 1
-                break
+            if word not in text:
+                continue
+            if used.get(word, 0) >= TERM_REPEAT_CAP:
+                break          # 상한에 걸린 용어는 이 항목에 붙이지 않는다
+            it["facts"] = (facts.rstrip() + f"\n용어 설명: {desc}").strip()
+            used[word] = used.get(word, 0) + 1
+            n += 1
+            break
     return n
 
 

@@ -1783,6 +1783,42 @@ def main():
                   all("broker" in [c["type"] for c in _claims.select(_ri, n, "terms")]
                       for n in (2, 3)),
                   str([c["type"] for c in _claims.select(_ri, 2, "terms")])))
+    # #123 실측: claim 조합은 43건에 28가지인데 첫 문장은 전건이 '<종목>+등락률'
+    # 한 형태였다. 블록이 CLAIM_SPECS 순서로 나가 늘 change·close 가 맨 위였다.
+    _mk = {"kind": "flow", "stock_code": "017900",
+           "facts": ("기준일: 2026-09-14\n종목: 광전자 (017900)\n종가: 10,270원\n"
+                     "등락률: 30.00%\n" + _f.DERIVED_HEADER + "\n"
+                     "· 거래량: 20일 평균의 11.8배\n"
+                     "· 5거래일 누적 등락률: +44.85%\n"
+                     "· 장중 고저 차이: 저가 대비 33.4%\n"
+                     "· 20일 이동평균 대비: 31.5% 위\n")}
+    _leads = {_claims.select(_mk, 4, a)[0]["type"]
+              for a in ("reaction", "compare", "duration", "ratio", "amount")}
+    ok.append(run("앵글마다 진입 사실이 갈림", len(_leads) >= 2, str(sorted(_leads))))
+    ok.append(run("주장 블록이 첫 문장 진입점을 지정",
+                  "첫 문장은" in _claims.block(_mk, 4, "duration")))
+
+    # 같은 설명이 여러 글에 반복되면 피드가 사전이 된다 (실측 #124: 10건 중 9건).
+    _many = [{"kind": "research", "title": "A", "facts": "제시 적정가격: 1원\n"}
+             for _ in range(10)]
+    ok.append(run("같은 용어 설명은 회차당 상한까지만 주입",
+                  _f.annotate_terms(_many) == _f.TERM_REPEAT_CAP,
+                  str(sum(1 for i in _many if "용어 설명:" in i["facts"]))))
+
+    # 값을 말할 때만 출처가 필요하다. 정의 문장은 목표주가 단정이 아니다.
+    _rfacts = ("종목: A (000000)\n리포트 제목: X\n발간: IBK투자증권 / 2026-09-15\n"
+               "제시 적정가격: 120,000원\n투자의견: 매수\n")
+    _defonly = ("A 관련 리포트가 나왔네요. 적정가격은 증권사가 리포트에서 제시한 "
+                "값이며 회사가 정한 가격이 아닙니다. 참고만 하시면 되겠어요.")
+    _noattr = "A가 적정가격 120,000원을 받았습니다. 투자의견은 매수인데요. 참고하세요."
+    ok.append(run("정의 문장은 출처 요구 대상이 아님",
+                  not any("출처없는목표주가" == e for e in _filters.check(
+                      _defonly, _rfacts, None, "terms", "fact_note", None, False,
+                      "research", "000000"))
+                  and any("출처없는목표주가" == e for e in _filters.check(
+                      _noattr, _rfacts, None, "terms", "fact_note", None, False,
+                      "research", "000000"))))
+
     ok.append(run("네이버 '발간:' 형식도 broker 로 인식",
                   any(c["type"] == "broker" and "미래에셋증권" in c["value"]
                       for c in _claims.build(_ri))))

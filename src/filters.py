@@ -181,7 +181,10 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
 
     # 리포트 수치는 '누가 제시했는지' 가 붙어야 인용이 된다.
     # 주어가 없으면 봇의 단정으로 읽힌다 (실측 #72: fatal 목표주가 단정).
-    if re.search(r"적정가격|목표주가", body) and "리포트" in (facts or ""):
+    # 값을 말할 때만 출처가 필요하다. '적정가격은 증권사가 제시한 값' 같은 정의
+    # 문장은 목표주가 단정이 아니다. 코드가 붙이는 용어 설명이 정확히 이 형태라,
+    # 그 문장만 인용해도 리젝되던 충돌이 있었다(감사 I2).
+    if re.search(r"(적정가격|목표주가)\D{0,20}[\d,]{3,}", body) and "리포트" in (facts or ""):
         firms = re.findall(r"([가-힣A-Za-z]{2,10}(?:증권|투자증권|자산운용|IR협의회))",
                            facts or "")
         if not any(f in body for f in firms):
