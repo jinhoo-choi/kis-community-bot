@@ -1819,6 +1819,36 @@ def main():
                       _noattr, _rfacts, None, "terms", "fact_note", None, False,
                       "research", "000000"))))
 
+    # #124: facts 가 제목·목표가·투자의견 셋뿐이라 fit 이 전건 1~2점이었다
+    # ('제목만 반복, 근거 내용 부재'). 요지를 사실로 넘겨 근거를 준다.
+    _gf = ("종목: 셀트리온 (068270)\n리포트 제목: 가속성장페달\n"
+           "발간: 미래에셋증권 / 2026-09-16\n제시 적정가격: 300,000원\n투자의견: Buy\n"
+           "리포트 요지: 2027년 매출액 약 7.1조원, 영업이익 2조 1,203억원을 전망한다.\n")
+    _gi = {"kind": "research", "stock_code": "068270", "facts": _gf}
+    ok.append(run("요지는 낮은 cap 에서도 선정",
+                  all("gist" in [c["type"] for c in _claims.select(_gi, n, "terms")]
+                      for n in (2, 3, 4)),
+                  str([c["type"] for c in _claims.select(_gi, 2, "terms")])))
+    ok.append(run("요지가 첫 문장 진입점",
+                  _claims.select(_gi, 3, "terms")[0]["type"] == "gist"))
+    ok.append(run("요지 없는 리포트는 목표가·투자의견이 앞으로",
+                  [c["type"] for c in _claims.select(
+                      {"kind": "research",
+                       "facts": "리포트 제목: X\n작성: 유안타증권 홍길동\n"
+                                "제시 적정가격: 30,000원\n투자의견: Buy\n"}, 2, "terms")]
+                  == ["target", "opinion", "broker"]))
+    # '리포트 요지:' 가 policy 주장으로도 잡히면 리서치 글에 정책 주장이 섞인다
+    ok.append(run("리포트 요지가 policy 주장과 충돌하지 않음",
+                  "policy" not in [c["type"] for c in _claims.build(_gi)]
+                  and "policy" in [c["type"] for c in _claims.build(
+                      {"kind": "policy",
+                       "facts": "출처: 연합뉴스\n요지: 정부가 정책금융을 "
+                                "1천490억원으로 늘리는 방안을 발표했다.\n"})]))
+    ok.append(run("요지만 있어도 리포트 게이트 통과",
+                  _gate.has_substance({"kind": "research",
+                                       "facts": "종목: A (000000)\n리포트 제목: X\n"
+                                                "리포트 요지: 매출이 늘 것으로 본다.\n"})))
+
     ok.append(run("네이버 '발간:' 형식도 broker 로 인식",
                   any(c["type"] == "broker" and "미래에셋증권" in c["value"]
                       for c in _claims.build(_ri))))

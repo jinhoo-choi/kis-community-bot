@@ -75,6 +75,28 @@ _TP_API = re.compile(r"목표주가[는를]?\s*([\d,]+)\s*원")
 _OP_API = re.compile(r"투자의견\s*([A-Za-z가-힣.]+)")
 
 
+GIST_MAX = 180         # 요지로 넘길 최대 길이. 원문을 통째로 싣지 않기 위한 상한
+
+
+def _gist(text: str) -> str:
+    """본문에서 요지를 만든다. 문장 경계로 자르고 상한을 넘기지 않는다.
+
+    목표가·투자의견을 알리는 첫 문장은 이미 별도 사실로 뽑혀 있으므로 건너뛴다.
+    같은 내용을 두 번 주면 모델이 그 문장만 되풀이한다.
+    """
+    if not text:
+        return ""
+    sents = [x.strip() for x in re.split(r"(?<=다[.!?])\s+", text) if x.strip()]
+    out = []
+    for s in sents:
+        if _TP_API.search(s) or _OP_API.search(s):
+            continue                      # 목표가·투자의견 문장은 중복이다
+        if len(" ".join(out + [s])) > GIST_MAX:
+            break
+        out.append(s)
+    return " ".join(out).strip()
+
+
 def fetch_naver_api(limit: int = 12) -> list[dict]:
     """개편된 네이버 리서치 API. 프로브로 확정한 경로다.
 
@@ -83,7 +105,18 @@ def fetch_naver_api(limit: int = 12) -> list[dict]:
 
     구 HTML 파싱보다 낫다. itemCode 가 JSON 에 직접 들어 있어 종목 귀속이
     정확하고, 상세 content 첫 문장에 목표주가·투자의견이 명시된다.
-    본문 자체는 리포트 저작물이라 저장하지 않는다. 수치만 뽑는다.
+
+    content 취급 (2026-09-16 변경, 사용자 컴플라이언스 확인 완료)
+      종전에는 수치만 뽑고 본문을 버렸다. 그 결과 facts 가 제목·목표가·
+      투자의견 셋뿐이라 fit 이 구조적으로 1~2점이었다(#124 리서치 10건 전건,
+      심사 사유 '제목만 반복, 근거 내용 부재').
+      프로브 실측: content 는 273~586자 애널리스트 요약문이고, 정형 실적
+      수치가 있는 것은 5건 중 1건뿐이라 '수치만 더 뽑기' 로는 밀도가 안 는다.
+      그래서 요지를 사실로 넘긴다. 다만 원문을 그대로 싣지 않는다.
+        - 문장 경계로 잘라 GIST_MAX 자까지만 넘긴다
+        - 발간 증권사 표기가 의무다(filters 출처없는목표주가)
+        - 원문은 문어체라 그대로 베끼면 literary_style·어미단조에 걸린다.
+          모델이 구어체로 다시 쓸 수밖에 없는 구조다
     """
     hdr = {"Accept": "application/json",
            "Referer": "https://m.stock.naver.com/investment/research/company"}
@@ -103,7 +136,7 @@ def fetch_naver_api(limit: int = 12) -> list[dict]:
         code, name = it.get("itemCode", ""), it.get("itemName", "")
         if not re.fullmatch(r"\d{6}", code or ""):
             continue          # 0017J0 같은 비정형 코드는 건너뛴다
-        tp = op = ""
+        tp = op = gist = ""
         try:
             d = crawl.requests.get(f"{RESEARCH_API}/end",
                                    params={"researchId": it["researchId"],
@@ -111,10 +144,12 @@ def fetch_naver_api(limit: int = 12) -> list[dict]:
                                    headers={**crawl.HEADERS, **hdr}, timeout=15)
             html = ((d.json().get("result") or {}).get("researchContent")
                     or {}).get("content", "")
-            text = BeautifulSoup(html, "html.parser").get_text(" ", strip=True)[:400]
+            full = BeautifulSoup(html, "html.parser").get_text(" ", strip=True)
+            text = full[:400]
             m1, m2 = _TP_API.search(text), _OP_API.search(text)
             tp = m1.group(1) if m1 else ""
             op = m2.group(1) if m2 else ""
+            gist = _gist(full)
         except Exception:
             pass
         crawl.sleep_jitter(0.2, 0.5)
@@ -124,6 +159,8 @@ def fetch_naver_api(limit: int = 12) -> list[dict]:
             detail += f"제시 적정가격: {tp}원\n"
         if op and "없음" not in op:
             detail += f"투자의견: {op}\n"
+        if gist:
+            detail += f"리포트 요지: {gist}\n"
         out.append({
             "id": f"naver-api-{it['researchId']}",
             "kind": "research",
