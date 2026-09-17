@@ -1864,10 +1864,31 @@ def main():
                       {"kind": "policy",
                        "facts": "출처: 연합뉴스\n요지: 정부가 정책금융을 "
                                 "1천490억원으로 늘리는 방안을 발표했다.\n"})]))
-    ok.append(run("요지만 있어도 리포트 게이트 통과",
-                  _gate.has_substance({"kind": "research",
-                                       "facts": "종목: A (000000)\n리포트 제목: X\n"
-                                                "리포트 요지: 매출이 늘 것으로 본다.\n"})))
+    # PR #27 은 요지를 게이트 글감으로도 인정했는데, 그 결과 목표가·투자의견이
+    # 없는 IR 소개자료가 통과해 리서치 발송을 점령했다(실측 #125: 발송 8건 중
+    # 7건이 한국IR협의회, fit 1점 6건). 요지는 밀도 보강용이지 통과 사유가 아니다.
+    ok.append(run("요지만으로는 리포트 게이트 미통과",
+                  not _gate.has_substance({
+                      "kind": "research",
+                      "facts": "종목: A (000000)\n리포트 제목: X\n"
+                               "리포트 요지: 사업분야는 실리콘 부품으로 구성되어 있다.\n"})
+                  and _gate.has_substance({
+                      "kind": "research",
+                      "facts": "종목: B (000001)\n리포트 제목: Y\n"
+                               "제시 적정가격: 50,000원\n투자의견: 매수\n"
+                               "리포트 요지: 2027년 매출 개선을 전망한다.\n"})))
+
+    # '투자의견 및 목표주가를 제시한다' 에서 '및' 을 값으로 잡아 그대로 나갔다
+    # (실측 #125 fatal: 투자의견 '및'은 오류값을 그대로 노출).
+    from src.sources import research as _res
+    def _op(t):
+        m = _res._OP_API.search(t)
+        return m.group(1) if m else None
+    ok.append(run("투자의견은 정해진 값만 인식",
+                  _op("투자의견 및 목표주가를 제시한다") is None
+                  and _op("투자의견을 제시하지 않았다") is None
+                  and _op("투자의견 매수 및 목표주가 80,000원") == "매수"
+                  and _op("투자의견 비중확대로 상향") == "비중확대"))
 
     ok.append(run("네이버 '발간:' 형식도 broker 로 인식",
                   any(c["type"] == "broker" and "미래에셋증권" in c["value"]
