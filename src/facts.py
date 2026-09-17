@@ -288,6 +288,16 @@ def evaluate(r: dict) -> list[str]:
             out.append(f"{who} {side}: {abs(v)/1e8:,.0f}억원 "
                        f"(거래대금 대비 {share:.1f}%)")
 
+    # 평소 대비 오늘이 얼마나 큰 움직임인지. '29% 올랐다' 보다 실질적이다.
+    mx = r.get("move_x")
+    if mx and mx >= 2.0:
+        out.append(f"등락 크기: 최근 20거래일 평균 등락폭의 {mx:.1f}배")
+    dd = r.get("drawdown20")
+    if dd is not None and dd <= -8.0:
+        out.append(f"고점 대비: 최근 20거래일 최고 종가 대비 {abs(dd):.1f}% 아래")
+    if r.get("gap_filled"):
+        out.append("갭 되돌림: 상승 출발 후 장중에 전일 종가까지 되돌림")
+
     sr = r.get("short_ratio")
     avg40 = r.get("short_avg40")
     if sr is not None and avg40:

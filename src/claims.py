@@ -50,6 +50,10 @@ CLAIM_SPECS = [
     # 투자의견은 …' 줄까지 값으로 잡아, 값이 없는 리포트에 가짜 주장이 생긴다.
     ("target",    "제시 적정가격", r"제시 적정가격:\s*([^\n]+)", "{}"),
     ("opinion",   "투자의견",      r"투자의견:\s*([^\n]+)", "{}"),
+    # 추가 요청 0회로 만든 결합 사실. rows(45일 OHLCV)는 이미 받아오고 있었다.
+    ("move_x",    "등락 크기",     r"등락 크기[:\s]*([^\n]+)", "{}"),
+    ("drawdown",  "고점 대비",     r"고점 대비[:\s]*([^\n]+)", "{}"),
+    ("gapfill",   "갭 되돌림",     r"갭 되돌림[:\s]*([^\n]+)", "{}"),
     # 리포트 요지. 제목·목표가만으로는 '제목만 반복' 이 돼 fit 이 1~2점에 머문다
     # (#124 리서치 10건 전건). 요지를 주장으로 등록해 본문의 근거가 되게 한다.
     ("gist",      "리포트 요지",   r"리포트 요지[:\s]*([^\n]+)", "{}"),
@@ -120,13 +124,13 @@ def build(item: dict) -> list[dict]:
 
 # 앵글별 우선 주장. "이 글이 알려줄 하나"에 직결되는 것부터 고른다.
 ANGLE_PREF = {
-    "reaction":    ["change", "gist", "close", "turnover", "gap"],
-    "compare":     ["vol_ratio", "gist", "ret5", "range", "close_pos", "ma20", "extreme"],
-    "ratio":       ["ratio_mg", "gist", "scale_vs", "stake", "conv_prc", "vol_ratio", "rate", "ma20"],
-    "amount":      ["issue_amt", "gist", "scale_vs", "turnover", "shares", "target"],
+    "reaction":    ["change", "gist", "move_x", "close", "turnover", "gap"],
+    "compare":     ["vol_ratio", "gist", "drawdown", "ret5", "range", "close_pos", "ma20", "extreme"],
+    "ratio":       ["ratio_mg", "move_x", "gist", "scale_vs", "stake", "conv_prc", "vol_ratio", "rate", "ma20"],
+    "amount":      ["issue_amt", "gist", "gapfill", "scale_vs", "turnover", "shares", "target"],
     "terms":       ["conv_prc", "gist", "rate", "ratio_mg", "counterpart", "opinion", "target", "maturity"],
     "purpose":     ["purpose", "gist", "contract", "counterpart", "issue_amt", "event"],
-    "duration":    ["maturity", "gist", "ret5", "event", "streak", "extreme"],
+    "duration":    ["maturity", "gist", "drawdown", "ret5", "event", "streak", "extreme"],
     "decode":      ["term_def", "gist", "event", "contract", "sector", "region"],
     "inquiry":     ["inquiry", "event", "change"],
     "uncertainty": ["event", "change"],
