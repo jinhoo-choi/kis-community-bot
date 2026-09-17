@@ -351,6 +351,12 @@ def _metadata_numbers(item: dict) -> set[str]:
     # 기간 단위를 값에서 제외한다. 여기에만 빠져 있어 본문이 지표명을 그대로
     # 인용하면 근거없는수치로 리젝됐다 (실측 #121: flow:근거없는수치['20'] 12건,
     # 캐시 197건 재현 시 24건).
+    # 검색 보강이 붙인 '[검색으로 확인된 배경]' 줄도 코드가 넣은 사실이다.
+    # 이 블록은 어떤 CLAIM_SPEC 에도 매핑되지 않아 프롬프트에 그대로 남는데,
+    # 인용하면 근거없는수치로 리젝된다(감사 I1, 실측 #125 공시 2건).
+    facts_txt = item.get("facts", "")
+    if "[검색으로 확인된 배경]" in facts_txt:
+        out |= _nums(facts_txt.split("[검색으로 확인된 배경]", 1)[1])
     for m in re.finditer(r"(?<!\d)(\d+)\s*(?:거래일|일|개월|년)(?!\d)",
                          item.get("facts", "")):
         out.add(m.group(1))

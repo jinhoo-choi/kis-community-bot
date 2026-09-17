@@ -72,7 +72,12 @@ def _naver_detail(url: str) -> str:
 
 RESEARCH_API = "https://m.stock.naver.com/front-api/research"
 _TP_API = re.compile(r"목표주가[는를]?\s*([\d,]+)\s*원")
-_OP_API = re.compile(r"투자의견\s*([A-Za-z가-힣.]+)")
+# 값만 받는다. '투자의견 및 목표주가를 제시한다' 에서 '및' 을 값으로 잡아
+# 그대로 본문에 나갔다(실측 #125 fatal: 투자의견 '및'은 오류값을 그대로 노출).
+_OP_VALUES = ("매수", "중립", "보유", "비중확대", "비중축소", "매도",
+              "Buy", "BUY", "Hold", "HOLD", "Neutral", "Sell", "SELL",
+              "Outperform", "Marketperform", "Underperform", "Overweight")
+_OP_API = re.compile(r"투자의견\s*(" + "|".join(_OP_VALUES) + r")")
 
 
 GIST_MAX = 180         # 요지로 넘길 최대 길이. 원문을 통째로 싣지 않기 위한 상한
@@ -86,6 +91,10 @@ def _gist(text: str) -> str:
     """
     if not text:
         return ""
+    # IR 소개자료는 '1 주요 제품 및 연혁' 같은 목차 머리글이 본문 앞에 붙는다.
+    # 그대로 넘기면 본문에 목차 번호가 나간다(실측 #125 노머스·월덱스).
+    text = re.sub(r"(?:^|\s)\d{1,2}\s*(?=[가-힣])(?=[^.]{2,20}(?:연혁|개요|현황|"
+                  r"제품|사업|전망|투자포인트|실적|요약))", " ", text)
     sents = [x.strip() for x in re.split(r"(?<=다[.!?])\s+", text) if x.strip()]
     out = []
     for s in sents:
