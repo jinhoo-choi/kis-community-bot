@@ -268,6 +268,29 @@ def _add_history(r: dict):
             if avg > 0:
                 r["vol_x"] = int(last[5]) / avg
 
+        # 아래 셋은 이미 받아온 rows 에서 계산한다. 추가 요청이 0회다.
+        # 실측 #125: 결합 사실이 2개 이하인 항목이 195건 중 38건(19%)이라
+        # 글이 얇아진다. 입력 축을 늘리는 가장 싼 방법이 이것이다.
+        closes = [int(x[4]) for x in rows[-22:] if x[4]]
+        if len(closes) >= 21:
+            rets = [abs((closes[i] - closes[i - 1]) / closes[i - 1] * 100)
+                    for i in range(1, len(closes)) if closes[i - 1]]
+            prior = rets[:-1]                      # 당일을 뺀 최근 20거래일
+            if prior:
+                base = sum(prior) / len(prior)
+                if base > 0.3:                     # 거의 안 움직이던 종목은 배수가 튄다
+                    r["move_x"] = abs(r.get("pct") or rets[-1]) / base
+        highs = [int(x[4]) for x in rows[-21:-1] if x[4]]
+        if highs and last[4]:
+            peak = max(highs)
+            if peak > 0:
+                r["drawdown20"] = (int(last[4]) - peak) / peak * 100
+        # 갭 상승으로 출발해 장중에 그 갭을 되돌렸는지. 시가·저가·전일 종가만 쓴다.
+        if last[1] and last[3] and r.get("prev_close"):
+            op_, lo_, pv_ = int(last[1]), int(last[3]), r["prev_close"]
+            if op_ > pv_ and lo_ <= pv_:
+                r["gap_filled"] = True
+
         # 이미 받아온 45일 종가로 시간축 값을 만든다. 추가 호출은 없다.
         # 실측: 발송 46건이 등락률·종가·거래량배수·5거래일 네 값의 재배열이었다.
         # 같은 날 수치만으로는 글이 갈리지 않는다.
@@ -510,6 +533,25 @@ def fetch(limit: int = 12) -> list[dict]:
     targets = rows[:limit]
     with cf.ThreadPoolExecutor(max_workers=8) as ex:
         list(ex.map(_enrich_one, targets))
+
+    # 수급 결합 사실이 실측 0건이다(#125, 195건). 파싱 실패인지 임계(5%) 때문인지
+    # 로그가 없어 구분이 안 된다. 계측만 남긴다 — 동작은 바꾸지 않는다.
+    _got = [r for r in targets if r.get("frgn_net") or r.get("inst_net")]
+    _shares = []
+    for r in _got:
+        tv = r.get("eok")
+        for k in ("frgn_net", "inst_net"):
+            if r.get(k) and tv:
+                _shares.append(abs(r[k]) / 1e8 / tv * 100)
+    _shares.sort()
+    if _shares:
+        _p = lambda q: _shares[min(int(len(_shares) * q), len(_shares) - 1)]
+        print(f"[market] 수급 파싱 {len(_got)}/{len(targets)}종목 / "
+              f"거래대금 대비 비중 중앙 {_p(0.5):.2f}% "
+              f"p75 {_p(0.75):.2f}% p90 {_p(0.9):.2f}% 최대 {_shares[-1]:.2f}% "
+              f"(현재 출력 임계 5.0%, 넘는 건 {sum(1 for x in _shares if x >= 5):d}건)")
+    else:
+        print(f"[market] ⚠ 수급 파싱 0/{len(targets)}종목 — frgn.naver 파싱 실패")
 
     out = []
     for r in rows[:limit]:

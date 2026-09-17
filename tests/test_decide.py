@@ -1783,6 +1783,33 @@ def main():
                   all("broker" in [c["type"] for c in _claims.select(_ri, n, "terms")]
                       for n in (2, 3)),
                   str([c["type"] for c in _claims.select(_ri, 2, "terms")])))
+    # 실측 #125: 결합 사실이 2개 이하인 항목이 195건 중 38건(19%)이라 글이 얇다.
+    # rows(45일 OHLCV)는 이미 받아오고 있었으므로 추가 요청 0회로 축을 늘린다.
+    _fr = {"pct": 29.5, "move_x": 4.2, "drawdown20": -12.3, "gap_filled": True,
+           "close": 13910, "prev_close": 10740, "open": 11000,
+           "high": 14000, "low": 10500, "eok": 320}
+    _dv = _f.evaluate(_fr)
+    ok.append(run("등락 크기·고점 대비·갭 되돌림이 결합 사실로 나옴",
+                  sum(1 for x in _dv if x.startswith(("등락 크기", "고점 대비",
+                                                      "갭 되돌림"))) == 3,
+                  str([x[:14] for x in _dv])))
+    # 임계 미만이면 붙이지 않는다. 평범한 날까지 붙으면 사실이 싱거워진다.
+    ok.append(run("임계 미만이면 붙이지 않음",
+                  not [x for x in _f.evaluate({**_fr, "move_x": 1.4,
+                                               "drawdown20": -2.0,
+                                               "gap_filled": False})
+                       if x.startswith(("등락 크기", "고점 대비", "갭 되돌림"))]))
+    # facts 의 수치 줄은 CLAIM_SPEC 에 매핑돼야 한다(감사 I1). 아니면 프롬프트에
+    # 남아 있으면서 인용하면 근거없는수치로 리젝된다.
+    _fit = {"kind": "flow", "stock_code": "000000",
+            "facts": ("기준일: 2026-09-16\n종목: A (000000)\n종가: 13,910원\n"
+                      "등락률: 29.52%\n" + _f.DERIVED_HEADER + "\n"
+                      + "\n".join("· " + x for x in _dv))}
+    ok.append(run("신규 결합 사실이 주장으로 매핑",
+                  {"move_x", "drawdown", "gapfill"}
+                  <= {c["type"] for c in _claims.build(_fit)},
+                  str([c["type"] for c in _claims.build(_fit)])))
+
     # #123 실측: claim 조합은 43건에 28가지인데 첫 문장은 전건이 '<종목>+등락률'
     # 한 형태였다. 블록이 CLAIM_SPECS 순서로 나가 늘 change·close 가 맨 위였다.
     _mk = {"kind": "flow", "stock_code": "017900",
