@@ -169,6 +169,33 @@ def is_relevant(title: str, desc: str = "") -> tuple[bool, str]:
     return True, ""
 
 
+# 본문 길이 상한이 페르소나별 70~150자다. 요지가 그보다 길면 모델이 다 담으려다
+# 너무김·수치과다에 걸린다(실측 #126: 너무김 3 / 수치과다 3).
+# 재구성할 여지를 남기도록 본문 상한보다 짧게 잡는다.
+GIST_MAX = 110
+
+
+def _gist(text: str) -> str:
+    """요지를 문장 경계로 잘라 상한까지만 넘긴다.
+
+    종전에는 desc[:500] 을 그대로 넘겼다. RSS 요약문은 길고 문어체(-다체)이며
+    수치가 몰려 있어, 모델이 그대로 따라 쓰면 세 필터에 동시에 걸린다.
+    실측 #126: 정책 12건 시도 중 3건 통과(25%). 리젝 11건의 내역이
+    어미단조 5 / 수치과다 3 / 너무김 3 으로, 전부 이 한 원인에서 나온다.
+    research._gist 와 같은 방식이다.
+    """
+    if not text:
+        return ""
+    sents = [x.strip() for x in re.split(r"(?<=다[.!?])\s+", text.strip()) if x.strip()]
+    out = []
+    for s in sents:
+        if len(" ".join(out + [s])) > GIST_MAX:
+            break
+        out.append(s)
+    # 첫 문장 하나도 상한을 넘으면 그 문장만 잘라서라도 준다
+    return " ".join(out).strip() or text.strip()[:GIST_MAX]
+
+
 def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
     try:
         r = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=12)
@@ -200,7 +227,7 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
                 f"출처: {dept}\n"
                 f"보도 시각: {published.strftime('%Y-%m-%d %H:%M KST')}\n"
                 f"제목: {title}\n"
-                f"요지: {desc[:500]}\n"
+                f"요지: {_gist(desc)}\n"
                 f"※ 수혜 종목을 특정하거나 추천하지 말 것. 산업/테마 수준으로만 언급.\n"
                 f"※ 언론 보도이며 정부 확정 발표가 아닐 수 있음. 단정하지 말 것."
             ),
@@ -224,11 +251,17 @@ def fetch(limit: int = 8) -> list[dict]:
         crawl.sleep_jitter(0.6, 1.4)
 
     # 국내 IP 러너로 옮기면 자동으로 살아난다
+    _base = len(out)
     for dept, url in OPTIONAL_FEEDS:
         if len(out) >= limit:
             break
         _read(dept, url, out, limit, optional=True)
 
+    # korea.kr 계열이 실제로 열리는지 로그가 없어 확인이 안 됐다.
+    # 러너가 해외 IP면 전건 0건일 텐데, 그러면 정책 공급은 연합뉴스 2개 피드가
+    # 전부다. 피드를 늘릴지 판단하려면 이 수치가 필요하다.
+    print(f"[policy] 필수 {ok}/{len(FEEDS)}피드 {_base}건 / "
+          f"선택(korea.kr) {len(out) - _base}건")
     crawl.report("policy_rss", len(out), limit if ok else 0,
                  "필수 RSS 전건 실패")
     return out

@@ -76,7 +76,43 @@ def _after_close(now=None) -> bool:
     return now.hour * 60 + now.minute >= config.MARKET_CLOSE_MIN
 
 
-def _cache_save(day: str, items: list[dict], confirmed: bool = False) -> None:
+def _flow_diag(rows: list[dict]) -> dict:
+    """수급 파싱 커버리지와 거래대금 대비 비중 분포.
+
+    수급 결합 사실이 실측 0건인데(#125, 195건) 파싱 실패인지 출력 임계(5%)
+    때문인지 구분할 로그가 없었다.
+    """
+    got = [r for r in rows if r.get("frgn_net") or r.get("inst_net")]
+    shares = []
+    for r in got:
+        tv = r.get("eok")
+        for k in ("frgn_net", "inst_net"):
+            if r.get(k) and tv:
+                shares.append(abs(r[k]) / 1e8 / tv * 100)
+    shares.sort()
+    d = {"rows": len(rows), "parsed": len(got), "ranked":
+         sum(1 for r in rows if r.get("flow_rank")), "over5":
+         sum(1 for x in shares if x >= 5.0)}
+    if shares:
+        q = lambda p: round(shares[min(int(len(shares) * p), len(shares) - 1)], 2)
+        d.update(p50=q(0.5), p75=q(0.75), p90=q(0.9), max=round(shares[-1], 2))
+    return d
+
+
+def _diag_line(d: dict) -> str:
+    if not d:
+        return "[market] 수급 계측 없음"
+    if not d.get("parsed"):
+        return (f"[market] ⚠ 수급 파싱 0/{d.get('rows', 0)}종목 — "
+                f"frgn.naver 파싱 실패 / 수급순위 {d.get('ranked', 0)}종목")
+    return (f"[market] 수급 파싱 {d['parsed']}/{d['rows']}종목 "
+            f"(수급순위 {d.get('ranked', 0)}종목) / 거래대금 대비 비중 "
+            f"중앙 {d.get('p50')}% p75 {d.get('p75')}% p90 {d.get('p90')}% "
+            f"최대 {d.get('max')}% / 출력 임계 5.0% 초과 {d['over5']}건")
+
+
+def _cache_save(day: str, items: list[dict], confirmed: bool = False,
+                diag: dict = None) -> None:
     if len(items) < 10:
         return
     # 장중에 저장하면 오늘 장중 데이터가 '어제 확정치' 로 둔갑한다.
@@ -89,10 +125,19 @@ def _cache_save(day: str, items: list[dict], confirmed: bool = False) -> None:
     try:
         os.makedirs("data", exist_ok=True)
         with open(_CACHE, "w", encoding="utf-8") as f:
-            json.dump({"day": day, "items": items}, f, ensure_ascii=False)
+            json.dump({"day": day, "items": items, "diag": diag or {}},
+                      f, ensure_ascii=False)
         print(f"[market] 캐시 저장 {len(items)}건 (기준일 {day})")
     except Exception as e:
         print(f"[market] 캐시 저장 실패: {e}")
+
+
+def _cache_diag() -> dict:
+    try:
+        with open(_CACHE, encoding="utf-8") as f:
+            return json.load(f).get("diag") or {}
+    except Exception:
+        return {}
 
 
 def _cache_load(day: str, max_age_days: int = 0) -> list[dict]:
@@ -407,6 +452,9 @@ def fetch(limit: int = 12) -> list[dict]:
     cache_need = min(limit, max(20, config.GEN_STAGE_SIZE))
     if len(cached) >= cache_need:
         print(f"[market] 기준일 일치 확정 캐시 {len(cached)}건 사용 (필요 {limit}건)")
+        # 캐시를 쓰면 크롤 경로의 계측이 실행되지 않아 수급 상태가 안 보인다.
+        # 캐시 생성 시점의 계측을 함께 저장해 두고 여기서 다시 찍는다.
+        print(_diag_line(_cache_diag()))
         crawl.report("market", len(cached), limit, "")
         return cached[:limit]
 
@@ -534,24 +582,8 @@ def fetch(limit: int = 12) -> list[dict]:
     with cf.ThreadPoolExecutor(max_workers=8) as ex:
         list(ex.map(_enrich_one, targets))
 
-    # 수급 결합 사실이 실측 0건이다(#125, 195건). 파싱 실패인지 임계(5%) 때문인지
-    # 로그가 없어 구분이 안 된다. 계측만 남긴다 — 동작은 바꾸지 않는다.
-    _got = [r for r in targets if r.get("frgn_net") or r.get("inst_net")]
-    _shares = []
-    for r in _got:
-        tv = r.get("eok")
-        for k in ("frgn_net", "inst_net"):
-            if r.get(k) and tv:
-                _shares.append(abs(r[k]) / 1e8 / tv * 100)
-    _shares.sort()
-    if _shares:
-        _p = lambda q: _shares[min(int(len(_shares) * q), len(_shares) - 1)]
-        print(f"[market] 수급 파싱 {len(_got)}/{len(targets)}종목 / "
-              f"거래대금 대비 비중 중앙 {_p(0.5):.2f}% "
-              f"p75 {_p(0.75):.2f}% p90 {_p(0.9):.2f}% 최대 {_shares[-1]:.2f}% "
-              f"(현재 출력 임계 5.0%, 넘는 건 {sum(1 for x in _shares if x >= 5):d}건)")
-    else:
-        print(f"[market] ⚠ 수급 파싱 0/{len(targets)}종목 — frgn.naver 파싱 실패")
+    diag = _flow_diag(targets)
+    print(_diag_line(diag))
 
     out = []
     for r in rows[:limit]:
@@ -593,6 +625,6 @@ def fetch(limit: int = 12) -> list[dict]:
     # 원본 rows 는 확보됐지만 소재 게이트를 통과한 out 이 없을 수 있다.
     # 이 경우는 수집 장애가 아니라 조건 충족 종목이 없는 정상적인 0건이다.
     # 전종목 일별시세 경로는 날짜를 지정해 가져오므로 장전에도 확정 캐시로 저장 가능하다.
-    _cache_save(day, out, confirmed=from_daily)
+    _cache_save(day, out, confirmed=from_daily, diag=diag)
     crawl.report("market", len(out), limit, "조건 충족 종목 없음")
     return out

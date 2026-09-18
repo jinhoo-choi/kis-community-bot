@@ -1783,6 +1783,25 @@ def main():
                   all("broker" in [c["type"] for c in _claims.select(_ri, n, "terms")]
                       for n in (2, 3)),
                   str([c["type"] for c in _claims.select(_ri, 2, "terms")])))
+    # 보강 결과에 마크다운이 섞여 들어와 format 필터에 걸렸다(감사 I2, #126).
+    from src import enrich as _en
+    ok.append(run("보강 결과의 마크다운 제거",
+                  _en._strip_markup("- **주력 사업**: 바이오  장비를 만든다.")
+                  == "- 주력 사업: 바이오 장비를 만든다."))
+
+    # 정책 요지가 본문 길이 상한(70~150자)보다 길면 모델이 다 담으려다
+    # 너무김·수치과다·어미단조에 동시에 걸린다(실측 #126: 12건 중 3건만 통과).
+    from src.sources import policy as _pol
+    _pd = ("정부가 중소기업 대상 정책금융 규모를 1천490억원으로 늘리는 방안을 "
+           "발표했다. 적용 시점은 2027년 1월이다. 금융위원회는 이날 브리핑에서 "
+           "관련 시행령 개정을 예고했다. 업계는 자금 조달 여건이 개선될 것으로 "
+           "기대하고 있다.")
+    ok.append(run("정책 요지는 상한 안에서 문장 경계로 잘림",
+                  len(_pol._gist(_pd)) <= _pol.GIST_MAX
+                  and _pol._gist(_pd).endswith("다.")
+                  and _pol.GIST_MAX < 150,
+                  f"{len(_pol._gist(_pd))}자"))
+
     # 실측 #125: 결합 사실이 2개 이하인 항목이 195건 중 38건(19%)이라 글이 얇다.
     # rows(45일 OHLCV)는 이미 받아오고 있었으므로 추가 요청 0회로 축을 늘린다.
     _fr = {"pct": 29.5, "move_x": 4.2, "drawdown20": -12.3, "gap_filled": True,

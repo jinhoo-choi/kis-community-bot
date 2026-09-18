@@ -8,6 +8,7 @@
 """
 import concurrent.futures as cf
 import json
+import re
 import os
 import time
 
@@ -71,6 +72,17 @@ USER = """[종목] {stock}
 최근 확인된 관련 사실 위주로."""
 
 
+def _strip_markup(t: str) -> str:
+    """보강 결과에서 마크다운 표기를 걷어낸다.
+
+    모델이 '주력 사업**: …' 처럼 굵게 표기를 섞어 보낸다. 그 줄이 그대로
+    facts 에 들어가고, 본문이 인용하면 format 필터에 걸린다
+    (감사 I2, 실측 #126 disclosure sector).
+    """
+    t = re.sub(r"\*{1,3}|`{1,3}|^#{1,6}\s*", "", t, flags=re.M)
+    return re.sub(r"[ \t]{2,}", " ", t).strip()
+
+
 def _one(item: dict) -> dict:
     g = enricher()
     if g is None or not g.available():
@@ -91,7 +103,7 @@ def _one(item: dict) -> dict:
         max_tokens=400,
     )
     record_usage(r, "enrich")
-    txt = (r.text or "").strip()
+    txt = _strip_markup((r.text or "").strip())
     if not r.ok:
         item["_enrich_error"] = r.error[:200]
         item["_enrich_status"] = "error"
@@ -120,9 +132,12 @@ CALLS = [0]   # 실행당 그라운딩 호출 수. 청구액 역산에 필요하
 def _apply_cached(item: dict, cached: dict) -> bool:
     status = cached.get("status")
     if status == "ok" and cached.get("text") and cached.get("sources"):
-        if cached["text"] not in item.get("facts", ""):
+        # 캐시(TTL 7일)에 마크다운이 섞인 항목이 남아 있다. 저장 시점이 아니라
+        # 적용 시점에도 걷어낸다 — 안 그러면 고친 뒤에도 일주일간 그대로 나간다.
+        text = _strip_markup(cached["text"])
+        if text not in item.get("facts", ""):
             item["facts"] = (item.get("facts", "")
-                             + "\n\n[검색으로 확인된 배경]\n" + cached["text"])
+                             + "\n\n[검색으로 확인된 배경]\n" + text)
         item["enrich_sources"] = cached["sources"]
         item["enriched"] = True
     elif status == "none":
