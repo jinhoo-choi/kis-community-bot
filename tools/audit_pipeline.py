@@ -33,7 +33,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import config                                            # noqa: E402
-from src import claims, facts, filters, gate, angles      # noqa: E402
+from src import claims, enrich, facts, filters, gate, angles   # noqa: E402
 
 FAIL, WARN = [], []
 
@@ -59,11 +59,22 @@ def _cached_flow() -> list[dict]:
 
 
 def _cached_posts() -> list[dict]:
+    """직전 실행의 발송분. 실제 facts 로 감사하려고 쓴다.
+
+    보강 텍스트는 이제 저장·적용 시점에 마크다운을 걷어내지만, 이미 나간
+    항목의 facts 에는 남아 있다. 지난 실행의 흔적으로 현재 코드를 실패로
+    판정하면 감사가 어제를 계속 재판한다. 파이프라인이 지금 하는 것과 같은
+    정리를 거쳐서 읽는다.
+    """
     try:
         with open("data/posts_latest.json", encoding="utf-8") as f:
-            return json.load(f)
+            posts = json.load(f)
     except Exception:
         return []
+    for p in posts:
+        if p.get("facts"):
+            p["facts"] = enrich._strip_markup(p["facts"])
+    return posts
 
 
 SYNTHETIC = [
