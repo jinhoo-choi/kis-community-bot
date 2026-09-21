@@ -204,6 +204,7 @@ def _gist(text: str) -> str:
 
 
 def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
+    _before = len(out)
     try:
         r = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=12)
         r.raise_for_status()
@@ -214,7 +215,11 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
         return False
 
     stale = 0
+    raw = rejected = 0
+    why_top = {}
+    sample = ""
     for it in root.iter("item"):
+        raw += 1
         published = _fresh_published_at(_feed_date(it))
         if published is None:
             stale += 1
@@ -224,8 +229,12 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
         # 섞이고 EXCLUDE 판정도 흔들린다.
         title = re.sub(r"\s+-\s+[^-]{2,20}$", "", title).strip()
         desc = re.sub(r"<[^>]+>", "", it.findtext("description") or "").strip()
+        if not sample:
+            sample = f"{title[:40]} | 요지 {len(desc)}자: {desc[:60]}"
         okay, _why = is_relevant(title, desc)
         if not okay:
+            rejected += 1
+            why_top[_why] = why_top.get(_why, 0) + 1
             continue
         out.append({
             "id": "pol-" + re.sub(r"\W", "", title)[:24],
@@ -245,8 +254,13 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
         })
         if len(out) >= limit:
             return True
-    if stale:
-        print(f"[policy] {dept} 오래됐거나 발행시각 없는 항목 {stale}건 제외")
+    # 피드를 바꿔도 0건이면 어느 단계에서 죽는지 알아야 한다.
+    # 실측 #128: 구글뉴스 경유 선택 피드가 0건인데 원인을 알 수 없었다.
+    top = sorted(why_top.items(), key=lambda x: -x[1])[:3]
+    print(f"[policy] {dept}: 원문 {raw}건 / 시각제외 {stale} / "
+          f"관련성탈락 {rejected} {top} / 채택 {len(out) - _before}")
+    if sample:
+        print(f"[policy] {dept} 표본: {sample}")
     return True
 
 
