@@ -1,6 +1,7 @@
 """배포 판정 테스트. main() 이 아니라 decide.py 의 실제 함수를 호출한다."""
 import pathlib
 import re as _re_mod
+from src.sources import policy as _pol_mod
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -1801,6 +1802,13 @@ def main():
     # (실측 #127: 차단 5 → 11건). 둘의 대소 관계를 고정한다.
     # 구글뉴스 RSS 는 제목 끝에 ' - 출처' 를 붙인다. 그대로 두면 본문에
     # 매체명이 섞이고 EXCLUDE 판정도 흔들린다.
+    # RSS 요약문에는 통신사 머리말·HTML 엔티티·말줄임이 그대로 들어온다(실측 #129).
+    ok.append(run("RSS 요지의 머리말·엔티티·말줄임 정리",
+                  _pol_mod._clean_desc(
+                      "(세종=연합뉴스) 송정은 기자 = 기획예산처는 &apos;지침&apos;을 "
+                      "확정했다...")
+                  == "기획예산처는 '지침'을 확정했다"))
+
     ok.append(run("구글뉴스 제목의 출처 꼬리표 제거",
                   _re_mod.sub(r"\s+-\s+[^-]{2,20}$", "",
                               "가덕도신공항 협의체 출범 - korea.kr").strip()
