@@ -1,4 +1,41 @@
 
+── A. 종목별 수급 API 후보 ──
+  200 https://m.stock.naver.com/api/stock/005930/trend
+      keys: list[10]
+      head: [{"itemCode":"005930","bizdate":"20260918","foreignerPureBuyQuant":"-1,673,323","foreignerHoldRatio":"46.46%","organPureBuyQuant":"+2,746,972","indivi
+  404 https://m.stock.naver.com/api/stock/005930/investor
+  404 https://m.stock.naver.com/api/stock/005930/foreignInstitution
+  404 https://api.stock.naver.com/stock/005930/trend
+  404 https://api.stock.naver.com/stock/005930/investor
+  404 https://m.stock.naver.com/front-api/stock/trend?stockCode=005930
+  404 https://m.stock.naver.com/front-api/external/chart/domestic/investor?stockCode=005930
+
+── B. 정책 RSS 후보 ──
+  404   0건  연합 전체
+  200 120건  연합 뉴스
+        · 전력연구원 벤처기업육성센터 화재…리튬이온 배터리 28팩 전소
+        · 코스피, 장초반 1%대 상승…장중 '7천피' 회복
+        · 인천공항서 누적 2억5천만보 달성하면 '1억원 기부'
+  200 120건  연합 시장
+        · 코스피, 장초반 1%대 상승…장중 '7천피' 회복
+        · [속보] 코스피, 장중 7천피 회복…7,002.30
+        · 오픈AI, 2030년까지 컴퓨팅 확보에 386조원 현금 소진
+  200 120건  연합 정치
+        · [속보] 당정 "'치유가능 불법전용 농지 양성화' 특별법 제정 추진"
+        · [속보] 당정 "경미한 농지법 위반은 정상적 이용…명백한 투기는 조치"
+        · 청와대 신임 대변인에 김성완 시사평론가 임명
+  500   0건  한국은행
+  200   0건  금융감독원
+  200   0건  KDI
+  200 100건  구글뉴스 korea.kr
+        · '가덕도신공항 사업추진협의체' 출범…"연내 착공 추진" - korea.kr
+        · 토지거래허가구역 내 실거주 유예, 내년 12월 31일까지 연장 - korea.k
+        · 코로나19 예방접종 '필수'로 전환…내달 12일부터 접종 시작 - korea.k
+  200 100건  구글뉴스 금융위
+        · 금융위 "금융회사 지배구조 개선방안 확정되지 않아" - korea.kr
+        · 금융위원회의 토큰증권 정책방향 발표 - 법률신문
+        · [다음주 경제] 올해 韓 성장전망 더 높아질까…금융안정 상황도 주목 - yna.
+
 ── 0. 종목별 외국인·기관 상세 (item/frgn.naver) ──
   [005930] HTTP 200 / 138,559bytes
     table.type2 0개
