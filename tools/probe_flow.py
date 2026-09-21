@@ -17,6 +17,84 @@ sys.path.insert(0, ".")
 OUT = []
 
 
+API_CANDIDATES = [
+    # 리서치에서 front-api 가 살아 있는 것을 확인했다. 수급도 있을 수 있다.
+    "https://m.stock.naver.com/api/stock/{code}/trend",
+    "https://m.stock.naver.com/api/stock/{code}/investor",
+    "https://m.stock.naver.com/api/stock/{code}/foreignInstitution",
+    "https://api.stock.naver.com/stock/{code}/trend",
+    "https://api.stock.naver.com/stock/{code}/investor",
+    "https://m.stock.naver.com/front-api/stock/trend?stockCode={code}",
+    "https://m.stock.naver.com/front-api/external/chart/domestic/investor"
+    "?stockCode={code}",
+]
+
+POLICY_FEED_CANDIDATES = [
+    ("연합 전체", "https://www.yna.co.kr/rss/all.xml"),
+    ("연합 뉴스", "https://www.yna.co.kr/rss/news.xml"),
+    ("연합 시장", "https://www.yna.co.kr/rss/market.xml"),
+    ("연합 정치", "https://www.yna.co.kr/rss/politics.xml"),
+    ("한국은행", "https://www.bok.or.kr/portal/bbs/B0000338/rss.do?menuNo=200761"),
+    ("금융감독원", "https://www.fss.or.kr/fss/bbs/B0000188/rss.do"),
+    ("KDI", "https://www.kdi.re.kr/rss/rss_news.jsp"),
+    ("구글뉴스 korea.kr",
+     "https://news.google.com/rss/search?q=site:korea.kr&hl=ko&gl=KR&ceid=KR:ko"),
+    ("구글뉴스 금융위",
+     "https://news.google.com/rss/search?q=%EA%B8%88%EC%9C%B5%EC%9C%84%EC%9B%90"
+     "%ED%9A%8C+%EB%B0%9C%ED%91%9C&hl=ko&gl=KR&ceid=KR:ko"),
+]
+
+
+def probe_stock_api(codes=("005930", "042660")) -> None:
+    """종목별 수급을 주는 API 후보 탐색.
+
+    실측 #127: item/frgn.naver 는 table.type2 가 0개이고 세 종목 응답이
+    138,559bytes 로 동일하다. 순위 페이지는 HTTP 410(Gone).
+    소스가 사라진 것이라 파서 수정으로는 못 고친다. 대체를 찾거나 걷어낸다.
+    """
+    log("\n── A. 종목별 수급 API 후보 ──")
+    for tmpl in API_CANDIDATES:
+        for code in codes[:1]:
+            url = tmpl.format(code=code)
+            try:
+                r = requests.get(url, headers={
+                    **H, "Accept": "application/json",
+                    "Referer": "https://m.stock.naver.com/"}, timeout=12)
+                head = (r.text or "")[:180].replace("\n", " ")
+                log(f"  {r.status_code} {url}")
+                if r.status_code == 200:
+                    try:
+                        d = r.json()
+                        keys = list(d)[:12] if isinstance(d, dict) else f"list[{len(d)}]"
+                        log(f"      keys: {keys}")
+                        log(f"      head: {head[:150]}")
+                    except Exception:
+                        log(f"      (JSON 아님) {head[:120]}")
+            except Exception as e:
+                log(f"  ERR {url} — {e}")
+
+
+def probe_policy_feeds() -> None:
+    """정책 RSS 대체 후보. korea.kr 계열은 해외 IP 에서 0건이다(실측 #127)."""
+    log("\n── B. 정책 RSS 후보 ──")
+    for name, url in POLICY_FEED_CANDIDATES:
+        try:
+            r = requests.get(url, headers=H, timeout=15)
+            n = 0
+            titles = []
+            if r.status_code == 200:
+                soup = BeautifulSoup(r.content, "xml")
+                items = soup.find_all("item")
+                n = len(items)
+                titles = [(i.title.get_text(strip=True) if i.title else "")[:44]
+                          for i in items[:3]]
+            log(f"  {r.status_code} {n:>3}건  {name}")
+            for t in titles:
+                log(f"        · {t}")
+        except Exception as e:
+            log(f"  ERR {name} — {e}")
+
+
 def probe_frgn_detail(codes=("005930", "000660", "042660")) -> None:
     """종목별 외국인·기관 페이지(item/frgn.naver) 구조 덤프.
 
@@ -134,6 +212,8 @@ def probe(label: str, url: str) -> None:
 
 
 def main() -> None:
+    probe_stock_api()
+    probe_policy_feeds()
     probe_frgn_detail()
     for label, url in CANDIDATES:
         probe(label, url)
