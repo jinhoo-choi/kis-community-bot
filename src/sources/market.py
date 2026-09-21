@@ -469,7 +469,13 @@ def fetch(limit: int = 12) -> list[dict]:
     # 캐시가 충분하면 네이버 순위 페이지와 상장 전종목 siseJson을 다시 훑지 않는다.
     # 최근 캐시는 휴장/장애 fallback 으로만 쓴다. 먼저 반환하면 금요일 시세를
     # 구할 수 있는데도 화요일 캐시를 게시하는 식의 날짜 오염이 생긴다.
-    cached = _cache_load(day)
+    # 캐시가 살아 있으면 크롤 경로가 통째로 안 돈다. 그래서 #33 의 새 수급 API 를
+    # 검증할 방법이 없었다(실측 #128·#129: 캐시에 저장된 옛 계측만 다시 찍힘).
+    if os.environ.get("REFRESH_MARKET") == "1":
+        print("[market] REFRESH_MARKET=1 — 캐시를 무시하고 새로 수집한다")
+        cached = []
+    else:
+        cached = _cache_load(day)
     cache_need = min(limit, max(20, config.GEN_STAGE_SIZE))
     if len(cached) >= cache_need:
         print(f"[market] 기준일 일치 확정 캐시 {len(cached)}건 사용 (필요 {limit}건)")

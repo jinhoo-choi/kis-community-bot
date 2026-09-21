@@ -179,6 +179,18 @@ def is_relevant(title: str, desc: str = "") -> tuple[bool, str]:
 # 본문 길이 상한이 페르소나별 70~150자다. 요지가 그보다 길면 모델이 다 담으려다
 # 너무김·수치과다에 걸린다(실측 #126: 너무김 3 / 수치과다 3).
 # 재구성할 여지를 남기도록 본문 상한보다 짧게 잡는다.
+_LEAD = re.compile(r"^\([^)]{2,20}=[^)]{2,20}\)\s*[가-힣]{2,4}\s*기자\s*=\s*")
+_ENT = {"&apos;": "'", "&quot;": '"', "&amp;": "&", "&lt;": "<", "&gt;": ">",
+        "&nbsp;": " ", "&#39;": "'"}
+
+
+def _clean_desc(t: str) -> str:
+    for k, v in _ENT.items():
+        t = t.replace(k, v)
+    t = _LEAD.sub("", t)
+    return re.sub(r"\.{2,}$|…$", "", t).strip()
+
+
 GIST_MAX = 110
 
 
@@ -210,8 +222,9 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
         r.raise_for_status()
         root = ET.fromstring(r.content)
     except Exception as e:
-        if not optional:
-            print(f"[policy] {dept} 실패: {type(e).__name__}")
+        # optional 이라고 조용히 넘기면 피드를 바꿔도 원인을 알 수 없다
+        # (실측 #128·#129: 구글뉴스 경유분이 로그 한 줄 없이 0건이었다).
+        print(f"[policy] {dept} 실패: {type(e).__name__} {str(e)[:60]}")
         return False
 
     stale = 0
@@ -229,6 +242,10 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
         # 섞이고 EXCLUDE 판정도 흔들린다.
         title = re.sub(r"\s+-\s+[^-]{2,20}$", "", title).strip()
         desc = re.sub(r"<[^>]+>", "", it.findtext("description") or "").strip()
+        # RSS 요약문에는 '(서울=연합뉴스) 홍길동 기자 = ' 머리말과 HTML 엔티티,
+        # 끝의 말줄임이 그대로 들어온다(실측 #129). 그대로 두면 본문에 기자명이
+        # 섞이고 엔티티가 노출된다.
+        desc = _clean_desc(desc)
         if not sample:
             sample = f"{title[:40]} | 요지 {len(desc)}자: {desc[:60]}"
         okay, _why = is_relevant(title, desc)

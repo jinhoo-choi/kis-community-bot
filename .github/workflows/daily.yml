@@ -28,6 +28,10 @@ on:
         description: '배포 건수 (비우면 50)'
         type: string
         default: ''
+      refresh_market:
+        description: '시세 캐시를 무시하고 새로 수집 (수급 API 검증용)'
+        type: boolean
+        default: false
       dry_run:
         description: '수집만 실행 (LLM/텔레그램 호출 없음)'
         type: boolean
@@ -105,6 +109,7 @@ jobs:
           TELEGRAM_CHAT_ID:      ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_TEST_CHAT_ID: ${{ secrets.TELEGRAM_TEST_CHAT_ID }}
           TELEGRAM_TEST_CHAT_SUFFIX: ${{ inputs.test_chat_suffix }}
+          REFRESH_MARKET: ${{ inputs.refresh_market && '1' || '0' }}
           TEST_MODE:             ${{ inputs.test_mode && '1' || '0' }}
           USE_BATCH:             ${{ inputs.use_batch || 'auto' }}
           IGNORE_SEEN:           ${{ inputs.ignore_seen && '1' || '0' }}
