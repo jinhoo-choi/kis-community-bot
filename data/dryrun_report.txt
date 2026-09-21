@@ -5,62 +5,87 @@
 [crawl] dart 4건
 [crawl] naver_research 3건
 [crawl] hankyung 3건
-[market] 기준일 일치 확정 캐시 199건 사용 (필요 25건)
-[market] ⚠ 수급 파싱 0/200종목 / 수급순위 0종목 / 실패사유 None
-[crawl] market 199건
+[market] REFRESH_MARKET=1 — 캐시를 무시하고 새로 수집한다
+[market] 발견된 헤더: []
+[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_quant.naver?sosok=0
+[market] 발견된 헤더: []
+[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_quant.naver?sosok=1
+[market] 발견된 헤더: []
+[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_rise.naver?sosok=0
+[market] 발견된 헤더: []
+[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_rise.naver?sosok=1
+[market] 발견된 헤더: []
+[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_fall.naver?sosok=0
+[market] 발견된 헤더: []
+[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_fall.naver?sosok=1
 [tickers] 상장 2626종목 로드 (lxml)
-[kind] 공시 17건 파싱, 조회공시 해당 없음 (정상)
+[market] siseJson 랭킹 생성 — 2626종목 조회
+[market] 확정 시세 2490종목 수집 (기준일 2026-09-18)
+[market] 후보 173종목 (중복 제거 후)
+[crawl] 재시도 1/1: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=01&investor_gubun=9000&type=buy
+[crawl] 로드 실패 https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=01&in: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=01&investor_gubun=9000&type=buy
+[crawl] 재시도 1/1: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=01&investor_gubun=9000&type=sell
+[crawl] 로드 실패 https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=01&in: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=01&investor_gubun=9000&type=sell
+[crawl] 재시도 1/1: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=02&investor_gubun=9000&type=buy
+[crawl] 로드 실패 https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=02&in: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=02&investor_gubun=9000&type=buy
+[crawl] 재시도 1/1: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=02&investor_gubun=9000&type=sell
+[crawl] 로드 실패 https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=02&in: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=02&investor_gubun=9000&type=sell
+[market] 수급 파싱 25/25종목 (수급순위 0종목) / 거래대금 대비 비중 중앙 4.24% p75 9.01% p90 18.16% 최대 31.5% / 출력 임계 5.0% 초과 24건
+[market] 캐시 저장 25건 (기준일 2026-09-18)
+[crawl] market 25건
+[kind] 공시 22건 파싱, 조회공시 해당 없음 (정상)
 [crawl] kind_inquiry 0건 (정상 0건)
-[policy] 연합뉴스 경제: 원문 120건 / 시각제외 0 / 관련성탈락 113 [('키워드없음', 56), ('정책신호없음', 23), ('기관·산업앵커없음', 9)] / 채택 7
-[policy] 연합뉴스 경제 표본: 세라젬, 혈액순환 개선 의료기기 '셀트론 순환 매트' 출시 | 요지 93자: (서울=연합뉴스) 구정모 기자 = 세라젬은 침대나 바닥 등에 깔아 누운 상태에서 혈액순환을 관리할 수 있는 
+[policy] 연합뉴스 경제: 원문 120건 / 시각제외 0 / 관련성탈락 111 [('키워드없음', 54), ('정책신호없음', 23), ('기관·산업앵커없음', 10)] / 채택 9
+[policy] 연합뉴스 경제 표본: 롯데웰푸드, 의성마늘햄 출시 20주년 캠페인…신제품도 선봬 | 요지 60자: 롯데웰푸드[280360]는 육가공 브랜드 '의성마늘' 출시 20주년을 맞아 브랜드 캠페인 '스물스물, 햄복이
 [policy] 필수 2/2피드 10건 / 선택(korea.kr) 0건
 [crawl] policy_rss 10건
 [tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
 [crawl] telegram_ch 0건 (정상 0건)
 [main] 수집 총 49건
-[main] 용어 설명 주입 5건
-[enrich] 선행 API 호출 없이 캐시 적용 {'ok': 8, 'none': 0}
+[main] 용어 설명 주입 4건
+[enrich] 선행 API 호출 없이 캐시 적용 {'ok': 7, 'none': 0}
 [enrich] dry-run — 신규 보강 호출 없음
 [main] 발송 목표 5건 / 수율 14% → 생성 상한 49건 → 기대 발송 5건
-[gate] 차단 3건 {'tier5': 3}
+[gate] 차단 4건 {'tier5': 4}
 [theme] 배정 취소 — 관련 섹터 없음: 산업부, 10개 지방투자기업에 보조금 816억원 지원 결정
-[theme] 배정 취소 — 관련 섹터 없음: 코트라, 내수기업 첫 수출 길잡이…화상상담·물류비 지원
-[theme] 테마글 6건에 게시 종목 배정
+[theme] 테마글 5건에 게시 종목 배정
 [theme] 게시판 매칭 실패 2건 생성 전 제외
-[dedup] 제외 19건 {'ID': 19}
-[main] 생성 대상 25건 {'disclosure': 3, 'research': 5, 'flow': 10, 'policy': 4, 'poll': 3}
+[dedup] 제외 16건 {'ID': 16}
+[main] 생성 대상 27건 {'disclosure': 3, 'research': 5, 'flow': 11, 'policy': 5, 'poll': 3}
 [main] 실제 후보 기준 기대 발송 5.0건
 [decide] 유형상한 완화로 1건 보충 (2 → 3)
-[decide] ⚠ 절대상한 해제로 2건 보충 (3 → 5) — 구성 목표 초과: {'flow': 2}. 비-flow 공급 부족이 원인이다.
-[template] 결정형 reserve 9/20건 → 배분 dry-run 5/5건
+[decide] ⚠ 절대상한 해제로 1건 보충 (3 → 4) — 구성 목표 초과: {'flow': 1}. 비-flow 공급 부족이 원인이다.
+[template] 결정형 reserve 10/20건 → 배분 dry-run 4/5건
+[template] ⚠ 50건 보장 reserve 미달 — 검증 사실 공급을 확인하세요
 
 ───── 수집 표본 ─────
   [flow      ] 켄코아에어로스페이스        274090  켄코아에어로스페이스 전일 12.69% 상승
   [flow      ] 파미셀               005690  파미셀 전일 7.54% 상승
   [policy    ] 삼성전자              005930  경제인협회 "반도체 공장 가동 앞두고 도로·용수 아직"
-  [flow      ] 센서뷰               321370  센서뷰 전일 7.05% 상승
   [flow      ] SK스퀘어             402340  SK스퀘어 전일 5.20% 상승
-  [research  ] 삼성물산              028260  건설이 달라지면, 가치도 달라진다
   [flow      ] HD현대              267250  HD현대 전일 5.36% 하락
+  [research  ] 아모그린텍             125210  [다시봐] 27년 매출성장 기대 요인
+  [flow      ] 기가비스              420770  기가비스 전일 10.99% 상승
   [policy    ] KB금융              105560  KB국민은행, 정기예금 금리 추가 인상…최고 연 3.5%
-  [flow      ] 일진전기              103590  일진전기 전일 7.05% 상승
+  [flow      ] 이수페타시스            007660  이수페타시스 전일 4.30% 하락
   [disclosure] 벡트                457600  [기재정정]최대주주변경을수반하는주식양수도계약체결
   [poll      ] 성호전자              043260  성호전자 전일 18.92% 상승
-  [flow      ] 기가비스              420770  기가비스 전일 10.99% 상승
+  [flow      ] 한라캐스트             125490  한라캐스트 전일 4.28% 상승
   [policy    ] HD한국조선해양          009540  조선업 청년들이 말하는 일터의 조건…울산 동구서 원탁회의
-  [flow      ] 지엔씨에너지            119850  지엔씨에너지 전일 5.47% 상승
-  [research  ] KT&G              033780  카자흐스탄 탐방: 현지화로 높아진 이익 체력
+  [flow      ] 인제니아테라퓨틱스         950260  인제니아테라퓨틱스 전일 4.62% 상승
+  [research  ] IPARK현대산업개발       294870  자체도 좋고 도급도 좋고, 외형 성장만 남았다!
 
 ───── 게이트 차단 ─────
-  pol        tier5:글감부족           2건
+  pol        tier5:글감부족           3건
   pol        tier5:게시판없음          2건
   hk         tier5:글감부족           1건
   --- 차단 목록 ---
   tier5:글감부족         [research  ] 네오오토 ICE와 xEV를 넘어 로봇으로 기어 서드
+  tier5:글감부족         [policy    ] 금감원 "증권사 배불리는 영업행태 비판있어…내부통제 개선"
   tier5:글감부족         [policy    ] AI가 읽기 쉬운 예산안 설명자료…기획처, 양식 개편
   tier5:글감부족         [policy    ] AI가 읽기 쉬운 예산안 설명자료…기획처, 양식 개편
+  tier5:게시판없음        [policy    ] 이억원 "내년 청년예산 2.1조원…자산·일자리·주거 지원"
   tier5:게시판없음        [policy    ] 산업부, 10개 지방투자기업에 보조금 816억원 지원 결정
-  tier5:게시판없음        [policy    ] 코트라, 내수기업 첫 수출 길잡이…화상상담·물류비 지원
 
   --- hk 차단 표본 (tier5:글감부족) hk-652456 ---
   리포트 제목: 네오오토 ICE와 xEV를 넘어 로봇으로 기어 서드
@@ -69,11 +94,11 @@
   작성: 한국IR협의회 조영환,김혜인
   ※ 제목 외 본문 수치는 미제공. 위 수치는 증권사 제시치이며 단정하지 말 것.
 
-  --- pol 차단 표본 (tier5:글감부족) pol-AI가읽기쉬운예산안설명자료기획처양식개편 ---
+  --- pol 차단 표본 (tier5:글감부족) pol-금감원증권사배불리는영업행태비판있어내부통제개선 ---
   출처: 연합뉴스 경제
-  보도 시각: 2026-09-21 09:36 KST
-  제목: AI가 읽기 쉬운 예산안 설명자료…기획처, 양식 개편
-  요지: (세종=연합뉴스) 송정은 기자 = 기획예산처는 2027년 정부 예산안의 사업 설명자료 양식을 인공지능(AI) 친화형으로 개편하고 이런 내용의 &apos;...
+  보도 시각: 2026-09-21 10:00 KST
+  제목: 금감원 "증권사 배불리는 영업행태 비판있어…내부통제 개선"
+  요지: 금융감독원이 증권업계에 투자자 중심 내부통제를 강화하라고 주문했다.
   ※ 수혜 종목을 특정하거나 추천하지 말 것. 산업/테마 수준으로만 언급.
   ※ 언론 보도이며 정부 확정 발표가 아닐 수 있음. 단정하지 말 것.
 
@@ -82,8 +107,7 @@
   pol-KB국민은행정기예금금리추가인상최고연35  ['종목명미검출'] → stock
   pol-조선업청년들이말하는일터의조건울산동구서원탁회의 ['종목명미검출'] → stock
   pol-추석연휴전국항만정상운영해수부특별대책시행  ['종목명미검출'] → stock
-  pol-경제인협회반도체공장가동앞두고도로용수아직  ['종목명미검출'] → stock
-  pol-조선업청년들이말하는일터의조건울산동구서원탁회의 ['종목명미검출'] → stock
+  pol-코트라내수기업첫수출길잡이화상상담물류비지원 ['종목명미검출'] → stock
 
 ───── 크롤링 헬스 ─────
 {
@@ -103,7 +127,7 @@
   "degraded": false
  },
  "market": {
-  "got": 199,
+  "got": 25,
   "expected": 20,
   "degraded": false
  },
@@ -125,8 +149,8 @@
 }
 
 ───── dedup ─────
- {'ID': 19}
+ {'ID': 16}
 
 ───── template reserve ─────
- 준비 9/20, dry-run 5/5
-[main] filter_log data/filter_log_20260921_0955.json
+ 준비 10/20, dry-run 4/5
+[main] filter_log data/filter_log_20260921_1010.json
