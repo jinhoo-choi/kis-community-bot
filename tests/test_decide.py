@@ -1814,6 +1814,18 @@ def main():
                               "가덕도신공항 협의체 출범 - korea.kr").strip()
                   == "가덕도신공항 협의체 출범"))
 
+    # RSS 요지는 원래 짧다(실측 #132: 24·42·61자). 90자 기준에서 정책 12건 중
+    # 11건이 막혀 생성 대상 0건이었다. 길이 대신 '제목 재탕인가' 를 직접 본다.
+    def _pg(t, d):
+        return _gate.has_substance({"kind": "policy", "title": t,
+                                    "facts": f"출처: 연합뉴스\n제목: {t}\n요지: {d}\n"})
+    ok.append(run("짧아도 제목과 다른 정책 요지는 통과",
+                  _pg("기상장비 국산화에 5년간 347억원",
+                      "기상청이 '기상장비 국산화'에 속도를 낸다.")))
+    ok.append(run("구글뉴스식 '제목 + 매체명' 요지는 차단",
+                  not _pg("가덕도신공항 사업추진협의체 출범",
+                          "가덕도신공항 사업추진협의체 출범  대한민국 정책브리핑")))
+
     ok.append(run("정책 게이트 하한 < 요지 상한",
                   _gate._POLICY_MIN_DESC < __import__(
                       "src.sources.policy", fromlist=["x"]).GIST_MAX,

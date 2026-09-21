@@ -141,11 +141,14 @@ _RESEARCH_SUBSTANCE = re.compile(r"제시 적정가격:|투자의견:|리포트 
 # 정책 글은 수치가 아니라 '무엇이 어떻게 바뀌는가'가 글감이다.
 # 수치를 요구했더니 26건 수집분에서 4건만 통과했다 (실측).
 # 대신 요지가 실제 내용을 담고 있는지를 본다 — 제목 재탕은 걸러야 한다.
-# 이 값은 policy._gist 의 GIST_MAX(110) 보다 반드시 작아야 한다.
-# 실측 #127: GIST_MAX 를 110 으로 낮추면서 요지가 이 기준(120)에 절대 닿지
-# 못하게 됐고, 정책 게이트 차단이 5 → 11 건으로 늘었다.
-# 둘이 따로 움직이면 또 어긋난다 — 회귀 테스트로 대소 관계를 고정한다.
-_POLICY_MIN_DESC = 90
+# 길이는 '제목 재탕이 아닌가' 의 대리 지표였는데, RSS 요지는 원래 짧다.
+# 실측 #132 (dry-run, 실운영 한도): 연합 산업 24자 / 구글뉴스 42자 / 연합 경제
+# 61자. 90자 기준에서 정책 12건 중 11건이 글감부족으로 막혀 생성 대상 0건.
+# #36 에서 '(세종=연합뉴스) 기자명 =' 머리말(약 20자)을 떼면서 길이가 더
+# 줄었고, 머리말이 의도치 않게 기준을 채워주고 있었다는 게 드러났다.
+# 재탕 여부는 아래에서 직접 본다. 길이는 한 문장이 성립하는 최소치만 남긴다.
+# (policy._gist 의 GIST_MAX 보다 작아야 한다 — 회귀 테스트로 고정)
+_POLICY_MIN_DESC = 20
 
 
 def has_substance(item: dict) -> bool:
@@ -160,9 +163,13 @@ def has_substance(item: dict) -> bool:
                        if l.startswith("요지"))
         title = "".join(l.split(":", 1)[-1] for l in core.splitlines()
                         if l.startswith("제목"))
-        # 요지가 제목을 그대로 옮긴 것이면 글감이 아니다
-        if desc.strip() and desc.strip() != title.strip():
-            return len(desc.strip()) >= _POLICY_MIN_DESC or bool(_SUBSTANCE.search(core))
+        # 요지가 제목을 그대로 옮긴 것이면 글감이 아니다.
+        # 구글뉴스는 요지 = '제목 + 매체명' 이다(실측 #132: "'가덕도신공항 …'
+        # 출범…  대한민국 정책브리핑"). 제목으로 시작하면 재탕으로 본다.
+        d, t = desc.strip(), title.strip()
+        rehash = (not d or d == t or (len(t) >= 8 and d.startswith(t[:len(t) - 2])))
+        if not rehash:
+            return len(d) >= _POLICY_MIN_DESC or bool(_SUBSTANCE.search(core))
         return bool(_SUBSTANCE.search(core))
     return bool(_SUBSTANCE.search(core))
 
