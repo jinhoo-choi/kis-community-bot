@@ -1897,6 +1897,28 @@ def main():
     ok.append(run("하락 글의 ㅎㅎ·물결 차단",
                   _sym("A가 8.10% 내렸습니다 ㅎㅎ", _dn) == ["하락글가벼운기호"]))
 
+    # 허용만 하면 모델이 기본값(안 씀)을 유지한다(실측 #135: 5건 중 0건).
+    # 전부 넣으라 하면 새 서명이 된다. 항목 단위로 커뮤니티 분포에 맞춰 배정한다.
+    from src import personas as _pers
+    _acc = [_pers.accent_for({"id": f"f-{i}", "facts": "등락률: 5.0%\n"})
+            for i in range(2000)]
+    ok.append(run("강조 배정이 커뮤니티 분포에 근사(느낌표 19%·ㅎㅎ 4%)",
+                  15 <= _acc.count("bang") / 20 <= 24
+                  and 2 <= _acc.count("hehe") / 20 <= 7,
+                  f"느낌표 {_acc.count('bang') / 20:.1f}% ㅎㅎ {_acc.count('hehe') / 20:.1f}%"))
+    ok.append(run("하락 글에는 ㅎㅎ 배정 안 함",
+                  not any(_pers.accent_for({"id": f"f-{i}", "facts": "등락률: -5.0%\n"})
+                          == "hehe" for i in range(2000))))
+    # 같은 뜻의 문장을 두 번 쓰면 AI 가 쓴 글로 읽힌다(실측 #135).
+    ok.append(run("문장 중복 차단",
+                  "문장중복" in _filters.check(
+                      "A에 적정가격 340,000원이 제시됐습니다. 이는 증권사가 제안한 값이며 "
+                      "회사가 정한 가격이 아닙니다. 적정가격은 증권사가 리포트에서 제시한 "
+                      "값이며 회사가 정한 가격이 아닙니다.",
+                      "종목: A\n리포트 제목: X\n발간: 유안타증권 / 2026-09-21\n"
+                      "제시 적정가격: 340,000원\n", None, "terms", "fact_note",
+                      None, False, "research", "000000")))
+
     ok.append(run("등락률 줄이 없으면 5일 누적값을 당일 등락률로 가져가지 않음",
                   "change" not in {c["type"] for c in _claims.build(
                       {"kind": "flow", "facts": _c1})}))
