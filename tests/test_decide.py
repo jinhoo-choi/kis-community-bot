@@ -1945,6 +1945,21 @@ def main():
     ok.append(run("생성(Haiku) system 은 캐시 지정 안 함",
                   isinstance(_sys_of("claude-haiku-4-5-20251001"), str)))
 
+    # 워크플로 기본값은 'auto' 인데 종전 비교식은 == "1" 이라 정기 실행에서
+    # 배치(단가 50%)가 한 번도 켜진 적이 없었다.
+    # config 를 이 프로세스에서 재로드하면 다른 테스트가 바꿔둔 설정이 풀린다.
+    # 하위 프로세스로 격리해 확인한다.
+    import subprocess as _sp, os as _os
+    _vals = {}
+    for _v in ("auto", "1", "0", "false"):
+        _r = _sp.run([sys.executable, "-c", "import config;print(config.USE_BATCH)"],
+                     capture_output=True, text=True,
+                     env={**_os.environ, "USE_BATCH": _v})
+        _vals[_v] = _r.stdout.strip() == "True"
+    ok.append(run("USE_BATCH 'auto' 는 배치를 켠다",
+                  _vals == {"auto": True, "1": True, "0": False, "false": False},
+                  str(_vals)))
+
     ok.append(run("평시 문장틀 비중 10%", _tr.normal_template_limit(50) == 5))
     _res = _tr.build(__import__("json").load(open("data/market_cache.json"))["items"], 65)
     def _mkp(i, k):

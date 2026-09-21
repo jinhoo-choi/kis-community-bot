@@ -2,9 +2,12 @@ name: daily-posts
 
 on:
   schedule:
-    # UTC 21:11 = KST 익일 06:11 / 월~금 배포 (일~목 UTC 실행)
-    # 정각은 GitHub 스케줄러 혼잡 구간이라 지연되거나 큐에서 드롭될 수 있다.
-    - cron: '11 21 * * 0-4'
+    # 주 경로는 외부 cron 이 매 영업일 KST 08:00 에 workflow_dispatch 로
+    # 호출한다(auto_schedule=true). GitHub schedule 은 지연이 크다
+    # (실측: +114분, 예정 시각에 아예 안 들어온 날도 있음).
+    # 이것은 외부 cron 이 실패한 날을 위한 예비다. UTC 23:40 = KST 08:40.
+    # 08:00 실행이 성공했으면 아래 가드가 이 실행을 건너뛴다.
+    - cron: '40 23 * * 0-4'
   workflow_dispatch:
     inputs:
       test_mode:
@@ -28,6 +31,10 @@ on:
         description: '배포 건수 (비우면 50)'
         type: string
         default: ''
+      auto_schedule:
+        description: '외부 cron 정기 실행 표시 (같은 날 이미 돌았으면 건너뜀)'
+        type: boolean
+        default: false
       refresh_market:
         description: '시세 캐시를 무시하고 새로 수집 (수급 API 검증용)'
         type: boolean
@@ -71,12 +78,24 @@ jobs:
         env:
           TZ: Asia/Seoul
         run: |
-          if [ "${{ github.event_name }}" != "schedule" ]; then
+          # 정기 실행(외부 cron 08:00, GitHub 예비 08:40)만 가드한다.
+          # 사람이 누른 수동 실행은 의도된 것이라 건너뛰지 않는다.
+          if [ "${{ github.event_name }}" != "schedule" ] && \
+             [ "${{ inputs.auto_schedule }}" != "true" ]; then
             echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          LAST=$(tail -n 1 data/run_stats.jsonl 2>/dev/null \
-                 | python3 -c "import sys,json;print(json.load(sys.stdin)['ts'][:10])" \
-                 2>/dev/null || echo "")
+          # 테스트 실행 기록은 빼고 '실채널로 나간 마지막 실행' 날짜를 본다.
+          LAST=$(python3 -c "
+          import json
+          last=''
+          for l in open('data/run_stats.jsonl', encoding='utf-8'):
+              try:
+                  r=json.loads(l)
+              except Exception:
+                  continue
+              if not r.get('test_mode') and r.get('sent', 0) > 0:
+                  last=r['ts'][:10]
+          print(last)" 2>/dev/null || echo "")
           TODAY=$(date +%F)
           if [ "$LAST" = "$TODAY" ]; then
             echo "::warning::오늘 $TODAY 이미 실행됨 — 지연된 정기 실행을 건너뛴다"

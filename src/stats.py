@@ -21,7 +21,12 @@ PATH = "data/run_stats.jsonl"
 
 
 def record(**kw) -> dict:
-    row = {"ts": datetime.now(KST).isoformat(timespec="seconds"), **kw}
+    import config as _cfg
+    # 같은 날 중복 발송 가드가 이 기록의 날짜를 본다. 테스트 실행도 여기에
+    # 남기 때문에, 아침에 테스트를 한 번 돌리면 그날 실운영이 건너뛰어졌다.
+    # 가드가 실채널 실행만 보도록 구분 표시를 남긴다.
+    row = {"ts": datetime.now(KST).isoformat(timespec="seconds"),
+           "test_mode": bool(_cfg.TEST_MODE), **kw}
     os.makedirs(os.path.dirname(PATH), exist_ok=True)
     with open(PATH, "a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")

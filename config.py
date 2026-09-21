@@ -162,7 +162,9 @@ CLAUDE_JUDGE_MODEL = os.environ.get("CLAUDE_JUDGE_MODEL", "claude-haiku-4-5-2025
 CLAUDE_BACKUP_JUDGE_MODEL = os.environ.get("CLAUDE_BACKUP_JUDGE_MODEL", "claude-sonnet-5")
 # Batch API 는 비동기 대량 작업용이다. 이 파이프라인은 같은 실행에서 결과가
 # 필요하므로 600초 대기 뒤 동기 재호출이 발생했다. 명시적으로 켤 때만 사용한다.
-USE_BATCH = os.environ.get("USE_BATCH", "0") == "1"
+# 워크플로는 기본값 'auto' 를 넘기는데 종전 비교식은 == "1" 이었다. 그래서 정기
+# 실행에서 배치(단가 50%)가 한 번도 켜진 적이 없었다. '0' 만 끈다.
+USE_BATCH = os.environ.get("USE_BATCH", "auto").lower() not in ("0", "false", "off")
 
 # 한 번에 전량 생성하지 않고 이 단위로 생성·심사한 뒤 목표 달성 여부를 본다.
 # 50건 기준 첫 묶음은 60건, 이후에는 실측 수율로 10~60건만 추가한다.

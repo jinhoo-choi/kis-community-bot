@@ -114,7 +114,7 @@ class ClaudeProvider(Provider):
             return GenResult("", self.name, self.model, ok=False, error=msg[:200])
 
     def generate_many(self, jobs, temperature=1.0, max_tokens=700,
-                      poll_sec=15, timeout_sec=600) -> list[GenResult]:
+                      poll_sec=10, timeout_sec=300) -> list[GenResult]:
         if not self.use_batch or len(jobs) < 15:
             return self._sync_many(jobs, temperature, max_tokens)
 
@@ -132,6 +132,7 @@ class ClaudeProvider(Provider):
 
             batch = self._client.messages.batches.create(requests=reqs)
             print(f"[claude] batch {batch.id} 제출 ({len(reqs)}건)")
+            _t0 = time.time()
 
             waited = 0
             while waited < timeout_sec:
@@ -140,9 +141,17 @@ class ClaudeProvider(Provider):
                 time.sleep(poll_sec)
                 waited += poll_sec
             else:
-                # 30분을 기다리느니 동기로 다시 도는 편이 빠르다
+                # 취소하지 않고 동기로 폴백하면, 배치는 뒤에서 끝까지 처리돼
+                # 배치분과 동기분이 둘 다 과금된다. 폴백 전에 반드시 취소한다.
+                # 대기 상한은 5분 — 08:00 발송이 목표라 오래 기다리지 않는다.
+                try:
+                    self._client.messages.batches.cancel(batch.id)
+                    print(f"[claude] batch {batch.id} {timeout_sec}s 초과 → 취소")
+                except Exception as ce:
+                    print(f"[claude] ⚠ batch 취소 실패(이중 과금 가능): {ce}")
                 raise TimeoutError(f"batch timeout {timeout_sec}s")
 
+            print(f"[claude] batch {batch.id} 완료 {time.time() - _t0:.0f}초")
             got = {}
             for res in self._client.messages.batches.results(batch.id):
                 if res.result.type == "succeeded":
