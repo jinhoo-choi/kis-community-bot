@@ -18,7 +18,10 @@ import zlib as _zlib
 
 # (claim_id, 라벨, facts 에서 뽑는 정규식, 값 포맷)
 CLAIM_SPECS = [
-    ("change",    "등락률",        r"등락률[:\s]*([-+]?[\d,.]+)\s*%", "{}%"),
+    # 줄 시작으로 한정한다. 안 그러면 '· 5거래일 누적 등락률: +26.77%' 를 잡는다
+    # (감사 I6). 기준 등락률 줄이 없으면 5일 누적값을 당일 등락률로 가져가고,
+    # change 가 미선정일 때는 facts_view 가 ret5 줄을 통째로 지웠다.
+    ("change",    "등락률",        r"(?m)^등락률[:\s]*([-+]?[\d,.]+)\s*%", "{}%"),
     ("close",     "종가",          r"종가[:\s]*([\d,]+)\s*원", "{}원"),
     ("turnover",  "거래대금",      r"거래대금[:\s]*([\d,]+)\s*억원", "{}억원"),
     ("vol_ratio", "거래량 배수",   r"거래량[:\s]*20일 평균의\s*([\d.]+)배", "20일 평균의 {}배"),
@@ -245,12 +248,16 @@ def facts_view(item: dict, n: int, angle: str = "") -> str:
     facts = item.get("facts", "")
     keep = {c["type"] for c in select(item, n, angle)}
     drop_pats = [pat for cid, _l, pat, _f in CLAIM_SPECS if cid not in keep]
+    keep_pats = [pat for cid, _l, pat, _f in CLAIM_SPECS if cid in keep]
     out = []
     for line in facts.splitlines():
         # ※ 주의문은 어떤 경우에도 지우지 않는다. 미선정 spec 에 우연히 걸려
         # 경고문이 통째로 사라지면 모델이 추정 금지 지시를 받지 못한다.
-        if not line.lstrip().startswith("※") and any(
-                re.search(pat, line) for pat in drop_pats):
+        # 선정된 주장의 줄은 지우지 않는다. 패턴이 겹치면 미선정 spec 이
+        # 선정된 사실의 줄을 지우는 일이 생긴다(감사 I6: change 가 ret5 줄을 지움).
+        if (not line.lstrip().startswith("※")
+                and any(re.search(pat, line) for pat in drop_pats)
+                and not any(re.search(pat, line) for pat in keep_pats)):
             continue
         out.append(line)
     return "\n".join(out)

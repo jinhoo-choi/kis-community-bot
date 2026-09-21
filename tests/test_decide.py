@@ -1869,6 +1869,19 @@ def main():
                                 "리포트 요지: 고점 대비 약 50% 하락한 "
                                 "수준이다. 실적 개선이 본격화될 전망이다.\n"})}))
 
+    # 감사 I6: change 가 '· 5거래일 누적 등락률' 줄까지 잡았다.
+    _c1 = "종목: A (000000)\n[결합 사실]\n· 5거래일 누적 등락률: +26.77%\n"
+    ok.append(run("등락률 줄이 없으면 5일 누적값을 당일 등락률로 가져가지 않음",
+                  "change" not in {c["type"] for c in _claims.build(
+                      {"kind": "flow", "facts": _c1})}))
+    _c2 = {"kind": "flow", "stock_code": "000000",
+           "facts": ("기준일: 2026-09-18\n종목: A (000000)\n종가: 52,000원\n"
+                     "등락률: 12.30%\n[결합 사실]\n· 5거래일 누적 등락률: +26.77%\n"
+                     "· 거래량: 20일 평균의 3.2배\n· 장중 고저 차이: 저가 대비 9.1%\n")}
+    ok.append(run("선정된 사실의 줄은 facts_view 에서 지워지지 않음",
+                  "ret5" in [c["type"] for c in _claims.select(_c2, 2, "duration")]
+                  and "5거래일" in _claims.facts_view(_c2, 2, "duration")))
+
     ok.append(run("신규 결합 사실이 주장으로 매핑",
                   {"move_x", "drawdown", "gapfill"}
                   <= {c["type"] for c in _claims.build(_fit)},

@@ -154,6 +154,7 @@ def fetch_naver_api(limit: int = 12) -> list[dict]:
         - 원문은 문어체라 그대로 베끼면 literary_style·어미단조에 걸린다.
           모델이 구어체로 다시 쓸 수밖에 없는 구조다
     """
+    _detail_fail = []
     hdr = {"Accept": "application/json",
            "Referer": "https://m.stock.naver.com/investment/research/company"}
     try:
@@ -186,8 +187,10 @@ def fetch_naver_api(limit: int = 12) -> list[dict]:
             tp = m1.group(1) if m1 else ""
             op = m2.group(1) if m2 else ""
             gist = _gist(full)
-        except Exception:
-            pass
+        except Exception as e:
+            # 상세 조회가 실패하면 목표가·투자의견·요지가 전부 비어 게이트에서
+            # '글감부족' 으로 막힌다. 진짜 글감이 없는 것과 구분이 안 된다.
+            _detail_fail.append(type(e).__name__)
         crawl.sleep_jitter(0.2, 0.5)
 
         detail = ""
@@ -213,6 +216,10 @@ def fetch_naver_api(limit: int = 12) -> list[dict]:
             ),
             "src": it.get("endUrl", ""),
         })
+    if _detail_fail:
+        from collections import Counter as _C
+        print(f"[research] 상세 조회 실패 {len(_detail_fail)}건 "
+              f"{dict(_C(_detail_fail).most_common(3))} — 이 항목은 글감부족으로 막힌다")
     crawl.report("naver_research", len(out), limit, "API 응답 구조 변경 의심")
     return out
 
