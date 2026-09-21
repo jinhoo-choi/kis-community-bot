@@ -487,7 +487,12 @@ def fetch(limit: int = 12) -> list[dict]:
 
     rows, ok = [], 0
 
-    for market, url in URLS:
+    # 네이버 순위 HTML 6개(sise_quant/rise/fall × 코스피·코스닥)는 개편 이후
+    # 헤더를 한 줄도 주지 않는다. 실측 #132: 6개 전부 '발견 []', 결국 매번
+    # siseJson 폴백이 2,490종목을 받아 살려냈다. 죽은 페이지를 6번 받고
+    # 페이지마다 1~2.4초씩 쉬는 것은 시간 낭비다. siseJson 을 주 경로로 쓴다.
+    # 네이버가 HTML 을 되살리면 MARKET_HTML=1 로 다시 켤 수 있다.
+    for market, url in (URLS if os.environ.get("MARKET_HTML") == "1" else []):
         soup = crawl.get_soup(url, encoding="euc-kr")
         if soup is None:
             continue
@@ -592,9 +597,10 @@ def fetch(limit: int = 12) -> list[dict]:
     # 입력이 종가·등락률·거래대금 3개뿐이면 아무리 축을 늘려도
     # 표현법만 30가지지 콘텐츠는 3가지다 (외부 검토 지적).
     # 원인 추정 없이 안전하게 늘릴 수 있는 정형 지표를 붙인다.
-    ranks = flow_ranks()
-    if ranks:
-        print(f"[market] 수급 상위 {len(ranks)}종목 확보")
+    # 수급 순위 페이지(sise_deal_rank_iframe)는 HTTP 410(Gone)이다.
+    # 실측 #132: 4개 URL × 재시도 1회 = 매 실행 8회 헛요청. 종목별 수급은
+    # m.stock.naver.com API 로 대체됐으므로(#33) 순위 조회는 끈다.
+    ranks = {}
     # 종목당 요청 2회를 직렬로 돌면서 0.4~0.9초씩 쉬고 있었다.
     # limit 이 250이면 보강만 250 x (2요청 + 0.65초) 로 8분 넘게 걸린다.
     # siseJson 랭킹(2,632종목)을 8워커로 이미 병렬 처리하고 있으므로
