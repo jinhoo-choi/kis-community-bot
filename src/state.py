@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 
 from config import STATE_PATH, KST
 
-DEFAULT = {"seen": {}, "recent_tone": {}}
+DEFAULT = {"seen": {}, "recent_tone": {}, "recent_templates": {},
+           "recent_stocks": {}}
 
 
 def load() -> dict:
@@ -22,7 +23,23 @@ def load() -> dict:
 def prune(s: dict, days: int = 7) -> dict:
     cut = (datetime.now(KST) - timedelta(days=days)).strftime("%Y-%m-%d")
     s["seen"] = {k: v for k, v in s["seen"].items() if v >= cut}
+    s["recent_templates"] = {k: v for k, v in s.get("recent_templates", {}).items()
+                             if v >= cut}
+    s["recent_stocks"] = {k: v for k, v in s.get("recent_stocks", {}).items()
+                          if v >= cut}
     return s
+
+
+def recent_stocks(s: dict, days: int) -> frozenset:
+    """최근 days 일 안에 게시한 종목코드."""
+    cut = (datetime.now(KST) - timedelta(days=days)).strftime("%Y-%m-%d")
+    return frozenset(k for k, v in s.get("recent_stocks", {}).items() if v >= cut)
+
+
+def cooled_templates(s: dict, days: int) -> frozenset:
+    """최근 days 일 안에 쓴 문장틀 id."""
+    cut = (datetime.now(KST) - timedelta(days=days)).strftime("%Y-%m-%d")
+    return frozenset(k for k, v in s.get("recent_templates", {}).items() if v >= cut)
 
 
 def is_new(s: dict, item_id: str) -> bool:
@@ -37,6 +54,10 @@ def mark(s: dict, posts: list[dict]):
         hist = s["recent_tone"].setdefault(key, [])
         hist.append(f"{p['tone']}:{p.get('angle','')}:{p.get('fmt','')}:{p.get('length','')}")
         s["recent_tone"][key] = hist[-3:]      # 최근 3개만 유지
+        if p.get("stock_code"):
+            s.setdefault("recent_stocks", {})[p["stock_code"]] = today
+        if p.get("provider") == "template" and p.get("template_id"):
+            s.setdefault("recent_templates", {})[p["template_id"]] = today
 
 
 def save(s: dict):

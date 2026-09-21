@@ -135,6 +135,17 @@ def main():
 
     raw = collect()
     print(f"[main] 수집 총 {len(raw)}건")
+    # 최근 이틀 안에 나간 종목의 특징주는 뒤로 보낸다(배제하지는 않는다).
+    # 실측(실채널 7회): 한전기술 5회, 대우건설·SK하이닉스 등 4회 등장.
+    # 같은 종목에 같은 틀이 겹치면 체감상 거의 같은 글이 된다.
+    # 특징주는 공급이 넉넉해(후보 200건대) 순서만 바꿔도 빠진다.
+    _recent = state.recent_stocks(s, 2)
+    if _recent:
+        _n0 = sum(1 for x in raw if x.get("kind") == "flow"
+                  and x.get("stock_code") in _recent)
+        raw.sort(key=lambda x: x.get("kind") == "flow"
+                 and x.get("stock_code") in _recent)
+        print(f"[main] 최근 2일 게시 종목 특징주 {_n0}건 후순위")
 
     # 용어 설명은 보강·게이트 이전에 코드가 붙인다. 모델에게 정의를 맡기지 않는다.
     _n_term = facts.annotate_terms(raw)
@@ -328,7 +339,11 @@ def main():
     # 최종 판정은 LLM과 reserve를 한 pool에서 다시 수행한다. decide가 LLM을
     # 우선하며, 같은 원본의 LLM/문장틀이 동시에 뽑히지 않게 막는다.
     if reserve:
-        sent_posts, held = decide.decide_distribution(posts + reserve)
+        # 최근 쓴 문장틀은 평시에 다시 쓰지 않는다(보장 모드에서는 무시).
+        sent_posts, held = decide.decide_distribution(
+            posts + reserve,
+            cooled_templates=state.cooled_templates(
+                s, template_reserve.COOLDOWN_DAYS))
         template_n = sum(p.get("provider") == "template" for p in sent_posts)
         print(f"[template] 최종 문장틀 보충 {template_n}건 / "
               f"LLM {len(sent_posts) - template_n}건")
