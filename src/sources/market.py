@@ -90,7 +90,12 @@ def _flow_diag(rows: list[dict]) -> dict:
             if r.get(k) and tv:
                 shares.append(abs(r[k]) / 1e8 / tv * 100)
     shares.sort()
-    d = {"rows": len(rows), "parsed": len(got), "ranked":
+    errs = {}
+    for r in rows:
+        if r.get("_flow_err"):
+            errs[r["_flow_err"]] = errs.get(r["_flow_err"], 0) + 1
+    d = {"errs": sorted(errs.items(), key=lambda x: -x[1])[:3],
+         "rows": len(rows), "parsed": len(got), "ranked":
          sum(1 for r in rows if r.get("flow_rank")), "over5":
          sum(1 for x in shares if x >= 5.0)}
     if shares:
@@ -103,8 +108,8 @@ def _diag_line(d: dict) -> str:
     if not d:
         return "[market] 수급 계측 없음"
     if not d.get("parsed"):
-        return (f"[market] ⚠ 수급 파싱 0/{d.get('rows', 0)}종목 — "
-                f"frgn.naver 파싱 실패 / 수급순위 {d.get('ranked', 0)}종목")
+        return (f"[market] ⚠ 수급 파싱 0/{d.get('rows', 0)}종목 / "
+                f"수급순위 {d.get('ranked', 0)}종목 / 실패사유 {d.get('errs')}")
     return (f"[market] 수급 파싱 {d['parsed']}/{d['rows']}종목 "
             f"(수급순위 {d.get('ranked', 0)}종목) / 거래대금 대비 비중 "
             f"중앙 {d.get('p50')}% p75 {d.get('p75')}% p90 {d.get('p90')}% "
@@ -253,9 +258,12 @@ def _add_flow(r: dict):
             headers={**crawl.HEADERS, "Accept": "application/json",
                      "Referer": "https://m.stock.naver.com/"}, timeout=12).text
         res = json.loads(txt)
-    except Exception:
+    except Exception as e:
+        # 조용히 return 하면 전건 실패해도 원인을 알 수 없다(실측 #127·#128).
+        r.setdefault("_flow_err", f"{type(e).__name__}")
         return
     if not isinstance(res, list) or not res:
+        r["_flow_err"] = f"shape={type(res).__name__} len={len(res) if hasattr(res,'__len__') else '-'}"
         return
     d = res[0]
 
@@ -266,6 +274,7 @@ def _add_flow(r: dict):
     close = _n("closePrice") or r.get("close")
     inst, frgn = _n("organPureBuyQuant"), _n("foreignerPureBuyQuant")
     if not close or (inst is None and frgn is None):
+        r["_flow_err"] = f"keys={list(d)[:8]}"
         return
     # 순매매 '수량'이므로 종가를 곱해 금액으로 환산한다 (코드가 계산)
     if inst is not None:
