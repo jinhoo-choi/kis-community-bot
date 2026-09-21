@@ -1923,6 +1923,28 @@ def main():
     # '비슷한 글을 올린다' 는 댓글. 실측(실채널 7회 350건): 뼈대가 완전히 같은
     # 글 59건이 전부 문장틀, 유사 307쌍 중 277쌍(90%)이 문장틀끼리였다.
     from src import template_reserve as _tr, state as _st
+    # 심사(Sonnet 5)는 비용의 36%였다(#127: 65회 $0.372). 프롬프트의 82%가 고정
+    # 규칙이라 캐시한다. 생성(Haiku 4.5)은 최소 길이(4,096) 미달이라 걸지 않는다.
+    from src.llm import claude as _cl
+    class _FakeMsgs:
+        def __init__(self): self.kw = None
+        def create(self, **kw): self.kw = kw; raise RuntimeError("stop")
+    class _FakeClient:
+        def __init__(self): self.messages = _FakeMsgs()
+    def _sys_of(model):
+        c = _cl.ClaudeProvider.__new__(_cl.ClaudeProvider)
+        c.model, c._no_temp, c._client = model, True, _FakeClient()
+        try:
+            c._create("규칙" * 10, "본문", 0.0, 10)
+        except RuntimeError:
+            pass
+        return c._client.messages.kw["system"]
+    _ss = _sys_of("claude-sonnet-5")
+    ok.append(run("심사(Sonnet 5) system 에 캐시 지정",
+                  isinstance(_ss, list) and _ss[0].get("cache_control") == {"type": "ephemeral"}))
+    ok.append(run("생성(Haiku) system 은 캐시 지정 안 함",
+                  isinstance(_sys_of("claude-haiku-4-5-20251001"), str)))
+
     ok.append(run("평시 문장틀 비중 10%", _tr.normal_template_limit(50) == 5))
     _res = _tr.build(__import__("json").load(open("data/market_cache.json"))["items"], 65)
     def _mkp(i, k):

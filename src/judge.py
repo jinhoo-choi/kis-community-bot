@@ -146,8 +146,14 @@ def judge_all(posts: list[dict], workers: int = 6) -> list[dict]:
     if len(judges()) < 2:
         print("[judge] 프로바이더가 1개뿐 → 교차 심사 스킵")
         return posts
+    if not posts:
+        return posts
+    # 캐시는 첫 응답이 시작된 뒤에야 쓸 수 있다. 처음부터 6개를 동시에 보내면
+    # 6개 모두 캐시를 못 쓰고 각자 쓰기 할증을 낸다. 한 건을 먼저 보내 캐시를
+    # 만든 뒤 나머지를 병렬로 보낸다.
+    first = _one(posts[0])
     with cf.ThreadPoolExecutor(max_workers=workers) as ex:
-        out = list(ex.map(_one, posts))
+        out = [first] + list(ex.map(_one, posts[1:]))
     backup_n = sum(p.get("judged_by") == "claude_backup" for p in out)
     if backup_n:
         print(f"[judge] Claude Sonnet 교차모델 심사 {backup_n}건")
