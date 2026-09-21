@@ -9,60 +9,45 @@
 [dart] 미보강 제목: ['[기재정정]최대주주변경을수반하는주식양수도계약체결', '[기재정정]최대주주변경', '[기재정정]최대주주변경을수반하는주식담보제공계약체결', '타법인주식및출자증권처분결정(종속회사의주요경영사항)', '주요사항보고서(전환사채매수선택권행사자지정)', '전환청구권ㆍ신주인수권ㆍ교환청구권행사', '[기재정정]주요사항보고서(자기전환사채매도결정)', '[기재정정]주요사항보고서(유상증자결정)']
 [crawl] dart 48건
 [crawl] naver_research 33건
-[crawl] hankyung 11건
+[crawl] hankyung 20건
 [market] REFRESH_MARKET=1 — 캐시를 무시하고 새로 수집한다
-[market] 발견된 헤더: []
-[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_quant.naver?sosok=0
-[market] 발견된 헤더: []
-[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_quant.naver?sosok=1
-[market] 발견된 헤더: []
-[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_rise.naver?sosok=0
-[market] 발견된 헤더: []
-[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_rise.naver?sosok=1
-[market] 발견된 헤더: []
-[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_fall.naver?sosok=0
-[market] 발견된 헤더: []
-[market] ⚠ 컬럼 부족 ['거래대금', '등락률', '종목명', '현재가'] / 발견 [] — https://finance.naver.com/sise/sise_fall.naver?sosok=1
 [tickers] 상장 2626종목 로드 (lxml)
 [market] siseJson 랭킹 생성 — 2626종목 조회
 [market] 확정 시세 2490종목 수집 (기준일 2026-09-18)
 [market] 후보 655종목 (중복 제거 후)
-[crawl] 재시도 1/1: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=01&investor_gubun=9000&type=buy
-[crawl] 로드 실패 https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=01&in: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=01&investor_gubun=9000&type=buy
-[crawl] 재시도 1/1: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=01&investor_gubun=9000&type=sell
-[crawl] 로드 실패 https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=01&in: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=01&investor_gubun=9000&type=sell
-[crawl] 재시도 1/1: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=02&investor_gubun=9000&type=buy
-[crawl] 로드 실패 https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=02&in: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=02&investor_gubun=9000&type=buy
-[crawl] 재시도 1/1: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=02&investor_gubun=9000&type=sell
-[crawl] 로드 실패 https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=02&in: 410 Client Error: 410 for url: https://finance.naver.com/sise/sise_deal_rank_iframe.naver?sosok=02&investor_gubun=9000&type=sell
 [market] 수급 파싱 250/250종목 (수급순위 0종목) / 거래대금 대비 비중 중앙 5.57% p75 12.21% p90 23.54% 최대 49.38% / 출력 임계 5.0% 초과 256건
 [market] 캐시 저장 250건 (기준일 2026-09-18)
 [crawl] market 250건
-[kind] 공시 65건 파싱, 조회공시 해당 없음 (정상)
+[kind] 공시 100건 파싱, 조회공시 해당 없음 (정상)
 [crawl] kind_inquiry 0건 (정상 0건)
-[policy] 연합뉴스 경제: 원문 120건 / 시각제외 0 / 관련성탈락 114 [('키워드없음', 66), ('정책신호없음', 24), ('기관·산업앵커없음', 7)] / 채택 6
-[policy] 연합뉴스 경제 표본: 오세훈 "박원순 前시장이 서울정비사업 해제 유도…이러고 남탓하나"(종합) | 요지 61자: 오세훈 서울시장은 21일 서울 주택공급 절벽이 전임 박원순 시장 시절에 비롯된 것이라며 책임소재를 분명히 해
-[policy] 연합뉴스 산업: 원문 120건 / 시각제외 0 / 관련성탈락 115 [('키워드없음', 79), ('정책신호없음', 18), ('기관·산업앵커없음', 7)] / 채택 5
-[policy] 연합뉴스 산업 표본: 기상장비 국산화에 5년간 347억원…천리안5호 탑재체도 기술자립 | 요지 24자: 기상청이 '기상장비 국산화'에 속도를 낸다.
-[policy] 정책브리핑(구글뉴스): 원문 100건 / 시각제외 43 / 관련성탈락 56 [('키워드없음', 40), ('인물중심', 10), ('정책신호없음', 3)] / 채택 1
-[policy] 정책브리핑(구글뉴스) 표본: '가덕도신공항 사업추진협의체' 출범…"연내 착공 추진" | 요지 42자: '가덕도신공항 사업추진협의체' 출범…"연내 착공 추진"  대한민국 정책브리핑
-[policy] 정책브리핑 실패: ConnectTimeout HTTPSConnectionPool(host='www.korea.kr', port=443): Max retr
-[policy] 기획재정부 실패: ConnectTimeout HTTPSConnectionPool(host='www.korea.kr', port=443): Max retr
-[policy] 금융위원회 실패: ConnectTimeout HTTPSConnectionPool(host='www.korea.kr', port=443): Max retr
-[policy] 산업통상자원부 실패: ConnectTimeout HTTPSConnectionPool(host='www.korea.kr', port=443): Max retr
-[policy] 필수 2/2피드 11건 / 선택(korea.kr) 1건
-[crawl] policy_rss 12건
+[policy] 연합뉴스 경제: 원문 120건 / 시각제외 0 / 관련성탈락 114 [('키워드없음', 64), ('정책신호없음', 23), ('기관·산업앵커없음', 8)] / 채택 6
+[policy] 연합뉴스 경제 표본: 한화, 'K-무인기' 생태계 구축한다…국내 기업 43곳과 업무협약 | 요지 34자: 한화에어로스페이스가 'K-무인기' 산업 생태계 구축에 나선다.
+[policy] 연합뉴스 산업: 원문 120건 / 시각제외 0 / 관련성탈락 112 [('키워드없음', 60), ('정책신호없음', 21), ('인물중심', 13)] / 채택 8
+[policy] 연합뉴스 산업 표본: AI로 사행산업 과몰입 선제 대응…강원랜드·마사회 정책 포럼 | 요지 61자: 강원랜드는 한국마사회와 함께 21일 그랜드 하얏트 서울에서 'AI 대전환 시대, 이용자 보호 패러다임의 전환
+[policy] 정책브리핑(구글뉴스): 원문 100건 / 시각제외 35 / 관련성탈락 63 [('키워드없음', 41), ('인물중심', 10), ('정책신호없음', 7)] / 채택 2
+[policy] 정책브리핑(구글뉴스) 표본: 밭농업 기계·기술 확산, 현장에서 답 찾다…우수 기술 연·전시회 성료 | 요지 50자: 밭농업 기계·기술 확산, 현장에서 답 찾다…우수 기술 연·전시회 성료  대한민국 정책브리핑
+[policy] 정책브리핑 실패: HTTPError 404 Client Error: Not Found for url: https://www.korea.kr/rs
+[policy] 기획재정부 실패: HTTPError 404 Client Error: Not Found for url: https://www.korea.kr/rs
+[policy] 금융위원회 실패: HTTPError 404 Client Error: Not Found for url: https://www.korea.kr/rs
+[policy] 산업통상자원부 실패: HTTPError 404 Client Error: Not Found for url: https://www.korea.kr/rs
+[policy] 필수 2/2피드 14건 / 선택(korea.kr) 2건
+[crawl] policy_rss 16건
 [tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
 [crawl] telegram_ch 0건 (정상 0건)
-[main] 수집 총 358건
+[main] 수집 총 371건
 [main] 용어 설명 주입 21건
 [enrich] 선행 API 호출 없이 캐시 적용 {'ok': 7, 'none': 0}
 [enrich] dry-run — 신규 보강 호출 없음
 [main] 발송 목표 50건 / 수율 14% → 생성 상한 429건 → 기대 발송 50건
-[gate] 차단 42건 {'tier5': 39, 'tier4': 1, 'tier2': 2}
-[theme] 게시판 매칭 실패 1건 생성 전 제외
-[dedup] 제외 45건 {'ID': 41, 'TTL': 3, 'EVT': 1}
-[main] 생성 대상 270건 {'disclosure': 18, 'research': 36, 'flow': 213, 'policy': 0, 'poll': 3}
+[gate] 차단 32건 {'tier5': 29, 'tier4': 1, 'tier2': 2}
+[theme] 배정 취소 — 주어 'SK에너지' 상장 매칭 실패: 수은, HD현대오일뱅크·SK에너지에 원유자금 대출한도 확대
+[theme] 배정 취소 — 주어 'IBK기업은행' 상장 매칭 실패: IBK기업은행, 가계대출 금리 감면 확대…"고객 부담 경감"
+[theme] 배정 취소 — 주어 'SK에너지' 상장 매칭 실패: 수은, HD현대오일뱅크·SK에너지에 원유자금 대출한도 확대
+[theme] 배정 취소 — 관련 섹터 없음: 농어촌 기본소득 시범사업, 국비 지원율 10%P 상향하여 지방정부 재원 
+[theme] 테마글 8건에 게시 종목 배정
+[theme] 게시판 매칭 실패 4건 생성 전 제외
+[dedup] 제외 60건 {'ID': 45, 'TTL': 3, 'SIM': 8, 'EVT': 4}
+[main] 생성 대상 275건 {'disclosure': 18, 'research': 34, 'flow': 213, 'policy': 7, 'poll': 3}
 [main] 실제 후보 기준 기대 발송 50.0건
 [decide] 유형상한 완화로 11건 보충 (19 → 30)
 [decide] ⚠ 절대상한 해제로 20건 보충 (30 → 50) — 구성 목표 초과: {'flow': 20}. 비-flow 공급 부족이 원인이다.
@@ -74,26 +59,26 @@
   [flow      ] 센서뷰               321370  센서뷰 전일 7.05% 상승
   [research  ] 롯데웰푸드             280360  재조명될 해외 사업
   [flow      ] SK스퀘어             402340  SK스퀘어 전일 5.20% 상승
+  [policy    ] CJ제일제당            097950  정부 "올해 차례상 비용 하락…연휴 마지막까지 물가 안정 총력"
   [flow      ] HD현대              267250  HD현대 전일 5.36% 하락
   [disclosure] 벡트                457600  [기재정정]최대주주변경을수반하는주식양수도계약체결
   [flow      ] 일진전기              103590  일진전기 전일 7.05% 상승
   [flow      ] 기가비스              420770  기가비스 전일 10.99% 상승
   [research  ] 아모그린텍             125210  [다시봐] 27년 매출성장 기대 요인
   [flow      ] 지엔씨에너지            119850  지엔씨에너지 전일 5.47% 상승
+  [policy    ] 삼성전자              005930  익산시, '반도체 소부장 특화단지' 훈풍 타고 기업 유치 총력
   [flow      ] 이수페타시스            007660  이수페타시스 전일 4.30% 하락
   [flow      ] 한라캐스트             125490  한라캐스트 전일 4.28% 상승
-  [disclosure] 중앙첨단소재            051980  [기재정정]최대주주변경을수반하는주식담보제공계약체결
-  [flow      ] 인제니아테라퓨틱스         950260  인제니아테라퓨틱스 전일 4.62% 상승
 
 ───── 게이트 차단 ─────
   dart       tier5:글감부족           23건
-  pol        tier5:글감부족           11건
   naver      tier5:글감부족           4건
+  pol        tier5:게시판없음          4건
   naver      tier4:제목부족           1건
   hk         tier5:글감부족           1건
   flow       tier2:자사계열종목         1건
   flow       tier2:이해상충(카카오뱅크)    1건
-  pol        tier5:게시판없음          1건
+  pol        tier5:글감부족           1건
   --- 차단 목록 ---
   tier5:글감부족         [disclosure] [기재정정]주요사항보고서(유상증자결정)
   tier5:글감부족         [disclosure] [기재정정]주요사항보고서(유형자산양도결정)
@@ -126,18 +111,11 @@
   tier5:글감부족         [research  ] 네오오토 ICE와 xEV를 넘어 로봇으로 기어 서드
   tier2:자사계열종목       [flow      ] 한국금융지주 전일 1.82% 하락
   tier2:이해상충(카카오뱅크)  [flow      ] 카카오뱅크 전일 1.44% 하락
-  tier5:글감부족         [policy    ] 수은, HD현대오일뱅크·SK에너지에 원유자금 대출한도 확대
-  tier5:글감부족         [policy    ] IBK기업은행, 가계대출 금리 감면 확대…"고객 부담 경감"
-  tier5:글감부족         [policy    ] GS건설, 사내 경진대회 'AX 레시피'…AI 현업 적용 본격화
-  tier5:글감부족         [policy    ] 금감원 "증권사 배불리는 영업행태 비판있어…내부통제 개선"
-  tier5:글감부족         [policy    ] AI가 읽기 쉬운 예산안 설명자료…기획처, 양식 개편
-  tier5:글감부족         [policy    ] 수은, HD현대오일뱅크·SK에너지에 원유자금 대출한도 확대
-  tier5:글감부족         [policy    ] K푸드 중국 수출길 넓힌다…고기 든 라면 규제 완화
-  tier5:글감부족         [policy    ] 韓총리 "AI허브, 공정·투명하게 최적입지 선정…차질없이 준비"
-  tier5:글감부족         [policy    ] GS건설, 사내 경진대회 'AX 레시피'…AI 현업 적용 본격화
-  tier5:글감부족         [policy    ] AI가 읽기 쉬운 예산안 설명자료…기획처, 양식 개편
-  tier5:글감부족         [policy    ] 연구개발부터 수출까지, K-뷰티 전주기 지원 위해 청년 기업인 목소리 듣는다
-  tier5:게시판없음        [policy    ] 이억원 "내년 청년예산 2.1조원…자산·일자리·주거 지원"
+  tier5:글감부족         [policy    ] (보도설명) 정부는 서민 지원 취지에 맞게 경차 유류세 환급제도를 정비하겠습니다.
+  tier5:게시판없음        [policy    ] 수은, HD현대오일뱅크·SK에너지에 원유자금 대출한도 확대
+  tier5:게시판없음        [policy    ] IBK기업은행, 가계대출 금리 감면 확대…"고객 부담 경감"
+  tier5:게시판없음        [policy    ] 수은, HD현대오일뱅크·SK에너지에 원유자금 대출한도 확대
+  tier5:게시판없음        [policy    ] 농어촌 기본소득 시범사업, 국비 지원율 10%P 상향하여 지방정부 재원 부담을 완화
 
   --- dart 차단 표본 (tier5:글감부족) dart-20260918000457 ---
   공시일: 20260918
@@ -179,7 +157,7 @@
   ※ 그대로 인용하되 원인으로 해석하지 말 것.
   ※ 등락 사유는 데이터에 없음. 원인을 추측해 단정하지 말 것.
 
-  --- pol 차단 표본 (tier5:글감부족) pol-수은HD현대오일뱅크SK에너지에원유자금대출한도 ---
+  --- pol 차단 표본 (tier5:게시판없음) pol-수은HD현대오일뱅크SK에너지에원유자금대출한도 ---
   출처: 연합뉴스 경제
   보도 시각: 2026-09-21 11:31 KST
   제목: 수은, HD현대오일뱅크·SK에너지에 원유자금 대출한도 확대
@@ -188,6 +166,14 @@
   ※ 언론 보도이며 정부 확정 발표가 아닐 수 있음. 단정하지 말 것.
 
 ───── 귀속 강등 ─────
+  pol-정부올해차례상비용하락연휴마지막까지물가안정총력 ['종목명미검출'] → stock
+  pol-익산시반도체소부장특화단지훈풍타고기업유치총력 ['종목명미검출'] → stock
+  pol-주병기소수업체방산독점개선해야신규진입촉진안논의 ['종목명미검출'] → stock
+  pol-익산시반도체소부장특화단지훈풍타고기업유치총력 ['종목명미검출'] → stock
+  pol-주병기소수업체방산독점개선해야신규진입촉진안논의 ['종목명미검출'] → stock
+  pol-韓총리AI허브공정투명하게최적입지선정차질없이준 ['종목명미검출'] → stock
+  pol-K푸드중국수출길넓힌다고기든라면규제완화   ['종목명미검출'] → stock
+  pol-韓총리AI허브공정투명하게최적입지선정차질없이준 ['종목명미검출'] → stock
 
 ───── 크롤링 헬스 ─────
 {
@@ -202,7 +188,7 @@
   "degraded": false
  },
  "hankyung": {
-  "got": 11,
+  "got": 20,
   "expected": 2,
   "degraded": false
  },
@@ -217,7 +203,7 @@
   "degraded": false
  },
  "policy_rss": {
-  "got": 12,
+  "got": 16,
   "expected": 3,
   "degraded": false
  },
@@ -229,8 +215,8 @@
 }
 
 ───── dedup ─────
- {'ID': 41, 'TTL': 3, 'EVT': 1}
+ {'ID': 45, 'TTL': 3, 'SIM': 8, 'EVT': 4}
 
 ───── template reserve ─────
  준비 65/65, dry-run 50/50
-[main] filter_log data/filter_log_20260921_1206.json
+[main] filter_log data/filter_log_20260921_1729.json
