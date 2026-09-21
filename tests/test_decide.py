@@ -1,5 +1,6 @@
 """배포 판정 테스트. main() 이 아니라 decide.py 의 실제 함수를 호출한다."""
 import pathlib
+import re as _re_mod
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -1798,6 +1799,13 @@ def main():
            "기대하고 있다.")
     # 게이트 하한이 요지 상한보다 크면 정책은 구조적으로 통과 불가다
     # (실측 #127: 차단 5 → 11건). 둘의 대소 관계를 고정한다.
+    # 구글뉴스 RSS 는 제목 끝에 ' - 출처' 를 붙인다. 그대로 두면 본문에
+    # 매체명이 섞이고 EXCLUDE 판정도 흔들린다.
+    ok.append(run("구글뉴스 제목의 출처 꼬리표 제거",
+                  _re_mod.sub(r"\s+-\s+[^-]{2,20}$", "",
+                              "가덕도신공항 협의체 출범 - korea.kr").strip()
+                  == "가덕도신공항 협의체 출범"))
+
     ok.append(run("정책 게이트 하한 < 요지 상한",
                   _gate._POLICY_MIN_DESC < __import__(
                       "src.sources.policy", fromlist=["x"]).GIST_MAX,

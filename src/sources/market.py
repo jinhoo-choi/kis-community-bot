@@ -191,7 +191,11 @@ SISE_JSON = ("https://api.finance.naver.com/siseJson.naver"
              "?symbol={code}&requestType=1&startTime={s}&endTime={e}&timeframe=day")
 
 
-FRGN_URL = "https://finance.naver.com/item/frgn.naver?code={code}"
+# 구 HTML 페이지(item/frgn.naver)는 더 이상 표를 주지 않는다.
+# 실측 #127: table.type2 0개, 세 종목 응답이 138,559bytes 로 동일(SPA 셸).
+# 순위 페이지(sise_deal_rank_iframe)는 HTTP 410(Gone).
+# 프로브에서 살아 있는 것은 모바일 API 하나뿐이다.
+FRGN_URL = "https://m.stock.naver.com/api/stock/{code}/trend"
 
 
 # 수급 상위 페이지. 프로브(data/flow_probe.txt)로 확인한 실제 iframe 주소다.
@@ -236,30 +240,38 @@ def _add_flow(r: dict):
     """외국인·기관 순매매를 붙인다.
 
     '왜 올랐는지'를 추정하지 않고도 관찰 가능한 사실을 늘리는 안전한 방법이다.
-    네이버 종목별 외국인·기관 페이지에서 최근 1일치만 읽는다.
+    모바일 API 가 최근 10거래일치를 배열로 준다. 첫 항목이 최신이다.
+
+    응답 예: [{"itemCode":"005930","bizdate":"20260918",
+              "foreignerPureBuyQuant":"-1,673,323","organPureBuyQuant":"+2,746,972",
+              "closePrice":"...", ...}, ...]
     """
-    soup = crawl.get_soup(FRGN_URL.format(code=r["code"]), encoding="euc-kr")
-    if soup is None:
-        return
     try:
-        for tr in soup.select("table.type2 tr"):
-            tds = tr.find_all("td")
-            if len(tds) < 9:
-                continue
-            def _n(i):
-                t = tds[i].get_text(strip=True).replace(",", "")
-                return int(t) if re.fullmatch(r"[-+]?\d+", t) else None
-            close, inst, frgn = _n(1), _n(5), _n(6)
-            if close is None or (inst is None and frgn is None):
-                continue
-            # 순매매 '수량'이므로 종가를 곱해 금액으로 환산한다 (코드가 계산)
-            if inst is not None:
-                r["inst_net"] = inst * close
-            if frgn is not None:
-                r["frgn_net"] = frgn * close
-            break
+        # siseJson 과 같은 방식. 모바일 API 라 Referer 가 필요하다.
+        txt = crawl.requests.get(
+            FRGN_URL.format(code=r["code"]),
+            headers={**crawl.HEADERS, "Accept": "application/json",
+                     "Referer": "https://m.stock.naver.com/"}, timeout=12).text
+        res = json.loads(txt)
     except Exception:
-        pass
+        return
+    if not isinstance(res, list) or not res:
+        return
+    d = res[0]
+
+    def _n(key):
+        t = str(d.get(key) or "").replace(",", "").replace("+", "")
+        return int(t) if re.fullmatch(r"-?\d+", t) else None
+
+    close = _n("closePrice") or r.get("close")
+    inst, frgn = _n("organPureBuyQuant"), _n("foreignerPureBuyQuant")
+    if not close or (inst is None and frgn is None):
+        return
+    # 순매매 '수량'이므로 종가를 곱해 금액으로 환산한다 (코드가 계산)
+    if inst is not None:
+        r["inst_net"] = inst * close
+    if frgn is not None:
+        r["frgn_net"] = frgn * close
 
 
 def _add_history(r: dict):

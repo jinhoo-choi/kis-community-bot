@@ -31,8 +31,15 @@ FEEDS = [
     ("연합뉴스 산업", "https://www.yna.co.kr/rss/industry.xml"),
 ]
 
+# 구글뉴스 RSS 는 해외 IP 에서도 열린다. korea.kr 보도자료를 site: 로 받아
+# 정책 원문 계열을 되살린다. 실측 #127: korea.kr 직접 피드 0건 / 구글뉴스
+# 경유 100건. 제목 끝에 ' - 출처' 가 붙는데 is_relevant 판정 전에 떼어낸다.
+GOOGLE_NEWS = ("https://news.google.com/rss/search"
+               "?q=site:korea.kr&hl=ko&gl=KR&ceid=KR:ko")
+
 # korea.kr 계열. 국내 IP 에서만 열리므로 실패해도 경고 대상에서 제외한다.
 OPTIONAL_FEEDS = [
+    ("정책브리핑(구글뉴스)", GOOGLE_NEWS),
     ("정책브리핑", "https://www.korea.kr/rss/policy.xml"),
     ("기획재정부", "https://www.korea.kr/rss/dept_moef.xml"),
     ("금융위원회", "https://www.korea.kr/rss/dept_fsc.xml"),
@@ -213,6 +220,9 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
             stale += 1
             continue
         title = (it.findtext("title") or "").strip()
+        # 구글뉴스는 제목 끝에 ' - 출처' 를 붙인다. 그대로 두면 본문에 매체명이
+        # 섞이고 EXCLUDE 판정도 흔들린다.
+        title = re.sub(r"\s+-\s+[^-]{2,20}$", "", title).strip()
         desc = re.sub(r"<[^>]+>", "", it.findtext("description") or "").strip()
         okay, _why = is_relevant(title, desc)
         if not okay:
