@@ -190,6 +190,22 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
         if not any(f in body for f in firms):
             errs.append("출처없는목표주가")
 
+    # 같은 뜻의 문장을 두 번 쓰면 AI 가 쓴 글로 읽힌다.
+    # 실측 #135: '…회사가 정한 가격이 아닙니다' 가 한 글에 두 번 나왔다
+    # (용어 설명 주장을 모델이 한 번 풀어 쓰고, 원문으로 한 번 더 썼다).
+    _sents = [re.sub(r"[\s.,!?~]", "", x) for x in
+              re.split(r"(?<=[.!?])(?!\d)\s+", body.strip()) if len(x) >= 12]
+    for i in range(len(_sents)):
+        for j in range(i + 1, len(_sents)):
+            a, b = _sents[i], _sents[j]
+            tail = min(len(a), len(b), 14)
+            if tail >= 10 and a[-tail:] == b[-tail:]:
+                errs.append("문장중복")
+                break
+        else:
+            continue
+        break
+
     # 커뮤니티 실측(당사 앱, 14.8만 건, 종목 규모·글 길이 통제): 아래 표현은
     # 모든 길이대에서 좋아요를 낮췄다. ㅋㅋ 0.84~0.93배, ㅠㅠ 0.72~0.87배,
     # ㅡㅡ 0.79~0.81배. 댓글은 늘지만(1.2배) 반박·조롱 성격이라 쓰지 않는다.
