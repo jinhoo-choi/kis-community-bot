@@ -108,6 +108,17 @@ SYNTHETIC = [
               "작성: 유안타증권 홍길동\n제시 적정가격: 30,000원 (해당 증권사 의견)\n"
               "투자의견: Buy (해당 증권사 의견)\n"
               "※ 제목 외 본문 수치는 미제공. 위 수치는 증권사 제시치이며 단정하지 말 것."},
+    # market.py + facts.py — 수급 줄. 시세 캐시가 #33 이전 코드로 만들어져
+    # 감사가 수급 결합 사실을 한 번도 본 적이 없었다. 실측 분포(#133: 비중
+    # 중앙 5.57%)에 맞춰 합성한다.
+    {"kind": "flow", "stock_code": "000001", "stock_name": "S",
+     "facts": "기준일: 2026-09-18\n종목: S (000001)\n종가: 52,000원\n등락률: 12.30%\n"
+              "[결합 사실 — 개별 수치만으로는 안 보이는 것]\n"
+              "· 외국인 순매수: 62억원 (거래대금 대비 7.3%)\n"
+              "· 기관 순매도: 45억원 (거래대금 대비 5.3%)\n"
+              "· 등락 크기: 최근 20거래일 평균 등락폭의 4.2배\n"
+              "· 고점 대비: 최근 20거래일 최고 종가 대비 12.3% 아래\n"
+              "· 갭 되돌림: 상승 출발 후 장중에 전일 종가까지 되돌림\n"},
     # policy.py — RSS
     {"kind": "policy", "stock_code": None, "stock_name": None,
      "title": "정책금융 지원 확대",
@@ -284,6 +295,72 @@ def audit_i5(items):
                         return
 
 
+# ── I6: 주장이 다른 라벨의 줄 한가운데에서 잡히는가 ─────────
+# 반복된 실패 계열이다(세 번):
+#   #27  '리포트 요지:' 가 policy 의 '요지' 로 잡힘
+#   #34  리서치 요지의 '고점 대비 약 50% 하락' 이 flow 의 drawdown 으로 잡힘
+# 정상 주장은 자기 라벨로 시작하는 줄의 앞머리에서 잡힌다. 줄 중간에서
+# 잡히면 남의 산문을 자기 주장으로 가져간 것이다.
+
+def audit_i6(items):
+    seen = set()
+    for it in items:
+        facts = claims._claimable(it.get("facts", ""))
+        for cid, _label, pat, _fmt in claims.CLAIM_SPECS:
+            for m in re.finditer(pat, facts):
+                ls = facts.rfind("\n", 0, m.start()) + 1
+                le = facts.find("\n", m.start())
+                line = facts[ls: le if le != -1 else len(facts)]
+                lead = len(line) - len(line.lstrip(" ·-\t"))
+                if m.start() - ls <= lead + 1:
+                    continue
+                key = (it.get("kind"), cid, line.split(":")[0][:14])
+                if key in seen:
+                    continue
+                seen.add(key)
+                fail("I6", f"[{it.get('kind')}] '{cid}' 가 다른 줄 중간에서 잡힘",
+                     line.strip()[:80])
+                break
+
+
+# ── I7: 소스가 내는 길이가 게이트 하한을 넘는가 ───────────────
+# #127: policy GIST_MAX(110) < 게이트 하한(120) 이라 요지가 구조적으로 통과 불가.
+# #132: 머리말 제거로 요지가 짧아져 하한(90) 아래로 떨어짐.
+# 한쪽만 바꾸면 반대쪽이 조용히 깨진다.
+
+def audit_i7():
+    from src.sources import policy as _pol
+    if gate._POLICY_MIN_DESC >= _pol.GIST_MAX:
+        fail("I7", "정책 게이트 하한 ≥ 요지 상한 — 구조적으로 통과 불가",
+             f"게이트 {gate._POLICY_MIN_DESC} / 요지 상한 {_pol.GIST_MAX}")
+
+
+# ── I8: 수집은 되는데 생성 대상이 0 인 유형이 있는가 ──────────
+# #132: 정책 수집 12건 → 생성 대상 0건. dry-run 리포트를 보기 전까지 몰랐다.
+# 가장 최근 실행 기록에서 이런 유형을 찾는다.
+
+def audit_i8():
+    for path, pat in (("data/dryrun_report.txt",
+                       r"생성 대상 \d+건 (\{[^}]*\})"),):
+        try:
+            txt = open(path, encoding="utf-8").read()
+        except Exception:
+            continue
+        m = re.findall(pat, txt)
+        if not m:
+            continue
+        import ast
+        gen = ast.literal_eval(m[-1])
+        col = dict(re.findall(r"\[crawl\] (\w+) (\d+)건", txt))
+        src_of = {"policy": "policy_rss", "research": "naver_research",
+                  "disclosure": "dart"}
+        for kind, src in src_of.items():
+            got = int(col.get(src, 0))
+            if got >= 5 and gen.get(kind, 0) == 0:
+                fail("I8", f"[{kind}] 수집 {got}건인데 생성 대상 0건",
+                     f"{path} 최근 실행")
+
+
 def main():
     items = targets()
     print(f"=== 파이프라인 정합성 감사 — 대상 {len(items)}건 "
@@ -293,6 +370,9 @@ def main():
     audit_i3(items)
     audit_i4()
     audit_i5(items)
+    audit_i6(items)
+    audit_i7()
+    audit_i8()
 
     for tag, lst in (("FAIL", FAIL), ("WARN", WARN)):
         for inv, msg, detail in lst:

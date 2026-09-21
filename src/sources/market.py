@@ -94,7 +94,9 @@ def _flow_diag(rows: list[dict]) -> dict:
     for r in rows:
         if r.get("_flow_err"):
             errs[r["_flow_err"]] = errs.get(r["_flow_err"], 0) + 1
-    d = {"errs": sorted(errs.items(), key=lambda x: -x[1])[:3],
+    hist_fail = sum(1 for r in rows if r.get("_hist_err"))
+    d = {"hist_fail": hist_fail,
+         "errs": sorted(errs.items(), key=lambda x: -x[1])[:3],
          "rows": len(rows), "parsed": len(got), "ranked":
          sum(1 for r in rows if r.get("flow_rank")), "over5":
          sum(1 for x in shares if x >= 5.0)}
@@ -113,7 +115,8 @@ def _diag_line(d: dict) -> str:
     return (f"[market] 수급 파싱 {d['parsed']}/{d['rows']}종목 "
             f"(수급순위 {d.get('ranked', 0)}종목) / 거래대금 대비 비중 "
             f"중앙 {d.get('p50')}% p75 {d.get('p75')}% p90 {d.get('p90')}% "
-            f"최대 {d.get('max')}% / 출력 임계 5.0% 초과 {d['over5']}건")
+            f"최대 {d.get('max')}% / 출력 임계 5.0% 초과 {d['over5']}건 / "
+            f"시세이력 실패 {d.get('hist_fail', '-')}종목")
 
 
 def _cache_save(day: str, items: list[dict], confirmed: bool = False,
@@ -378,8 +381,10 @@ def _add_history(r: dict):
                 sign, streak = d, streak + 1
             if streak >= 2:
                 r["streak"] = streak * sign
-    except Exception:
-        pass
+    except Exception as e:
+        # 여기가 실패하면 ret5·거래량배수·이동평균·등락크기·고점대비·갭·연속흐름이
+        # 한꺼번에 사라진다. 조용히 넘기면 '결합 사실이 얇다' 로만 보인다.
+        r["_hist_err"] = type(e).__name__
 
 
 def _col_map(soup) -> dict:
