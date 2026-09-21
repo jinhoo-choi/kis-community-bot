@@ -739,9 +739,16 @@ def main():
         _f_ai, "fact_read", "reaction", "short"))))
 
     # ── Voice 가 계약을 담고 있는가 (라벨이면 문체가 안 바뀐다)
-    from src.personas_v2 import PERSONAS as _PD
-    ok.append(run("페르소나 계약에 어미 규칙",
-                  any("종결어미" in p["desc"] for p in _PD.values())))
+    from src.personas_v2 import PERSONAS as _PD, SYSTEM_PROMPT as _SP
+    # 종전에는 페르소나마다 '~습니다와 ~네요를 섞는다' 식으로 어미를 고정했다.
+    # 당사 커뮤니티 실측(14.8만 건): 봇 글 66%에 '~네요' 가 정확히 한 번씩
+    # 들어가 모든 글이 같은 서명을 달고 나갔다('~네요' 포함률 봇 68% / 상위글 15%,
+    # '~했습니다' 봇 52% / 상위글 2.4%). 어미 고정이 AI 말투의 원인이었다.
+    # 계약은 이제 '어미를 고정하지 말라' 는 쪽이다.
+    ok.append(run("페르소나가 특정 종결어미를 강제하지 않음",
+                  not any("종결어미는" in p["desc"] for p in _PD.values())))
+    ok.append(run("공통 문체가 어미 고정을 금지",
+                  "고정하지 않습니다" in _SP))
 
 
     # ── 재생성 힌트 (같은 프롬프트로 재시도하면 같은 실수를 반복한다)
@@ -1871,6 +1878,25 @@ def main():
 
     # 감사 I6: change 가 '· 5거래일 누적 등락률' 줄까지 잡았다.
     _c1 = "종목: A (000000)\n[결합 사실]\n· 5거래일 누적 등락률: +26.77%\n"
+    # 당사 커뮤니티 실측(종목 규모·글 길이 통제, 모든 길이대에서 같은 방향):
+    # ㅋㅋ·ㅡㅡ·ㅠㅠ 는 좋아요를 낮추고, ㅎㅎ·느낌표·물결은 올린다.
+    _up = "기준일: 2026-09-18\n종목: A (000000)\n등락률: 12.30%\n"
+    _dn = "기준일: 2026-09-18\n종목: A (000000)\n등락률: -8.10%\n"
+    def _sym(b, f):
+        return [e for e in _filters.check(b, f, None, "reaction", "quick_memo",
+                                          None, False, "flow", "000000")
+                if e.startswith(("감정기호", "기호과다", "하락글"))]
+    ok.append(run("ㅋㅋ·ㅡㅡ·ㅠㅠ 차단",
+                  all(_sym(f"A가 12.30% 올랐습니다 {x} 참고하세요.", _up)
+                      for x in ("ㅋㅋ", "ㅡㅡ", "ㅠㅠ"))))
+    ok.append(run("ㅎㅎ·느낌표 1회는 허용",
+                  not _sym("A가 12.30% 올랐습니다! 오랜만이네요 ㅎㅎ", _up)))
+    ok.append(run("같은 기호 2회 이상 차단",
+                  _sym("A가 12.30% 올랐습니다! 대단합니다!", _up)
+                  == ["기호과다(느낌표)"]))
+    ok.append(run("하락 글의 ㅎㅎ·물결 차단",
+                  _sym("A가 8.10% 내렸습니다 ㅎㅎ", _dn) == ["하락글가벼운기호"]))
+
     ok.append(run("등락률 줄이 없으면 5일 누적값을 당일 등락률로 가져가지 않음",
                   "change" not in {c["type"] for c in _claims.build(
                       {"kind": "flow", "facts": _c1})}))
