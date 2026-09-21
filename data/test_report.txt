@@ -332,7 +332,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'data_focus', 'fact_note', 'check_list', 'open_talk', 'careful_note', 'brief_report'})
+  OK    flow 에서 quick_memo 미선택  ({'fact_note', 'brief_report', 'check_list', 'careful_note', 'data_focus', 'open_talk'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
   OK    미선정 비수치 사실도 프롬프트에서 제거
@@ -425,6 +425,8 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    등락 크기·고점 대비·갭 되돌림이 결합 사실로 나옴  (['장중 고저 차이: 저가 대', '마감 위치: 장중 고가 대', '등락 크기: 최근 20거래', '고점 대비: 최근 20거래', '갭 되돌림: 상승 출발 후', '시가 대비 마감: 26.5'])
   OK    임계 미만이면 붙이지 않음
   OK    결합 사실 주장은 줄 단위로만 매칭
+  OK    등락률 줄이 없으면 5일 누적값을 당일 등락률로 가져가지 않음
+  OK    선정된 사실의 줄은 facts_view 에서 지워지지 않음
   OK    신규 결합 사실이 주장으로 매핑  (['change', 'close', 'range', 'close_pos', 'open_pos', 'move_x', 'drawdown', 'gapfill'])
   OK    앵글마다 진입 사실이 갈림  (['ret5', 'vol_ratio'])
   OK    주장 블록이 첫 문장 진입점을 지정
@@ -478,7 +480,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    수치 문장의 완충 표현 차단
   OK    수치 없는 완충 1회는 허용
 
-421/421 passed
+423/423 passed
   OK    문장틀 22종 계약
   OK    50+15 reserve 준비  (65)
   OK    reserve 전건 원문 재검증
@@ -581,7 +583,7 @@ FAIL 0 / WARN 0
 FAIL 0 / WARN 0
 
 === 2d. 파이프라인 정합성 (facts 생성 x 게이트 x claim x 필터) ===
-=== 파이프라인 정합성 감사 — 대상 254건 (합성 5 + 캐시 249) ===
+=== 파이프라인 정합성 감사 — 대상 255건 (합성 6 + 캐시 249) ===
   WARN [I2] [research] claim 'gist' 인용이 필터에 걸림
        └ ['literary_style'] / 리포트 요지: 2027년 매출액 약 7.1조원, 영업이익 2조 1,203억원을 전망한다. 짐펜트라 미국 매출이 본격화되며 수익성이 개선될 것으로 본다.
   WARN [I2] [policy] claim 'policy' 인용이 필터에 걸림
@@ -618,7 +620,7 @@ FAIL 0 / WARN 2
        └ '두산에너빌리티 원전 수주 소식이 나왔네요. 저는 이거 물렸는데 이번엔 좀 오르려나요. 체코 건 이후로 분위기가 달라진 건 맞습니다. 다만 확정된 수치는 없습니다. 어떻게 보시나요.'
 [gen] 정규식 리젝 v2 ['trade_advice', 'price_target']
        └ '카카오 광고매출 회복 얘기가 나옵니다. 지금 비중확대 하세요. 목표가 6만원 갑니다. 반드시 오릅니다. 지금이 기회입니다. 다들 어떻게 보시나요.'
-[gen] 정규식 리젝 v3 ["미확인수치['8742', '1530', '452']", "근거없는수치['1530', '452', '8742']", '어미단조(격식체만 3문장)']
+[gen] 정규식 리젝 v3 ["미확인수치['1530', '452', '8742']", "근거없는수치['1530', '452', '8742']", '어미단조(격식체만 3문장)']
        └ 'LG에너지솔루션이 어제 2.30% 올랐습니다. 거래대금은 8,742억원이었고 외국인이 1,530억 순매수했습니다. 수주잔고도 452조원까지 늘었다고 합니다. 배터리 업황이 돌아서는 걸까요.'
 [gen] 정규식 통과 9건 / 시도 13건
 
