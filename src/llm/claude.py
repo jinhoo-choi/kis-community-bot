@@ -80,6 +80,14 @@ class ClaudeProvider(Provider):
         # Sonnet 5는 비기본 sampling parameter를 거부하고 adaptive thinking이 기본이다.
         # JSON 심사는 짧고 결정적이어야 하므로 thinking을 끄고 temperature를 보내지 않는다.
         if self.model == "claude-sonnet-5":
+            # 심사 프롬프트의 82%(약 2,016토큰)는 매번 같은 규칙 텍스트다.
+            # Sonnet 5 의 캐싱 최소 길이(1,024토큰)를 넘으므로 system 을 캐시한다.
+            # 캐시 읽기는 입력 단가의 0.1배라 심사 입력비가 약 70% 준다(#127 기준
+            # 심사 65회 $0.320 → 약 $0.084). 심사 결과는 바뀌지 않는다 — 같은 입력이다.
+            # Haiku 4.5(생성)는 최소 길이가 4,096토큰인데 입력이 3,836토큰이라
+            # 캐싱되지 않는다. 그쪽에 걸면 쓰기 할증만 생길 수 있어 걸지 않는다.
+            kw["system"] = [{"type": "text", "text": system,
+                             "cache_control": {"type": "ephemeral"}}]
             return self._client.messages.create(
                 thinking={"type": "disabled"}, **kw)
         if self._no_temp:                 # 한 번 확인했으면 매번 재시도하지 않는다
