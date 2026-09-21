@@ -1,5 +1,6 @@
 """배포 판정 테스트. main() 이 아니라 decide.py 의 실제 함수를 호출한다."""
 import pathlib
+from collections import Counter
 import re as _re_mod
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -1918,6 +1919,40 @@ def main():
                       "종목: A\n리포트 제목: X\n발간: 유안타증권 / 2026-09-21\n"
                       "제시 적정가격: 340,000원\n", None, "terms", "fact_note",
                       None, False, "research", "000000")))
+
+    # '비슷한 글을 올린다' 는 댓글. 실측(실채널 7회 350건): 뼈대가 완전히 같은
+    # 글 59건이 전부 문장틀, 유사 307쌍 중 277쌍(90%)이 문장틀끼리였다.
+    from src import template_reserve as _tr, state as _st
+    ok.append(run("평시 문장틀 비중 10%", _tr.normal_template_limit(50) == 5))
+    _res = _tr.build(__import__("json").load(open("data/market_cache.json"))["items"], 65)
+    def _mkp(i, k):
+        return {"id": f"{k}{i}", "kind": k, "provider": "claude",
+                "stock_code": f"{abs(hash(k)) % 9}{i:05d}", "stock_name": f"{k}{i}",
+                "body": "본문", "tone": ["fact_note", "data_focus", "brief_report",
+                                        "careful_note", "quick_memo"][i % 5],
+                "score": {"total": 16, "fit": 4, "factual": 5, "compliant": 5}}
+    _pool = ([_mkp(i, "research") for i in range(9)] + [_mkp(i, "disclosure") for i in range(4)]
+             + [_mkp(i, "policy") for i in range(2)] + [_mkp(i, "flow") for i in range(30)])
+    _cool = frozenset(p["template_id"] for p in _res[:10])
+    _sent, _ = decide_distribution(_pool + [dict(p) for p in _res], target=50,
+                                   cooled_templates=_cool)
+    _tp = [p for p in _sent if p.get("provider") == "template"]
+    _tc = Counter(p["template_id"] for p in _tp)
+    ok.append(run("평시엔 같은 문장틀 1건·최근 쓴 틀 제외",
+                  len(_tp) <= 5 and max(_tc.values(), default=0) <= 1
+                  and not any(p["template_id"] in _cool for p in _tp),
+                  f"문장틀 {len(_tp)} / 틀당 최대 {max(_tc.values(), default=0)}"))
+    # 장애(보장 모드)에서는 50건을 채우는 게 우선이다. 이 동작은 바뀌면 안 된다.
+    _pool2 = [_mkp(i, "research") for i in range(9)] + [_mkp(i, "flow") for i in range(5)]
+    _sent2, _ = decide_distribution(_pool2 + [dict(p) for p in _res], target=50,
+                                    cooled_templates=_cool)
+    ok.append(run("장애 시에는 문장틀로 목표 50건 유지", len(_sent2) == 50, str(len(_sent2))))
+    _s = {"seen": {}, "recent_tone": {}, "recent_templates": {}, "recent_stocks": {}}
+    _st.mark(_s, [{"id": "x", "stock_code": "015760", "tone": "t",
+                   "provider": "template", "template_id": "T01"}])
+    ok.append(run("게시 종목·문장틀을 상태에 기록",
+                  "015760" in _st.recent_stocks(_s, 2)
+                  and "T01" in _st.cooled_templates(_s, 4)))
 
     ok.append(run("등락률 줄이 없으면 5일 누적값을 당일 등락률로 가져가지 않음",
                   "change" not in {c["type"] for c in _claims.build(

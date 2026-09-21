@@ -17,7 +17,14 @@ from src import claims, facts, filters
 
 MODEL = "template_v1"
 RESERVE_EXTRA = 15
-NORMAL_SHARE = 0.30
+# 평시 문장틀 비중. 30% 였을 때 문장틀 22종으로 주 97건을 찍어내 한 틀이
+# 일주일에 최대 8번 나갔고, '비슷한 글을 올린다' 는 댓글이 달렸다.
+# 실측(실채널 7회 350건): 종목명·숫자만 바꾼 뼈대가 완전히 같은 글 59건이
+# 전부 문장틀이었고, 유사도 0.8 이상 307쌍 중 277쌍(90%)이 문장틀끼리였다.
+# 장애 대비 보장 모드(LLM 공급 부족 시 목표까지 채움)는 그대로 둔다.
+NORMAL_SHARE = 0.10
+# 같은 문장틀을 다시 쓰기까지의 간격. 평시 5건 x 4일 = 20 < 22종.
+COOLDOWN_DAYS = 4
 APPROVED_TONES = ("data_focus", "fact_note", "brief_report")
 APPROVED_RELATIONS = ("vol_ratio", "ret5", "close_pos")
 

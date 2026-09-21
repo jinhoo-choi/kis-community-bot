@@ -38,7 +38,7 @@ def decide_distribution(
     min_factual: int = None,
     min_compliant: int = None,
     hard_kind_cap: dict = None,
-) -> tuple[list[dict], list[dict]]:
+    cooled_templates: frozenset = frozenset()) -> tuple[list[dict], list[dict]]:
     """(배포, 보류) 반환.
 
     순서가 중요하다. 상한 적용 전에 정렬해야 '좋은 글이 상한에 걸려 잘리는' 일이 없다.
@@ -120,6 +120,8 @@ def decide_distribution(
     # 품질이 좋지만 공급이 적다. 그래서 좋은 것부터 채우고 flow 로 메운다.
     pool.sort(key=lambda x: (_PRIORITY.get(x.get("kind", ""), 9),
                              x.get("provider") == "template",
+                             # 보장 모드에서 문장틀로 채울 때도 최근 안 쓴 틀부터 쓴다
+                             x.get("template_id", "") in cooled_templates,
                              -(x.get("score") or {}).get("total", 0)))
 
     # 평시에는 LLM 승인본 70% 이상을 우선하고 template은 최대 30%(50건이면
@@ -162,8 +164,13 @@ def decide_distribution(
             if template_sent >= (target if template_guarantee else template_limit):
                 p["hold_reason"] = "문장틀상한"
                 return False
-            if not tid or per_tid[tid] >= 3:
+            # 보장 모드(LLM 공급 부족)에서는 목표를 채우는 게 우선이라 종전대로
+            # 3건까지 허용한다. 평시에는 한 회차에 같은 틀 1건, 최근 쓴 틀은 제외.
+            if not tid or per_tid[tid] >= (3 if template_guarantee or guarantee_mode else 1):
                 p["hold_reason"] = "문장틀반복상한"
+                return False
+            if not (template_guarantee or guarantee_mode) and tid in cooled_templates:
+                p["hold_reason"] = "문장틀쿨다운"
                 return False
         code = p.get("stock_code") or "_theme"
         if code != "_theme" and per_s[code] >= per_stock:
