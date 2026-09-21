@@ -15,6 +15,42 @@ from bs4 import BeautifulSoup
 sys.path.insert(0, ".")
 
 OUT = []
+
+
+def probe_frgn_detail(codes=("005930", "000660", "042660")) -> None:
+    """종목별 외국인·기관 페이지(item/frgn.naver) 구조 덤프.
+
+    실측 #127: 200종목 전건 파싱 실패(수급 파싱 0/200). _add_flow 는
+    table.type2 의 tr 에서 td 9개 이상을 찾아 td[1]=종가, td[5]=기관,
+    td[6]=외국인으로 읽는데, 한 컬럼이라도 어긋나면 전건 조용히 실패한다.
+    추측하지 않고 실제 표를 덤프한다.
+    """
+    log("\n── 0. 종목별 외국인·기관 상세 (item/frgn.naver) ──")
+    for code in codes:
+        url = f"https://finance.naver.com/item/frgn.naver?code={code}"
+        try:
+            r = requests.get(url, headers=H, timeout=15)
+            r.encoding = "euc-kr"
+            log(f"  [{code}] HTTP {r.status_code} / {len(r.content):,}bytes")
+            if r.status_code != 200:
+                continue
+            soup = BeautifulSoup(r.text, "html.parser")
+            tables = soup.select("table.type2")
+            log(f"    table.type2 {len(tables)}개")
+            for ti, tb in enumerate(tables):
+                rows = tb.select("tr")
+                wide = [tr for tr in rows if len(tr.find_all("td")) >= 9]
+                log(f"    [{ti}] tr {len(rows)}개 / td9+ {len(wide)}개")
+                heads = [th.get_text(strip=True)
+                         for th in tb.select("th")][:12]
+                if heads:
+                    log(f"        th: {heads}")
+                for tr in wide[:2]:
+                    tds = [td.get_text(strip=True)
+                           for td in tr.find_all("td")]
+                    log(f"        td({len(tds)}): {tds}")
+        except Exception as e:
+            log(f"  [{code}] 실패: {e}")
 H = {"User-Agent": "Mozilla/5.0", "Referer": "https://finance.naver.com/"}
 
 CANDIDATES = [
@@ -98,6 +134,7 @@ def probe(label: str, url: str) -> None:
 
 
 def main() -> None:
+    probe_frgn_detail()
     for label, url in CANDIDATES:
         probe(label, url)
     with open("data/flow_probe.txt", "w", encoding="utf-8") as f:

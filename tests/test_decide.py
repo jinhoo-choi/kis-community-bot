@@ -1796,6 +1796,13 @@ def main():
            "발표했다. 적용 시점은 2027년 1월이다. 금융위원회는 이날 브리핑에서 "
            "관련 시행령 개정을 예고했다. 업계는 자금 조달 여건이 개선될 것으로 "
            "기대하고 있다.")
+    # 게이트 하한이 요지 상한보다 크면 정책은 구조적으로 통과 불가다
+    # (실측 #127: 차단 5 → 11건). 둘의 대소 관계를 고정한다.
+    ok.append(run("정책 게이트 하한 < 요지 상한",
+                  _gate._POLICY_MIN_DESC < __import__(
+                      "src.sources.policy", fromlist=["x"]).GIST_MAX,
+                  f"게이트 {_gate._POLICY_MIN_DESC} / 요지 상한 "
+                  f"{__import__('src.sources.policy', fromlist=['x']).GIST_MAX}"))
     ok.append(run("정책 요지는 상한 안에서 문장 경계로 잘림",
                   len(_pol._gist(_pd)) <= _pol.GIST_MAX
                   and _pol._gist(_pd).endswith("다.")
