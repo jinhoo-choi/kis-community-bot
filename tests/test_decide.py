@@ -1839,6 +1839,16 @@ def main():
             "facts": ("기준일: 2026-09-16\n종목: A (000000)\n종가: 13,910원\n"
                       "등락률: 29.52%\n" + _f.DERIVED_HEADER + "\n"
                       + "\n".join("· " + x for x in _dv))}
+    # 결합 사실 spec 이 줄 중간까지 잡으면 다른 유형의 산문에서 엉뚱한 주장이
+    # 생긴다. 실측: 리서치 요지의 '고점 대비 약 50% 하락한 수준이다' 가
+    # flow 의 drawdown 으로 잡혔다(감사 I2).
+    ok.append(run("결합 사실 주장은 줄 단위로만 매칭",
+                  "drawdown" not in {c["type"] for c in _claims.build(
+                      {"kind": "research",
+                       "facts": "종목: A (000000)\n리포트 제목: X\n"
+                                "리포트 요지: 고점 대비 약 50% 하락한 "
+                                "수준이다. 실적 개선이 본격화될 전망이다.\n"})}))
+
     ok.append(run("신규 결합 사실이 주장으로 매핑",
                   {"move_x", "drawdown", "gapfill"}
                   <= {c["type"] for c in _claims.build(_fit)},
