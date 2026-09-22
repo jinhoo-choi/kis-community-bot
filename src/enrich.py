@@ -92,7 +92,7 @@ def _one(item: dict) -> dict:
         item["thin_facts"] = True
         return item
     CALLS[0] += 1
-    r = g.generate(
+    r = g.search(
         SYSTEM,
         USER.format(
             stock=item.get("stock_name") or "해당 없음",
