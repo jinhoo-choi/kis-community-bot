@@ -108,10 +108,13 @@ def _ending_variety(body: str) -> list[str]:
     top, n = c.most_common(1)[0]
     if n >= 4:
         errs.append(f"어미반복({top}×{n})")
-    formal = sum(v for k, v in c.items()
-                 if k in ("습니다", "합니다", "입니다", "됩니다"))
-    if len(ends) >= 3 and formal == len(ends):
-        errs.append(f"어미단조(격식체만 {formal}문장)")
+    # '전 문장 격식체' 를 리젝하던 어미단조는 뺐다. 근거가 네이버 종토방(격식체
+    # 1.7%)이었는데, 당사 커뮤니티 실측(3문장 이상 2,171건)에서는
+    #   격식 섞임 좋아요 1.08배 / 전부 격식 1.04배 / 격식 없음 0.89배
+    # 로 전부 격식체도 평균 이상이다. 그런데 #137 에서 정규식 리젝 188건 중
+    # 119건(63%)이 이 규칙이었고, LLM 발송 1건에 5.8회를 생성했다.
+    # 반응 좋은 글을 돈 들여 만들고 버리고 있었다. 같은 어미 4회 반복은 위의
+    # 어미반복이 계속 막고, 섞기는 명사형 종결 배정(personas.noun_ending_for)이 한다.
     return errs
 
 

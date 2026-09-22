@@ -360,18 +360,27 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
     angs = angs or [""] * len(items)
     lens = lens or ["medium"] * len(items)
     p = router.writers()[provider_name]
-    # temperature 가 다른 항목은 배치를 나눈다 (배치는 파라미터가 요청별로 고정되므로)
-    groups = {}
-    for i, (it, tn, fm, ag, ln) in enumerate(zip(items, tones, fmts, angs, lens)):
-        groups.setdefault(temperature_for(it), []).append((i, it, tn, fm, ag, ln))
-
     results = [None] * len(items)
-    for temp, grp in groups.items():
-        jobs = [P.build_messages_v2(it, tn, ag)
-                for _, it, tn, fm, ag, ln in grp]
-        for g, r in zip(grp, p.generate_many(jobs, temperature=temp)):
+    if provider_name == "claude":
+        # 배치 API 는 요청마다 temperature 를 따로 받는다. 종전에는 '파라미터가
+        # 요청별로 고정' 이라고 잘못 보고 온도(유형)별로 쪼개 보냈고, 15건 미만
+        # 묶음은 배치 문턱에 못 미쳐 정가 동기 호출로 갔다. 한 번에 보낸다.
+        jobs = [P.build_messages_v2(it, tn, ag) for it, tn, ag in zip(items, tones, angs)]
+        temps = [temperature_for(it) for it in items]
+        for i, r in enumerate(p.generate_many(jobs, temperature=temps)):
             record_usage(r, "write", attempt_type)
-            results[g[0]] = r
+            results[i] = r
+    else:
+        # Gemini 는 배치를 쓰지 않는다(소규모 병렬). 종전대로 온도별로 호출한다.
+        groups = {}
+        for i, (it, tn, fm, ag, ln) in enumerate(zip(items, tones, fmts, angs, lens)):
+            groups.setdefault(temperature_for(it), []).append((i, it, tn, fm, ag, ln))
+        for temp, grp in groups.items():
+            jobs = [P.build_messages_v2(it, tn, ag)
+                    for _, it, tn, fm, ag, ln in grp]
+            for g, r in zip(grp, p.generate_many(jobs, temperature=temp)):
+                record_usage(r, "write", attempt_type)
+                results[g[0]] = r
 
     out = []
     for it, tn, fm, ag, ln, r in zip(items, tones, fmts, angs, lens, results):

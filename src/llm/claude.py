@@ -118,6 +118,8 @@ class ClaudeProvider(Provider):
         if not self.use_batch or len(jobs) < 15:
             return self._sync_many(jobs, temperature, max_tokens)
 
+        # temperature 는 요청마다 다를 수 있다(배치 API 는 요청별 params 를 받는다).
+        temps = temperature if isinstance(temperature, list) else [temperature] * len(jobs)
         try:
             reqs = [{
                 "custom_id": f"j{i}",
@@ -126,7 +128,7 @@ class ClaudeProvider(Provider):
                     "messages": [{"role": "user", "content": u}],
                     **({"thinking": {"type": "disabled"}}
                        if self.model == "claude-sonnet-5"
-                       else ({} if self._no_temp else {"temperature": temperature})),
+                       else ({} if self._no_temp else {"temperature": temps[i]})),
                 },
             } for i, (s, u) in enumerate(jobs)]
 
@@ -172,6 +174,7 @@ class ClaudeProvider(Provider):
         if not jobs:
             return []
         workers = min(max(1, config.CLAUDE_SYNC_WORKERS), len(jobs))
+        temps = temperature if isinstance(temperature, list) else [temperature] * len(jobs)
         with cf.ThreadPoolExecutor(max_workers=workers) as ex:
-            return list(ex.map(lambda job: self.generate(
-                job[0], job[1], temperature, max_tokens), jobs))
+            return list(ex.map(lambda jt: self.generate(
+                jt[0][0], jt[0][1], jt[1], max_tokens), zip(jobs, temps)))

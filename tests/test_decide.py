@@ -727,10 +727,18 @@ def main():
         "로보티즈가 어제 20.32% 올랐습니다. 종가는 299,000원인데요. "
         "거래대금은 2,990억원으로 고가 대비 소폭 밀린 자리에서 마감했습니다.",
         _f_ai, "fact_read", "reaction", "short")))
-    ok.append(run("격식체 일변도 리젝", any("어미단조" in e for e in _f2.check(
+    # 종전에는 격식체 3문장을 '어미단조' 로 리젝했다(근거: 네이버 종토방 1.7%).
+    # 당사 커뮤니티 실측에서 전부 격식체 글은 좋아요 1.04배로 평균 이상이고,
+    # #137 에서 이 규칙이 정규식 리젝의 63%(119/188)를 차지해 생성비를 태웠다.
+    # 기대를 뒤집는다: 격식체 3문장은 통과, 같은 어미 4회 반복은 여전히 리젝.
+    ok.append(run("격식체 3문장은 통과", not any("어미단조" in e for e in _f2.check(
         "로보티즈가 어제 20.32% 올랐습니다. 종가는 299,000원입니다. "
         "거래대금은 2,990억원이었습니다.",
         _f_ai, "fact_read", "reaction", "short"))))
+    ok.append(run("같은 어미 4회 반복은 여전히 리젝", any("어미반복" in e for e in _f2.check(
+        "로보티즈가 20.32% 올랐습니다. 종가는 299,000원까지 갔습니다. "
+        "거래대금은 2,990억원을 기록했습니다. 5거래일로는 31% 올랐습니다.",
+        _f_ai, "fact_read", "reaction", "medium"))))
     # 실측: 50건 중 22건이 수치로 시작해 종목명이 끝까지 안 나왔다
     ok.append(run("수치 선두 리젝", any("수치선두" in e for e in _f2.check(
         "20.32% 상승. 로보티즈 종가는 299,000원입니다.",
@@ -1918,6 +1926,26 @@ def main():
     # 봇 글 52% 에 들어가는 획일성이 문제라 명사형 종결(커뮤니티 26%)을 섞는다.
     _ne = sum(_pers.noun_ending_for({"id": f"f-{i}"}) for i in range(2000)) / 20
     ok.append(run("명사형 종결 배정 약 30%", 25 <= _ne <= 35, f"{_ne:.1f}%"))
+    # 배치 API 는 요청별 temperature 를 받는다. 종전엔 유형별로 쪼개 15건 미만
+    # 묶음이 정가 동기 호출로 갔다(#137). 한 번에 보내면 요청마다 온도가 붙어야 한다.
+    from src.llm import claude as _cl2
+    class _BM:
+        def __init__(self): self.req = None
+        def create(self, requests): self.req = requests; raise RuntimeError("stop")
+    class _MM:
+        def __init__(self): self.batches = _BM()
+    class _CC:
+        def __init__(self): self.messages = _MM()
+    _cp = _cl2.ClaudeProvider.__new__(_cl2.ClaudeProvider)
+    _cp.model, _cp._no_temp, _cp.use_batch, _cp._client = \
+        "claude-haiku-4-5-20251001", False, True, _CC()
+    _cp._sync_many = lambda jobs, t, m: ["sync"] * len(jobs)
+    _cp.generate_many([("s", "u")] * 16, temperature=[0.4] * 8 + [0.8] * 8)
+    _reqs = _cp._client.messages.batches.req or []
+    ok.append(run("배치 한 번에 요청별 온도",
+                  len(_reqs) == 16 and _reqs[0]["params"]["temperature"] == 0.4
+                  and _reqs[-1]["params"]["temperature"] == 0.8))
+
     ok.append(run("하락 글에는 ㅎㅎ 배정 안 함",
                   not any(_pers.accent_for({"id": f"f-{i}", "facts": "등락률: -5.0%\n"})
                           == "hehe" for i in range(2000))))
