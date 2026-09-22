@@ -305,6 +305,20 @@ def main():
     start = 0
     next_size = min(config.GEN_STAGE_SIZE, len(picked))
     while start < len(picked) and next_size:
+        # 특징주가 이미 유형 상한에 걸려 보류되고 있으면, 특징주를 더 만들어도
+        # 발송이 늘지 않는다(보류분이 상한 완화 때 먼저 올라간다).
+        # 실측 #137: 모든 검사를 통과하고도 '유형절대상한(flow)' 로 버려진 글 51건,
+        # LLM 생성의 19%. 남은 후보에서 특징주를 빼고 비-특징주만 계속 만든다.
+        _flow_surplus = sum(1 for h in held if h.get("kind") == "flow"
+                            and h.get("hold_reason", "").startswith(("유형절대상한", "유형상한")))
+        if _flow_surplus:
+            _before = len(picked)
+            picked = picked[:start] + [x for x in picked[start:] if x.get("kind") != "flow"]
+            if len(picked) < _before:
+                print(f"[main] 특징주 {_flow_surplus}건이 이미 상한 대기 → "
+                      f"남은 특징주 후보 {_before - len(picked)}건 생성 생략")
+            if start >= len(picked):
+                break
         stage = picked[start:start + next_size]
         start += len(stage)
         stage_sizes.append(len(stage))

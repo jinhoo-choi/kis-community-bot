@@ -151,7 +151,7 @@ def fetch_naver_api(limit: int = 12) -> list[dict]:
       그래서 요지를 사실로 넘긴다. 다만 원문을 그대로 싣지 않는다.
         - 문장 경계로 잘라 GIST_MAX 자까지만 넘긴다
         - 발간 증권사 표기가 의무다(filters 출처없는목표주가)
-        - 원문은 문어체라 그대로 베끼면 literary_style·어미단조에 걸린다.
+        - 원문은 문어체(~한다·~이다)라 그대로 베끼면 literary_style 에 걸린다.
           모델이 구어체로 다시 쓸 수밖에 없는 구조다
     """
     _detail_fail = []
