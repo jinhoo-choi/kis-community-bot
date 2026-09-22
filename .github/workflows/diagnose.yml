@@ -32,7 +32,10 @@ jobs:
           git add -f data/diagnose.txt data/telegram_probe.txt data/telegram_probe.json data/kind_probe.txt data/dart_probe.txt
           git diff --staged --quiet || git commit -m "chore: diagnose $(date +%FT%H%M)"
           # daily 와 동시 실행되면 push 가 경합해 깨진다 (실측)
+          pushed=0
           for i in 1 2 3; do
-            git pull --rebase --autostash origin main && git push && break
+            git pull --rebase -X theirs --autostash -q origin main || git rebase --abort 2>/dev/null || true
+            git push && { pushed=1; break; }
             sleep 10
           done
+          [ "$pushed" = 1 ] || { echo "::error::diagnose push 3회 실패"; exit 1; }

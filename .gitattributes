@@ -1,0 +1,2 @@
+# 여러 실행이 같은 파일 끝에 한 줄씩 붙인다. 충돌 시 양쪽 줄을 모두 남긴다.
+data/run_stats.jsonl merge=union
