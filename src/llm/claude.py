@@ -26,6 +26,16 @@ def _message_result(message, provider: str, fallback_model: str,
                     billing_mode: str = "standard") -> GenResult:
     """Anthropic message의 실제 usage를 공통 결과로 정규화한다."""
     txt = "".join(b.text for b in message.content if b.type == "text").strip()
+    # 웹 검색 도구를 쓴 응답은 근거 URL 이 검색 결과 블록에 들어온다.
+    # 보강은 '검색으로 확인된 사실' 만 쓰므로 근거가 없으면 채택하지 않는다.
+    srcs = []
+    for b in message.content:
+        if getattr(b, "type", "") != "web_search_tool_result":
+            continue
+        for it in (getattr(b, "content", None) or []):
+            u = getattr(it, "url", None)
+            if u:
+                srcs.append({"url": u, "title": getattr(it, "title", "") or ""})
     usage = getattr(message, "usage", None)
     cache_read = _ival(usage, "cache_read_input_tokens")
     cache_write = _ival(usage, "cache_creation_input_tokens")
@@ -38,6 +48,7 @@ def _message_result(message, provider: str, fallback_model: str,
         output_tokens=_ival(usage, "output_tokens"),
         cache_read_tokens=cache_read,
         cache_write_tokens=cache_write,
+        sources=srcs,
         tier="paid", service_tier=service_tier, billing_mode=billing_mode,
     )
 
@@ -112,6 +123,23 @@ class ClaudeProvider(Provider):
                 result.attempts += 1
                 return result
             return GenResult("", self.name, self.model, ok=False, error=msg[:200])
+
+    def search(self, system: str, user: str, max_tokens: int = 700) -> GenResult:
+        """웹 검색 도구를 붙여 호출한다. 보강(enrich) 전용.
+
+        Gemini 그라운딩이 하던 일을 대신한다. 검색 결과 블록에서 근거 URL 을
+        모아 GenResult.sources 에 담는다 — 보강은 근거 없는 내용을 쓰지 않는다.
+        """
+        try:
+            r = self._client.messages.create(
+                model=self.model, max_tokens=max_tokens, system=system,
+                messages=[{"role": "user", "content": user}],
+                tools=[{"type": "web_search_20250305", "name": "web_search",
+                        "max_uses": 3}],
+            )
+            return _message_result(r, self.name, self.model)
+        except Exception as e:
+            return GenResult("", self.name, self.model, ok=False, error=str(e)[:200])
 
     def generate_many(self, jobs, temperature=1.0, max_tokens=700,
                       poll_sec=10, timeout_sec=300) -> list[GenResult]:

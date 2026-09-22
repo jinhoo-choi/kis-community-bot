@@ -1438,8 +1438,8 @@ def main():
 
         class _BrokenEnricher:
             def available(self): return True
-            def generate(self, *_a, **_k):
-                return _GR("", "gemini", "fake", ok=False, error="timeout")
+            def search(self, *_a, **_k):
+                return _GR("", "claude", "fake", ok=False, error="timeout")
 
         _en.enricher = lambda: _BrokenEnricher()
         _en.enrich_all([{"id": "err", "facts": "x"}], workers=1)
@@ -1449,9 +1449,9 @@ def main():
         _probe_calls = [0]
         class _ProbeBroken:
             def available(self): return True
-            def generate(self, *_a, **_k):
+            def search(self, *_a, **_k):
                 _probe_calls[0] += 1
-                return _GR("검색 도구 없는 답", "gemini", "fake", sources=[])
+                return _GR("검색 근거 없는 답", "claude", "fake", sources=[])
         _en.enricher = lambda: _ProbeBroken()
         _probe_items = [{"id": f"probe-{i}", "facts": "x"} for i in range(7)]
         _probe_out = _en.enrich_all(_probe_items, workers=2)
@@ -1461,7 +1461,7 @@ def main():
 
         class _NoneEnricher:
             def available(self): return True
-            def generate(self, *_a, **_k): return _GR("NONE", "gemini", "fake")
+            def search(self, *_a, **_k): return _GR("NONE", "claude", "fake")
 
         _en.enricher = lambda: _NoneEnricher()
         _en.enrich_all([{"id": "none", "facts": "x"}], workers=1)
@@ -2011,6 +2011,29 @@ def main():
         if _pushes and (_txt.count("pushed=1") < _pushes or "exit 1" not in _txt):
             _bad.append(_wf.split("/")[-1])
     ok.append(run("push 하는 단계는 실패를 숨기지 않음", not _bad, str(_bad)))
+
+    # Gemini 제거 — 작성·심사·보강 모두 Claude. 심사는 작성(Haiku)과 다른
+    # Sonnet 이어야 자기 글 자기 채점이 아니다.
+    from src.llm import router as _rt
+    ok.append(run("라우터에 Gemini 경로 없음",
+                  "gemini" not in _rt.cross_judge_for.__doc__ if _rt.cross_judge_for.__doc__ else True))
+    import inspect as _insp
+    _src = _insp.getsource(_rt)
+    ok.append(run("라우터가 Gemini 를 등록하지 않음",
+                  "GeminiProvider(" not in _src))
+    ok.append(run("교차 심사 후보는 Sonnet 우선",
+                  _insp.getsource(_rt.cross_judge_for).count("claude_backup") == 1
+                  and "gemini" not in _insp.getsource(_rt.cross_judge_for)))
+    # 'ㅎㅎ' 로 끝나면 미완성으로 잘리던 문제(#139: ㅎㅎ 사용률 0%)
+    ok.append(run("ㅎㅎ 로 끝나도 미완성 아님",
+                  not any(e.startswith("미완성") for e in _filters.check(
+                      "A가 12.30% 올랐습니다. 종가는 52,000원이었어요 ㅎㅎ",
+                      "기준일: 2026-09-18\n종목: A (000000)\n등락률: 12.30%\n",
+                      None, "reaction", "quick_memo", None, False, "flow", "000000"))))
+    ok.append(run("종결부호 없으면 여전히 미완성",
+                  any(e.startswith("미완성") for e in _filters.check(
+                      "A가 12.30% 올랐습니다. 종가는 52,000원이었", "기준일: 2026-09-18\n",
+                      None, "reaction", "quick_memo", None, False, "flow", "000000"))))
 
     ok.append(run("평시 문장틀 비중 10%", _tr.normal_template_limit(50) == 5))
     _res = _tr.build(__import__("json").load(open("data/market_cache.json"))["items"], 65)
