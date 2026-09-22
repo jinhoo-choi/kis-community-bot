@@ -1962,14 +1962,15 @@ def main():
 
     # 상태 push 가 실패해도 단계가 성공으로 끝나던 구조(실측 #137: 실채널 50건
     # 발송 기록이 저장되지 않음). push 하는 모든 단계는 실패 시 exit 1 해야 한다.
-    import glob as _gl, yaml as _y
+    # CI 에는 pyyaml 이 없다. 파일 텍스트로 검사한다 — 'git push' 가 있는
+    # 워크플로는 pushed 플래그와 exit 1 을 함께 가져야 한다.
+    import glob as _gl
     _bad = []
     for _wf in _gl.glob(".github/workflows/*.yml"):
-        for _j in (_y.safe_load(open(_wf, encoding="utf-8")) or {}).get("jobs", {}).values():
-            for _step in _j.get("steps", []):
-                _r = _step.get("run", "") or ""
-                if "git push" in _r and not ("pushed" in _r and "exit 1" in _r):
-                    _bad.append(f"{_wf.split('/')[-1]}:{_step.get('name')}")
+        _txt = open(_wf, encoding="utf-8").read()
+        _pushes = _txt.count("git push")
+        if _pushes and (_txt.count("pushed=1") < _pushes or "exit 1" not in _txt):
+            _bad.append(_wf.split("/")[-1])
     ok.append(run("push 하는 단계는 실패를 숨기지 않음", not _bad, str(_bad)))
 
     ok.append(run("평시 문장틀 비중 10%", _tr.normal_template_limit(50) == 5))
