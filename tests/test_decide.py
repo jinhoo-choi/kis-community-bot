@@ -1898,15 +1898,26 @@ def main():
     ok.append(run("하락 글의 ㅎㅎ·물결 차단",
                   _sym("A가 8.10% 내렸습니다 ㅎㅎ", _dn) == ["하락글가벼운기호"]))
 
-    # 허용만 하면 모델이 기본값(안 씀)을 유지한다(실측 #135: 5건 중 0건).
-    # 전부 넣으라 하면 새 서명이 된다. 항목 단위로 커뮤니티 분포에 맞춰 배정한다.
+    # 느낌표는 무작위 배정(#41)에서 사실 크기 연동으로 바꿨다. 무작위일 때
+    # '고저 차이 6.1%였습니다!' 처럼 강조할 게 없는 글에도 붙었다(#137).
     from src import personas as _pers
-    _acc = [_pers.accent_for({"id": f"f-{i}", "facts": "등락률: 5.0%\n"})
-            for i in range(2000)]
-    ok.append(run("강조 배정이 커뮤니티 분포에 근사(느낌표 19%·ㅎㅎ 4%)",
-                  15 <= _acc.count("bang") / 20 <= 24
-                  and 2 <= _acc.count("hehe") / 20 <= 7,
-                  f"느낌표 {_acc.count('bang') / 20:.1f}% ㅎㅎ {_acc.count('hehe') / 20:.1f}%"))
+    _mc = __import__("json").load(open("data/market_cache.json"))["items"]
+    _acc = [_pers.accent_for(x) for x in _mc]
+    ok.append(run("느낌표는 두드러진 사실에만(특징주 10~24%)",
+                  10 <= _acc.count("bang") / len(_acc) * 100 <= 24
+                  and all(_pers.salient_fact(x) for x, a in zip(_mc, _acc) if a == "bang"),
+                  f"느낌표 {_acc.count('bang') / len(_acc) * 100:.0f}%"))
+    ok.append(run("거래량 25배는 강조, 고저차 6%만 있으면 강조 안 함",
+                  _pers.salient_fact({"facts": "· 거래량: 20일 평균의 25.2배\n"}) == "거래량"
+                  and not _pers.salient_fact({"facts": "등락률: 3.10%\n"
+                                                        "· 장중 고저 차이: 저가 대비 6.1%\n"})))
+    _rnd = [_pers.accent_for({"id": f"f-{i}", "facts": "등락률: 5.0%\n"}) for i in range(2000)]
+    ok.append(run("ㅎㅎ 는 무작위 약 4%", 2 <= _rnd.count("hehe") / 20 <= 7,
+                  f"{_rnd.count('hehe') / 20:.1f}%"))
+    # '~했습니다' 는 커뮤니티에서 좋아요 1.22~1.46배로 나쁜 어미가 아니다.
+    # 봇 글 52% 에 들어가는 획일성이 문제라 명사형 종결(커뮤니티 26%)을 섞는다.
+    _ne = sum(_pers.noun_ending_for({"id": f"f-{i}"}) for i in range(2000)) / 20
+    ok.append(run("명사형 종결 배정 약 30%", 25 <= _ne <= 35, f"{_ne:.1f}%"))
     ok.append(run("하락 글에는 ㅎㅎ 배정 안 함",
                   not any(_pers.accent_for({"id": f"f-{i}", "facts": "등락률: -5.0%\n"})
                           == "hehe" for i in range(2000))))
