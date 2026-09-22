@@ -1966,10 +1966,10 @@ def main():
     _bad = []
     for _wf in _gl.glob(".github/workflows/*.yml"):
         for _j in (_y.safe_load(open(_wf, encoding="utf-8")) or {}).get("jobs", {}).values():
-            for _st in _j.get("steps", []):
-                _r = _st.get("run", "") or ""
+            for _step in _j.get("steps", []):
+                _r = _step.get("run", "") or ""
                 if "git push" in _r and not ("pushed" in _r and "exit 1" in _r):
-                    _bad.append(f"{_wf.split('/')[-1]}:{_st.get('name')}")
+                    _bad.append(f"{_wf.split('/')[-1]}:{_step.get('name')}")
     ok.append(run("push 하는 단계는 실패를 숨기지 않음", not _bad, str(_bad)))
 
     ok.append(run("평시 문장틀 비중 10%", _tr.normal_template_limit(50) == 5))
