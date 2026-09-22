@@ -281,9 +281,18 @@ jobs:
           # 다른 실행·사람이 같은 순간에 push 하면 non-fast-forward 로 죽는다
           # (실측 2026-09-13: dry-run·verify 의 Commit 단계가 이 사유로 실패).
           # 상태 커밋이 실패하면 발송 이력이 저장되지 않아 다음 날 중복 발송 위험이 있다.
+          # 충돌 시 이번 실행의 상태를 우선한다(-X theirs: rebase 에서 theirs=재적용되는 내 커밋).
+          # 종전에는 rebase 충돌을 || true 로 삼키고 push 3회가 모두 실패해도
+          # 루프 뒤 마지막 명령이 sleep 이라 단계가 성공으로 끝났다.
+          # 실측 #137(2026-09-22): 실채널 50건을 보냈는데 발송 기록이 저장되지 않았다.
+          pushed=0
           for i in 1 2 3; do
-            git pull --rebase -q origin main || true
-            git push && break
+            git pull --rebase -X theirs -q origin main || git rebase --abort 2>/dev/null || true
+            git push && { pushed=1; break; }
             echo "push 재시도 $i"
             sleep $((i * 5))
           done
+          if [ "$pushed" != 1 ]; then
+            echo "::error::상태 push 3회 실패 — 발송 기록 미저장. 다음 실행 중복 발송 위험"
+            exit 1
+          fi

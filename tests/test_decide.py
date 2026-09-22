@@ -1960,11 +1960,25 @@ def main():
                   _vals == {"auto": True, "1": True, "0": False, "false": False},
                   str(_vals)))
 
+    # 상태 push 가 실패해도 단계가 성공으로 끝나던 구조(실측 #137: 실채널 50건
+    # 발송 기록이 저장되지 않음). push 하는 모든 단계는 실패 시 exit 1 해야 한다.
+    import glob as _gl, yaml as _y
+    _bad = []
+    for _wf in _gl.glob(".github/workflows/*.yml"):
+        for _j in (_y.safe_load(open(_wf, encoding="utf-8")) or {}).get("jobs", {}).values():
+            for _st in _j.get("steps", []):
+                _r = _st.get("run", "") or ""
+                if "git push" in _r and not ("pushed" in _r and "exit 1" in _r):
+                    _bad.append(f"{_wf.split('/')[-1]}:{_st.get('name')}")
+    ok.append(run("push 하는 단계는 실패를 숨기지 않음", not _bad, str(_bad)))
+
     ok.append(run("평시 문장틀 비중 10%", _tr.normal_template_limit(50) == 5))
     _res = _tr.build(__import__("json").load(open("data/market_cache.json"))["items"], 65)
     def _mkp(i, k):
         return {"id": f"{k}{i}", "kind": k, "provider": "claude",
-                "stock_code": f"{abs(hash(k)) % 9}{i:05d}", "stock_name": f"{k}{i}",
+                # hash() 는 실행마다 값이 바뀐다(파이썬 해시 무작위화). 종목코드가
+                # 겹쳤다 안 겹쳤다 하며 테스트가 불안정했다. 고정 접두어를 쓴다.
+                "stock_code": f"{'rdpfq'.index(k[0]) + 1}{i:05d}", "stock_name": f"{k}{i}",
                 "body": "본문", "tone": ["fact_note", "data_focus", "brief_report",
                                         "careful_note", "quick_memo"][i % 5],
                 "score": {"total": 16, "fit": 4, "factual": 5, "compliant": 5}}
