@@ -236,6 +236,9 @@ ENRICH_MAX = int(os.environ.get("ENRICH_MAX", "40" if TEST_MODE else "20"))
 ENRICH_RESCUE_CHUNK = max(1, int(os.environ.get("ENRICH_RESCUE_CHUNK", "5")))
 
 ENABLE_JUDGE  = os.environ.get("ENABLE_JUDGE", "1") == "1"
+# 한 번에 심사할 묶음 크기. 목표를 채우면 남은 글은 심사하지 않는다.
+# 작게 잡으면 판정 호출이 늘고, 크게 잡으면 버릴 글까지 심사한다.
+JUDGE_CHUNK = int(os.environ.get("JUDGE_CHUNK", "20"))
 MIN_JUDGE_SCORE = int(os.environ.get("MIN_JUDGE_SCORE", "14"))   # 20점 환산
 # 총점만 보면 사실성 2점도 다른 축으로 상쇄될 수 있다. 금융 게시글은 사실성과
 # 준법성 중 하나라도 낮으면 총점과 무관하게 보류한다.

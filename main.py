@@ -325,7 +325,21 @@ def main():
         attempted_items.extend(stage)
         made = generator.generate(stage, s["recent_tone"])
         if config.ENABLE_JUDGE:
-            made = judge.judge_all(made)
+            # 목표를 채우고 나면 남은 글은 심사해도 상한에 걸려 버려진다.
+            # 실측 #139: 심사 71회 중 '유형절대상한(flow)' 로 버려진 글이 29건.
+            # 배포 우선순위(비-특징주 먼저)대로 나눠 심사하고, 목표를 채우면 멈춘다.
+            # 심사하지 않은 글은 이번 회차에서 쓰지 않는다 — 어차피 자리가 없다.
+            made.sort(key=lambda p: decide._PRIORITY.get(p.get("kind", ""), 9))
+            judged, cut = [], 0
+            for i in range(0, len(made), config.JUDGE_CHUNK):
+                judged.extend(judge.judge_all(made[i:i + config.JUDGE_CHUNK]))
+                probe, _ = decide.decide_distribution(posts + judged)
+                if len(probe) >= llm_target:
+                    cut = len(made) - len(judged)
+                    break
+            if cut:
+                print(f"[main] 목표 도달 → 남은 {cut}건 심사 생략")
+            made = judged
         posts.extend(made)
         sent_posts, held = decide.decide_distribution(posts)
         print(f"[main] 단계 생성 {start}/{len(picked)}건"
