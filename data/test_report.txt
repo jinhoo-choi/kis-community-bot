@@ -287,7 +287,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    조회공시→시세 연결
   OK    가격제한폭 위반은 연결 안 함
 [market] 기준일 일치 확정 캐시 100건 사용 (필요 50건)
-[market] 수급 파싱 200/200종목 (수급순위 0종목) / 거래대금 대비 비중 중앙 6.28% p75 15.27% p90 23.36% 최대 50.64% / 출력 임계 5.0% 초과 221건 / 시세이력 실패 0종목
+[market] 수급 파싱 200/200종목 (수급순위 0종목) / 거래대금 대비 비중 중앙 8.06% p75 16.93% p90 25.09% 최대 49.98% / 출력 임계 5.0% 초과 251건 / 시세이력 실패 0종목
 [crawl] market 100건
   OK    기준일 일치 시세 캐시 우선 사용
 [market] 최근 확정 캐시 사용 (캐시 2026-09-11 vs 필요 2026-09-14, 3일 차이)
@@ -334,7 +334,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'check_list', 'data_focus', 'careful_note', 'open_talk', 'fact_note', 'brief_report'})
+  OK    flow 에서 quick_memo 미선택  ({'brief_report', 'check_list', 'open_talk', 'careful_note', 'fact_note', 'data_focus'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
   OK    미선정 비수치 사실도 프롬프트에서 제거
@@ -431,7 +431,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    ㅎㅎ·느낌표 1회는 허용
   OK    같은 기호 2회 이상 차단
   OK    하락 글의 ㅎㅎ·물결 차단
-  OK    느낌표는 두드러진 사실에만(특징주 10~24%)  (느낌표 15%)
+  OK    느낌표는 두드러진 사실에만(특징주 10~24%)  (느낌표 17%)
   OK    거래량 25배는 강조, 고저차 6%만 있으면 강조 안 함
   OK    ㅎㅎ 는 무작위 약 4%  (4.3%)
   OK    명사형 종결 배정 약 30%  (30.6%)
@@ -443,6 +443,14 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    생성(Haiku) system 은 캐시 지정 안 함
   OK    USE_BATCH 'auto' 는 배치를 켠다  ({'auto': True, '1': True, '0': False, 'false': False})
   OK    push 하는 단계는 실패를 숨기지 않음  ([])
+  OK    라우터에 Gemini 경로 없음
+  OK    라우터가 Gemini 를 등록하지 않음
+  OK    교차 심사 후보는 Sonnet 우선
+  OK    ㅎㅎ 로 끝나도 미완성 아님
+  OK    종결부호 없으면 여전히 미완성
+  OK    리서치 요지 상한 < 본문 상한 중앙값  (요지 130 / 본문 상한 [120, 150, 200, 220, 240, 240, 240, 260, 280, 280])
+  OK    심사 묶음 크기 설정 존재
+  OK    목표 도달 시 심사 중단 로직 존재
   OK    평시 문장틀 비중 10%
 [decide] 유형상한 완화로 11건 보충 (34 → 45)
 [decide] ⚠ 절대상한 해제로 5건 보충 (45 → 50) — 구성 목표 초과: {'flow': 5}. 비-flow 공급 부족이 원인이다.
@@ -506,7 +514,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    수치 문장의 완충 표현 차단
   OK    수치 없는 완충 1회는 허용
 
-444/444 passed
+452/452 passed
   OK    문장틀 22종 계약
   OK    50+15 reserve 준비  (65)
   OK    reserve 전건 원문 재검증
@@ -610,7 +618,7 @@ FAIL 0 / WARN 0
 FAIL 0 / WARN 0
 
 === 2d. 파이프라인 정합성 (facts 생성 x 게이트 x claim x 필터) ===
-=== 파이프라인 정합성 감사 — 대상 210건 (합성 6 + 캐시 204) ===
+=== 파이프라인 정합성 감사 — 대상 255건 (합성 6 + 캐시 249) ===
   WARN [I2] [research] claim 'gist' 인용이 필터에 걸림
        └ ['literary_style'] / 리포트 요지: 2027년 매출액 약 7.1조원, 영업이익 2조 1,203억원을 전망한다. 짐펜트라 미국 매출이 본격화되며 수익성이 개선될 것으로 본다.
   WARN [I2] [policy] claim 'policy' 인용이 필터에 걸림
@@ -647,7 +655,7 @@ FAIL 0 / WARN 2
        └ '두산에너빌리티 원전 수주 소식이 나왔네요. 저는 이거 물렸는데 이번엔 좀 오르려나요. 체코 건 이후로 분위기가 달라진 건 맞습니다. 다만 확정된 수치는 없습니다. 어떻게 보시나요.'
 [gen] 정규식 리젝 v2 ['trade_advice', 'price_target']
        └ '카카오 광고매출 회복 얘기가 나옵니다. 지금 비중확대 하세요. 목표가 6만원 갑니다. 반드시 오릅니다. 지금이 기회입니다. 다들 어떻게 보시나요.'
-[gen] 정규식 리젝 v3 ["미확인수치['8742', '1530', '452']", "근거없는수치['1530', '452', '8742']"]
+[gen] 정규식 리젝 v3 ["미확인수치['1530', '452', '8742']", "근거없는수치['1530', '452', '8742']"]
        └ 'LG에너지솔루션이 어제 2.30% 올랐습니다. 거래대금은 8,742억원이었고 외국인이 1,530억 순매수했습니다. 수주잔고도 452조원까지 늘었다고 합니다. 배터리 업황이 돌아서는 걸까요.'
 [gen] 정규식 통과 9건 / 시도 13건
 
