@@ -2035,6 +2035,23 @@ def main():
                       "A가 12.30% 올랐습니다. 종가는 52,000원이었", "기준일: 2026-09-18\n",
                       None, "reaction", "quick_memo", None, False, "flow", "000000"))))
 
+    # 리서치 요지 상한은 본문 길이 상한보다 작아야 한다. 180자였을 때 요지 하나가
+    # brief_report(150)·quick_memo(120) 본문 상한을 넘어 너무김·수치과다로 걸렸다
+    # (#139: 리서치 21건 중 5건만 통과). 정책과 같은 계약이다.
+    from src.sources import research as _res2
+    from src import personas_v2 as _v2
+    _maxes = [_pers.len_bounds(k)[1] for k in _v2.PERSONAS]
+    ok.append(run("리서치 요지 상한 < 본문 상한 중앙값",
+                  _res2.GIST_MAX <= sorted(_maxes)[len(_maxes) // 2],
+                  f"요지 {_res2.GIST_MAX} / 본문 상한 {sorted(_maxes)}"))
+    # 목표를 채우면 남은 글은 심사하지 않는다(#139: 심사 71회 중 29건이 상한으로 버려짐)
+    ok.append(run("심사 묶음 크기 설정 존재", isinstance(_cfg.JUDGE_CHUNK, int)
+                  and 5 <= _cfg.JUDGE_CHUNK <= 60))
+    import inspect as _i2, main as _mainmod
+    _msrc = _i2.getsource(_mainmod)
+    ok.append(run("목표 도달 시 심사 중단 로직 존재",
+                  "심사 생략" in _msrc and "JUDGE_CHUNK" in _msrc))
+
     ok.append(run("평시 문장틀 비중 10%", _tr.normal_template_limit(50) == 5))
     _res = _tr.build(__import__("json").load(open("data/market_cache.json"))["items"], 65)
     def _mkp(i, k):
