@@ -19,7 +19,7 @@ import os
 import sys
 
 import config
-from src import (state, tickers, generator, telegram_bot, enrich, judge,
+from src import (state, tickers, generator, telegram_bot, enrich, judge, trading,
                  gate, decide, stats, dedup, crawl, assign, theme_map, facts,
                  template_reserve)
 from src.sources import dart, research, market, policy, telegram_ch, kind_inquiry
@@ -135,6 +135,15 @@ def main():
 
     raw = collect()
     print(f"[main] 수집 총 {len(raw)}건")
+
+    # 국내 휴장일에는 보내지 않는다(담당자가 출근하지 않는 날이다).
+    # 08:00 에는 당일 장이 열릴지 시장 데이터로 알 수 없다 — 개장 전이라
+    # '기준일 전진' 같은 관찰 방식으로는 휴장일과 영업일이 구분되지 않는다.
+    # 실측 2026-09-24(추석 연휴): 기준일은 09-23 으로 정상 전진했다.
+    # 그래서 휴장일 목록을 파일로 둔다(data/market_holidays.txt, 한 줄에 YYYY-MM-DD).
+    if trading.is_holiday():
+        print(f"[main] 휴장일({trading.today()}) — 발송하지 않는다")
+        return
     # 최근 이틀 안에 나간 종목의 특징주는 뒤로 보낸다(배제하지는 않는다).
     # 실측(실채널 7회): 한전기술 5회, 대우건설·SK하이닉스 등 4회 등장.
     # 같은 종목에 같은 틀이 겹치면 체감상 거의 같은 글이 된다.
@@ -411,6 +420,7 @@ def main():
         dedup.mark(p_, s["seen"], __import__("datetime").datetime.now(config.KST).strftime("%Y-%m-%d"))
     if not config.IGNORE_SEEN:
         state.mark(s, delivered_posts)
+        # 다음 실행이 '기준일이 전진했는지' 로 휴장일을 판단한다
         state.save(s)
     if sent != len(sent_posts):
         raise RuntimeError(f"텔레그램 부분 전송: {sent}/{len(sent_posts)}건")

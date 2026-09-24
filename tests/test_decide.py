@@ -2070,6 +2070,31 @@ def main():
     ok.append(run("목표 도달 시 심사 중단 로직 존재",
                   "심사 생략" in _msrc and "JUDGE_CHUNK" in _msrc))
 
+    # 실측 #141·#144: enrich 가 g.search(..., temperature=, max_tokens=) 로 부르는데
+    # ClaudeProvider.search 에 temperature 가 없어 TypeError 로 실행 전체가 죽었다.
+    # 테스트의 가짜 프로바이더가 **kwargs 를 받아 못 잡았다. 실제 시그니처를 본다.
+    import inspect as _i3
+    from src.llm.claude import ClaudeProvider as _CP
+    _sig = _i3.signature(_CP.search).parameters
+    ok.append(run("보강 호출 인자가 프로바이더 시그니처와 맞음",
+                  {"system", "user", "temperature", "max_tokens"} <= set(_sig),
+                  str(list(_sig))))
+    import ast as _ast2
+    _mod = _ast2.parse(open("src/enrich.py", encoding="utf-8").read())
+    _kw = set()
+    for _n in _ast2.walk(_mod):
+        if (isinstance(_n, _ast2.Call) and isinstance(_n.func, _ast2.Attribute)
+                and _n.func.attr == "search"):
+            _kw |= {k.arg for k in _n.keywords if k.arg}
+    ok.append(run("enrich 가 쓰는 인자가 전부 시그니처에 있음",
+                  _kw and _kw <= set(_sig), f"{_kw} vs {set(_sig)}"))
+
+    # 국내 휴장일에는 보내지 않는다(담당자 출근일 기준)
+    from src import trading as _tr2
+    ok.append(run("주말은 휴장", _tr2.is_holiday("2026-09-26")
+                  and _tr2.is_holiday("2026-09-27")))
+    ok.append(run("평일 기본값은 영업일", not _tr2.is_holiday("2026-09-23")))
+
     ok.append(run("평시 문장틀 비중 10%", _tr.normal_template_limit(50) == 5))
     _res = _tr.build(__import__("json").load(open("data/market_cache.json"))["items"], 65)
     def _mkp(i, k):
