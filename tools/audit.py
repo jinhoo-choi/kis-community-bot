@@ -43,7 +43,9 @@ sec("프롬프트 치환")
 for pid in PERSONAS:
     s, _ = P.build_messages_v2({"kind": "flow", "title": "t", "facts": "등락률: 1.0%"},
                                pid, "reaction")
-    left = re.findall(r"\{[a-z_]+\}", s)
+    # system 은 [고정(캐시), 가변] 두 블록이다. 합쳐서 검사한다.
+    text = "\n".join(b["text"] for b in s) if isinstance(s, list) else s
+    left = re.findall(r"\{[a-z_]+\}", text)
     if left:
         fail(f"v2 {pid}: 미치환 {left}")
 if not FAIL:
@@ -104,7 +106,8 @@ ok(f"규칙 {len(rules.RULES)}종이 작성·심사 프롬프트에 파생됨")
 for blk, nm in ((wb, "v2 프롬프트"),):
     s, _ = P.build_messages_v2({"kind": "flow", "title": "t", "facts": "x"},
                                "fact_note", "reaction")
-    if wb not in s:
+    stext = "\n".join(b["text"] for b in s) if isinstance(s, list) else s
+    if wb not in stext:
         fail(f"{nm}에 규칙 블록 미주입")
 ok("v2 프롬프트에 규칙 블록 주입 확인")
 
