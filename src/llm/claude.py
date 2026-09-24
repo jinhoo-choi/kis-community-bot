@@ -144,19 +144,21 @@ class ClaudeProvider(Provider):
         except Exception as e:
             print(f"[claude] 캐시 예열 실패(무시): {type(e).__name__}")
 
-    def search(self, system: str, user: str, max_tokens: int = 700) -> GenResult:
+    def search(self, system: str, user: str, temperature: float = 1.0,
+               max_tokens: int = 700) -> GenResult:
         """웹 검색 도구를 붙여 호출한다. 보강(enrich) 전용.
 
         Gemini 그라운딩이 하던 일을 대신한다. 검색 결과 블록에서 근거 URL 을
         모아 GenResult.sources 에 담는다 — 보강은 근거 없는 내용을 쓰지 않는다.
         """
         try:
-            r = self._client.messages.create(
-                model=self.model, max_tokens=max_tokens, system=system,
-                messages=[{"role": "user", "content": user}],
-                tools=[{"type": "web_search_20250305", "name": "web_search",
-                        "max_uses": 3}],
-            )
+            kw = dict(model=self.model, max_tokens=max_tokens, system=system,
+                      messages=[{"role": "user", "content": user}],
+                      tools=[{"type": "web_search_20250305", "name": "web_search",
+                              "max_uses": 3}])
+            if not self._no_temp:
+                kw["temperature"] = temperature
+            r = self._client.messages.create(**kw)
             return _message_result(r, self.name, self.model)
         except Exception as e:
             return GenResult("", self.name, self.model, ok=False, error=str(e)[:200])
