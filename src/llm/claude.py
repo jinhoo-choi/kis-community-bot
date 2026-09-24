@@ -90,7 +90,10 @@ class ClaudeProvider(Provider):
                   messages=[{"role": "user", "content": user}])
         # Sonnet 5는 비기본 sampling parameter를 거부하고 adaptive thinking이 기본이다.
         # JSON 심사는 짧고 결정적이어야 하므로 thinking을 끄고 temperature를 보내지 않는다.
-        if self.model == "claude-sonnet-5":
+        if isinstance(system, list):
+            # 이미 블록 단위로 캐시 경계가 지정된 프롬프트다. 그대로 보낸다.
+            pass
+        elif self.model == "claude-sonnet-5":
             # 심사 프롬프트의 82%(약 2,016토큰)는 매번 같은 규칙 텍스트다.
             # Sonnet 5 의 캐싱 최소 길이(1,024토큰)를 넘으므로 system 을 캐시한다.
             # 캐시 읽기는 입력 단가의 0.1배라 심사 입력비가 약 70% 준다(#127 기준
@@ -99,6 +102,7 @@ class ClaudeProvider(Provider):
             # 캐싱되지 않는다. 그쪽에 걸면 쓰기 할증만 생길 수 있어 걸지 않는다.
             kw["system"] = [{"type": "text", "text": system,
                              "cache_control": {"type": "ephemeral"}}]
+        if self.model == "claude-sonnet-5":
             return self._client.messages.create(
                 thinking={"type": "disabled"}, **kw)
         if self._no_temp:                 # 한 번 확인했으면 매번 재시도하지 않는다
@@ -124,6 +128,22 @@ class ClaudeProvider(Provider):
                 return result
             return GenResult("", self.name, self.model, ok=False, error=msg[:200])
 
+    def _prewarm(self, jobs) -> None:
+        """고정부를 캐시에 미리 적재한다. 실패해도 조용히 넘어간다(캐시는 최적화일 뿐)."""
+        sysblk = jobs[0][0] if jobs else None
+        if not isinstance(sysblk, list) or not sysblk:
+            return
+        try:
+            r = self._client.messages.create(
+                model=self.model, max_tokens=0, system=[sysblk[0]],
+                messages=[{"role": "user", "content": "warmup"}])
+            u = getattr(r, "usage", None)
+            print(f"[claude] 캐시 예열 write "
+                  f"{getattr(u, 'cache_creation_input_tokens', 0):,} / read "
+                  f"{getattr(u, 'cache_read_input_tokens', 0):,}토큰")
+        except Exception as e:
+            print(f"[claude] 캐시 예열 실패(무시): {type(e).__name__}")
+
     def search(self, system: str, user: str, max_tokens: int = 700) -> GenResult:
         """웹 검색 도구를 붙여 호출한다. 보강(enrich) 전용.
 
@@ -148,6 +168,11 @@ class ClaudeProvider(Provider):
 
         # temperature 는 요청마다 다를 수 있다(배치 API 는 요청별 params 를 받는다).
         temps = temperature if isinstance(temperature, list) else [temperature] * len(jobs)
+        # 배치는 요청이 동시에 처리된다. 캐시 항목은 첫 응답이 시작돼야 쓸 수 있어
+        # (문서: 병렬 요청은 첫 응답을 기다려야 적중), 예열 없이 보내면 60건이
+        # 전부 미스가 되고 쓰기 할증만 문다. 배치 밖에서 max_tokens=0 으로 먼저
+        # 고정부를 적재한다(배치 안에서는 max_tokens=0 이 거부된다).
+        self._prewarm(jobs)
         try:
             reqs = [{
                 "custom_id": f"j{i}",

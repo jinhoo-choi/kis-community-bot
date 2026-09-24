@@ -769,7 +769,9 @@ def main():
     from src.personas import build_messages_v2 as _bm
     _sys, _ = _bm({"kind": "flow", "title": "t", "facts": "등락률: 20.32%",
                    "retry_hint": "- 숫자를 줄이세요."}, "fact_note", "reaction")
-    ok.append(run("힌트가 프롬프트에 주입", "직전 시도에서" in _sys))
+    # system 은 이제 [고정(캐시), 가변] 두 블록이다. 검사는 합친 텍스트로 한다.
+    _flat = lambda b: "\n".join(x["text"] for x in b) if isinstance(b, list) else b
+    ok.append(run("힌트가 프롬프트에 주입", "직전 시도에서" in _flat(_sys)))
 
     # 방향 오용 규칙은 전역(SYSTEM_PROMPT)에만 둔다 — 페르소나마다 적으면 어긋난다
     ok.append(run("전역 규칙에 방향 어휘", "등락 방향 어휘" in _SP))
@@ -862,10 +864,25 @@ def main():
                       "fact_note", "amount", "fact_note")))
     _s2, _ = _PM.build_messages_v2({"kind": "flow", "title": "t", "facts": "등락률: 20.32%"},
                                    "brief_report", "reaction")
+    _sys2_text = "\n".join(x["text"] for x in _s2) if isinstance(_s2, list) else _s2
     ok.append(run("v2 프롬프트 미치환 없음",
-                  not any(x in _s2 for x in ("{persona_name}", "{angle_desc}",
-                                             "{rule_block}", "{num_cap}"))))
-    ok.append(run("v2 프롬프트에 공통규칙 주입", "1인칭" in _s2 and "당신" in _s2))
+                  not any(x in _sys2_text for x in ("{persona_name}", "{angle_desc}",
+                                                    "{rule_block}", "{num_cap}"))))
+    ok.append(run("v2 프롬프트에 공통규칙 주입",
+                  "1인칭" in _sys2_text and "당신" in _sys2_text))
+    # 캐시 경계 계약: 고정 블록은 항목·페르소나·앵글이 달라도 완전히 같아야 한다.
+    # 하나라도 다르면 접두부 해시가 달라져 적중이 영영 없다.
+    _a, _ = _bm({"kind": "flow", "title": "t", "facts": "등락률: 20.32%",
+                 "stock_name": "A"}, "brief_report", "reaction")
+    _b, _ = _bm({"kind": "research", "title": "u", "facts": "제시 적정가격: 1원",
+                 "stock_name": "B"}, "quick_memo", "terms")
+    ok.append(run("고정 블록이 항목·페르소나·앵글과 무관하게 동일",
+                  isinstance(_a, list) and len(_a) == 2
+                  and _a[0].get("cache_control") == {"type": "ephemeral"}
+                  and _a[0]["text"] == _b[0]["text"]))
+    # Haiku 4.5 는 4,096토큰 미만이면 오류 없이 캐시되지 않는다. 여유를 둔다.
+    ok.append(run("고정 블록이 캐시 최소 길이를 넘음",
+                  len(_a[0]["text"]) >= 3700, f"{len(_a[0]['text'])}자"))
 
 
     # ── 테스트 채널 분리 (운영 단톡방에 테스트 50건을 쏘는 사고 방지)
@@ -936,7 +953,8 @@ def main():
     ok.append(run("금지 claim type 명시", "등락의 원인" in _cl2.block(_it3)))
     from src.personas import build_messages_v2 as _bm2
     _s3, _ = _bm2(_it3, "quick_memo", "reaction")
-    ok.append(run("프롬프트에 claim 주입", "등락률: 12.41%" in _s3))
+    ok.append(run("프롬프트에 claim 주입",
+                  "등락률: 12.41%" in "\n".join(x["text"] for x in _s3)))
     # 지시는 데이터에 진다 — 안 쓸 수치는 [사실관계]에서도 지워야 한다 (실측 오탐 6건)
     _s4, _u4 = _bm2(_it3, "quick_memo", "reaction")
     _keep = {c["value"].split()[0] for c in _cl2.select(_it3, 3, "reaction")}

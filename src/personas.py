@@ -109,9 +109,18 @@ def noun_ending_for(item: dict) -> bool:
     return zlib.crc32(("end:" + str(item.get("id", ""))).encode()) % 100 < NOUN_ENDING_SHARE
 
 
-def build_messages_v2(item: dict, persona: str, angle: str = "") -> tuple[str, str]:
+def build_messages_v2(item: dict, persona: str, angle: str = "") -> tuple[list, str]:
+    """system 을 [고정 블록(캐시), 가변 블록] 으로 돌려준다.
+
+    고정 블록은 모든 호출에 동일하므로 캐시 경계를 여기에 둔다. 매 호출 달라지는
+    페르소나·앵글·주장은 경계 뒤에 붙인다 — 경계 앞에 두면 접두부 해시가 매번
+    달라져 적중이 영영 없다.
+    Haiku 4.5 는 4,096토큰 이상이어야 캐시된다(고정부 약 4,300토큰).
+    미달이면 오류 없이 캐시만 되지 않는다.
+    """
     p = v2.PERSONAS[persona]
-    system = (v2.SYSTEM_PROMPT
+    static = v2.STATIC_PROMPT.replace("{rule_block}", rules.writer_block())
+    system = (v2.DYNAMIC_PROMPT
               .replace("{persona_name}", p["name"])
               .replace("{persona_desc}", p["desc"])
               .replace("{sentences}", p["sentences"])
@@ -124,8 +133,7 @@ def build_messages_v2(item: dict, persona: str, angle: str = "") -> tuple[str, s
               .replace("{num_cap}", str(p["num_cap"]))
               .replace("{angle_desc}", angles.contract(angle))
               .replace("{claim_block}",
-                       claims.block(item, v2.claim_cap(persona), angle))
-              .replace("{rule_block}", rules.writer_block()))
+                       claims.block(item, v2.claim_cap(persona), angle)))
     accent = accent_for(item)
     if accent == "bang":
         system += ("\n[이번 글의 강조] '" + salient_fact(item) +
@@ -147,4 +155,6 @@ def build_messages_v2(item: dict, persona: str, angle: str = "") -> tuple[str, s
         # 고르지 않은 수치는 프롬프트에서 지운다. 보이면 쓴다.
         facts=claims.facts_view(item, v2.claim_cap(persona), angle).strip()[:4000],
     )
-    return system, user
+    return [{"type": "text", "text": static,
+             "cache_control": {"type": "ephemeral"}},
+            {"type": "text", "text": system}], user
