@@ -2094,6 +2094,15 @@ def main():
     ok.append(run("주말은 휴장", _tr2.is_holiday("2026-09-26")
                   and _tr2.is_holiday("2026-09-27")))
     ok.append(run("평일 기본값은 영업일", not _tr2.is_holiday("2026-09-23")))
+    # 빨간날이면 국내 증시는 무조건 휴장. 반대는 성립하지 않아 목록이 필요하다
+    # (5/1 근로자의 날, 12/31 연말 휴장은 빨간날이 아니지만 증시는 쉰다).
+    ok.append(run("추석·한글날 등 공휴일 등록",
+                  all(_tr2.is_holiday(d) for d in
+                      ("2026-09-24", "2026-09-25", "2026-10-09", "2026-12-25"))))
+    ok.append(run("빨간날 아닌 증시 휴장일도 등록",
+                  _tr2.is_holiday("2026-05-01") and _tr2.is_holiday("2026-12-31")))
+    ok.append(run("휴장일 줄의 사유 주석을 날짜로 오인하지 않음",
+                  all(len(d) == 10 for d in _tr2.holidays()), str(sorted(_tr2.holidays())[:3])))
 
     ok.append(run("평시 문장틀 비중 10%", _tr.normal_template_limit(50) == 5))
     _res = _tr.build(__import__("json").load(open("data/market_cache.json"))["items"], 65)

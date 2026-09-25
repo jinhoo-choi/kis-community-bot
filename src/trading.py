@@ -25,8 +25,13 @@ def today() -> str:
 def holidays() -> set:
     try:
         with open(PATH, encoding="utf-8") as f:
-            return {l.strip() for l in f
-                    if l.strip() and not l.lstrip().startswith("#")}
+            # 날짜 뒤에 '# 사유' 주석을 붙일 수 있다
+            out = set()
+            for line in f:
+                line = line.split("#", 1)[0].strip()
+                if line:
+                    out.add(line)
+            return out
     except FileNotFoundError:
         return set()
 
