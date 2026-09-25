@@ -173,7 +173,9 @@ def enrich_all(items: list[dict], workers: int = 5) -> list[dict]:
     # 키가 없어도 캐시분은 살린다 (로컬/무료 테스트에서 유용)
     g = enricher()
     if g is None or not g.available():
-        print(f"[enrich] GEMINI_API_KEY 없음 → 캐시 {len(hits)}건만 사용, "
+        # 보강은 2026-09-23 부터 Claude 웹 검색이다(#48). 메시지가 Gemini 를
+        # 가리키고 있어 원인 추적을 헷갈리게 했다.
+        print(f"[enrich] ANTHROPIC_API_KEY 없음 → 캐시 {len(hits)}건만 사용, "
               f"{len(miss)}건 스킵")
         for it in miss:
             it["thin_facts"] = True
