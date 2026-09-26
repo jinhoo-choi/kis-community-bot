@@ -881,8 +881,18 @@ def main():
                   and _a[0].get("cache_control") == {"type": "ephemeral"}
                   and _a[0]["text"] == _b[0]["text"]))
     # Haiku 4.5 는 4,096토큰 미만이면 오류 없이 캐시되지 않는다. 여유를 둔다.
+    # 실측 #145: 3,895자 고정부가 4,096토큰에 못 미쳐 캐시가 안 만들어졌다
+    # (예열 로그 write 0 / read 0). 문자수 추정이 틀렸으므로 여유를 크게 둔다.
     ok.append(run("고정 블록이 캐시 최소 길이를 넘음",
-                  len(_a[0]["text"]) >= 3700, f"{len(_a[0]['text'])}자"))
+                  len(_a[0]["text"]) >= 4400, f"{len(_a[0]['text'])}자"))
+    # temperature 미지원 판정은 모든 인스턴스가 공유해야 한다. 인스턴스별이면
+    # 생성용만 폴백을 밟고 보강용은 매번 죽는다(#145: enrich 14건 전건 실패).
+    from src.llm.claude import ClaudeProvider as _CP2
+    ok.append(run("temperature 폴백 플래그는 클래스 공유",
+                  "_no_temp" in _CP2.__dict__))
+    import inspect as _i4
+    ok.append(run("search 도 같은 폴백 경로를 쓴다",
+                  "_call_with_temp" in _i4.getsource(_CP2.search)))
 
 
     # ── 테스트 채널 분리 (운영 단톡방에 테스트 50건을 쏘는 사고 방지)
