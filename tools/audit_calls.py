@@ -173,10 +173,60 @@ def audit_providers():
                         _sig_ok(fn, n, where)
 
 
+def audit_shared_safeguards():
+    """새 경로가 기존 안전장치를 건너뛰지 않았는가.
+
+    반복된 사고의 정체가 이것이다. 기능은 이미 있는데, 나중에 만든 경로가
+    그 장치를 안 태운다.
+      #145 search() 가 temperature 폴백(_call_with_temp)을 안 타 전건 실패
+      #20  filters.check 가 kind 를 안 넘겨 앵커 주장이 '선정외주장' 으로 리젝
+    장치마다 '통과해야 하는 관문' 을 여기 적어 두고, 우회로가 생기면 잡는다.
+    """
+    src = open("src/llm/claude.py", encoding="utf-8").read()
+    tree = ast.parse(src)
+    for fn in [n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]:
+        if fn.name == "_call_with_temp":
+            continue
+        for n in ast.walk(fn):
+            if not (isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+                    and n.func.attr == "create"):
+                continue
+            if any(k.arg == "temperature" for k in n.keywords):
+                fail(f"src/llm/claude.py:{n.lineno} {fn.name}(): temperature 를 "
+                     f"직접 넘긴다 — SDK 폴백을 타려면 _call_with_temp 를 쓸 것")
+
+    # 생성 프롬프트는 한 곳에서만 조립돼야 한다. 다른 곳에서 만들면 캐시 경계와
+    # 강조·끝맺음 배정이 빠진 채로 호출된다.
+    builders = set()
+    for path in glob.glob("src/**/*.py", recursive=True) + ["main.py"]:
+        t = ast.parse(open(path, encoding="utf-8").read())
+        for n in ast.walk(t):
+            if (isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+                    and n.func.attr.startswith("build_messages")):
+                builders.add(n.func.attr)
+    if builders - {"build_messages_v2"}:
+        fail(f"생성 프롬프트 조립 경로가 여럿이다: {sorted(builders)}")
+
+    # 본문 필터는 kind 별 앵커·근거 판정을 쓴다. kind 를 빼면 조용히 다른 결과가 난다.
+    for path in ("src/generator.py", "src/template_reserve.py"):
+        t = ast.parse(open(path, encoding="utf-8").read())
+        for n in ast.walk(t):
+            if (isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+                    and n.func.attr == "check"
+                    and isinstance(n.func.value, ast.Name)
+                    and n.func.value.id in ("filters", "_f2")):
+                # kind 는 8번째 위치 인자이거나 kind= 키워드다
+                has_kind = len(n.args) >= 8 or any(k.arg == "kind" for k in n.keywords)
+                if not has_kind:
+                    fail(f"{path}:{n.lineno} filters.check() 가 kind 를 넘기지 않는다 "
+                         f"— 앵커 주장이 '선정외주장' 으로 리젝된다(#20)")
+
+
 def main():
     print("=== 모듈 간 호출 정합성 ===")
     audit_calls()
     audit_providers()
+    audit_shared_safeguards()
     for msg, *_ in FAIL:
         print(f"  FAIL {msg}")
     print(f"FAIL {len(FAIL)}")
