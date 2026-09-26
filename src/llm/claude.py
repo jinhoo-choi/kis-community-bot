@@ -54,13 +54,17 @@ def _message_result(message, provider: str, fallback_model: str,
 
 
 class ClaudeProvider(Provider):
+    # SDK 1.8.0 의 messages.create 는 temperature 를 받지 않는다. 한 번 확인하면
+    # 모든 인스턴스가 공유한다. 인스턴스별 플래그였을 때, 생성용 프로바이더만
+    # 폴백을 밟고 보강용 프로바이더는 매번 TypeError 로 죽었다
+    # (실측 #145: enrich 14건 전건 실패, 공시 발송 0건).
+    _no_temp = False
     name = "claude"
 
     def __init__(self, api_key: str, model: str, use_batch: bool = True):
         self.model = model
         self.use_batch = use_batch
         self._client = None
-        self._no_temp = False
         if api_key:
             import anthropic
             from anthropic import Anthropic
@@ -105,7 +109,11 @@ class ClaudeProvider(Provider):
         if self.model == "claude-sonnet-5":
             return self._client.messages.create(
                 thinking={"type": "disabled"}, **kw)
-        if self._no_temp:                 # 한 번 확인했으면 매번 재시도하지 않는다
+        return self._call_with_temp(kw, temperature)
+
+    def _call_with_temp(self, kw: dict, temperature: float):
+        """temperature 를 붙여 보고, SDK 가 못 받으면 빼고 다시 부른다."""
+        if ClaudeProvider._no_temp:       # 한 번 확인했으면 매번 재시도하지 않는다
             return self._client.messages.create(**kw)
         try:
             return self._client.messages.create(temperature=temperature, **kw)
@@ -113,7 +121,7 @@ class ClaudeProvider(Provider):
             if "temperature" not in str(e):
                 raise
             print(f"[claude] SDK 가 temperature 미지원 → 제외하고 재호출 ({e})")
-            self._no_temp = True
+            ClaudeProvider._no_temp = True
             return self._client.messages.create(**kw)
 
     def generate(self, system, user, temperature=1.0, max_tokens=700) -> GenResult:
@@ -138,9 +146,9 @@ class ClaudeProvider(Provider):
                 model=self.model, max_tokens=0, system=[sysblk[0]],
                 messages=[{"role": "user", "content": "warmup"}])
             u = getattr(r, "usage", None)
-            print(f"[claude] 캐시 예열 write "
-                  f"{getattr(u, 'cache_creation_input_tokens', 0):,} / read "
-                  f"{getattr(u, 'cache_read_input_tokens', 0):,}토큰")
+            print(f"[claude] 캐시 예열 고정부 {getattr(u, 'input_tokens', 0):,}토큰 "
+                  f"(최소 4,096) / write {getattr(u, 'cache_creation_input_tokens', 0):,}"
+                  f" / read {getattr(u, 'cache_read_input_tokens', 0):,}")
         except Exception as e:
             print(f"[claude] 캐시 예열 실패(무시): {type(e).__name__}")
 
@@ -156,9 +164,7 @@ class ClaudeProvider(Provider):
                       messages=[{"role": "user", "content": user}],
                       tools=[{"type": "web_search_20250305", "name": "web_search",
                               "max_uses": 3}])
-            if not self._no_temp:
-                kw["temperature"] = temperature
-            r = self._client.messages.create(**kw)
+            r = self._call_with_temp(kw, temperature)
             return _message_result(r, self.name, self.model)
         except Exception as e:
             return GenResult("", self.name, self.model, ok=False, error=str(e)[:200])
@@ -183,7 +189,8 @@ class ClaudeProvider(Provider):
                     "messages": [{"role": "user", "content": u}],
                     **({"thinking": {"type": "disabled"}}
                        if self.model == "claude-sonnet-5"
-                       else ({} if self._no_temp else {"temperature": temps[i]})),
+                       else ({} if ClaudeProvider._no_temp
+                             else {"temperature": temps[i]})),
                 },
             } for i, (s, u) in enumerate(jobs)]
 
