@@ -227,7 +227,9 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    v2 프롬프트 미치환 없음
   OK    v2 프롬프트에 공통규칙 주입
   OK    고정 블록이 항목·페르소나·앵글과 무관하게 동일
-  OK    고정 블록이 캐시 최소 길이를 넘음  (3895자)
+  OK    고정 블록이 캐시 최소 길이를 넘음  (4674자)
+  OK    temperature 폴백 플래그는 클래스 공유
+  OK    search 도 같은 폴백 경로를 쓴다
   OK    테스트채널 미등록 시 발송 차단
   OK    테스트 모드는 테스트채널로
   OK    운영 모드는 운영채널로
@@ -337,7 +339,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'data_focus', 'careful_note', 'check_list', 'fact_note', 'brief_report', 'open_talk'})
+  OK    flow 에서 quick_memo 미선택  ({'open_talk', 'fact_note', 'brief_report', 'check_list', 'careful_note', 'data_focus'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
   OK    미선정 비수치 사실도 프롬프트에서 제거
@@ -455,9 +457,12 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    심사 묶음 크기 설정 존재
   OK    목표 도달 시 심사 중단 로직 존재
   OK    보강 호출 인자가 프로바이더 시그니처와 맞음  (['self', 'system', 'user', 'temperature', 'max_tokens'])
-  OK    enrich 가 쓰는 인자가 전부 시그니처에 있음  ({'temperature', 'max_tokens'} vs {'system', 'user', 'max_tokens', 'temperature', 'self'})
+  OK    enrich 가 쓰는 인자가 전부 시그니처에 있음  ({'temperature', 'max_tokens'} vs {'max_tokens', 'self', 'system', 'user', 'temperature'})
   OK    주말은 휴장
   OK    평일 기본값은 영업일
+  OK    추석·한글날 등 공휴일 등록
+  OK    빨간날 아닌 증시 휴장일도 등록
+  OK    휴장일 줄의 사유 주석을 날짜로 오인하지 않음  (['2026-01-01', '2026-02-16', '2026-02-17'])
   OK    평시 문장틀 비중 10%
 [decide] 유형상한 완화로 11건 보충 (34 → 45)
 [decide] ⚠ 절대상한 해제로 5건 보충 (45 → 50) — 구성 목표 초과: {'flow': 5}. 비-flow 공급 부족이 원인이다.
@@ -521,7 +526,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    수치 문장의 완충 표현 차단
   OK    수치 없는 완충 1회는 허용
 
-458/458 passed
+463/463 passed
   OK    문장틀 22종 계약
   OK    50+15 reserve 준비  (65)
   OK    reserve 전건 원문 재검증
@@ -624,6 +629,10 @@ FAIL 0 / WARN 0
 ==================================================
 FAIL 0 / WARN 0
 
+=== 2c-2. 모듈 간 호출 정합성 (시그니처·존재 여부) ===
+=== 모듈 간 호출 정합성 ===
+FAIL 0
+
 === 2d. 파이프라인 정합성 (facts 생성 x 게이트 x claim x 필터) ===
 === 파이프라인 정합성 감사 — 대상 255건 (합성 6 + 캐시 249) ===
   WARN [I2] [research] claim 'gist' 인용이 필터에 걸림
@@ -651,7 +660,7 @@ FAIL 0 / WARN 2
 [dedup] 제외 2건 {'EVT': 2}
 
 [3] 중복 제거 → 통과 13건
-[enrich] GEMINI_API_KEY 없음 → 캐시 0건만 사용, 13건 스킵
+[enrich] ANTHROPIC_API_KEY 없음 → 캐시 0건만 사용, 13건 스킵
 
 [4] 생성 + 정규식 필터
 [gen] claude: 6/6건 생성
@@ -660,7 +669,7 @@ FAIL 0 / WARN 2
        └ '두산에너빌리티 원전 수주 소식이 나왔네요. 저는 이거 물렸는데 이번엔 좀 오르려나요. 체코 건 이후로 분위기가 달라진 건 맞습니다. 다만 확정된 수치는 없습니다. 어떻게 보시나요.'
 [gen] 정규식 리젝 v2 ['trade_advice', 'price_target']
        └ '카카오 광고매출 회복 얘기가 나옵니다. 지금 비중확대 하세요. 목표가 6만원 갑니다. 반드시 오릅니다. 지금이 기회입니다. 다들 어떻게 보시나요.'
-[gen] 정규식 리젝 v3 ["미확인수치['8742', '1530', '452']", "근거없는수치['1530', '452', '8742']"]
+[gen] 정규식 리젝 v3 ["미확인수치['8742', '452', '1530']", "근거없는수치['1530', '452', '8742']"]
        └ 'LG에너지솔루션이 어제 2.30% 올랐습니다. 거래대금은 8,742억원이었고 외국인이 1,530억 순매수했습니다. 수주잔고도 452조원까지 늘었다고 합니다. 배터리 업황이 돌아서는 걸까요.'
 [gen] 정규식 통과 10건 / 시도 13건
 
