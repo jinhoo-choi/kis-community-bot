@@ -7,6 +7,8 @@ on:
     # (실측: +114분, 예정 시각에 아예 안 들어온 날도 있음).
     # 이것은 외부 cron 이 실패한 날을 위한 예비다. UTC 23:40 = KST 08:40.
     # 08:00 실행이 성공했으면 아래 가드가 이 실행을 건너뛴다.
+    # 외부 cron 08:15 재시도(같은 입력)도 둔다 — 9시 전 발송 보장. 08:00이
+    # 성공했거나 실행 중이면 concurrency 대기 후 가드가 건너뛴다.
     - cron: '40 23 * * 0-4'
   workflow_dispatch:
     inputs:
@@ -107,6 +109,8 @@ jobs:
       - name: Tests
         id: tests
         if: steps.guard.outputs.skip != 'true' 
+        env:
+          OPS_RUN: '1'
         run: |
           mkdir -p data
           set -o pipefail
