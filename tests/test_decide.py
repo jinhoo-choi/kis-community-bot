@@ -1791,6 +1791,18 @@ def main():
                   str([c["type"] for c in _claims.select(_dis, 2, "purpose")])))
     ok.append(run("금액 고정이 앵글 우선분을 밀어내지 않음",
                   "purpose" in [c["type"] for c in _claims.select(_dis, 2, "purpose")]))
+    # 2026-09-29 감사 2d FAIL 2건(I6 maturity, I2 gist 목표주가) 회귀 방지
+    _mat = lambda f: next((c["value"] for c in _claims.build({"kind": "disclosure", "facts": f})
+                           if c["type"] == "maturity"), None)
+    ok.append(run("만기·예정일은 줄 앞머리 라벨에서만, 만기일 값 보존",
+                  _mat("- 취득 예정일: 2028-04-30") == "2028-04-30"
+                  and _mat("만기일: 2029-01-01") == "2029-01-01"
+                  and _mat("리포트 요지: 상장 예정일은 12월로 본다") is None,
+                  str([_mat("만기일: 2029-01-01")])))
+    _rg = {"kind": "research", "facts": "리포트 요지: 목표주가 280만원을 유지한다\n작성: 한국투자증권"}
+    ok.append(run("요지에 목표주가 수치가 있으면 발간 증권사 동반 선정",
+                  "broker" in [c["type"] for c in _claims.select(_rg, 1, "")],
+                  str([c["type"] for c in _claims.select(_rg, 1, "")])))
     ok.append(run("특징주에는 금액 고정 미적용",
                   "issue_amt" not in [c["type"] for c in
                                       _claims.select(dict(_dis, kind="flow"), 2, "purpose")]))

@@ -194,8 +194,10 @@ def audit_i2(items):
         for c in cs:
             # 목표가·투자의견은 출처 표기가 의무다(filters 출처없는목표주가).
             # 실제 프롬프트도 broker 를 함께 준다(PR #24). 감사 본문도 맞춘다.
-            _attr = f"{_broker}가 낸 자료입니다. " if (
-                _broker and c["type"] in ("target", "opinion")) else ""
+            # 요지에 목표주가 수치가 있으면 select 가 broker 를 붙인다(claims.select).
+            _attr = f"{_broker}가 낸 자료입니다. " if (_broker and (
+                c["type"] in ("target", "opinion") or (c["type"] == "gist" and re.search(
+                    r"(적정가격|목표주가)\D{0,20}[\d,]{3,}", c["value"])))) else ""
             body = f"종목이 이렇게 움직였네요. {_attr}{c['label']}은 {c['value']}였습니다. " \
                    f"기준은 공시와 시세 자료예요."
             errs = filters.check(body, it.get("facts", ""), None, None, None, None,
