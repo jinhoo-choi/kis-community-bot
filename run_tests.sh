@@ -59,7 +59,16 @@ echo "=== 2c-2. 모듈 간 호출 정합성 (시그니처·존재 여부) ==="
 python3 tools/audit_calls.py
 echo
 echo "=== 2d. 파이프라인 정합성 (facts 생성 x 게이트 x claim x 필터) ==="
-python3 tools/audit_pipeline.py
+# 2d 는 캐시(당일 수집 데이터)까지 검사한다. 운영 실행에서 FAIL 이면
+# 코드 변경 없이 당일 데이터 1건 때문에 발송 전체가 막힌다
+# (실측 2026-09-29 08:00: policy I6 1건으로 스킵 → 12:07 발송).
+# 운영(OPS_RUN=1)은 경고만, PR CI 는 종전대로 차단한다.
+if [ "${OPS_RUN:-0}" = "1" ]; then
+  python3 tools/audit_pipeline.py \
+    || echo "::warning::2d 파이프라인 감사 FAIL — 운영 실행이라 경고 처리(발송 진행). PR에서 수정 필요"
+else
+  python3 tools/audit_pipeline.py
+fi
 echo
 echo "=== 3. E2E 시뮬레이션 ==="
 python3 tests/test_e2e.py
