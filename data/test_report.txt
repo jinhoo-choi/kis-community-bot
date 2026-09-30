@@ -339,7 +339,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'open_talk', 'brief_report', 'check_list', 'careful_note', 'data_focus', 'fact_note'})
+  OK    flow 에서 quick_memo 미선택  ({'fact_note', 'brief_report', 'open_talk', 'careful_note', 'data_focus', 'check_list'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
   OK    미선정 비수치 사실도 프롬프트에서 제거
@@ -459,7 +459,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    심사 묶음 크기 설정 존재
   OK    목표 도달 시 심사 중단 로직 존재
   OK    보강 호출 인자가 프로바이더 시그니처와 맞음  (['self', 'system', 'user', 'temperature', 'max_tokens'])
-  OK    enrich 가 쓰는 인자가 전부 시그니처에 있음  ({'max_tokens', 'temperature'} vs {'max_tokens', 'user', 'temperature', 'self', 'system'})
+  OK    enrich 가 쓰는 인자가 전부 시그니처에 있음  ({'temperature', 'max_tokens'} vs {'system', 'self', 'user', 'max_tokens', 'temperature'})
   OK    주말은 휴장
   OK    평일 기본값은 영업일
   OK    추석·한글날 등 공휴일 등록
