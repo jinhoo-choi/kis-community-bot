@@ -165,9 +165,12 @@ def _fmt(val: str, unit: str) -> str:
         v = v[:90].rstrip() + "…"
     # DART 합병비율은 1.0000000 : 0.0000000처럼 고정 소수점으로 온다.
     # 값은 바꾸지 않고 불필요한 0만 제거해 사람이 읽는 표기로 만든다.
-    if not unit and re.fullmatch(r"\d+(?:\.\d+)?\s*:\s*\d+(?:\.\d+)?", v):
-        left, right = (x.strip() for x in v.split(":"))
-        v = f"{float(left):g} : {float(right):g}"
+    # 회사명이 앞에 붙은 형태('A : B = 1.0000000 : 0.0000000')도 있다(실측 2026-09-30 사조대림).
+    if not unit:
+        # 양쪽 다 소수(고정 소수점)일 때만, 끝의 0만 지운다(:g 는 6자리로 반올림해 값이 바뀜).
+        _z = lambda x: x.rstrip("0").rstrip(".")
+        v = re.sub(r"(\d+\.\d+)\s*:\s*(\d+\.\d+)",
+                   lambda m: f"{_z(m.group(1))} : {_z(m.group(2))}", v)
     # 숫자면 천 단위 구분, 억/조 단위로 읽기 쉽게
     if unit == "원" and re.fullmatch(r"[\d,]+", v):
         n = int(v.replace(",", ""))
