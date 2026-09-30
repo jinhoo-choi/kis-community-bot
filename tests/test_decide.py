@@ -1300,6 +1300,10 @@ def main():
     ok.append(run("줄바꿈 접힘", "\n" not in _dd._fmt("토지 및 건물\n경기도 성남시", "")))
     ok.append(run("DART 고정소수 합병비율 정리",
                   _dd._fmt("1.0000000 : 0.0000000", "") == "1 : 0"))
+    ok.append(run("합병비율: 회사명 붙은 형태도 정리·값 반올림 금지·시각 표기 보존",
+                  _dd._fmt("A사 : B사 = 1.0000000 : 0.0000000", "") == "A사 : B사 = 1 : 0"
+                  and _dd._fmt("1.0000000 : 0.3521467", "") == "1 : 0.3521467"
+                  and _dd._fmt("10:30 결정", "") == "10:30 결정"))
 
     # 함수 안 재import 가 모듈 전역을 가려 UnboundLocalError 를 냈다 (실측: 워크플로 실패).
     # 유닛테스트로는 안 잡힌다 — 네트워크 함수라 호출되지 않기 때문이다. 정적으로 잡는다.
@@ -1798,6 +1802,10 @@ def main():
                   str([c["type"] for c in _claims.select(_dis, 2, "purpose")])))
     ok.append(run("금액 고정이 앵글 우선분을 밀어내지 않음",
                   "purpose" in [c["type"] for c in _claims.select(_dis, 2, "purpose")]))
+    # 2026-09-30 중복 발송: 대기 후 시작한 재시도가 트리거 시점 커밋으로 돌아 가드 통과
+    _wf = open(".github/workflows/daily.yml", encoding="utf-8").read()
+    ok.append(run("daily 워크플로는 최신 main 을 체크아웃(중복 발송 가드 전제)",
+                  bool(_re_mod.search(r"actions/checkout@v4\n\s+with:\n\s+ref: main", _wf))))
     # 2026-09-29 감사 2d FAIL 2건(I6 maturity, I2 gist 목표주가) 회귀 방지
     _mat = lambda f: next((c["value"] for c in _claims.build({"kind": "disclosure", "facts": f})
                            if c["type"] == "maturity"), None)

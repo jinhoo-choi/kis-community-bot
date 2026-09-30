@@ -404,24 +404,29 @@ def main():
     delivered_posts = telegram_bot.send_all(sent_posts)
     sent = len(delivered_posts)
 
-    row = stats.record(**stats.summarize(
-        raw, blocked, enriched_n, posts, delivered_posts, held,
-        generator.collect_fallbacks(), generation_candidates=picked,
-        generation_attempted=attempted_items, generation_stages=stage_sizes,
-        delivery_attempted=sent_posts, template_reserve=reserve),
-        dedup=dup_reasons, crawl_health=crawl.health())
-    telegram_bot.send_summary(sent_posts, sent, row, config.TARGET_POSTS)
-    print("[main] filter_log " + stats.detail_log(picked, sent_posts, held, blocked, raw))
-    if degraded:
-        telegram_bot.send_warning(f"수집 이상 소스: {', '.join(degraded)}")
-    print("[main] stats " + json.dumps(row, ensure_ascii=False))
-
+    # 발송 기록(state·run_stats)을 발송 직후 먼저 남긴다. 이후 통계·요약에서 죽으면
+    # 기록이 없어 재시도(08:15·예비)가 같은 글을 다시 보낸다.
     for p_ in delivered_posts:
         dedup.mark(p_, s["seen"], __import__("datetime").datetime.now(config.KST).strftime("%Y-%m-%d"))
     if not config.IGNORE_SEEN:
         state.mark(s, delivered_posts)
         # 다음 실행이 '기준일이 전진했는지' 로 휴장일을 판단한다
         state.save(s)
+    try:
+        summary = stats.summarize(
+            raw, blocked, enriched_n, posts, delivered_posts, held,
+            generator.collect_fallbacks(), generation_candidates=picked,
+            generation_attempted=attempted_items, generation_stages=stage_sizes,
+            delivery_attempted=sent_posts, template_reserve=reserve)
+    except Exception as e:
+        summary = {"sent": sent, "stats_error": repr(e)[:200]}
+    row = stats.record(**summary, dedup=dup_reasons, crawl_health=crawl.health())
+    telegram_bot.send_summary(sent_posts, sent, row, config.TARGET_POSTS)
+    print("[main] filter_log " + stats.detail_log(picked, sent_posts, held, blocked, raw))
+    if degraded:
+        telegram_bot.send_warning(f"수집 이상 소스: {', '.join(degraded)}")
+    print("[main] stats " + json.dumps(row, ensure_ascii=False))
+
     if sent != len(sent_posts):
         raise RuntimeError(f"텔레그램 부분 전송: {sent}/{len(sent_posts)}건")
     if sent < config.TARGET_POSTS:
