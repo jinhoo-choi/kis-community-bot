@@ -173,6 +173,8 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks,
         # 통과율을 역산하려면 tier 합계가 아니라 사유별 분포가 필요하다
         "gate_detail": dict(Counter(w for _, w in blocked).most_common(25)),
         "enrich_ok": enriched,
+        # 보강이 실제 발송에 기여한 건수. 비용 대비 효과 판단용(10-01 도입).
+        "enrich_delivered": sum(1 for p in sent if p.get("enriched")),
         # filter_log 를 아티팩트로 돌린 뒤 리젝 사유를 볼 수 없게 됐다.
         # 튜닝에 필요한 건 사유 분포이므로 집계만이라도 여기 남긴다.
         "reject_reasons": _reject_reasons(),

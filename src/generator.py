@@ -469,9 +469,21 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
     return posts
 
 
-def retry_rejected() -> list[dict]:
-    """미사용 원본 후보를 모두 소진한 뒤에만 정규식 리젝분을 한 번 다시 쓴다."""
-    pending = [p for p in REJECTED if not p.get("_rewrite_attempted")]
+# 사유 하나짜리 경미 리젝. 원본 사실·선정이 맞고 표현만 어긋난 경우라
+# 새 후보(flow 통과율 19%)보다 한 번 고쳐 쓰는 편이 수율이 높다고 본다.
+# 효과는 run_stats by_attempt_type.filter_rewrite 로 측정한다(10-01 도입).
+FIXABLE_ERRS = ("상대날짜", "주장과다", "수치과다")
+
+
+def _fixable(p: dict) -> bool:
+    errs = p.get("reject_errs", [])
+    return len(errs) == 1 and errs[0].startswith(FIXABLE_ERRS)
+
+
+def retry_rejected(only_fixable: bool = False) -> list[dict]:
+    """정규식 리젝분을 한 번 다시 쓴다. only_fixable 이면 단일 경미 사유만."""
+    pending = [p for p in REJECTED if not p.get("_rewrite_attempted")
+               and (not only_fixable or _fixable(p))]
     if not pending:
         return []
     names = [n for n, provider in router.writers().items()

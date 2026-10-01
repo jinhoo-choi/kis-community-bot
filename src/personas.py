@@ -36,12 +36,12 @@ def len_bounds(style_or_len: str) -> tuple[int, int]:
     return (p["min"], p["max"]) if p else (50, 300)
 
 
-def claim_cap(style: str) -> int:
+def claim_cap(style: str, kind: str = "") -> int:
     """주장 상한."""
-    return v2.claim_cap(style) if style in v2.PERSONAS else 4
+    return v2.claim_cap(style, kind) if style in v2.PERSONAS else v2.claim_cap("", kind)
 
 
-def num_cap(style_or_len: str) -> int:
+def num_cap(style_or_len: str, kind: str = "") -> int:
     """허용 숫자 개수. claim_cap 에서 파생시킨다.
 
     별도 상수로 두었더니 서로 어긋났다 — check_list 는 주장 5개를 허용하면서
@@ -50,8 +50,8 @@ def num_cap(style_or_len: str) -> int:
     실측: 수치과다 6건 중 5건이 이 불일치에서 나왔다.
     """
     if style_or_len in v2.PERSONAS:
-        return v2.claim_cap(style_or_len) + 1
-    return 4
+        return v2.claim_cap(style_or_len, kind) + 1
+    return v2.claim_cap("", kind) + 1 if kind == "flow" else 4
 
 
 # 강조 기호는 '써도 된다' 고 허용만 하면 모델이 기본값(안 씀)을 유지한다.
@@ -130,10 +130,14 @@ def build_messages_v2(item: dict, persona: str, angle: str = "") -> tuple[list, 
               # 즉 후처리 문제가 아니라 모델이 실제로 짧게 쓴 것이었다.
               .replace("{min}", str(p["min"]))
               .replace("{max}", str(p["max"]))
-              .replace("{num_cap}", str(p["num_cap"]))
+              .replace("{num_cap}", str(min(p["num_cap"], num_cap(persona, item.get("kind", "")))))
               .replace("{angle_desc}", angles.contract(angle))
               .replace("{claim_block}",
-                       claims.block(item, v2.claim_cap(persona), angle)))
+                       claims.block(item, v2.claim_cap(persona, item.get("kind", "")), angle)))
+    if item.get("kind") == "flow":
+        # 심사 유용성·얻을거리 2.5/5, '수치 나열' 지적(10-01 실측 5회).
+        system += ("\n[특징주 구성] 가장 두드러진 사실 하나를 중심에 두고, 나머지 주장은 "
+                   "그 사실의 크기를 가늠하게 하는 맥락으로만 씁니다. 수치를 나열하지 않습니다.")
     accent = accent_for(item)
     if accent == "bang":
         system += ("\n[이번 글의 강조] '" + salient_fact(item) +
@@ -153,7 +157,7 @@ def build_messages_v2(item: dict, persona: str, angle: str = "") -> tuple[list, 
         stock=item.get("stock_name") or "해당 종목 없음(테마)",
         title=item.get("title", ""),
         # 고르지 않은 수치는 프롬프트에서 지운다. 보이면 쓴다.
-        facts=claims.facts_view(item, v2.claim_cap(persona), angle).strip()[:4000],
+        facts=claims.facts_view(item, v2.claim_cap(persona, item.get("kind", "")), angle).strip()[:4000],
     )
     return [{"type": "text", "text": static,
              "cache_control": {"type": "ephemeral"}},

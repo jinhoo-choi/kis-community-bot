@@ -123,11 +123,11 @@ def _ending_variety(body: str) -> list[str]:
 _NUM_CAP = {"short": 3, "medium": 4, "long": 5}
 
 
-def _number_overuse(body: str, length: str = None, slot_n: int = 0) -> list[str]:
+def _number_overuse(body: str, length: str = None, slot_n: int = 0, kind: str = "") -> list[str]:
     """숫자 나열 제한. 제공된 수치를 전부 소비하면 표지 나열이 된다."""
     nums = {n.replace(",", "") for n in NUM_RE.findall(body) if len(n.replace(",", "")) >= 2}
     from src import personas as _P
-    cap = _P.num_cap(length) if length else 4
+    cap = _P.num_cap(length, kind) if length else _P.num_cap("", kind)
     # 정량 데이터를 늘리면 모델이 더 많이 쓴다. 페르소나 상한만 고정하면
     # 데이터 확대와 충돌한다(실측: data_focus 가 7개 사용).
     # 입력 사실이 많으면 상한을 한 단계 올려 준다.
@@ -280,6 +280,10 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
                  # 뒤의 어미에 닿지 못한다. 문장 경계는 여전히 막는다.
                  r"(?:[^.!?\n]|\d\.\d){0,30}(?:이었|였|입니다|이네요|였네요)", body):
         errs.append("문장성분오류")
+    # 같은 계열: '한울소재과학이 거래량은 20일 평균의 3.8배였습니다' (실측 10-01 실발송).
+    if re.search(r"[가-힣A-Za-z0-9]+[이가]\s*(?:거래량|거래대금|종가|등락률|주가)[은는]\s*"
+                 r"(?:[^.!?\n]|\d\.\d){0,40}(?:이었|였|입니다|이네요|였네요|배)", body):
+        errs.append("문장성분오류")
     # 라벨이 뒤에 오는 형태도 있다: 'A가 저가 대비 5.0% 고저차였습니다'.
     # 종전 패턴이 잡던 형태라 유지하되, 여기도 소수점을 허용한다.
     if re.search(r"[가-힣A-Za-z0-9]+[이가]\s*저가 대비"
@@ -329,7 +333,7 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
     # 숫자 개수 대신 '인용한 주장 수' 로 판정한다 (claims.grounding_errors).
     # 개수 세기는 claim 과 어긋나 "1 대 1.8702948" 이 2개로 계산됐다.
     from src import claims as _cl, personas as _P2
-    _cap = _P2.claim_cap(length) if length else 4
+    _cap = _P2.claim_cap(length, kind) if length else _P2.claim_cap("", kind)
     # kind 를 빼고 넘기면 claims 의 ANCHOR_TYPES 가 필터 경로에서만 적용되지
     # 않아, 프롬프트가 쓰라고 시킨 주장이 '선정외주장' 으로 리젝된다
     # (실측 #121: 선정외주장 17건). stock_code 도 근거 숫자 판정에 쓰인다.
@@ -338,7 +342,7 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
     if _g:
         errs += _g
     else:
-        errs += _number_overuse(body, length, _slot_n(facts))
+        errs += _number_overuse(body, length, _slot_n(facts), kind)
     errs += _ending_variety(body)
     errs += _needs_relation(body, facts)
 
