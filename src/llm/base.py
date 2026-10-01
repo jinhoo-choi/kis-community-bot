@@ -121,6 +121,9 @@ def _cost(event: dict) -> tuple[float, bool]:
     ) / 1_000_000
     if event["billing_mode"] == "batch":
         cost *= 0.5
+    # Claude 웹 검색은 토큰과 별도 $10/1,000회(배치도 동일 단가).
+    if event["provider"] == "claude":
+        cost += event["grounding_queries"] * 0.01
     return cost, True
 
 
@@ -173,7 +176,7 @@ def usage_summary(delivered: int = 0) -> dict:
         if delivered else None)
     return {
         "pricing_as_of": "2026-09-12",
-        "cost_scope": "token_only; grounding overage/storage excluded",
+        "cost_scope": "token + claude web_search; gemini grounding overage/storage excluded",
         **total,
         "by_route": dict(sorted(routes.items())),
         "by_attempt_type": dict(sorted(attempts.items())),

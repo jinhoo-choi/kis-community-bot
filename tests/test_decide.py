@@ -1775,7 +1775,7 @@ def main():
                   _flash_rejects({**_base_score, "factual": 3})))
     ok.append(run("Sonnet 최종승인은 fit·총점까지 적용",
                   _sonnet_pass(_base_score)
-                  and not _sonnet_pass({**_base_score, "fit": 2})))
+                  and not _sonnet_pass({**_base_score, "fit": 1})))
     _pairs = [
         {"sonnet_score": {**_base_score, "fatal": ["x"]},
          "flash_score": {**_base_score, "factual": 3}},
@@ -1802,6 +1802,29 @@ def main():
                   str([c["type"] for c in _claims.select(_dis, 2, "purpose")])))
     ok.append(run("금액 고정이 앵글 우선분을 밀어내지 않음",
                   "purpose" in [c["type"] for c in _claims.select(_dis, 2, "purpose")]))
+    # 2026-10-01 품질·비용 조정 회귀 방지
+    from src import personas as _Pq, personas_v2 as _P2q, generator as _gq, filters as _fq
+    from src.llm import base as _bq
+    ok.append(run("flow 주장 3개·숫자 4개 상한, 다른 유형은 종전",
+                  all(_P2q.claim_cap(_p, "flow") <= 3 for _p in _P2q.PERSONAS)
+                  and _Pq.num_cap("", "flow") == 4
+                  and max(_P2q.claim_cap(_p, "disclosure") for _p in _P2q.PERSONAS) > 3))
+    ok.append(run("이중 주어 비문 차단('A이 거래량은 …배였습니다')",
+                  "문장성분오류" in _fq.check("한울소재과학이 거래량은 20일 평균의 3.8배였습니다.",
+                                          "기준일: 2026-09-30", kind="flow")
+                  and "문장성분오류" not in _fq.check("한울소재과학의 거래량은 20일 평균의 3.8배였습니다.",
+                                                  "기준일: 2026-09-30", kind="flow")))
+    ok.append(run("단일 경미 사유만 즉시 재작성 대상",
+                  _gq._fixable({"reject_errs": ["상대날짜(전일)"]})
+                  and not _gq._fixable({"reject_errs": ["상대날짜(전일)", "미확인수치['12']"]})
+                  and not _gq._fixable({"reject_errs": ["근거없는수치['25']"]})))
+    _ev = {"tier": "paid", "provider": "claude", "model": "claude-haiku-4-5", "input_tokens": 0,
+           "cache_read_tokens": 0, "cache_write_tokens": 0, "output_tokens": 0,
+           "thinking_tokens": 0, "billing_mode": "standard", "grounding_queries": 3}
+    ok.append(run("Claude 웹 검색 요금($0.01/회) 비용 집계", abs(_bq._cost(_ev)[0] - 0.03) < 1e-9,
+                  str(_bq._cost(_ev))))
+    ok.append(run("투표 기본 중단·flow 절대상한 50%",
+                  not _cfg.ENABLE_POLL and _cfg.DIST_HARD_CAP["flow"] == round(_cfg.TARGET_POSTS * 0.5)))
     # 2026-09-30 중복 발송: 대기 후 시작한 재시도가 트리거 시점 커밋으로 돌아 가드 통과
     _wf = open(".github/workflows/daily.yml", encoding="utf-8").read()
     ok.append(run("daily 워크플로는 최신 main 을 체크아웃(중복 발송 가드 전제)",
@@ -2383,8 +2406,8 @@ def main():
     ok.append(run("완화 대상 유형은 fit·총점 문턱 해제",
                   _cfg.min_fit_for("research") == 1 and _cfg.min_fit_for("policy") == 1
                   and _cfg.min_score_for("research") == 0
-                  and _cfg.min_fit_for("flow") == 3
-                  and _cfg.min_score_for("flow") == 14))
+                  and _cfg.min_fit_for("flow") == 2
+                  and _cfg.min_score_for("flow") == 12))
     # 남는 관문이 곧 할루시네이션 방어선이다. 완화해도 이쪽은 유지돼야 한다.
     ok.append(run("사실성·준법성은 완화 대상이 아님",
                   _cfg.MIN_FACTUAL_SCORE == 4 and _cfg.MIN_COMPLIANT_SCORE == 4))
@@ -2395,11 +2418,11 @@ def main():
                 "score": {"fit": fit, "total": total, "factual": 5, "compliant": 5}}
     _sent, _held = decide_distribution(
         [_scored("research", 1, 10), _scored("policy", 1, 10),
-         _scored("flow", 2, 13), _scored("flow", 3, 14)], target=10)
+         _scored("flow", 1, 11), _scored("flow", 2, 12)], target=10)
     _ids = {p["id"] for p in _sent}
     ok.append(run("리포트·정책은 저점수여도 배포, 특징주 동일 점수는 보류",
                   {"research-1-10", "policy-1-10"} <= _ids
-                  and "flow-2-13" not in _ids and "flow-3-14" in _ids,
+                  and "flow-1-11" not in _ids and "flow-2-12" in _ids,
                   str(sorted(_ids))))
     # 완화는 fit·총점에만 적용된다. 지어낸 내용은 유형과 무관하게 막아야 한다.
     _h = [_scored("research", 5, 20), _scored("research", 5, 20),

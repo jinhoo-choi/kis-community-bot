@@ -109,7 +109,8 @@ DIST_CAP["theme"] = DIST_CAP["policy"]
 # 2차에서 완전히 풀려 무력화됐기 때문이다. flow 는 이미 fit 2/5 로 깎이는 유형이라
 # (위 주석 참조) 목표를 채우려고 무제한 보충하면 피드 전체가 시세 나열이 된다.
 # 목표 미달은 '배포 미달' 로 보고돼야 하지 flow 로 가려져선 안 된다.
-DIST_HARD_CAP = {"flow": max(1, round(TARGET_POSTS * 0.6))}
+# 2026-10-01: 실채널 5회 심사 유용성·얻을거리 2.5/5, flow 가 50건 중 29건. 60%→50%.
+DIST_HARD_CAP = {"flow": max(1, round(TARGET_POSTS * 0.5))}
 
 # 목표에 못 미치는 이유가 필터인지 공급인지 즉시 판별할 수 있어야 한다.
 # 생성 상한. LLM 은 이만큼을 한꺼번에 호출하지 않고 GEN_STAGE_SIZE 단위로
@@ -232,21 +233,27 @@ ENABLE_ENRICH = os.environ.get("ENABLE_ENRICH", "1") == "1"
 # 테스트도 운영과 같은 공급 조건이어야 50건 달성 여부를 잴 수 있다.
 # 10 으로 조였더니 공시 9 / 정책 5 밖에 안 남아 배포가 22건에 그쳤다(실측 #67,#68).
 # 반복 실행은 캐시 적중으로 호출이 0 이라 테스트 상한을 높여도 비용이 늘지 않는다.
-ENRICH_MAX = int(os.environ.get("ENRICH_MAX", "40" if TEST_MODE else "20"))
+# 2026-10-01: 운영 20→6. 5회 실측 보강 발송 기여 0~5건/회 대비 비용 비중 최대.
+ENRICH_MAX = int(os.environ.get("ENRICH_MAX", "40" if TEST_MODE else "6"))
 ENRICH_RESCUE_CHUNK = max(1, int(os.environ.get("ENRICH_RESCUE_CHUNK", "5")))
+
+# 투표(poll): 실채널 5회(09-28~10-01) 시도 12 → 필터 통과 1 → 발송 0. 기본 중단.
+ENABLE_POLL = os.environ.get("ENABLE_POLL", "0") == "1"
 
 ENABLE_JUDGE  = os.environ.get("ENABLE_JUDGE", "1") == "1"
 # 한 번에 심사할 묶음 크기. 목표를 채우면 남은 글은 심사하지 않는다.
 # 작게 잡으면 판정 호출이 늘고, 크게 잡으면 버릴 글까지 심사한다.
 JUDGE_CHUNK = int(os.environ.get("JUDGE_CHUNK", "20"))
-MIN_JUDGE_SCORE = int(os.environ.get("MIN_JUDGE_SCORE", "14"))   # 20점 환산
+MIN_JUDGE_SCORE = int(os.environ.get("MIN_JUDGE_SCORE", "12"))   # 20점 환산
+# 2026-10-01 운영 결정: 비용 우선. 14→12, fit 3→2 로 완화해 보류·재생성을 줄인다.
+# 사실성·준법성 하한(4)과 심사 fatal 은 그대로 둔다 — 할루시네이션·준법 방어선.
 # 총점만 보면 사실성 2점도 다른 축으로 상쇄될 수 있다. 금융 게시글은 사실성과
 # 준법성 중 하나라도 낮으면 총점과 무관하게 보류한다.
 MIN_FACTUAL_SCORE = int(os.environ.get("MIN_FACTUAL_SCORE", "4"))
 MIN_COMPLIANT_SCORE = int(os.environ.get("MIN_COMPLIANT_SCORE", "4"))
 # community_fit 하한. 심사가 '이 종목을 보는 사람이 새로 얻는 게 없다'고 판정했는데
 # 총점만 넘어 배포되던 문제(실측: 5건 전건 fit 2~3점인데 전건 배포)를 막는다.
-MIN_FIT = int(os.environ.get("MIN_FIT", "3"))
+MIN_FIT = int(os.environ.get("MIN_FIT", "2"))
 
 # 유형별 완화. 실측 #122: 배포 50건이 특징주 45 + 공시 5 였고 리포트·정책은 0건이다.
 # 피드가 시세 나열 일색이 된다는 운영 피드백이 나왔다.

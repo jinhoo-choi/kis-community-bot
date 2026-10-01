@@ -120,18 +120,19 @@ SLOT_W = {
                    # 반복됐다. 리서치는 값과 출처를 전달하고 질문형은 쓰지 않는다.
                    "open_talk": 0, "quick_memo": 0, "timeline_note": 1},
     "flow":       {"brief_report": 3, "quick_memo": 0, "data_focus": 3, "careful_note": 2,
-                   "fact_note": 2, "open_talk": 2, "check_list": 1,
+                   # open_talk: 10-01 실측 시도 37 → 발송 1. flow 에선 제외.
+                   "fact_note": 2, "open_talk": 0, "check_list": 1,
                    "two_view": 1, "term_guide": 1, "timeline_note": 1},
     # 정책 항목은 수치가 없는 경우가 많다. 수치 기반 페르소나는 확률을 낮춘다.
     "policy":     {"term_guide": 3, "two_view": 3, "check_list": 3, "fact_note": 2,
-                   "timeline_note": 2, "open_talk": 2, "careful_note": 2,
+                   "timeline_note": 2, "open_talk": 1, "careful_note": 2,
                    "brief_report": 1, "data_focus": 0, "quick_memo": 0},
     # poll 은 make_polls()가 질문 마무리를 계약한다. 질문 금지 페르소나를
     # 섞으면 생성 프롬프트 내부에서 서로 모순되므로 발제형만 허용한다.
     "poll":       {"open_talk": 3, "two_view": 0, "check_list": 0, "quick_memo": 0,
                    "fact_note": 0, "term_guide": 0, "brief_report": 0,
                    "data_focus": 0, "careful_note": 0, "timeline_note": 0},
-    "theme":      {"term_guide": 3, "two_view": 3, "fact_note": 2, "open_talk": 2,
+    "theme":      {"term_guide": 3, "two_view": 3, "fact_note": 2, "open_talk": 1,
                    "check_list": 2, "careful_note": 2, "timeline_note": 1,
                    "brief_report": 1, "data_focus": 0, "quick_memo": 0},
 }
@@ -292,7 +293,10 @@ def compatible(persona: str, angle: str) -> bool:
 import re as _re
 
 
-def claim_cap(persona: str) -> int:
+FLOW_CLAIM_CAP = 3
+
+
+def claim_cap(persona: str, kind: str = "") -> int:
     """이 페르소나가 인용할 수 있는 주장 수.
 
     num_cap(서로 다른 숫자 개수)을 그대로 쓰니 과도하게 좁았다
@@ -301,9 +305,13 @@ def claim_cap(persona: str) -> int:
     """
     p = PERSONAS.get(persona)
     if not p:
-        return 4
-    nums = [int(x) for x in _re.findall(r"\d+", p["sentences"])]
-    return min(max(nums) if nums else 4, 5)
+        cap = 4
+    else:
+        nums = [int(x) for x in _re.findall(r"\d+", p["sentences"])]
+        cap = min(max(nums) if nums else 4, 5)
+    # flow 는 주장 3개까지. 실측(5회): flow 리젝 1·2위가 수치과다 274·주장과다 178,
+    # 심사가 '수치 나열' 로 깎는다. 적게 주면 적게 쓴다(프롬프트·필터 같은 값).
+    return min(cap, FLOW_CLAIM_CAP) if kind == "flow" else cap
 
 
 # 계약 감사·테스트는 '프롬프트 전체가 무엇을 지시하는가' 를 본다. 캐시 때문에

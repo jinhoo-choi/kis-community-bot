@@ -49,6 +49,8 @@ def _message_result(message, provider: str, fallback_model: str,
         cache_read_tokens=cache_read,
         cache_write_tokens=cache_write,
         sources=srcs,
+        # 웹 검색은 토큰과 별도로 1회당 과금된다($10/1,000). 종전엔 집계 누락.
+        grounding_queries=_ival(getattr(usage, "server_tool_use", None), "web_search_requests"),
         tier="paid", service_tier=service_tier, billing_mode=billing_mode,
     )
 
@@ -163,7 +165,9 @@ class ClaudeProvider(Provider):
             kw = dict(model=self.model, max_tokens=max_tokens, system=system,
                       messages=[{"role": "user", "content": user}],
                       tools=[{"type": "web_search_20250305", "name": "web_search",
-                              "max_uses": 3}])
+                              # 3→1: 결과가 입력 토큰으로 붙어 호출당 ~3만 토큰.
+                              # 10-01 실측 보강 $0.46(비용 44%)에 발송 기여 0~5건.
+                              "max_uses": 1}])
             r = self._call_with_temp(kw, temperature)
             return _message_result(r, self.name, self.model)
         except Exception as e:
