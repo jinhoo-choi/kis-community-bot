@@ -292,7 +292,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    조회공시→시세 연결
   OK    가격제한폭 위반은 연결 안 함
 [market] 기준일 일치 확정 캐시 100건 사용 (필요 50건)
-[market] 수급 파싱 200/200종목 (수급순위 0종목) / 거래대금 대비 비중 중앙 6.0% p75 12.9% p90 20.79% 최대 56.89% / 출력 임계 5.0% 초과 204건 / 시세이력 실패 0종목
+[market] 수급 파싱 200/200종목 (수급순위 0종목) / 거래대금 대비 비중 중앙 8.35% p75 17.14% p90 27.58% 최대 429.98% / 출력 임계 5.0% 초과 247건 / 시세이력 실패 0종목
 [crawl] market 100건
   OK    기준일 일치 시세 캐시 우선 사용
 [market] 최근 확정 캐시 사용 (캐시 2026-09-11 vs 필요 2026-09-14, 3일 차이)
@@ -340,7 +340,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'check_list', 'data_focus', 'careful_note', 'brief_report', 'fact_note'})
+  OK    flow 에서 quick_memo 미선택  ({'fact_note', 'careful_note', 'brief_report', 'check_list', 'data_focus'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
   OK    미선정 비수치 사실도 프롬프트에서 제거
@@ -445,7 +445,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    ㅎㅎ·느낌표 1회는 허용
   OK    같은 기호 2회 이상 차단
   OK    하락 글의 ㅎㅎ·물결 차단
-  OK    느낌표는 두드러진 사실에만(특징주 10~24%)  (느낌표 16%)
+  OK    느낌표는 두드러진 사실에만(특징주 10~24%)  (느낌표 20%)
   OK    거래량 25배는 강조, 고저차 6%만 있으면 강조 안 함
   OK    ㅎㅎ 는 무작위 약 4%  (4.3%)
   OK    명사형 종결 배정 약 30%  (30.6%)
@@ -466,7 +466,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    심사 묶음 크기 설정 존재
   OK    목표 도달 시 심사 중단 로직 존재
   OK    보강 호출 인자가 프로바이더 시그니처와 맞음  (['self', 'system', 'user', 'temperature', 'max_tokens'])
-  OK    enrich 가 쓰는 인자가 전부 시그니처에 있음  ({'max_tokens', 'temperature'} vs {'system', 'self', 'temperature', 'max_tokens', 'user'})
+  OK    enrich 가 쓰는 인자가 전부 시그니처에 있음  ({'max_tokens', 'temperature'} vs {'user', 'self', 'max_tokens', 'system', 'temperature'})
   OK    주말은 휴장
   OK    평일 기본값은 영업일
   OK    추석·한글날 등 공휴일 등록
@@ -643,7 +643,7 @@ FAIL 0 / WARN 0
 FAIL 0
 
 === 2d. 파이프라인 정합성 (facts 생성 x 게이트 x claim x 필터) ===
-=== 파이프라인 정합성 감사 — 대상 253건 (합성 6 + 캐시 247) ===
+=== 파이프라인 정합성 감사 — 대상 254건 (합성 6 + 캐시 248) ===
   WARN [I2] [research] claim 'gist' 인용이 필터에 걸림
        └ ['literary_style'] / 리포트 요지: 2027년 매출액 약 7.1조원, 영업이익 2조 1,203억원을 전망한다. 짐펜트라 미국 매출이 본격화되며 수익성이 개선될 것으로 본다.
   WARN [I2] [policy] claim 'policy' 인용이 필터에 걸림
