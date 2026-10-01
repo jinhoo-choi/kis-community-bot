@@ -293,9 +293,6 @@ def compatible(persona: str, angle: str) -> bool:
 import re as _re
 
 
-FLOW_CLAIM_CAP = 3
-
-
 def claim_cap(persona: str, kind: str = "") -> int:
     """이 페르소나가 인용할 수 있는 주장 수.
 
@@ -309,9 +306,9 @@ def claim_cap(persona: str, kind: str = "") -> int:
     else:
         nums = [int(x) for x in _re.findall(r"\d+", p["sentences"])]
         cap = min(max(nums) if nums else 4, 5)
-    # flow 는 주장 3개까지. 실측(5회): flow 리젝 1·2위가 수치과다 274·주장과다 178,
-    # 심사가 '수치 나열' 로 깎는다. 적게 주면 적게 쓴다(프롬프트·필터 같은 값).
-    return min(cap, FLOW_CLAIM_CAP) if kind == "flow" else cap
+    # flow 주장 3개 상한은 실측(10-02) flow 필터 통과율 27%→14%, 너무짧음 34건
+    # 신규로 역효과라 철회했다. 모델이 덜 쓰지 않고 상한만 좁아졌다.
+    return cap
 
 
 # 계약 감사·테스트는 '프롬프트 전체가 무엇을 지시하는가' 를 본다. 캐시 때문에
