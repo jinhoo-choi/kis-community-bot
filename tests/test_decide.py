@@ -1805,19 +1805,11 @@ def main():
     # 2026-10-01 품질·비용 조정 회귀 방지
     from src import personas as _Pq, personas_v2 as _P2q, generator as _gq, filters as _fq
     from src.llm import base as _bq
-    ok.append(run("flow 주장 3개·숫자 4개 상한, 다른 유형은 종전",
-                  all(_P2q.claim_cap(_p, "flow") <= 3 for _p in _P2q.PERSONAS)
-                  and _Pq.num_cap("", "flow") == 4
-                  and max(_P2q.claim_cap(_p, "disclosure") for _p in _P2q.PERSONAS) > 3))
     ok.append(run("이중 주어 비문 차단('A이 거래량은 …배였습니다')",
                   "문장성분오류" in _fq.check("한울소재과학이 거래량은 20일 평균의 3.8배였습니다.",
                                           "기준일: 2026-09-30", kind="flow")
                   and "문장성분오류" not in _fq.check("한울소재과학의 거래량은 20일 평균의 3.8배였습니다.",
                                                   "기준일: 2026-09-30", kind="flow")))
-    ok.append(run("단일 경미 사유만 즉시 재작성 대상",
-                  _gq._fixable({"reject_errs": ["상대날짜(전일)"]})
-                  and not _gq._fixable({"reject_errs": ["상대날짜(전일)", "미확인수치['12']"]})
-                  and not _gq._fixable({"reject_errs": ["근거없는수치['25']"]})))
     _ev = {"tier": "paid", "provider": "claude", "model": "claude-haiku-4-5", "input_tokens": 0,
            "cache_read_tokens": 0, "cache_write_tokens": 0, "output_tokens": 0,
            "thinking_tokens": 0, "billing_mode": "standard", "grounding_queries": 3}

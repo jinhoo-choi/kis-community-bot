@@ -2,14 +2,14 @@ name: daily-posts
 
 on:
   schedule:
-    # 주 경로는 외부 cron 이 매 영업일 KST 08:00 에 workflow_dispatch 로
+    # 주 경로는 외부 cron 이 매 영업일 KST 07:00 에 workflow_dispatch 로
     # 호출한다(auto_schedule=true). GitHub schedule 은 지연이 크다
     # (실측: +114분, 예정 시각에 아예 안 들어온 날도 있음).
-    # 이것은 외부 cron 이 실패한 날을 위한 예비다. UTC 23:40 = KST 08:40.
-    # 08:00 실행이 성공했으면 아래 가드가 이 실행을 건너뛴다.
-    # 외부 cron 08:15 재시도(같은 입력)도 둔다 — 9시 전 발송 보장. 08:00이
+    # 이것은 외부 cron 이 실패한 날을 위한 예비다. UTC 22:40 = KST 07:40.
+    # 07:00 실행이 성공했으면 아래 가드가 이 실행을 건너뛴다.
+    # 외부 cron 07:15 재시도(같은 입력)도 둔다 — 9시 전 발송 보장. 07:00이
     # 성공했거나 실행 중이면 concurrency 대기 후 가드가 건너뛴다.
-    - cron: '40 23 * * 0-4'
+    - cron: '40 22 * * 0-4'
   workflow_dispatch:
     inputs:
       test_mode:
@@ -85,7 +85,7 @@ jobs:
         env:
           TZ: Asia/Seoul
         run: |
-          # 정기 실행(외부 cron 08:00, GitHub 예비 08:40)만 가드한다.
+          # 정기 실행(외부 cron 07:00·07:15, GitHub 예비 07:40)만 가드한다.
           # 사람이 누른 수동 실행은 의도된 것이라 건너뛰지 않는다.
           if [ "${{ github.event_name }}" != "schedule" ] && \
              [ "${{ inputs.auto_schedule }}" != "true" ]; then

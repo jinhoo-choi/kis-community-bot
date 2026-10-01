@@ -334,8 +334,6 @@ def main():
         stage_sizes.append(len(stage))
         attempted_items.extend(stage)
         made = generator.generate(stage, s["recent_tone"])
-        # 단일 경미 사유 리젝은 같은 단계에서 바로 한 번 고쳐 쓴다(새 후보보다 수율↑).
-        made += generator.retry_rejected(only_fixable=True)
         if config.ENABLE_JUDGE:
             # 목표를 채우고 나면 남은 글은 심사해도 상한에 걸려 버려진다.
             # 실측 #139: 심사 71회 중 '유형절대상한(flow)' 로 버려진 글이 29건.
