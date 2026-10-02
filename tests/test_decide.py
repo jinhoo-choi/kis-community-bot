@@ -1814,6 +1814,12 @@ def main():
     _b = "A 거래량이 20일 평균의 40.4배였습니다. 2026년 9월 29일 종가는 5,670원이고 25.03% 올랐어요."
     ok.append(run("기간·날짜 숫자는 주장 개수에서 제외(20일·9월 29일)",
                   not _clq.grounding_errors(_b, _it, 3), str(_clq.grounding_errors(_b, _it, 3))))
+    _dfx = "공시명: 단일판매ㆍ공급계약 체결\n계약 금액: 1,539억원\n계약 종료일: 2031-01-31\n만기일: 2031-01-31"
+    ok.append(run("공시 날짜는 주장으로 계속 셈(구조 숫자 제외는 flow 한정)",
+                  _clq.strip_structural("2031년 1월 31일") != "2031년 1월 31일"
+                  and _clq.grounding_errors("계약 금액 1,539억원, 종료일은 2031년 1월 31일입니다.",
+                                            {"facts": _dfx, "kind": "disclosure", "angle": ""}, 1)
+                  != []))
     ok.append(run("기간 숫자도 근거 검사는 원문 그대로(30거래일 지어냄 차단)",
                   any(e.startswith("근거없는수치") for e in
                       _clq.grounding_errors(_b + " 최근 30거래일 중 최고예요.", _it, 4))))
