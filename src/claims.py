@@ -411,7 +411,9 @@ def grounding_errors(body: str, item: dict, cap: int) -> list[str]:
                 if item.get("angle") else all_cs)
     selected_ids = {c["id"] for c in selected}
     allow = _codes(item) | _metadata_numbers(item)
-    hit, _ = used(strip_structural(body), all_cs, allow, prefer=selected_ids)
+    # flow 에서만 뺀다. 공시의 '계약 종료일 2031년 1월 31일' 은 틀이 아니라 만기 주장 자체다(검수 10-02).
+    _cnt_body = strip_structural(body) if item.get("kind") == "flow" else body
+    hit, _ = used(_cnt_body, all_cs, allow, prefer=selected_ids)
     _, ungrounded = used(body, all_cs, allow, prefer=selected_ids)
     errs = []
     if len(hit) > cap:
