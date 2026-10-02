@@ -1805,6 +1805,23 @@ def main():
     # 2026-10-01 품질·비용 조정 회귀 방지
     from src import personas as _Pq, personas_v2 as _P2q, generator as _gq, filters as _fq
     from src.llm import base as _bq
+    # 2026-10-02 flow 통과율: 기간·날짜 숫자는 주장·수치 개수에서 제외, 근거 검사는 원문
+    from src import claims as _clq
+    _fx = ("기준일: 2026-09-29\n종목: A (000001)\n종가: 5,670원\n등락률: +25.03%\n"
+           "· 거래량: 20일 평균의 40.4배\n· 장중 고저 차이: 저가 대비 33.1%\n"
+           "· 종가 위치: 최근 29거래일 중 최고")
+    _it = {"facts": _fx, "kind": "flow", "angle": ""}
+    _b = "A 거래량이 20일 평균의 40.4배였습니다. 2026년 9월 29일 종가는 5,670원이고 25.03% 올랐어요."
+    ok.append(run("기간·날짜 숫자는 주장 개수에서 제외(20일·9월 29일)",
+                  not _clq.grounding_errors(_b, _it, 3), str(_clq.grounding_errors(_b, _it, 3))))
+    ok.append(run("기간 숫자도 근거 검사는 원문 그대로(30거래일 지어냄 차단)",
+                  any(e.startswith("근거없는수치") for e in
+                      _clq.grounding_errors(_b + " 최근 30거래일 중 최고예요.", _it, 4))))
+    ok.append(run("'전일 대비·전일 종가' 허용, 그 외 '전일' 차단",
+                  not any(e.startswith("상대날짜") for e in _fq.check(
+                      "A가 전일 대비 25.03% 올랐어요.", _fx, kind="flow"))
+                  and any(e.startswith("상대날짜") for e in _fq.check(
+                      "A가 전일에는 25.03% 올랐어요.", _fx, kind="flow"))))
     ok.append(run("이중 주어 비문 차단('A이 거래량은 …배였습니다')",
                   "문장성분오류" in _fq.check("한울소재과학이 거래량은 20일 평균의 3.8배였습니다.",
                                           "기준일: 2026-09-30", kind="flow")
