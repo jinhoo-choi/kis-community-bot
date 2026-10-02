@@ -125,7 +125,10 @@ _NUM_CAP = {"short": 3, "medium": 4, "long": 5}
 
 def _number_overuse(body: str, length: str = None, slot_n: int = 0, kind: str = "") -> list[str]:
     """숫자 나열 제한. 제공된 수치를 전부 소비하면 표지 나열이 된다."""
-    nums = {n.replace(",", "") for n in NUM_RE.findall(body) if len(n.replace(",", "")) >= 2}
+    from src import claims as _cl
+    # 기간·날짜 숫자는 세지 않는다(claims.strip_structural 참조).
+    nums = {n.replace(",", "") for n in NUM_RE.findall(_cl.strip_structural(body))
+            if len(n.replace(",", "")) >= 2}
     from src import personas as _P
     cap = _P.num_cap(length, kind) if length else _P.num_cap("", kind)
     # 정량 데이터를 늘리면 모델이 더 많이 쓴다. 페르소나 상한만 고정하면
@@ -261,7 +264,9 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
         # 실측(#113): 정규식 리젝 1위가 flow:상대날짜 60건이었고 전건 이 충돌이다.
         rel_words = r"오늘|금일|어제|전날|지난\s*거래일|지난거래일"
         if "전일" not in (facts or ""):
-            rel_words += "|전일"
+            # '전일 대비'·'전일 종가' 는 등락률의 정의(직전 거래일 종가 대비)라 주말·휴장과
+            # 무관하게 참이다. 실측: 상대날짜(전일) 리젝 71건 대부분이 이 표현.
+            rel_words += r"|전일(?!\s*(?:대비|종가))"
         rel = re.search(rel_words, body)
         if rel:
             errs.append(f"상대날짜({rel.group()})")

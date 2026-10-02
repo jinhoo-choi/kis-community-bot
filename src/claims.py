@@ -293,6 +293,18 @@ def _nums(text: str) -> set[str]:
             if len(n.replace(",", "")) >= 2}
 
 
+# 기간·날짜 숫자('20일 평균', '29거래일', '2026년 9월 29일')는 주장 값이 아니라 틀이다.
+# 그대로 세면 '20' 이 이동평균·종가위치 주장까지 맞혀 주장 하나가 둘셋으로 세진다.
+# 실측(09-29~10-01 flow 리젝 342건): 주장과다 127건 중 81건, 수치과다 129건 중 121건이
+# 이 틀 숫자를 빼면 상한 이내. 개수 판정에만 뺀다 — 근거 검사는 원문 그대로 한다.
+_STRUCT_NUM = re.compile(r"\d+(?=\s*(?:거래일|일\s*평균|일\s*이동평균|일선|개월))"
+                         r"|\d{4}\s*년|\d{1,2}\s*월\s*\d{1,2}\s*일")
+
+
+def strip_structural(body: str) -> str:
+    return _STRUCT_NUM.sub("§", body)
+
+
 def used(body: str, cs: list[dict], extra_allow: set = frozenset(),
          prefer: set = frozenset()) -> tuple[set[str], set[str]]:
     """(사용된 claim id, 근거 없는 숫자).
@@ -398,8 +410,9 @@ def grounding_errors(body: str, item: dict, cap: int) -> list[str]:
     selected = (select(item, cap, item.get("angle", ""))
                 if item.get("angle") else all_cs)
     selected_ids = {c["id"] for c in selected}
-    hit, ungrounded = used(body, all_cs, _codes(item) | _metadata_numbers(item),
-                           prefer=selected_ids)
+    allow = _codes(item) | _metadata_numbers(item)
+    hit, _ = used(strip_structural(body), all_cs, allow, prefer=selected_ids)
+    _, ungrounded = used(body, all_cs, allow, prefer=selected_ids)
     errs = []
     if len(hit) > cap:
         errs.append(f"주장과다({len(hit)}개/{cap})")
