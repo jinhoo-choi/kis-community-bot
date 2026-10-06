@@ -23,7 +23,7 @@ from src import (state, tickers, generator, telegram_bot, enrich, judge, trading
                  gate, decide, stats, dedup, crawl, assign, theme_map, facts,
                  template_reserve)
 from src.sources import dart, research, market, policy, telegram_ch, kind_inquiry
-from src.llm.base import reset_usage
+from src.llm.base import reset_usage, dump_events
 
 
 def collect() -> list[dict]:
@@ -116,6 +116,58 @@ def _balanced_rescue(items: list[dict], limit: int) -> list[dict]:
     return out
 
 
+def _enrich_skip_reason(item: dict, seen: dict, cnt: dict) -> str:
+    """유료 검색 전에 확정되는 '검색해도 소용없는' 사유. 없으면 빈 문자열."""
+    kind = item.get("kind", "")
+    if not gate.enrich_can_fill(item):
+        return f"{kind}:보강으로충족불가"
+    if not config.IGNORE_SEEN and dedup.is_dup(item, seen)[0]:
+        return "중복"
+    if kind in ("policy", "theme") and theme_map.board_unfit(item):
+        return "게시판부적합"
+    if config.expected_sent({kind: cnt.get(kind, 0)}) >= config.DIST_CAP.get(kind, 0):
+        return "슬롯충족"
+    return ""
+
+
+def _enrich_outcome(raw, blocked, items, picked, attempted, posts, sent, held) -> dict:
+    """보강된 항목이 어디서 멈췄는지. 실제 보강 사실이 본문에 쓰였는지는 판정할
+    근거가 없어 발송분도 'unverified' 로 둔다(enriched 표시 ≠ 사용)."""
+    from src.generator import REJECTED
+    why = dict(blocked)
+    ids = lambda xs: {x.get("id") for x in xs}
+    s_items, s_picked, s_att = ids(items), ids(picked), ids(attempted)
+    s_posts, s_sent = ids(posts), ids(sent)
+    held_by = {h.get("id"): h.get("hold_reason", "") for h in held}
+    rej_by = {r.get("id"): ",".join(r.get("reject_errs", []))[:60] for r in REJECTED}
+    out = {}
+    for it in raw:
+        if not it.get("enriched"):
+            continue
+        i = it.get("id")
+        if i in why:
+            stage = "gate:" + why[i]
+        elif i not in s_items:
+            stage = "dedup"
+        elif i not in s_picked:
+            stage = "not_picked"
+        elif i not in s_att:
+            stage = "not_attempted"
+        elif i in s_sent:
+            stage = "delivered"
+        elif i in held_by:
+            stage = "held:" + held_by[i][:40]
+        elif i in rej_by and i not in s_posts:
+            stage = "filter:" + rej_by[i]
+        else:
+            stage = "unknown"
+        out[i] = {"kind": it.get("kind"), "source": (
+                      "cache" if it.get("_enrich_cache_status") else "search"),
+                  "stage": stage,
+                  "enrich_used": "unverified" if stage == "delivered" else "no"}
+    return out
+
+
 def _next_stage_size(remaining: int, needed: int,
                      attempted: int, deliverable: int) -> int:
     """누적 실수율로 다음 생성량을 계산하되 작은/과대한 묶음을 막는다."""
@@ -124,7 +176,10 @@ def _next_stage_size(remaining: int, needed: int,
     observed_yield = (deliverable / attempted) if attempted else config.YIELD
     observed_yield = min(1.0, max(0.02, observed_yield))
     estimated = math.ceil(needed / observed_yield)
-    bounded = min(config.GEN_STAGE_MAX, max(config.GEN_STAGE_MIN, estimated))
+    # 부족분이 작을 때 최소 묶음(10)을 그대로 쓰면 초과 생성이 커진다.
+    # 실측 10-06: 1건 부족(수율 45%)에 10건 생성·심사. 하한을 추정치의 2배로 낮춘다.
+    floor = min(config.GEN_STAGE_MIN, 2 * estimated)
+    bounded = min(config.GEN_STAGE_MAX, max(floor, estimated))
     return min(remaining, bounded)
 
 
@@ -194,18 +249,28 @@ def main():
     # 총 기대 발송이 50/50 이라 rescue 가 0회였고 flow 48건(96%)으로 메웠다.
     # 목표는 DIST_CAP 합(38)이 아니라 flow 절대상한에서 역산한다. 도달 불가능한
     # 목표를 쓰면 매 실행 보강 예산을 전량 소모한다.
+    enrich_skipped: dict = {}
     nonflow_target = config.TARGET_POSTS - config.DIST_HARD_CAP.get("flow", 0)
     nonflow_expected = config.expected_sent({k: v for k, v in cnt.items() if k != "flow"})
     if config.ENABLE_ENRICH and not dry and (
             actual_expected < config.TARGET_POSTS
             or nonflow_expected < nonflow_target):
         reasons = dict(blocked)
-        rescue_pool = _balanced_rescue([
-            x for x in raw
-            if x.get("kind") != "flow"
-            and reasons.get(x.get("id", "")) == "tier5:글감부족"
-            and x.get("_enrich_cache_status") != "none"
-        ], config.ENRICH_MAX)
+        _thin = [x for x in raw
+                 if x.get("kind") != "flow"
+                 and reasons.get(x.get("id", "")) == "tier5:글감부족"
+                 and x.get("_enrich_cache_status") != "none"]
+        # 검색 결과로 채울 수 없는 근거·중복·게시판 부적합·이미 찬 슬롯은 호출하지 않는다.
+        _eligible = []
+        for x in _thin:
+            r = _enrich_skip_reason(x, s["seen"], cnt)
+            if r:
+                enrich_skipped[r] = enrich_skipped.get(r, 0) + 1
+            else:
+                _eligible.append(x)
+        if enrich_skipped:
+            print(f"[enrich] 검색 전 제외 {enrich_skipped}")
+        rescue_pool = _balanced_rescue(_eligible, config.ENRICH_MAX)
         for start in range(0, len(rescue_pool), config.ENRICH_RESCUE_CHUNK):
             chunk = rescue_pool[start:start + config.ENRICH_RESCUE_CHUNK]
             print(f"[enrich] 후보 부족 rescue {start + 1}~{start + len(chunk)}"
@@ -307,8 +372,8 @@ def main():
     # 생성→심사→판정을 묶음 단위로 실행한다. 목표를 채우면 남은 후보는 LLM에
     # 보내지 않는다. 기존 함수와 최종 판정 기준은 그대로 재사용한다.
     posts, sent_posts, held, attempted_items, stage_sizes = [], [], [], [], []
-    # 정상 모드에서는 최종 50건 중 LLM 승인본 70%(35건)를 확보하면 멈추고,
-    # 남은 최대 15건을 reserve로 채운다. reserve가 준비되지 않았으면 기존처럼
+    # 정상 모드에서는 LLM 승인본 normal_llm_target(현재 NORMAL_SHARE 10% → 45건)을
+    # 확보하면 멈추고, 남은 최대 5건을 reserve로 채운다. reserve가 준비되지 않았으면 기존처럼
     # LLM 승인본만으로 전체 목표를 추적한다.
     llm_target = (template_reserve.normal_llm_target(config.TARGET_POSTS)
                   if reserve_ready else config.TARGET_POSTS)
@@ -332,8 +397,9 @@ def main():
         stage = picked[start:start + next_size]
         start += len(stage)
         stage_sizes.append(len(stage))
-        attempted_items.extend(stage)
         made = generator.generate(stage, s["recent_tone"])
+        # 조합이 없어 호출 없이 보류한 후보는 생성 시도로 세지 않는다(수율 왜곡 방지).
+        attempted_items.extend(x for x in stage if not x.get("_style_hold"))
         if config.ENABLE_JUDGE:
             # 목표를 채우고 나면 남은 글은 심사해도 상한에 걸려 버려진다.
             # 실측 #139: 심사 71회 중 '유형절대상한(flow)' 로 버려진 글이 29건.
@@ -421,9 +487,19 @@ def main():
             delivery_attempted=sent_posts, template_reserve=reserve)
     except Exception as e:
         summary = {"sent": sent, "stats_error": repr(e)[:200]}
-    row = stats.record(**summary, dedup=dup_reasons, crawl_health=crawl.health())
+    try:
+        _eo = _enrich_outcome(raw, blocked, items, picked, attempted_items,
+                              posts, delivered_posts, held)
+    except Exception as e:
+        _eo = {"error": repr(e)[:120]}
+    row = stats.record(**summary, dedup=dup_reasons, crawl_health=crawl.health(),
+                       enrich_skipped=enrich_skipped, enrich_outcome=_eo,
+                       style_held=generator.STYLE_HELD[:50])
     telegram_bot.send_summary(sent_posts, sent, row, config.TARGET_POSTS)
     print("[main] filter_log " + stats.detail_log(picked, sent_posts, held, blocked, raw))
+    # 건별 비용 원장(run/job/request/batch id). 커밋하지 않고 artifact 로만 남긴다.
+    print("[main] usage_log " + dump_events(
+        f"data/usage_log_{__import__('datetime').datetime.now(config.KST):%Y%m%d_%H%M}.json"))
     if degraded:
         telegram_bot.send_warning(f"수집 이상 소스: {', '.join(degraded)}")
     print("[main] stats " + json.dumps(row, ensure_ascii=False))

@@ -179,23 +179,29 @@ def fetch_naver_api(limit: int = 12) -> list[dict]:
         if not re.fullmatch(r"\d{6}", code or ""):
             continue          # 0017J0 같은 비정형 코드는 건너뛴다
         tp = op = gist = ""
-        try:
-            d = crawl.requests.get(f"{RESEARCH_API}/end",
-                                   params={"researchId": it["researchId"],
-                                           "category": "company"},
-                                   headers={**crawl.HEADERS, **hdr}, timeout=15)
-            html = ((d.json().get("result") or {}).get("researchContent")
-                    or {}).get("content", "")
-            full = BeautifulSoup(html, "html.parser").get_text(" ", strip=True)
-            text = full[:400]
-            m1, m2 = _TP_API.search(text), _OP_API.search(text)
-            tp = m1.group(1) if m1 else ""
-            op = m2.group(1) if m2 else ""
-            gist = _gist(full)
-        except Exception as e:
-            # 상세 조회가 실패하면 목표가·투자의견·요지가 전부 비어 게이트에서
-            # '글감부족' 으로 막힌다. 진짜 글감이 없는 것과 구분이 안 된다.
-            _detail_fail.append(type(e).__name__)
+        # 일시 실패는 1회만 재시도한다(무료 HTML/JSON 조회). 반복 실패면 글감부족으로 남는다.
+        for _try in range(2):
+            try:
+                d = crawl.requests.get(f"{RESEARCH_API}/end",
+                                       params={"researchId": it["researchId"],
+                                               "category": "company"},
+                                       headers={**crawl.HEADERS, **hdr}, timeout=15)
+                html = ((d.json().get("result") or {}).get("researchContent")
+                        or {}).get("content", "")
+                full = BeautifulSoup(html, "html.parser").get_text(" ", strip=True)
+                text = full[:400]
+                m1, m2 = _TP_API.search(text), _OP_API.search(text)
+                tp = m1.group(1) if m1 else ""
+                op = m2.group(1) if m2 else ""
+                gist = _gist(full)
+                break
+            except Exception as e:
+                # 상세 조회가 실패하면 목표가·투자의견·요지가 전부 비어 게이트에서
+                # '글감부족' 으로 막힌다. 진짜 글감이 없는 것과 구분이 안 된다.
+                if _try:
+                    _detail_fail.append(type(e).__name__)
+                else:
+                    crawl.sleep_jitter(0.5, 1.0)
         crawl.sleep_jitter(0.2, 0.5)
 
         detail = ""

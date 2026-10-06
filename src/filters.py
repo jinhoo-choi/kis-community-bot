@@ -147,6 +147,65 @@ def _slot_n(facts: str) -> int:
         return 0
 
 
+# 결합 사실의 수치는 비교 기준과 한 몸이다. 기준을 빼면 숫자는 맞아도 다른 사실이 된다.
+# 실측(10-06 실발송 flow-2026-10-02-079550): facts '시가 대비 마감: 4.8% 높은 수준' →
+# 본문 '종가는 4.8% 높은 수준' (기준 누락). 심사는 사실성 5점으로 통과시켰다.
+# (facts 줄 라벨, 본문 같은 문장에 있어야 하는 기준어)
+_BASIS = (
+    (r"시가 대비 마감", r"시가"),
+    (r"시가 출발", r"시가|출발"),
+    (r"장중 고저 차이", r"저가|고저"),
+    (r"마감 위치", r"고가"),
+    (r"5거래일 누적 등락률", r"5거래일|5일|누적"),
+    (r"20일 이동평균 대비", r"이동평균|이평"),
+    (r"거래량", r"평균"),
+    (r"등락 크기", r"평균"),
+    (r"고점 대비", r"고점|최고"),
+)
+_NUM_UNIT = re.compile(r"(\d[\d,]*(?:\.\d+)?)\s*(%|배|억원)")
+
+
+def _basis_errors(body: str, facts: str) -> list[str]:
+    """비교 기준·귀속이 필요한 수치를 기준 없이 쓴 문장을 찾는다.
+
+    같은 값이 기준 없는 줄(등락률·종가 등)에도 있으면 판정하지 않는다(오탐 방지).
+    수급 줄은 금액에 주체(외국인·기관), 비중에 '거래대금' 이 필요하다.
+    """
+    need: dict[str, list] = {}
+    for line in (facts or "").splitlines():
+        t = line.strip().lstrip("·").strip()
+        if t.startswith("※") or ":" not in t:
+            continue
+        label, rest = (x.strip() for x in t.split(":", 1))
+        anchor = next((a for lab, a in _BASIS if re.fullmatch(lab, label)), None)
+        inv = re.match(r"(외국인|기관) 순매[수도]", label)
+        for m in _NUM_UNIT.finditer(rest):
+            key = m.group(1).replace(",", "") + m.group(2)
+            if inv:
+                anchor_ = "거래대금" if m.group(2) == "%" else inv.group(1)
+            else:
+                anchor_ = anchor
+            need.setdefault(key, []).append(anchor_)
+    # 날짜도 사실의 일부다. 본문의 'M월 D일' 이 facts 의 어떤 날짜와도 맞지 않으면
+    # 숫자 화이트리스트(1~5·10)에 묻혀 미확인수치로도 안 잡힌다.
+    known = {(int(a), int(b)) for a, b in re.findall(
+        r"\d{4}[-.](\d{1,2})[-.](\d{1,2})", facts or "")}
+    known |= {(int(a), int(b)) for a, b in re.findall(
+        r"(\d{1,2})월\s*(\d{1,2})일", facts or "")}
+    if known:
+        for a, b in re.findall(r"(\d{1,2})월\s*(\d{1,2})일", body or ""):
+            if (int(a), int(b)) not in known:
+                return [f"날짜불일치({a}월 {b}일)"]
+    for sent in re.split(r"(?<=[.!?])\s+|\n", body or ""):
+        for m in _NUM_UNIT.finditer(sent):
+            anchors = need.get(m.group(1).replace(",", "") + m.group(2))
+            if not anchors or None in anchors:
+                continue
+            if not any(re.search(a, sent) for a in anchors):
+                return [f"비교기준누락({m.group(0)})"]
+    return []
+
+
 def check(body: str, facts: str, fmt: str = None, angle: str = None,
           length: str = None, theme_stock: str = None,
           require_question: bool = False, kind: str = "",
@@ -350,6 +409,7 @@ def check(body: str, facts: str, fmt: str = None, angle: str = None,
         errs += _number_overuse(body, length, _slot_n(facts), kind)
     errs += _ending_variety(body)
     errs += _needs_relation(body, facts)
+    errs += _basis_errors(body, facts)
 
     # 미확인 표현은 uncertainty 앵글에서만 허용한다.
     # "정보가 없다"는 안전한 문장이라 모델이 습관적으로 쓰고, 그게 50건 중 20건에

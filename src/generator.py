@@ -18,6 +18,8 @@ from src.llm.base import record_usage
 
 # 리젝된 생성물 보관 (품질 검토용). main 이 filter_log 에 함께 기록한다.
 REJECTED: list[dict] = []
+# 유효한 Persona × Angle 이 없어 호출 없이 보류한 후보(사유 포함).
+STYLE_HELD: list[dict] = []
 
 # 모델이 본문 앞뒤에 붙이는 군더더기. 리젝하기 전에 정리해 준다.
 # (실측: Gemini 가 "안녕하세요 AI 작성 봇입니다" 로 시작하거나
@@ -295,22 +297,29 @@ def pick_style(item: dict, recent: dict, used_now: set,
         # quick_memo 는 표본 9건에서 전멸했다 (sent 0 / held 5 / reject 4,
         # 사유가 전부 '정보량 부족'). 2~3문장으로는 fit 을 구조적으로 못 넘는다.
         # 다만 공시는 사실 하나로도 글이 된다("A사가 B사를 흡수합병"). 거기만 남긴다.
+        # 구조 전제로 꺼진 페르소나. 아래 대체(fallback) 선택도 이 조건을 따른다.
+        struct_off = set()
         if kind != "disclosure":
             pw["quick_memo"] = 0
+            struct_off.add("quick_memo")
 
         # 구조적 전제 조건
         if not both:
             pw["two_view"] = 0                     # 양방향 근거가 있어야 성립
+            struct_off.add("two_view")
         if "term_word" not in sl:
             pw["term_guide"] = 0                   # 풀어줄 용어가 있어야 성립
+            struct_off.add("term_guide")
         # 5거래일 누적은 '기간'이지 별개 시점이 아니다. 정렬 가능한 시점 2개가 필요하다.
         import re as _re
         n_anchor = len(_re.findall(r"\d{4}[-.]\d{1,2}[-.]?\d{0,2}|\d{1,2}월 \d{1,2}일",
                                    item.get("facts", "")))
         if n_anchor < 2:
             pw["timeline_note"] = 0
+            struct_off.add("timeline_note")
         if not (sl & {"vs_avg", "five_day", "intraday", "flow_inv", "short"}):
             pw["data_focus"] = 0                   # 비교값이 있어야 성립
+            struct_off.add("data_focus")
         hist = hist_v2(recent, item)
         used_p = {h.split(":")[0] for h in hist} | {u[0] for u in used_now}
         used_a2 = {h.split(":")[1] for h in hist if ":" in h} | {u[1] for u in used_now}
@@ -327,15 +336,22 @@ def pick_style(item: dict, recent: dict, used_now: set,
                     pw[pid] = 0
 
         if not any(pw.values()):
-            # Fact Slot이 짧아 정상 후보가 모두 꺼진 경우에도 슬롯 계약과 COMPAT을
-            # 깨지 않는다. 가능한 것 중 가장 짧은 페르소나를 쓰고, 호환 Angle조차
-            # 없으면 슬롯의 최단 페르소나 + 일반 초점으로 보수적으로 폴백한다.
+            # 대체 조합도 같은 요건(구조 전제·호환 Angle·사실 수)을 통과해야 한다.
+            # 종전엔 기본 후보를 그대로 다시 열어 요건 밖 조합(빈 Angle 포함)이 생성됐다.
+            # 리포트·정책은 facts.count(시세·공시 슬롯 기준)가 0 이라 대부분 여기로 온다
+            # (10-06 리포트 발송 7건 중 3건). 사실 수는 작성 프롬프트·근거 검사가 쓰는
+            # 주장 목록(claims.build)으로 센다. 그래도 없으면 유료 호출 없이 보류한다.
+            from src import claims as _claims
+            n_claim = len(_claims.build(item))
             base = P.style_ids().get(kind, {})
-            valid = [pid for pid, w in base.items() if w > 0 and
-                     any(P.v2.compatible(pid, a) for a in cand2)]
-            active = [pid for pid, w in base.items() if w > 0]
-            pool = valid or active or (["quick_memo"] if kind == "disclosure"
-                                        else ["brief_report"])
+            pool = [pid for pid, w in base.items()
+                    if w > 0 and pid not in struct_off
+                    and n_claim >= need.get(pid, 2)
+                    and any(P.v2.compatible(pid, a) for a in cand2)]
+            if not pool:
+                item["_style_hold"] = (f"조합없음(사실{n_fact}·주장{n_claim}"
+                                       f"·앵글{len(cand2)})")
+                return "", "", "", ""
             fallback = min(pool, key=lambda pid: P.len_bounds(pid)[0])
             pw = {fallback: 1}
 
@@ -368,7 +384,7 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
         jobs = [P.build_messages_v2(it, tn, ag) for it, tn, ag in zip(items, tones, angs)]
         temps = [temperature_for(it) for it in items]
         for i, r in enumerate(p.generate_many(jobs, temperature=temps)):
-            record_usage(r, "write", attempt_type)
+            record_usage(r, "write", attempt_type, job_id=items[i].get("id", ""))
             results[i] = r
     else:
         # Gemini 는 배치를 쓰지 않는다(소규모 병렬). 종전대로 온도별로 호출한다.
@@ -379,7 +395,7 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
             jobs = [P.build_messages_v2(it, tn, ag)
                     for _, it, tn, fm, ag, ln in grp]
             for g, r in zip(grp, p.generate_many(jobs, temperature=temp)):
-                record_usage(r, "write", attempt_type)
+                record_usage(r, "write", attempt_type, job_id=g[1].get("id", ""))
                 results[g[0]] = r
 
     out = []
@@ -407,11 +423,22 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
     used_now: set = set()
     n_unc = max(1, int(len(items) * UNCERTAINTY_QUOTA))
     styles = {}
+    ready = []
     for i, it in enumerate(items):
         style = pick_style(it, recent, used_now, allow_uncertainty=(i < n_unc))
+        if not style[0]:
+            # 요건을 만족하는 Persona × Angle 이 없다. 생성·심사 호출 없이 보류한다.
+            STYLE_HELD.append({"id": it.get("id"), "kind": it.get("kind"),
+                               "reason": it.get("_style_hold", "조합없음")})
+            print(f"[gen] 조합 보류 {it.get('id')} {it.get('_style_hold')}")
+            continue
+        ready.append(it)
         styles[id(it)] = style
         # stats가 실제 생성 시도 기준 페르소나·Angle 수율을 기록할 수 있게 한다.
         it["_selected_persona"], it["_selected_angle"] = style[0], style[1]
+    items = ready
+    if not items:
+        return []
     buckets = router.split_by_ratio(items)
     # 앞 생성 단계에서 품질 회로가 열린 프로바이더 물량은 살아 있는 작성자에게
     # 넘긴다. provider.available()은 HTTP 성공만 보므로 내용 품질 장애는 못 잡는다.
@@ -528,6 +555,9 @@ _HINTS = {
     "어미반복": "같은 종결어미가 반복됩니다. 어미를 섞으세요.",
     "literary_style": "'~했다', '~이다' 같은 기사체를 썼습니다. 존댓말 구어체로 쓰세요.",
     "미확인수치": "입력에 없는 숫자를 만들었습니다. 입력에 적힌 숫자만 그대로 쓰세요.",
+    "날짜불일치": "입력에 없는 날짜를 썼습니다. 기준일을 입력에 적힌 그대로 쓰세요.",
+    "비교기준누락": "수치의 비교 기준(예: '시가 대비', '저가 대비', '거래대금 대비')을 "
+                  "입력에 적힌 그대로 함께 쓰세요.",
 }
 
 

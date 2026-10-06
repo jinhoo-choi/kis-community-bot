@@ -42,3 +42,12 @@ jobs:
           name: pr-test-report-${{ github.run_id }}
           path: data/test_report.txt
           retention-days: 7
+
+      # 로그·artifact 를 못 여는 환경에서도 실패 원인을 API(annotations)로 볼 수 있게 한다.
+      - name: Surface failures
+        if: failure()
+        run: |
+          grep -aE "  FAIL|FAIL [1-9]|Traceback|Error|passed|^=== " data/test_report.txt \
+            | tail -40 | while IFS= read -r l; do echo "::error::${l:0:300}"; done || true
+          grep -aE "FAIL|Traceback" /tmp/pipeline_offline.log 2>/dev/null \
+            | head -8 | while IFS= read -r l; do echo "::error::pipeline ${l:0:300}"; done || true

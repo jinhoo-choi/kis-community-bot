@@ -3,11 +3,15 @@
 대량 비실시간 작업이므로 Message Batches API 를 기본으로 쓴다.
 문서: https://docs.claude.com/en/docs/build-with-claude/batch-processing
 """
+import hashlib
+import json
+import os
 import time
 import concurrent.futures as cf
 
 import config
-from src.llm.base import Provider, GenResult
+from src.llm import base
+from src.llm.base import Provider, GenResult, record_usage
 
 # 모델이 은퇴하면 단일 문자열은 그날 파이프라인을 죽인다.
 # 404/not_found/deprecated 계열 오류에서만 다음 후보로 승격한다.
@@ -20,6 +24,60 @@ def _ival(obj, name: str) -> int:
         return int(getattr(obj, name, 0) or 0)
     except (TypeError, ValueError):
         return 0
+
+
+def _unclear(e: Exception) -> str:
+    """응답을 못 받은 채 끊긴 호출은 처리·과금 여부를 알 수 없다."""
+    name = type(e).__name__
+    return ("unconfirmed" if name in ("APITimeoutError", "APIConnectionError",
+                                       "ReadTimeout", "ConnectionError", "TimeoutError")
+            else "estimated")
+
+
+def _job_hash(model, system, user, temperature, max_tokens) -> str:
+    raw = json.dumps([model, system, user, temperature, max_tokens],
+                     ensure_ascii=False, sort_keys=True, default=str)
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def _load_state() -> dict:
+    try:
+        with open(config.BATCH_STATE_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_state(st: dict) -> None:
+    """배치 상태를 원자적으로 저장한다. 정리 끝난 지 7일 지난 기록은 버린다."""
+    now = time.time()
+    st = {k: v for k, v in st.items()
+          if not (v.get("status") in ("collected", "abandoned")
+                  and now - v.get("created", now) > 7 * 86400)}
+    if not st:
+        # 복원할 배치가 없으면 파일을 남기지 않는다(테스트·빈 실행의 부산물 방지).
+        if os.path.exists(config.BATCH_STATE_PATH):
+            os.remove(config.BATCH_STATE_PATH)
+        return
+    try:
+        os.makedirs(os.path.dirname(config.BATCH_STATE_PATH) or ".", exist_ok=True)
+        tmp = config.BATCH_STATE_PATH + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(st, f, ensure_ascii=False, indent=1)
+        os.replace(tmp, config.BATCH_STATE_PATH)
+    except Exception as e:
+        print(f"[claude] 배치 상태 저장 실패: {e}")
+
+
+def _find_reusable(st: dict, model: str, hashes: list) -> str:
+    """같은 작업을 모두 담은, 아직 정리되지 않은 배치. 있으면 재제출하지 않는다."""
+    want = set(hashes)
+    for bid, rec in st.items():
+        if (not bid.startswith("pending-") and rec.get("model") == model
+                and rec.get("status") not in ("collected", "abandoned")
+                and want <= set(rec.get("jobs", {}).values())):
+            return bid
+    return ""
 
 
 def _message_result(message, provider: str, fallback_model: str,
@@ -52,6 +110,7 @@ def _message_result(message, provider: str, fallback_model: str,
         # 웹 검색은 토큰과 별도로 1회당 과금된다($10/1,000). 종전엔 집계 누락.
         grounding_queries=_ival(getattr(usage, "server_tool_use", None), "web_search_requests"),
         tier="paid", service_tier=service_tier, billing_mode=billing_mode,
+        request_id=str(getattr(message, "id", "") or ""),
     )
 
 
@@ -136,7 +195,8 @@ class ClaudeProvider(Provider):
                 result = self.generate(system, user, temperature, max_tokens)
                 result.attempts += 1
                 return result
-            return GenResult("", self.name, self.model, ok=False, error=msg[:200])
+            return GenResult("", self.name, self.model, ok=False, error=msg[:200],
+                             cost_status=_unclear(e))
 
     def _prewarm(self, jobs) -> None:
         """고정부를 캐시에 미리 적재한다. 실패해도 조용히 넘어간다(캐시는 최적화일 뿐)."""
@@ -147,12 +207,20 @@ class ClaudeProvider(Provider):
             r = self._client.messages.create(
                 model=self.model, max_tokens=0, system=[sysblk[0]],
                 messages=[{"role": "user", "content": "warmup"}])
+            # 본문 없는 정상 응답이다. 캐시 쓰기 할증이 붙으므로 별도 역할로 원장에 남긴다
+            # (10-06 실측: 예열 2회 약 $0.0064 가 원장에서 빠져 있었다).
+            res = _message_result(r, self.name, self.model)
+            res.ok = True
+            record_usage(res, "prewarm", "prewarm")
             u = getattr(r, "usage", None)
             print(f"[claude] 캐시 예열 고정부 {getattr(u, 'input_tokens', 0):,}토큰 "
                   f"(최소 4,096) / write {getattr(u, 'cache_creation_input_tokens', 0):,}"
                   f" / read {getattr(u, 'cache_read_input_tokens', 0):,}")
         except Exception as e:
             print(f"[claude] 캐시 예열 실패(무시): {type(e).__name__}")
+            record_usage(GenResult("", self.name, self.model, ok=False,
+                                   error=str(e)[:200], cost_status=_unclear(e)),
+                         "prewarm", "prewarm")
 
     def search(self, system: str, user: str, temperature: float = 1.0,
                max_tokens: int = 700) -> GenResult:
@@ -171,69 +239,222 @@ class ClaudeProvider(Provider):
             r = self._call_with_temp(kw, temperature)
             return _message_result(r, self.name, self.model)
         except Exception as e:
-            return GenResult("", self.name, self.model, ok=False, error=str(e)[:200])
+            return GenResult("", self.name, self.model, ok=False, error=str(e)[:200],
+                             cost_status=_unclear(e))
 
     def generate_many(self, jobs, temperature=1.0, max_tokens=700,
-                      poll_sec=10, timeout_sec=300) -> list[GenResult]:
+                      poll_sec=10, timeout_sec=None) -> list[GenResult]:
         if not self.use_batch or len(jobs) < 15:
             return self._sync_many(jobs, temperature, max_tokens)
-
+        timeout_sec = config.BATCH_TIMEOUT_SEC if timeout_sec is None else timeout_sec
+        n = len(jobs)
         # temperature 는 요청마다 다를 수 있다(배치 API 는 요청별 params 를 받는다).
-        temps = temperature if isinstance(temperature, list) else [temperature] * len(jobs)
-        # 배치는 요청이 동시에 처리된다. 캐시 항목은 첫 응답이 시작돼야 쓸 수 있어
-        # (문서: 병렬 요청은 첫 응답을 기다려야 적중), 예열 없이 보내면 60건이
-        # 전부 미스가 되고 쓰기 할증만 문다. 배치 밖에서 max_tokens=0 으로 먼저
-        # 고정부를 적재한다(배치 안에서는 max_tokens=0 이 거부된다).
-        self._prewarm(jobs)
-        try:
+        temps = temperature if isinstance(temperature, list) else [temperature] * n
+        # 논리 작업 ID = 요청 내용 해시. 재시작 후 같은 작업이면 같은 배치를 찾는다.
+        hashes = [_job_hash(self.model, s, u, temps[i], max_tokens)
+                  for i, (s, u) in enumerate(jobs)]
+        cids = [f"j{i}_{h}" for i, h in enumerate(hashes)]
+        out: list = [None] * n
+
+        st = _load_state()
+        reuse = _find_reusable(st, self.model, hashes)
+        # 이전 실행의 배치를 먼저 정리한다. 같은 작업 결과면 재사용, 아니면 비용만 원장에.
+        found = self._recover(st, skip=reuse, want=set(hashes))
+        for i, h in enumerate(hashes):
+            if h in found:
+                out[i] = found.pop(h)
+        todo = [i for i in range(n) if out[i] is None]
+        if not todo:
+            _save_state(st)
+            return out
+
+        if reuse:
+            batch_id = reuse
+            print(f"[claude] 기존 batch {batch_id} 재사용 — 재제출 안 함")
+        elif len(todo) < 15:
+            _save_state(st)
+            return self._fill_sync(out, todo, jobs, temps, max_tokens)
+        else:
+            # 배치는 요청이 동시에 처리된다. 캐시 항목은 첫 응답이 시작돼야 쓸 수 있어
+            # (문서: 병렬 요청은 첫 응답을 기다려야 적중), 예열 없이 보내면 60건이
+            # 전부 미스가 되고 쓰기 할증만 문다. 배치 밖에서 max_tokens=0 으로 먼저
+            # 고정부를 적재한다(배치 안에서는 max_tokens=0 이 거부된다).
+            self._prewarm([jobs[i] for i in todo])
             reqs = [{
-                "custom_id": f"j{i}",
+                "custom_id": cids[i],
                 "params": {
-                    "model": self.model, "max_tokens": max_tokens, "system": s,
-                    "messages": [{"role": "user", "content": u}],
+                    "model": self.model, "max_tokens": max_tokens, "system": jobs[i][0],
+                    "messages": [{"role": "user", "content": jobs[i][1]}],
                     **({"thinking": {"type": "disabled"}}
                        if self.model == "claude-sonnet-5"
                        else ({} if ClaudeProvider._no_temp
                              else {"temperature": temps[i]})),
                 },
-            } for i, (s, u) in enumerate(jobs)]
+            } for i in todo]
+            # 제출 전에 논리 작업을 기록한다. 제출 직후 죽어도 무엇을 보냈는지 남는다.
+            pre = f"pending-{base.RUN_ID[0]}-{int(time.time())}"
+            st[pre] = {"run_id": base.RUN_ID[0], "model": self.model,
+                       "created": time.time(), "status": "preparing",
+                       "jobs": {cids[i]: hashes[i] for i in todo}, "collected": []}
+            _save_state(st)
+            try:
+                batch = self._client.messages.batches.create(requests=reqs)
+            except Exception as e:
+                # 제출 자체가 실패하면 처리된 요청이 없다(과금 없음). 동기로 처리한다.
+                print(f"[claude] batch 제출 실패 → 동기: {e}")
+                st.pop(pre, None)
+                _save_state(st)
+                return self._fill_sync(out, todo, jobs, temps, max_tokens)
+            batch_id = batch.id
+            st[batch_id] = dict(st.pop(pre), status="submitted")
+            _save_state(st)
+            print(f"[claude] batch {batch_id} 제출 ({len(reqs)}건)")
 
-            batch = self._client.messages.batches.create(requests=reqs)
-            print(f"[claude] batch {batch.id} 제출 ({len(reqs)}건)")
-            _t0 = time.time()
+        rec = st[batch_id]
+        _t0 = time.time()
+        status = self._wait(batch_id, timeout_sec, poll_sec, st)
+        if status != "ended":
+            # 취소 요청은 취소 완료가 아니다. 이미 처리 중인 요청은 끝까지 처리·과금된다.
+            # 종료를 확인한 뒤 성공분은 회수하고, 처리되지 않은 것만 다시 만든다.
+            try:
+                self._client.messages.batches.cancel(batch_id)
+                rec["status"] = "canceling"
+                print(f"[claude] batch {batch_id} {timeout_sec}s 초과 → 취소 요청")
+            except Exception as ce:
+                print(f"[claude] ⚠ batch 취소 요청 실패: {ce}")
+            _save_state(st)
+            # 이번 실행의 나머지 묶음은 동기로 처리한다(아침 마감).
+            self.use_batch = False
+            status = self._wait(batch_id, config.BATCH_CANCEL_WAIT_SEC, poll_sec, st)
+        print(f"[claude] batch {batch_id} 상태 {status} {time.time() - _t0:.0f}초")
 
-            waited = 0
-            while waited < timeout_sec:
-                if self._client.messages.batches.retrieve(batch.id).processing_status == "ended":
-                    break
-                time.sleep(poll_sec)
-                waited += poll_sec
+        prev = set(rec.get("collected", []))     # 이전 실행이 이미 회수(원장 기록)한 결과
+        got = self._results(batch_id, rec) if status == "ended" else {}
+        for cid in prev & set(got):
+            kind, res = got[cid]
+            if kind == "succeeded":
+                # 내용은 다시 쓰되 비용은 이미 기록됐다. 두 번 합산하지 않는다.
+                res.input_tokens = res.output_tokens = 0
+                res.cache_read_tokens = res.cache_write_tokens = 0
+                res.attempt_type = "batch_reuse"
+        # 재사용한 배치는 custom_id 순번이 다를 수 있어 작업 해시로 맞춘다.
+        bcid = {h: c for c, h in rec["jobs"].items()}
+        retry = []
+        for i in todo:
+            kind, res = got.get(bcid.get(hashes[i], cids[i]), (None, None))
+            if kind == "succeeded":
+                out[i] = res
+            elif kind in ("canceled", "expired") or (
+                    kind == "errored" and res != "invalid_request_error"):
+                retry.append(i)          # 처리되지 않았다(과금 없음). 필요한 것만 다시
+            elif kind == "errored":
+                out[i] = GenResult("", self.name, self.model, ok=False,
+                                   error=f"batch errored: {res}", billing_mode="batch",
+                                   batch_id=batch_id,
+                                   custom_id=bcid.get(hashes[i], cids[i]))
             else:
-                # 취소하지 않고 동기로 폴백하면, 배치는 뒤에서 끝까지 처리돼
-                # 배치분과 동기분이 둘 다 과금된다. 폴백 전에 반드시 취소한다.
-                # 대기 상한은 5분 — 08:00 발송이 목표라 오래 기다리지 않는다.
-                try:
-                    self._client.messages.batches.cancel(batch.id)
-                    print(f"[claude] batch {batch.id} {timeout_sec}s 초과 → 취소")
-                except Exception as ce:
-                    print(f"[claude] ⚠ batch 취소 실패(이중 과금 가능): {ce}")
-                raise TimeoutError(f"batch timeout {timeout_sec}s")
+                # 종료를 확인 못 했거나 결과를 못 받았다. 처리·과금 여부를 모르므로
+                # 0원 처리도, 전량 재호출도 하지 않는다. 다음 실행이 결과를 회수한다.
+                out[i] = GenResult("", self.name, self.model, ok=False,
+                                   error=f"batch unresolved ({status})",
+                                   billing_mode="batch", cost_status="unconfirmed",
+                                   batch_id=batch_id,
+                                   custom_id=bcid.get(hashes[i], cids[i]))
+        _save_state(st)
+        if retry:
+            print(f"[claude] batch 미처리 {len(retry)}건만 동기 재시도")
+        return self._fill_sync(out, retry, jobs, temps, max_tokens,
+                               attempt_type="batch_retry")
 
-            print(f"[claude] batch {batch.id} 완료 {time.time() - _t0:.0f}초")
-            got = {}
-            for res in self._client.messages.batches.results(batch.id):
-                if res.result.type == "succeeded":
-                    m = res.result.message
-                    got[res.custom_id] = _message_result(
-                        m, self.name, self.model, billing_mode="batch")
+    def _fill_sync(self, out, idx, jobs, temps, max_tokens, attempt_type=""):
+        if idx:
+            res = self._sync_many([jobs[i] for i in idx], [temps[i] for i in idx],
+                                  max_tokens)
+            for i, r in zip(idx, res):
+                if attempt_type:
+                    r.attempt_type = attempt_type
+                out[i] = r
+        return out
 
-            return [got.get(f"j{i}") or GenResult(
-                        "", self.name, self.model, ok=False,
-                        error="batch result missing", billing_mode="batch")
-                    for i in range(len(jobs))]
-        except Exception as e:
-            print(f"[claude] batch 실패 → 동기 폴백: {e}")
-            return self._sync_many(jobs, temperature, max_tokens)
+    def _wait(self, batch_id, limit, poll_sec, st) -> str:
+        """limit 초 안에 ended 를 확인하면 'ended'. 조회 오류는 상한 안에서만 재시도."""
+        deadline = time.monotonic() + max(0, limit)
+        status = "unknown"
+        while True:
+            try:
+                status = self._client.messages.batches.retrieve(batch_id).processing_status
+                st[batch_id]["status"] = status
+            except Exception as e:
+                print(f"[claude] batch 조회 실패(재시도): {type(e).__name__}")
+            if status == "ended" or time.monotonic() >= deadline:
+                return status
+            time.sleep(poll_sec)
+
+    def _results(self, batch_id, rec, tries=3) -> dict:
+        """custom_id → (결과 유형, GenResult|오류유형). 다운로드가 끊기면 결과 조회만 재시도한다."""
+        got = {}
+        for t in range(tries):
+            try:
+                for r in self._client.messages.batches.results(batch_id):
+                    if r.custom_id in got:
+                        continue
+                    kind = r.result.type
+                    if kind == "succeeded":
+                        g = _message_result(r.result.message, self.name, self.model,
+                                            billing_mode="batch")
+                        g.batch_id, g.custom_id = batch_id, r.custom_id
+                        got[r.custom_id] = (kind, g)
+                    else:
+                        err = getattr(getattr(getattr(r.result, "error", None), "error",
+                                              None), "type", "") or ""
+                        got[r.custom_id] = (kind, err)
+                break
+            except Exception as e:
+                print(f"[claude] batch 결과 조회 중단 {t + 1}/{tries}: {type(e).__name__}")
+        rec["collected"] = sorted(got)
+        rec["status"] = ("collected" if set(rec["jobs"]) <= set(got)
+                         else "ended_uncollected")
+        return got
+
+    def _recover(self, st, skip, want) -> dict:
+        """상태 파일의 이전 배치를 정리한다. 반환: 작업 해시 → 재사용 가능한 성공 결과.
+
+        같은 작업이 아닌 성공 결과는 이미 과금된 것이므로 원장에 'orphan_batch' 로
+        한 번만 남긴다. 아직 끝나지 않은 배치는 비용 미확정으로 표시하고 기다리지 않는다.
+        """
+        found = {}
+        for bid, rec in list(st.items()):
+            if bid == skip or rec.get("status") in ("collected", "abandoned"):
+                continue
+            if bid.startswith("pending-"):
+                # 제출 직전 기록만 있고 batch_id 가 없다. 제출 여부를 알 수 없다.
+                base.PENDING_BATCHES[bid] = len(rec.get("jobs", {}))
+                print(f"[claude] ⚠ 제출 여부 불명 배치 기록 {bid} — 비용 미확정")
+                continue
+            try:
+                status = self._client.messages.batches.retrieve(bid).processing_status
+            except Exception as e:
+                print(f"[claude] 이전 batch {bid} 조회 실패: {type(e).__name__}")
+                base.PENDING_BATCHES[bid] = len(rec.get("jobs", {}))
+                continue
+            if status != "ended":
+                rec["status"] = status
+                base.PENDING_BATCHES[bid] = len(rec.get("jobs", {}))
+                print(f"[claude] 이전 batch {bid} {status} — 비용 미확정, 대기 안 함")
+                continue
+            done = set(rec.get("collected", []))
+            got = self._results(bid, rec)
+            for cid, (kind, res) in got.items():
+                if kind != "succeeded" or cid in done:
+                    continue
+                h = rec["jobs"].get(cid)
+                if h in want and h not in found:
+                    found[h] = res           # 같은 작업: 다시 만들지 않는다
+                else:
+                    record_usage(res, "write", "orphan_batch")
+            if rec["status"] != "collected":
+                base.PENDING_BATCHES[bid] = len(set(rec["jobs"]) - set(got))
+        return found
 
     def _sync_many(self, jobs, temperature, max_tokens) -> list[GenResult]:
         """같은 실행에서 결과가 필요한 작업을 제한된 동시성으로 처리한다."""

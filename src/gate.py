@@ -174,6 +174,23 @@ def has_substance(item: dict) -> bool:
     return bool(_SUBSTANCE.search(core))
 
 
+# 검색 보강이 facts 에 붙이는 형식. enrich._one / _apply_cached 와 같은 표식이다.
+_ENRICH_MARK = "\n\n[검색으로 확인된 배경]\n"
+
+
+def enrich_can_fill(item: dict) -> bool:
+    """검색 보강이 성공한다고 가정해도 이 항목의 글감 요건을 채울 수 있는가.
+
+    유료 검색 전에 판정한다. 리포트는 '리포트 요지·투자의견·적정가격' 을 요구하는데
+    보강은 회사 배경만 붙인다. 그 배경을 요지로 치지 않으므로(위 _RESEARCH_SUBSTANCE)
+    검색해도 게이트를 못 넘는다 (실측 10-06: research 6건 검색 $0.18, 통과 0건).
+    게이트 기준은 그대로 두고, 호출 여부만 같은 기준으로 미리 본다.
+    """
+    probe = dict(item)
+    probe["facts"] = item.get("facts", "") + _ENRICH_MARK + "(검색 결과)"
+    return has_substance(probe)
+
+
 def apply(items: list[dict]) -> tuple[list[dict], list[tuple[str, str]]]:
     passed, blocked = [], []
     for it in items:
