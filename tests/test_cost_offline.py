@@ -295,7 +295,9 @@ def preflight_tests() -> list[bool]:
     G.STYLE_HELD.clear()
 
     # 회귀: flow-2026-10-02-079550 '시가 대비 마감: 4.8% 높은 수준' 의 기준 누락
-    p = next(x for x in posts if x["id"] == "flow-2026-10-02-079550")
+    # posts_latest 는 정기 실행마다 교체된다. 실측 회귀는 고정 원문으로 재현한다.
+    p = json.load(open("tests/fixtures/basis_regressions.json", encoding="utf-8"))[
+        "missing_close_basis"]
     errs = filters.check(p["body"], p["facts"], p.get("fmt"), p.get("angle"),
                          p.get("length"), None, False, p["kind"], p["stock_code"])
     fixed = p["body"].replace("종가는 4.8% 높은", "종가는 시가 대비 4.8% 높은")
@@ -318,8 +320,9 @@ def preflight_tests() -> list[bool]:
     res = T.build(flow, 200)
     fp = [x["id"] for x in posts if filters._basis_errors(x["body"], x["facts"])]
     fpt = [x["id"] for x in res if filters._basis_errors(x["body"], x["facts"])]
-    ok.append(run("기준 검사 오탐: 실발송 50건 중 079550 1건만, 문장틀 0건",
-                  fp == ["flow-2026-10-02-079550"] and not fpt, f"{len(res)}개 문장틀"))
+    expected = [p["id"]] if any(x["id"] == p["id"] for x in posts) else []
+    ok.append(run("기준 검사 오탐: 현재 발송분의 알려진 079550 외 0건, 문장틀 0건",
+                  fp == expected and not fpt, f"{len(res)}개 문장틀"))
 
     # 마지막 소량 부족분: 10-06 3단계(부족 1, 누적 44/97)
     ok.append(run("소량 부족분 묶음 10→6 (하한=추정치×2)",
