@@ -9,6 +9,7 @@ import re
 
 from src import filters
 from src.llm import router
+import config
 from src.decide import temperature_for
 from src import angles
 from src import facts as facts_mod
@@ -222,10 +223,25 @@ _DEGRADED_WRITERS: set[str] = set()
 _QUALITY_FALLBACKS: list[str] = []
 _QUALITY_MIN_SAMPLES = 4
 _QUALITY_MIN_PASS_RATE = 0.10
+_WRITER_QUALITY_COUNTS: dict[str, tuple[int, int]] = {}
+
+
+def reset_quality_tracking() -> None:
+    _WRITER_QUALITY_COUNTS.clear()
+    _DEGRADED_WRITERS.clear()
+    _QUALITY_FALLBACKS.clear()
 
 
 def _record_writer_quality(name: str, attempted: int, passed: int) -> bool:
     """통과율이 임계값 미만이면 후속 생성에서 제외. 제외됐으면 True."""
+    if config.COST_PRIORITY_MODE:
+        # Small economical stages must not disable the sole writer after one
+        # unlucky 4–10 item batch. Use cumulative evidence across at least 20 jobs.
+        old_attempted, old_passed = _WRITER_QUALITY_COUNTS.get(name, (0, 0))
+        attempted, passed = old_attempted + attempted, old_passed + passed
+        _WRITER_QUALITY_COUNTS[name] = (attempted, passed)
+        if attempted < 20:
+            return False
     if attempted < _QUALITY_MIN_SAMPLES or passed / attempted >= _QUALITY_MIN_PASS_RATE:
         return False
     _DEGRADED_WRITERS.add(name)
@@ -419,6 +435,40 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
     return out
 
 
+def trim_excess_sentence(post: dict, errors: list[str]) -> bool:
+    """Recover count/length-only drafts with no additional writing call.
+
+    Keep the lead, remove one complete later sentence, then re-run every filter.
+    Never ignore a grounding error (claim-count errors can mask scope errors).
+    The shortened draft still goes through the ordinary cross-model judge.
+    """
+    if not errors or any(not e.startswith(("주장과다(", "수치과다(", "너무김("))
+                         for e in errors):
+        return False
+    body = post["body"]
+    sentences = re.split(r"(?<=[.!?])\s+(?=[가-힣A-Za-z0-9])", body)
+    if len(sentences) < 3:
+        return False
+    for drop in range(1, len(sentences)):
+        kept = [x for i, x in enumerate(sentences) if i != drop]
+        # Do not create a dangling explicit backwards reference by deletion.
+        if any(re.match(r"(?:이는|이를|이런|그런|따라서|그래서|이 때문에|이로 인해)", x)
+               for x in kept[1:]):
+            continue
+        candidate = " ".join(kept)
+        errs = filters.check(
+            candidate, post["facts"], post.get("fmt"), post.get("angle"),
+            post.get("length"),
+            post.get("stock_name") if post.get("theme_assigned") else None,
+            post.get("kind") == "poll", post.get("kind", ""), post.get("stock_code"))
+        if not errs:
+            post["pre_trim_body"] = body
+            post["body"] = candidate
+            post["deterministic_trim"] = "one_excess_sentence"
+            return True
+    return False
+
+
 def generate(items: list[dict], recent: dict) -> list[dict]:
     used_now: set = set()
     n_unc = max(1, int(len(items) * UNCERTAINTY_QUOTA))
@@ -478,6 +528,9 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
                 p["body"], p["facts"], p.get("fmt"), p.get("angle"), p.get("length"),
                 p.get("stock_name") if p.get("theme_assigned") else None,
                 p.get("kind") == "poll", p.get("kind", ""), p.get("stock_code"))
+            if errs and config.COST_PRIORITY_MODE and trim_excess_sentence(p, errs):
+                print(f"[gen] 문장 1개 제거 후 전체 필터 통과 {p['id']} — 신규 작성 호출 0")
+                errs = []
             if errs:
                 # 본문을 함께 남겨야 '이 리젝이 타당했는지' 사후 검토가 된다
                 print(f"[gen] 정규식 리젝 {p['id']} {errs}")
@@ -496,13 +549,15 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
     return posts
 
 
-def retry_rejected() -> list[dict]:
+def retry_rejected(limit: int | None = None) -> list[dict]:
     """미사용 원본 후보를 모두 소진한 뒤에만 정규식 리젝분을 한 번 다시 쓴다.
 
     단계마다 경미 리젝을 즉시 재작성하는 방식은 실측(10-02)에서 통과 7/63(11%)로
     새 후보보다 낮았고, 단계마다 배치가 하나 더 붙어 실행이 55분으로 늘었다. 철회.
     """
     pending = [p for p in REJECTED if not p.get("_rewrite_attempted")]
+    if limit is not None:
+        pending = pending[:max(0, limit)]
     if not pending:
         return []
     names = [n for n, provider in router.writers().items()

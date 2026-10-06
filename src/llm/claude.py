@@ -111,6 +111,19 @@ def _message_result(message, provider: str, fallback_model: str,
         grounding_queries=_ival(getattr(usage, "server_tool_use", None), "web_search_requests"),
         tier="paid", service_tier=service_tier, billing_mode=billing_mode,
         request_id=str(getattr(message, "id", "") or ""),
+        # Missing usage is unknown cost, not a free response. This is telemetry
+        # only and never prevents safe content from progressing to delivery.
+        cost_status=("estimated" if usage is not None and service_tier == "standard"
+                     and all(isinstance(getattr(usage, k, None), int)
+                             and not isinstance(getattr(usage, k, None), bool)
+                             and getattr(usage, k) >= 0
+                             for k in ("input_tokens", "output_tokens"))
+                     and all(isinstance(getattr(usage, k, 0), int)
+                             and not isinstance(getattr(usage, k, 0), bool)
+                             and getattr(usage, k, 0) >= 0
+                             for k in ("cache_read_input_tokens", "cache_creation_input_tokens"))
+                     and not _ival(getattr(usage, "cache_creation", None), "ephemeral_1h_input_tokens")
+                     else "unconfirmed"),
     )
 
 
@@ -494,6 +507,14 @@ class ClaudeProvider(Provider):
             return []
         workers = min(max(1, config.CLAUDE_SYNC_WORKERS), len(jobs))
         temps = temperature if isinstance(temperature, list) else [temperature] * len(jobs)
+        # A useful first response primes an explicitly cacheable writer prefix.
+        # Non-cacheable requests remain parallel; no extra warmup request is made.
+        sysblk = jobs[0][0]
+        cacheable = (isinstance(sysblk, list) and sysblk
+                     and isinstance(sysblk[0], dict) and sysblk[0].get("cache_control"))
+        first = ([self.generate(jobs[0][0], jobs[0][1], temps[0], max_tokens)]
+                 if cacheable else [])
+        offset = len(first)
         with cf.ThreadPoolExecutor(max_workers=workers) as ex:
-            return list(ex.map(lambda jt: self.generate(
-                jt[0][0], jt[0][1], jt[1], max_tokens), zip(jobs, temps)))
+            return first + list(ex.map(lambda jt: self.generate(
+                jt[0][0], jt[0][1], jt[1], max_tokens), zip(jobs[offset:], temps[offset:])))

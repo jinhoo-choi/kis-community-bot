@@ -151,7 +151,9 @@ jobs:
           GEMINI_HTTP_TIMEOUT_SEC: ${{ vars.GEMINI_HTTP_TIMEOUT_SEC || '30' }}
           ENABLE_ENRICH:     ${{ vars.ENABLE_ENRICH || '1' }}
           ENABLE_JUDGE:      ${{ vars.ENABLE_JUDGE || '1' }}
-          MIN_JUDGE_SCORE:   ${{ vars.MIN_JUDGE_SCORE || '14' }}
+          COST_PRIORITY_MODE: '1'
+          MIN_JUDGE_SCORE:   '10'
+          MIN_FIT:           '1'
           MIN_FACTUAL_SCORE: ${{ vars.MIN_FACTUAL_SCORE || '4' }}
           MIN_COMPLIANT_SCORE: ${{ vars.MIN_COMPLIANT_SCORE || '4' }}
           MAX_PER_STOCK:     ${{ vars.MAX_PER_STOCK || '2' }}

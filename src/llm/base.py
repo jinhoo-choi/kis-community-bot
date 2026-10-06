@@ -244,7 +244,15 @@ def usage_summary(delivered: int = 0) -> dict:
     total["cost_per_delivered_usd"] = (
         round(total["estimated_token_cost_usd"] / delivered, 6)
         if delivered else None)
+    # Advisory only: crossing the target must never stop the 50-post goal.
+    import config
+    complete = (total["unconfirmed_cost_calls"] == 0
+                and total["unknown_cost_calls"] == 0 and not PENDING_BATCHES)
     return {
+        "cost_target_usd": config.API_COST_TARGET_USD,
+        "cost_target_mode": "advisory",
+        "cost_target_met": (total["estimated_token_cost_usd"] < config.API_COST_TARGET_USD
+                            if complete else None),
         "pricing_as_of": "2026-09-12",
         "cost_scope": "token + claude web_search; gemini grounding overage/storage excluded",
         **total,
