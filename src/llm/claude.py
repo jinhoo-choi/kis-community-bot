@@ -244,8 +244,6 @@ class ClaudeProvider(Provider):
 
     def generate_many(self, jobs, temperature=1.0, max_tokens=700,
                       poll_sec=10, timeout_sec=None) -> list[GenResult]:
-        if not self.use_batch or len(jobs) < 15:
-            return self._sync_many(jobs, temperature, max_tokens)
         timeout_sec = config.BATCH_TIMEOUT_SEC if timeout_sec is None else timeout_sec
         n = len(jobs)
         # temperature 는 요청마다 다를 수 있다(배치 API 는 요청별 params 를 받는다).
@@ -257,9 +255,20 @@ class ClaudeProvider(Provider):
         out: list = [None] * n
 
         st = _load_state()
-        reuse = _find_reusable(st, self.model, hashes)
+        reuse = _find_reusable(st, self.model, hashes) if hashes else ""
         # 이전 실행의 배치를 먼저 정리한다. 같은 작업 결과면 재사용, 아니면 비용만 원장에.
         found = self._recover(st, skip=reuse, want=set(hashes))
+        # 동기·소량 모드도 잔여 배치를 확인한다. 처리 여부 불명인 같은 작업은
+        # 새 배치나 동기로 다시 제출하지 않고, 무관한 신규 작업만 진행한다.
+        for bid, rec in st.items():
+            if bid == reuse or bid not in base.PENDING_BATCHES:
+                continue
+            for cid, h in rec.get("jobs", {}).items():
+                if h in hashes and h not in found:
+                    found[h] = GenResult(
+                        "", self.name, rec.get("model", self.model), ok=False,
+                        error="previous batch unresolved", billing_mode="batch",
+                        cost_status="unconfirmed", batch_id=bid, custom_id=cid)
         for i, h in enumerate(hashes):
             if h in found:
                 out[i] = found.pop(h)
@@ -271,7 +280,7 @@ class ClaudeProvider(Provider):
         if reuse:
             batch_id = reuse
             print(f"[claude] 기존 batch {batch_id} 재사용 — 재제출 안 함")
-        elif len(todo) < 15:
+        elif not self.use_batch or len(todo) < 15:
             _save_state(st)
             return self._fill_sync(out, todo, jobs, temps, max_tokens)
         else:
@@ -292,7 +301,7 @@ class ClaudeProvider(Provider):
                 },
             } for i in todo]
             # 제출 전에 논리 작업을 기록한다. 제출 직후 죽어도 무엇을 보냈는지 남는다.
-            pre = f"pending-{base.RUN_ID[0]}-{int(time.time())}"
+            pre = f"pending-{base.RUN_ID[0]}-{time.time_ns()}"
             st[pre] = {"run_id": base.RUN_ID[0], "model": self.model,
                        "created": time.time(), "status": "preparing",
                        "jobs": {cids[i]: hashes[i] for i in todo}, "collected": []}
@@ -300,7 +309,21 @@ class ClaudeProvider(Provider):
             try:
                 batch = self._client.messages.batches.create(requests=reqs)
             except Exception as e:
-                # 제출 자체가 실패하면 처리된 요청이 없다(과금 없음). 동기로 처리한다.
+                if _unclear(e) == "unconfirmed":
+                    # 서버가 접수한 뒤 응답만 유실됐을 수 있다. 준비 기록을
+                    # 보존하고 같은 작업의 동기 폴백·다음 실행 재제출을 막는다.
+                    st[pre]["status"] = "submission_unknown"
+                    _save_state(st)
+                    base.PENDING_BATCHES[pre] = len(todo)
+                    for i in todo:
+                        out[i] = GenResult(
+                            "", self.name, self.model, ok=False,
+                            error=f"batch submission unresolved: {e}"[:200],
+                            billing_mode="batch", cost_status="unconfirmed",
+                            batch_id=pre, custom_id=cids[i])
+                    print(f"[claude] batch 제출 응답 불명 — {len(todo)}건 재호출 보류")
+                    return out
+                # 처리 불명이 아닌 제출 오류는 기존 동기 폴백을 유지한다.
                 print(f"[claude] batch 제출 실패 → 동기: {e}")
                 st.pop(pre, None)
                 _save_state(st)
@@ -330,6 +353,10 @@ class ClaudeProvider(Provider):
 
         prev = set(rec.get("collected", []))     # 이전 실행이 이미 회수(원장 기록)한 결과
         got = self._results(batch_id, rec) if status == "ended" else {}
+        if status == "ended":
+            base.PENDING_BATCHES.pop(batch_id, None)
+            if rec["status"] != "collected":
+                base.PENDING_BATCHES[batch_id] = len(set(rec["jobs"]) - set(got))
         for cid in prev & set(got):
             kind, res = got[cid]
             if kind == "succeeded":
@@ -442,15 +469,20 @@ class ClaudeProvider(Provider):
                 base.PENDING_BATCHES[bid] = len(rec.get("jobs", {}))
                 print(f"[claude] 이전 batch {bid} {status} — 비용 미확정, 대기 안 함")
                 continue
+            base.PENDING_BATCHES.pop(bid, None)
             done = set(rec.get("collected", []))
             got = self._results(bid, rec)
             for cid, (kind, res) in got.items():
-                if kind != "succeeded" or cid in done:
+                if kind != "succeeded":
                     continue
                 h = rec["jobs"].get(cid)
                 if h in want and h not in found:
+                    if cid in done:
+                        res.input_tokens = res.output_tokens = 0
+                        res.cache_read_tokens = res.cache_write_tokens = 0
+                        res.attempt_type = "batch_reuse"
                     found[h] = res           # 같은 작업: 다시 만들지 않는다
-                else:
+                elif cid not in done:
                     record_usage(res, "write", "orphan_batch")
             if rec["status"] != "collected":
                 base.PENDING_BATCHES[bid] = len(set(rec["jobs"]) - set(got))
