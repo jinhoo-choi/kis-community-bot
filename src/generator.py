@@ -8,7 +8,8 @@ import random
 import re
 
 from src import filters
-from src.llm import router
+from src.llm import router, budget
+import config
 from src.decide import temperature_for
 from src import angles
 from src import facts as facts_mod
@@ -383,7 +384,9 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
         # 묶음은 배치 문턱에 못 미쳐 정가 동기 호출로 갔다. 한 번에 보낸다.
         jobs = [P.build_messages_v2(it, tn, ag) for it, tn, ag in zip(items, tones, angs)]
         temps = [temperature_for(it) for it in items]
-        for i, r in enumerate(p.generate_many(jobs, temperature=temps)):
+        for i, r in enumerate(p.generate_many(jobs, temperature=temps,
+                                           max_tokens=(config.BUDGET_WRITE_MAX_TOKENS
+                                                       if budget.active() else 700))):
             record_usage(r, "write", attempt_type, job_id=items[i].get("id", ""))
             results[i] = r
     else:
@@ -417,6 +420,40 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
                     "raw_len": len(r.text.strip()),
                     "raw_tail": r.text.strip()[-45:]})
     return out
+
+
+def trim_excess_sentence(post: dict, errors: list[str]) -> bool:
+    """Recover count/length-only drafts with no additional writing call.
+
+    Keep the lead, remove one complete later sentence, then re-run every filter.
+    Never ignore a grounding error (claim-count errors can mask scope errors).
+    The shortened draft still goes through the ordinary cross-model judge.
+    """
+    if not errors or any(not e.startswith(("주장과다(", "수치과다(", "너무김("))
+                         for e in errors):
+        return False
+    body = post["body"]
+    sentences = re.split(r"(?<=[.!?])\s+(?=[가-힣A-Za-z0-9])", body)
+    if len(sentences) < 3:
+        return False
+    for drop in range(1, len(sentences)):
+        kept = [x for i, x in enumerate(sentences) if i != drop]
+        # Do not create a dangling explicit backwards reference by deletion.
+        if any(re.match(r"(?:이는|이를|이런|그런|따라서|그래서|이 때문에|이로 인해)", x)
+               for x in kept[1:]):
+            continue
+        candidate = " ".join(kept)
+        errs = filters.check(
+            candidate, post["facts"], post.get("fmt"), post.get("angle"),
+            post.get("length"),
+            post.get("stock_name") if post.get("theme_assigned") else None,
+            post.get("kind") == "poll", post.get("kind", ""), post.get("stock_code"))
+        if not errs:
+            post["pre_trim_body"] = body
+            post["body"] = candidate
+            post["deterministic_trim"] = "one_excess_sentence"
+            return True
+    return False
 
 
 def generate(items: list[dict], recent: dict) -> list[dict]:
@@ -478,6 +515,9 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
                 p["body"], p["facts"], p.get("fmt"), p.get("angle"), p.get("length"),
                 p.get("stock_name") if p.get("theme_assigned") else None,
                 p.get("kind") == "poll", p.get("kind", ""), p.get("stock_code"))
+            if errs and budget.active() and trim_excess_sentence(p, errs):
+                print(f"[gen] 문장 1개 제거 후 전체 필터 통과 {p['id']} — 신규 작성 호출 0")
+                errs = []
             if errs:
                 # 본문을 함께 남겨야 '이 리젝이 타당했는지' 사후 검토가 된다
                 print(f"[gen] 정규식 리젝 {p['id']} {errs}")

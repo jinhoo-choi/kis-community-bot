@@ -4,13 +4,14 @@
 문서: https://docs.claude.com/en/docs/build-with-claude/batch-processing
 """
 import hashlib
+import inspect
 import json
 import os
 import time
 import concurrent.futures as cf
 
 import config
-from src.llm import base
+from src.llm import base, budget
 from src.llm.base import Provider, GenResult, record_usage
 
 # 모델이 은퇴하면 단일 문자열은 그날 파이프라인을 죽인다.
@@ -28,6 +29,8 @@ def _ival(obj, name: str) -> int:
 
 def _unclear(e: Exception) -> str:
     """응답을 못 받은 채 끊긴 호출은 처리·과금 여부를 알 수 없다."""
+    if budget.active() and "unconfirmed" in budget.summary()["stop_reason"]:
+        return "unconfirmed"
     name = type(e).__name__
     return ("unconfirmed" if name in ("APITimeoutError", "APIConnectionError",
                                        "ReadTimeout", "ConnectionError", "TimeoutError")
@@ -43,8 +46,18 @@ def _job_hash(model, system, user, temperature, max_tokens) -> str:
 def _load_state() -> dict:
     try:
         with open(config.BATCH_STATE_PATH, encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
+            st = json.load(f)
+        if not isinstance(st, dict) or any(
+                not isinstance(rec, dict) or not isinstance(rec.get("jobs"), dict)
+                for rec in st.values()):
+            raise ValueError("invalid batch checkpoint")
+        return st
+    except FileNotFoundError:
+        return {}
+    except Exception as exc:
+        if budget.active():
+            budget.block("legacy batch checkpoint unreadable")
+            raise budget.BudgetDenied("legacy batch checkpoint unreadable") from exc
         return {}
 
 
@@ -99,6 +112,14 @@ def _message_result(message, provider: str, fallback_model: str,
     cache_write = _ival(usage, "cache_creation_input_tokens")
     uncached = _ival(usage, "input_tokens")
     service_tier = str(getattr(usage, "service_tier", "standard") or "standard")
+    cache_1h = _ival(getattr(usage, "cache_creation", None), "ephemeral_1h_input_tokens")
+    numeric = [getattr(usage, k, None) for k in ("input_tokens", "output_tokens")]
+    numeric += [getattr(usage, k, 0) for k in
+                ("cache_read_input_tokens", "cache_creation_input_tokens")]
+    numeric += [getattr(getattr(usage, "cache_creation", None),
+                        "ephemeral_1h_input_tokens", 0)]
+    valid_usage = all(isinstance(v, int) and not isinstance(v, bool) and v >= 0
+                      for v in numeric) and cache_1h <= cache_write
     return GenResult(
         txt, provider, str(getattr(message, "model", "") or fallback_model),
         ok=bool(txt),
@@ -106,11 +127,13 @@ def _message_result(message, provider: str, fallback_model: str,
         output_tokens=_ival(usage, "output_tokens"),
         cache_read_tokens=cache_read,
         cache_write_tokens=cache_write,
+        cache_write_1h_tokens=cache_1h,
         sources=srcs,
         # 웹 검색은 토큰과 별도로 1회당 과금된다($10/1,000). 종전엔 집계 누락.
         grounding_queries=_ival(getattr(usage, "server_tool_use", None), "web_search_requests"),
         tier="paid", service_tier=service_tier, billing_mode=billing_mode,
         request_id=str(getattr(message, "id", "") or ""),
+        cost_status="estimated" if valid_usage else "unconfirmed",
     )
 
 
@@ -129,7 +152,7 @@ class ClaudeProvider(Provider):
         if api_key:
             import anthropic
             from anthropic import Anthropic
-            self._client = Anthropic(api_key=api_key)
+            self._client = Anthropic(api_key=api_key, max_retries=0)
             print(f"[claude] SDK {getattr(anthropic, '__version__', '?')}")
 
     def available(self) -> bool:
@@ -148,6 +171,45 @@ class ClaudeProvider(Provider):
         self.fallbacks = (self.fallbacks or []) + [f"{self.model}->{nxt}"]
         self.model = nxt
         return True
+
+    def _budget_create(self, **kw):
+        """Every paid synchronous SDK call passes one atomic reservation."""
+        token = None
+        # A signature binding failure is provably before dispatch. Runtime
+        # TypeError can also be a response-decoding failure, so never waive it.
+        inspect.signature(self._client.messages.create).bind(**kw)
+        if budget.active():
+            if budget.stopped():
+                raise budget.BudgetDenied(budget.summary()["stop_reason"])
+            if kw.get("tools"):
+                # Server search can inject an unbounded result context. Its request
+                # cannot be priced before execution, so the bounded profile forbids it.
+                raise budget.BudgetDenied("search disabled by bounded API budget")
+            try:
+                count_kw = {k: kw[k] for k in ("model", "system", "messages", "thinking")
+                            if k in kw}
+                count = self._client.messages.count_tokens(**count_kw).input_tokens
+            except Exception as exc:
+                budget.block("input token counting unavailable")
+                raise budget.BudgetDenied("input token counting unavailable") from exc
+            # Conservatively cover even a future explicit 1-hour cache boundary.
+            one_hour = '\"ttl\": \"1h\"' in json.dumps(kw.get("system"))
+            token = budget.reserve(kw["model"], count, kw["max_tokens"],
+                                   cache_multiplier=2.0 if one_hour else 1.25)
+        try:
+            message = self._client.messages.create(**kw)
+        except Exception as exc:
+            status = getattr(exc, "status_code", None)
+            # Local signature errors and rejected requests are not billable. Every
+            # other failure is uncertain; automatic SDK retries are disabled.
+            budget.fail(token, known_unbilled=status in (400, 401, 403, 404, 413, 422, 429))
+            raise
+        try:
+            budget.settle(token, _message_result(message, self.name, self.model))
+        except Exception:
+            budget.fail(token)
+            raise
+        return message
 
     def _create(self, system, user, temperature, max_tokens):
         """설치된 SDK 가 temperature 를 안 받는 경우가 있어(실측) 방어적으로 호출한다."""
@@ -168,27 +230,30 @@ class ClaudeProvider(Provider):
             kw["system"] = [{"type": "text", "text": system,
                              "cache_control": {"type": "ephemeral"}}]
         if self.model == "claude-sonnet-5":
-            return self._client.messages.create(
+            return self._budget_create(
                 thinking={"type": "disabled"}, **kw)
         return self._call_with_temp(kw, temperature)
 
     def _call_with_temp(self, kw: dict, temperature: float):
         """temperature 를 붙여 보고, SDK 가 못 받으면 빼고 다시 부른다."""
         if ClaudeProvider._no_temp:       # 한 번 확인했으면 매번 재시도하지 않는다
-            return self._client.messages.create(**kw)
+            return self._budget_create(**kw)
         try:
-            return self._client.messages.create(temperature=temperature, **kw)
+            return self._budget_create(temperature=temperature, **kw)
         except TypeError as e:
-            if "temperature" not in str(e):
+            if budget.stopped() or "temperature" not in str(e):
                 raise
             print(f"[claude] SDK 가 temperature 미지원 → 제외하고 재호출 ({e})")
             ClaudeProvider._no_temp = True
-            return self._client.messages.create(**kw)
+            return self._budget_create(**kw)
 
     def generate(self, system, user, temperature=1.0, max_tokens=700) -> GenResult:
         try:
             r = self._create(system, user, temperature, max_tokens)
             return _message_result(r, self.name, self.model)
+        except budget.BudgetDenied as e:
+            return GenResult("", self.name, self.model, ok=False, error=str(e),
+                             attempts=0, cost_status="not_sent")
         except Exception as e:
             msg = str(e)
             if self._promote(msg):
@@ -204,7 +269,7 @@ class ClaudeProvider(Provider):
         if not isinstance(sysblk, list) or not sysblk:
             return
         try:
-            r = self._client.messages.create(
+            r = self._budget_create(
                 model=self.model, max_tokens=0, system=[sysblk[0]],
                 messages=[{"role": "user", "content": "warmup"}])
             # 본문 없는 정상 응답이다. 캐시 쓰기 할증이 붙으므로 별도 역할로 원장에 남긴다
@@ -216,6 +281,10 @@ class ClaudeProvider(Provider):
             print(f"[claude] 캐시 예열 고정부 {getattr(u, 'input_tokens', 0):,}토큰 "
                   f"(최소 4,096) / write {getattr(u, 'cache_creation_input_tokens', 0):,}"
                   f" / read {getattr(u, 'cache_read_input_tokens', 0):,}")
+        except budget.BudgetDenied as e:
+            record_usage(GenResult("", self.name, self.model, ok=False,
+                                   error=str(e), attempts=0, cost_status="not_sent"),
+                         "prewarm", "prewarm")
         except Exception as e:
             print(f"[claude] 캐시 예열 실패(무시): {type(e).__name__}")
             record_usage(GenResult("", self.name, self.model, ok=False,
@@ -238,6 +307,9 @@ class ClaudeProvider(Provider):
                               "max_uses": 1}])
             r = self._call_with_temp(kw, temperature)
             return _message_result(r, self.name, self.model)
+        except budget.BudgetDenied as e:
+            return GenResult("", self.name, self.model, ok=False, error=str(e),
+                             attempts=0, cost_status="not_sent")
         except Exception as e:
             return GenResult("", self.name, self.model, ok=False, error=str(e)[:200],
                              cost_status=_unclear(e))
@@ -257,7 +329,7 @@ class ClaudeProvider(Provider):
         st = _load_state()
         reuse = _find_reusable(st, self.model, hashes) if hashes else ""
         # 이전 실행의 배치를 먼저 정리한다. 같은 작업 결과면 재사용, 아니면 비용만 원장에.
-        found = self._recover(st, skip=reuse, want=set(hashes))
+        found = self._recover(st, skip="" if budget.active() else reuse, want=set(hashes))
         # 동기·소량 모드도 잔여 배치를 확인한다. 처리 여부 불명인 같은 작업은
         # 새 배치나 동기로 다시 제출하지 않고, 무관한 신규 작업만 진행한다.
         for bid, rec in st.items():
@@ -276,6 +348,14 @@ class ClaudeProvider(Provider):
         if not todo:
             _save_state(st)
             return out
+
+        if budget.active():
+            # Reconcile old work above, but do not create fresh asynchronous jobs
+            # whose outcome can outlive this run's bounded ledger.
+            if base.PENDING_BATCHES:
+                budget.block("unresolved legacy batch")
+            _save_state(st)
+            return self._fill_sync(out, todo, jobs, temps, max_tokens)
 
         if reuse:
             batch_id = reuse
@@ -362,7 +442,7 @@ class ClaudeProvider(Provider):
             if kind == "succeeded":
                 # 내용은 다시 쓰되 비용은 이미 기록됐다. 두 번 합산하지 않는다.
                 res.input_tokens = res.output_tokens = 0
-                res.cache_read_tokens = res.cache_write_tokens = 0
+                res.cache_read_tokens = res.cache_write_tokens = res.cache_write_1h_tokens = 0
                 res.attempt_type = "batch_reuse"
         # 재사용한 배치는 custom_id 순번이 다를 수 있어 작업 해시로 맞춘다.
         bcid = {h: c for c, h in rec["jobs"].items()}
@@ -475,11 +555,13 @@ class ClaudeProvider(Provider):
             for cid, (kind, res) in got.items():
                 if kind != "succeeded":
                     continue
+                if cid not in done:
+                    budget.account_recovered(res)
                 h = rec["jobs"].get(cid)
                 if h in want and h not in found:
                     if cid in done:
                         res.input_tokens = res.output_tokens = 0
-                        res.cache_read_tokens = res.cache_write_tokens = 0
+                        res.cache_read_tokens = res.cache_write_tokens = res.cache_write_1h_tokens = 0
                         res.attempt_type = "batch_reuse"
                     found[h] = res           # 같은 작업: 다시 만들지 않는다
                 elif cid not in done:
@@ -493,7 +575,14 @@ class ClaudeProvider(Provider):
         if not jobs:
             return []
         workers = min(max(1, config.CLAUDE_SYNC_WORKERS), len(jobs))
+        if budget.active():
+            workers = min(workers, 2)
         temps = temperature if isinstance(temperature, list) else [temperature] * len(jobs)
+        # One useful response primes the shared cache; avoids six cold writes and
+        # an extra max_tokens=0 prewarm. Same prompt and generated content contract.
+        first = ([self.generate(jobs[0][0], jobs[0][1], temps[0], max_tokens)]
+                 if budget.active() else [])
+        offset = len(first)
         with cf.ThreadPoolExecutor(max_workers=workers) as ex:
-            return list(ex.map(lambda jt: self.generate(
-                jt[0][0], jt[0][1], jt[1], max_tokens), zip(jobs, temps)))
+            return first + list(ex.map(lambda jt: self.generate(
+                jt[0][0], jt[0][1], jt[1], max_tokens), zip(jobs[offset:], temps[offset:])))

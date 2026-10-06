@@ -90,7 +90,8 @@ def _parse(txt: str) -> dict | None:
             d[k] = int(v)
             if not 1 <= d[k] <= 5:
                 return None
-        fatal = d.get("fatal") or []
+        # Missing/null fatal is incomplete judgment, not evidence of no violation.
+        fatal = d.get("fatal")
         if not isinstance(fatal, list) or not all(isinstance(x, str) for x in fatal):
             return None
         d["fatal"] = fatal

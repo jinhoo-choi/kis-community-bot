@@ -149,6 +149,7 @@ jobs:
           GEMINI_FREE_MODEL: ${{ vars.GEMINI_FREE_MODEL || 'gemini-3.1-flash-lite' }}
           GEMINI_FREE_MIN_INTERVAL: ${{ vars.GEMINI_FREE_MIN_INTERVAL || '5.0' }}
           GEMINI_HTTP_TIMEOUT_SEC: ${{ vars.GEMINI_HTTP_TIMEOUT_SEC || '30' }}
+          RUN_API_BUDGET_USD: '0.29'
           ENABLE_ENRICH:     ${{ vars.ENABLE_ENRICH || '1' }}
           ENABLE_JUDGE:      ${{ vars.ENABLE_JUDGE || '1' }}
           MIN_JUDGE_SCORE:   ${{ vars.MIN_JUDGE_SCORE || '14' }}
@@ -206,6 +207,7 @@ jobs:
           path: |
             data/filter_log_*.json
             data/usage_log_*.json
+            data/run_budget.json
           retention-days: 30
           if-no-files-found: ignore
 
@@ -223,6 +225,7 @@ jobs:
           git add -f data/enrich_cache.json 2>/dev/null || true
           # 배치 상태. 재시도·다음 실행이 같은 배치를 다시 찾아 중복 제출·비용 누락을 막는다
           git add -f data/batch_jobs.json 2>/dev/null || true
+          git add -f data/run_budget.json 2>/dev/null || true
           # 상장사 목록 캐시. KIND 403 시 이게 없으면 종목 귀속이 무너진다
           git add -f data/listed_cache.json 2>/dev/null || true
           # 지정일 일별시세로 만든 확정 캐시. 다음 장전 실행의 2,600회 재조회를 줄인다

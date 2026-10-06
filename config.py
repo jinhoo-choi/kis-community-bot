@@ -305,3 +305,12 @@ TG_SEND_INTERVAL = float(os.environ.get("TG_SEND_INTERVAL", "1.2"))
 # 정규장 15:30 이후에도 대체거래소 애프터마켓이 돌아 순위가 계속 바뀐다.
 # 마감 전에 캐시를 채우면 장중 데이터가 '전일 확정치'로 둔갑한다.
 MARKET_CLOSE_MIN = int(os.environ.get("MARKET_CLOSE_MIN", "1210"))   # 20:10
+
+# 2026-10-07: explicit user cost priority. This is a usage estimate guard, not
+# an invoice promise. Leave $0.01 below $0.30; reject larger/nonpositive limits.
+RUN_API_BUDGET_USD = float(os.environ.get("RUN_API_BUDGET_USD", "0.29"))
+RUN_API_BUDGET_PATH = os.environ.get("RUN_API_BUDGET_PATH", "data/run_budget.json")
+BUDGET_STAGE_SIZE = 10
+BUDGET_WRITE_MAX_TOKENS = 350
+BUDGET_MIN_SCORE = 0
+BUDGET_MIN_FIT = 1

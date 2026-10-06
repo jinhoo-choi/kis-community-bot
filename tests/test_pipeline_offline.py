@@ -100,6 +100,7 @@ def run_main(raw, writer, judge_scores):
         (stats, "PATH", os.path.join(tmp, "run_stats.jsonl")),
         (config, "OUTPUT_PATH", os.path.join(tmp, "posts.json")),
         (config, "IGNORE_SEEN", True),
+        (config, "RUN_API_BUDGET_USD", None),
         (config, "BATCH_STATE_PATH", os.path.join(tmp, "batch.json")),
         (enrich, "CACHE_PATH", os.path.join(tmp, "enrich_cache.json")),
         (enrich, "enricher", lambda: fake_search),

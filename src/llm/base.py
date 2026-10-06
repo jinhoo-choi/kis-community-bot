@@ -26,6 +26,7 @@ class GenResult:
     thinking_tokens: int = 0
     cache_read_tokens: int = 0
     cache_write_tokens: int = 0
+    cache_write_1h_tokens: int = 0
     grounding_queries: int = 0
     tier: str = "paid"
     service_tier: str = "standard"
@@ -118,13 +119,14 @@ def record_usage(result: GenResult, role: str,
         "attempt_type": result.attempt_type or attempt_type,
         # 예열은 본문이 없는 것이 정상 응답이다. 실패로 세지 않는다.
         "ok": bool(result.ok and (result.text or role == "prewarm")),
-        "calls": 1,
+        "calls": 0 if result.cost_status == "not_sent" else 1,
         "attempts": max(0, int(result.attempts)),
         "input_tokens": max(0, int(result.input_tokens or 0)),
         "output_tokens": max(0, int(result.output_tokens or 0)),
         "thinking_tokens": max(0, int(result.thinking_tokens or 0)),
         "cache_read_tokens": max(0, int(result.cache_read_tokens or 0)),
         "cache_write_tokens": max(0, int(result.cache_write_tokens or 0)),
+        "cache_write_1h_tokens": max(0, int(result.cache_write_1h_tokens or 0)),
         "grounding_queries": max(0, int(result.grounding_queries or 0)),
     }
     with _USAGE_LOCK:
@@ -167,7 +169,8 @@ def _cost(event: dict) -> tuple[float, bool]:
     cost = (
         uncached * input_rate
         + event["cache_read_tokens"] * cache_read_rate
-        + event["cache_write_tokens"] * cache_write_rate
+        + max(0, event["cache_write_tokens"] - event.get("cache_write_1h_tokens", 0)) * cache_write_rate
+        + event.get("cache_write_1h_tokens", 0) * input_rate * 2
         + (event["output_tokens"] + event["thinking_tokens"]) * output_rate
     ) / 1_000_000
     if event["billing_mode"] == "batch":
@@ -185,7 +188,7 @@ def usage_summary(delivered: int = 0) -> dict:
 
     fields = ("calls", "attempts", "input_tokens", "output_tokens",
               "thinking_tokens", "cache_read_tokens", "cache_write_tokens",
-              "grounding_queries")
+              "grounding_queries", "cache_write_1h_tokens")
 
     def blank():
         return {k: 0 for k in fields} | {
@@ -208,16 +211,16 @@ def usage_summary(delivered: int = 0) -> dict:
             total[field] += event[field]
             bucket[field] += event[field]
         if not event["ok"]:
-            total["failed_calls"] += 1
-            bucket["failed_calls"] += 1
+            total["failed_calls"] += event["calls"]
+            bucket["failed_calls"] += event["calls"]
         total["uncached_input_tokens"] += max(
             0, event["input_tokens"] - event["cache_read_tokens"]
             - event["cache_write_tokens"])
         att = attempts[event["attempt_type"]]
-        att["calls"] += 1
+        att["calls"] += event["calls"]
         att["api_attempts"] += event["attempts"]
         bill = billing[event["billing_mode"]]
-        bill["calls"] += 1
+        bill["calls"] += event["calls"]
         # 처리 여부를 모르는 요청은 0원으로 합산하지 않고 따로 센다.
         if event.get("cost_status") == "unconfirmed":
             total["unconfirmed_cost_calls"] += 1
@@ -244,7 +247,9 @@ def usage_summary(delivered: int = 0) -> dict:
     total["cost_per_delivered_usd"] = (
         round(total["estimated_token_cost_usd"] / delivered, 6)
         if delivered else None)
+    from src.llm import budget
     return {
+        "run_budget": budget.summary(),
         "pricing_as_of": "2026-09-12",
         "cost_scope": "token + claude web_search; gemini grounding overage/storage excluded",
         **total,
@@ -256,7 +261,8 @@ def usage_summary(delivered: int = 0) -> dict:
         "pending_batch_requests": sum(PENDING_BATCHES.values()),
         "cost_complete": total["unconfirmed_cost_calls"] == 0
                          and total["unknown_cost_calls"] == 0
-                         and not PENDING_BATCHES,
+                         and not PENDING_BATCHES
+                         and not budget.summary().get("outstanding_reserved_usd", 0),
         "by_route": dict(sorted(routes.items())),
         "by_attempt_type": dict(sorted(attempts.items())),
         "by_billing_mode": dict(sorted(billing.items())),

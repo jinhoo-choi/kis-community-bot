@@ -24,6 +24,7 @@ from src import (state, tickers, generator, telegram_bot, enrich, judge, trading
                  template_reserve)
 from src.sources import dart, research, market, policy, telegram_ch, kind_inquiry
 from src.llm.base import reset_usage, dump_events
+from src.llm import budget
 
 
 def collect() -> list[dict]:
@@ -186,6 +187,7 @@ def _next_stage_size(remaining: int, needed: int,
 def main():
     dry = "--dry-run" in sys.argv
     reset_usage()
+    budget.start(config.RUN_API_BUDGET_USD, config.RUN_API_BUDGET_PATH)
     enrich.CALLS[0] = 0
     s = state.prune(state.load())
 
@@ -252,7 +254,7 @@ def main():
     enrich_skipped: dict = {}
     nonflow_target = config.TARGET_POSTS - config.DIST_HARD_CAP.get("flow", 0)
     nonflow_expected = config.expected_sent({k: v for k, v in cnt.items() if k != "flow"})
-    if config.ENABLE_ENRICH and not dry and (
+    if config.ENABLE_ENRICH and not dry and not budget.active() and (
             actual_expected < config.TARGET_POSTS
             or nonflow_expected < nonflow_target):
         reasons = dict(blocked)
@@ -287,6 +289,9 @@ def main():
             if (actual_expected >= config.TARGET_POSTS
                     and nonflow_expected >= nonflow_target):
                 break
+    elif budget.active() and not dry:
+        enrich_skipped["budget:new_search_disabled"] = len(thin)
+        print("[enrich] 비용 상한 모드 — 유효 캐시만 사용, 신규 검색 0건")
     elif config.ENABLE_ENRICH and not dry:
         print(f"[enrich] 후보 충분 ({actual_expected:.1f}/{config.TARGET_POSTS})"
               " → 신규 그라운딩 0건")
@@ -307,12 +312,17 @@ def main():
     # LLM은 이 원본을 교체해 품질을 높이는 경로이며, 실패해도 준비량을 줄이지 않는다.
     reserve_goal = config.TARGET_POSTS + template_reserve.RESERVE_EXTRA
     reserve = template_reserve.build(picked, reserve_goal)
+    cooled_templates = state.cooled_templates(s, template_reserve.COOLDOWN_DAYS)
     reserve_probe, _ = decide.decide_distribution(
-        [dict(p) for p in reserve], target=config.TARGET_POSTS)
+        [dict(p) for p in reserve], target=config.TARGET_POSTS,
+        allow_template_guarantee=not budget.active(),
+        cooled_templates=cooled_templates if budget.active() else frozenset())
     reserve_ready = len(reserve_probe) >= config.TARGET_POSTS
     print(f"[template] 결정형 reserve {len(reserve)}/{reserve_goal}건"
           f" → 배분 dry-run {len(reserve_probe)}/{config.TARGET_POSTS}건")
-    if not reserve_ready:
+    if budget.active():
+        print(f"[template] 비용 모드 정상 상한·쿨다운 적용 예비 {len(reserve_probe)}건")
+    elif not reserve_ready:
         print("[template] ⚠ 50건 보장 reserve 미달 — 검증 사실 공급을 확인하세요")
 
     if dry:
@@ -377,9 +387,24 @@ def main():
     # LLM 승인본만으로 전체 목표를 추적한다.
     llm_target = (template_reserve.normal_llm_target(config.TARGET_POSTS)
                   if reserve_ready else config.TARGET_POSTS)
+    def target_progress(llm_posts):
+        if not budget.active():
+            return len(decide.decide_distribution(llm_posts)[0]), llm_target
+        # Actual allowed reserve can be smaller than five, or collide with an
+        # LLM source. Stop only when the real final selector can deliver 50.
+        combined, _ = decide.decide_distribution(
+            [dict(p) for p in llm_posts + reserve],
+            allow_template_guarantee=False, cooled_templates=cooled_templates)
+        return len(combined), config.TARGET_POSTS
+
     start = 0
     next_size = min(config.GEN_STAGE_SIZE, len(picked))
     while start < len(picked) and next_size:
+        if budget.stopped():
+            print("[budget] " + budget.summary()["stop_reason"])
+            break
+        if budget.active():
+            next_size = min(next_size, config.BUDGET_STAGE_SIZE)
         # 특징주가 이미 유형 상한에 걸려 보류되고 있으면, 특징주를 더 만들어도
         # 발송이 늘지 않는다(보류분이 상한 완화 때 먼저 올라간다).
         # 실측 #137: 모든 검사를 통과하고도 '유형절대상한(flow)' 로 버려진 글 51건,
@@ -409,8 +434,8 @@ def main():
             judged, cut = [], 0
             for i in range(0, len(made), config.JUDGE_CHUNK):
                 judged.extend(judge.judge_all(made[i:i + config.JUDGE_CHUNK]))
-                probe, _ = decide.decide_distribution(posts + judged)
-                if len(probe) >= llm_target:
+                progress, goal = target_progress(posts + judged)
+                if progress >= goal:
                     cut = len(made) - len(judged)
                     break
             if cut:
@@ -420,17 +445,21 @@ def main():
         sent_posts, held = decide.decide_distribution(posts)
         print(f"[main] 단계 생성 {start}/{len(picked)}건"
               f" → LLM 승인 가능 {len(sent_posts)}/{llm_target}건")
-        if len(sent_posts) >= llm_target:
+        progress, goal = target_progress(posts)
+        if progress >= goal:
+            break
+        if budget.active() and not made and budget.summary()["denied_requests"]:
+            print("[budget] 이번 묶음 호출 예산 부족 — 목표 미달을 명시적으로 보고")
             break
         next_size = _next_stage_size(
             len(picked) - start,
-            llm_target - len(sent_posts),
+            goal - progress,
             len(attempted_items),
             len(sent_posts),
         )
     # 정규식 리젝분을 즉시 재호출하면 아직 쓰지 않은 원본보다 비싼 두 번째 시도를
     # 먼저 하게 된다. 전체 원본 후보를 소진하고도 목표가 모자랄 때만 한 번 재작성한다.
-    if len(sent_posts) < llm_target and not reserve_ready:
+    if len(sent_posts) < llm_target and not reserve_ready and not budget.active():
         remade = generator.retry_rejected()
         if config.ENABLE_JUDGE:
             remade = judge.judge_all(remade)
@@ -446,8 +475,9 @@ def main():
         # 최근 쓴 문장틀은 평시에 다시 쓰지 않는다(보장 모드에서는 무시).
         sent_posts, held = decide.decide_distribution(
             posts + reserve,
-            cooled_templates=state.cooled_templates(
-                s, template_reserve.COOLDOWN_DAYS))
+            # Budget pressure must not silently increase the approved 5/50 mix.
+            allow_template_guarantee=not budget.active(),
+            cooled_templates=cooled_templates)
         template_n = sum(p.get("provider") == "template" for p in sent_posts)
         print(f"[template] 최종 문장틀 보충 {template_n}건 / "
               f"LLM {len(sent_posts) - template_n}건")
@@ -504,6 +534,13 @@ def main():
         telegram_bot.send_warning(f"수집 이상 소스: {', '.join(degraded)}")
     print("[main] stats " + json.dumps(row, ensure_ascii=False))
 
+    budget_status = budget.summary()
+    if budget_status.get("enabled") and (
+            budget_status["stop_reason"] or budget_status["overruns"]
+            or budget_status["outstanding_reserved_usd"]):
+        telegram_bot.send_warning(
+            "API 예산 검증 미완료: " + (budget_status["stop_reason"] or "미확정 사용량"))
+        raise RuntimeError("API 예산 검증 미완료: " + json.dumps(budget_status))
     if sent != len(sent_posts):
         raise RuntimeError(f"텔레그램 부분 전송: {sent}/{len(sent_posts)}건")
     if sent < config.TARGET_POSTS:
