@@ -8,7 +8,7 @@ import random
 import re
 
 from src import filters
-from src.llm import router, budget
+from src.llm import router
 import config
 from src.decide import temperature_for
 from src import angles
@@ -223,10 +223,25 @@ _DEGRADED_WRITERS: set[str] = set()
 _QUALITY_FALLBACKS: list[str] = []
 _QUALITY_MIN_SAMPLES = 4
 _QUALITY_MIN_PASS_RATE = 0.10
+_WRITER_QUALITY_COUNTS: dict[str, tuple[int, int]] = {}
+
+
+def reset_quality_tracking() -> None:
+    _WRITER_QUALITY_COUNTS.clear()
+    _DEGRADED_WRITERS.clear()
+    _QUALITY_FALLBACKS.clear()
 
 
 def _record_writer_quality(name: str, attempted: int, passed: int) -> bool:
     """통과율이 임계값 미만이면 후속 생성에서 제외. 제외됐으면 True."""
+    if config.COST_PRIORITY_MODE:
+        # Small economical stages must not disable the sole writer after one
+        # unlucky 4–10 item batch. Use cumulative evidence across at least 20 jobs.
+        old_attempted, old_passed = _WRITER_QUALITY_COUNTS.get(name, (0, 0))
+        attempted, passed = old_attempted + attempted, old_passed + passed
+        _WRITER_QUALITY_COUNTS[name] = (attempted, passed)
+        if attempted < 20:
+            return False
     if attempted < _QUALITY_MIN_SAMPLES or passed / attempted >= _QUALITY_MIN_PASS_RATE:
         return False
     _DEGRADED_WRITERS.add(name)
@@ -384,9 +399,7 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
         # 묶음은 배치 문턱에 못 미쳐 정가 동기 호출로 갔다. 한 번에 보낸다.
         jobs = [P.build_messages_v2(it, tn, ag) for it, tn, ag in zip(items, tones, angs)]
         temps = [temperature_for(it) for it in items]
-        for i, r in enumerate(p.generate_many(jobs, temperature=temps,
-                                           max_tokens=(config.BUDGET_WRITE_MAX_TOKENS
-                                                       if budget.active() else 700))):
+        for i, r in enumerate(p.generate_many(jobs, temperature=temps)):
             record_usage(r, "write", attempt_type, job_id=items[i].get("id", ""))
             results[i] = r
     else:
@@ -515,7 +528,7 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
                 p["body"], p["facts"], p.get("fmt"), p.get("angle"), p.get("length"),
                 p.get("stock_name") if p.get("theme_assigned") else None,
                 p.get("kind") == "poll", p.get("kind", ""), p.get("stock_code"))
-            if errs and budget.active() and trim_excess_sentence(p, errs):
+            if errs and config.COST_PRIORITY_MODE and trim_excess_sentence(p, errs):
                 print(f"[gen] 문장 1개 제거 후 전체 필터 통과 {p['id']} — 신규 작성 호출 0")
                 errs = []
             if errs:
@@ -536,13 +549,15 @@ def generate(items: list[dict], recent: dict) -> list[dict]:
     return posts
 
 
-def retry_rejected() -> list[dict]:
+def retry_rejected(limit: int | None = None) -> list[dict]:
     """미사용 원본 후보를 모두 소진한 뒤에만 정규식 리젝분을 한 번 다시 쓴다.
 
     단계마다 경미 리젝을 즉시 재작성하는 방식은 실측(10-02)에서 통과 7/63(11%)로
     새 후보보다 낮았고, 단계마다 배치가 하나 더 붙어 실행이 55분으로 늘었다. 철회.
     """
     pending = [p for p in REJECTED if not p.get("_rewrite_attempted")]
+    if limit is not None:
+        pending = pending[:max(0, limit)]
     if not pending:
         return []
     names = [n for n, provider in router.writers().items()

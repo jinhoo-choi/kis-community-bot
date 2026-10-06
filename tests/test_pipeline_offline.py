@@ -88,7 +88,7 @@ class _Judge:
                          input_tokens=2000, output_tokens=60)
 
 
-def run_main(raw, writer, judge_scores):
+def run_main(raw, writer, judge_scores, cost_priority=False):
     """main() 을 한 번 돌린다. (발송분, 경고, 예외, stats 행, 검색 호출 수)"""
     tmp = tempfile.mkdtemp()
     sent_box, warns, fake_search = [], [], _FakeSearch()
@@ -100,7 +100,7 @@ def run_main(raw, writer, judge_scores):
         (stats, "PATH", os.path.join(tmp, "run_stats.jsonl")),
         (config, "OUTPUT_PATH", os.path.join(tmp, "posts.json")),
         (config, "IGNORE_SEEN", True),
-        (config, "RUN_API_BUDGET_USD", None),
+        (config, "COST_PRIORITY_MODE", cost_priority),
         (config, "BATCH_STATE_PATH", os.path.join(tmp, "batch.json")),
         (enrich, "CACHE_PATH", os.path.join(tmp, "enrich_cache.json")),
         (enrich, "enricher", lambda: fake_search),
