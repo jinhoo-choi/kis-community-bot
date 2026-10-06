@@ -102,7 +102,7 @@ def _one(item: dict) -> dict:
         temperature=0.2,       # 사실 추출이므로 낮게
         max_tokens=400,
     )
-    record_usage(r, "enrich")
+    record_usage(r, "enrich", job_id=item.get("id", ""))
     txt = _strip_markup((r.text or "").strip())
     if not r.ok:
         item["_enrich_error"] = r.error[:200]

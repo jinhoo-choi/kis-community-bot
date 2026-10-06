@@ -128,7 +128,8 @@ def _one(post: dict) -> dict:
             temperature=0.0,
             max_tokens=300,
         )
-        record_usage(r, "judge", "initial" if index == 0 else "judge_fallback")
+        record_usage(r, "judge", "initial" if index == 0 else "judge_fallback",
+                     job_id=post.get("id", ""))
         d = _parse(r.text)
         if d is not None:
             post["score"] = d

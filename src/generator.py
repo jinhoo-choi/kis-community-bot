@@ -368,7 +368,7 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
         jobs = [P.build_messages_v2(it, tn, ag) for it, tn, ag in zip(items, tones, angs)]
         temps = [temperature_for(it) for it in items]
         for i, r in enumerate(p.generate_many(jobs, temperature=temps)):
-            record_usage(r, "write", attempt_type)
+            record_usage(r, "write", attempt_type, job_id=items[i].get("id", ""))
             results[i] = r
     else:
         # Gemini 는 배치를 쓰지 않는다(소규모 병렬). 종전대로 온도별로 호출한다.
@@ -379,7 +379,7 @@ def _run(provider_name: str, items: list[dict], tones: list[str],
             jobs = [P.build_messages_v2(it, tn, ag)
                     for _, it, tn, fm, ag, ln in grp]
             for g, r in zip(grp, p.generate_many(jobs, temperature=temp)):
-                record_usage(r, "write", attempt_type)
+                record_usage(r, "write", attempt_type, job_id=g[1].get("id", ""))
                 results[g[0]] = r
 
     out = []

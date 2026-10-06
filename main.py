@@ -23,7 +23,7 @@ from src import (state, tickers, generator, telegram_bot, enrich, judge, trading
                  gate, decide, stats, dedup, crawl, assign, theme_map, facts,
                  template_reserve)
 from src.sources import dart, research, market, policy, telegram_ch, kind_inquiry
-from src.llm.base import reset_usage
+from src.llm.base import reset_usage, dump_events
 
 
 def collect() -> list[dict]:
@@ -424,6 +424,9 @@ def main():
     row = stats.record(**summary, dedup=dup_reasons, crawl_health=crawl.health())
     telegram_bot.send_summary(sent_posts, sent, row, config.TARGET_POSTS)
     print("[main] filter_log " + stats.detail_log(picked, sent_posts, held, blocked, raw))
+    # 건별 비용 원장(run/job/request/batch id). 커밋하지 않고 artifact 로만 남긴다.
+    print("[main] usage_log " + dump_events(
+        f"data/usage_log_{__import__('datetime').datetime.now(config.KST):%Y%m%d_%H%M}.json"))
     if degraded:
         telegram_bot.send_warning(f"수집 이상 소스: {', '.join(degraded)}")
     print("[main] stats " + json.dumps(row, ensure_ascii=False))

@@ -7,7 +7,7 @@ import time
 import concurrent.futures as cf
 
 import config
-from src.llm.base import Provider, GenResult
+from src.llm.base import Provider, GenResult, record_usage
 
 # 모델이 은퇴하면 단일 문자열은 그날 파이프라인을 죽인다.
 # 404/not_found/deprecated 계열 오류에서만 다음 후보로 승격한다.
@@ -20,6 +20,14 @@ def _ival(obj, name: str) -> int:
         return int(getattr(obj, name, 0) or 0)
     except (TypeError, ValueError):
         return 0
+
+
+def _unclear(e: Exception) -> str:
+    """응답을 못 받은 채 끊긴 호출은 처리·과금 여부를 알 수 없다."""
+    name = type(e).__name__
+    return ("unconfirmed" if name in ("APITimeoutError", "APIConnectionError",
+                                       "ReadTimeout", "ConnectionError", "TimeoutError")
+            else "estimated")
 
 
 def _message_result(message, provider: str, fallback_model: str,
@@ -52,6 +60,7 @@ def _message_result(message, provider: str, fallback_model: str,
         # 웹 검색은 토큰과 별도로 1회당 과금된다($10/1,000). 종전엔 집계 누락.
         grounding_queries=_ival(getattr(usage, "server_tool_use", None), "web_search_requests"),
         tier="paid", service_tier=service_tier, billing_mode=billing_mode,
+        request_id=str(getattr(message, "id", "") or ""),
     )
 
 
@@ -136,7 +145,8 @@ class ClaudeProvider(Provider):
                 result = self.generate(system, user, temperature, max_tokens)
                 result.attempts += 1
                 return result
-            return GenResult("", self.name, self.model, ok=False, error=msg[:200])
+            return GenResult("", self.name, self.model, ok=False, error=msg[:200],
+                             cost_status=_unclear(e))
 
     def _prewarm(self, jobs) -> None:
         """고정부를 캐시에 미리 적재한다. 실패해도 조용히 넘어간다(캐시는 최적화일 뿐)."""
@@ -147,12 +157,20 @@ class ClaudeProvider(Provider):
             r = self._client.messages.create(
                 model=self.model, max_tokens=0, system=[sysblk[0]],
                 messages=[{"role": "user", "content": "warmup"}])
+            # 본문 없는 정상 응답이다. 캐시 쓰기 할증이 붙으므로 별도 역할로 원장에 남긴다
+            # (10-06 실측: 예열 2회 약 $0.0064 가 원장에서 빠져 있었다).
+            res = _message_result(r, self.name, self.model)
+            res.ok = True
+            record_usage(res, "prewarm", "prewarm")
             u = getattr(r, "usage", None)
             print(f"[claude] 캐시 예열 고정부 {getattr(u, 'input_tokens', 0):,}토큰 "
                   f"(최소 4,096) / write {getattr(u, 'cache_creation_input_tokens', 0):,}"
                   f" / read {getattr(u, 'cache_read_input_tokens', 0):,}")
         except Exception as e:
             print(f"[claude] 캐시 예열 실패(무시): {type(e).__name__}")
+            record_usage(GenResult("", self.name, self.model, ok=False,
+                                   error=str(e)[:200], cost_status=_unclear(e)),
+                         "prewarm", "prewarm")
 
     def search(self, system: str, user: str, temperature: float = 1.0,
                max_tokens: int = 700) -> GenResult:
@@ -171,7 +189,8 @@ class ClaudeProvider(Provider):
             r = self._call_with_temp(kw, temperature)
             return _message_result(r, self.name, self.model)
         except Exception as e:
-            return GenResult("", self.name, self.model, ok=False, error=str(e)[:200])
+            return GenResult("", self.name, self.model, ok=False, error=str(e)[:200],
+                             cost_status=_unclear(e))
 
     def generate_many(self, jobs, temperature=1.0, max_tokens=700,
                       poll_sec=10, timeout_sec=300) -> list[GenResult]:

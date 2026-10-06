@@ -202,7 +202,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: filter-log-${{ github.run_id }}
-          path: data/filter_log_*.json
+          path: |
+            data/filter_log_*.json
+            data/usage_log_*.json
           retention-days: 30
           if-no-files-found: ignore
 
