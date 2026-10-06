@@ -338,6 +338,192 @@ def preflight_tests() -> list[bool]:
     return ok
 
 
+class _FakeBatches:
+    """Message Batches API 가짜. retrieve 상태와 결과를 시나리오대로 돌려준다."""
+
+    def __init__(self, statuses, plan, results_fail=0, cancel_fail=False):
+        self.statuses, self.plan = list(statuses), plan
+        self.results_fail, self.cancel_fail = results_fail, cancel_fail
+        self.created, self.reqs = [], {}
+        self.cancels = self.results_calls = 0
+
+    def create(self, requests):
+        bid = f"msgbatch_fake{len(self.created) + 1}"
+        self.created.append(bid)
+        self.reqs[bid] = [r["custom_id"] for r in requests]
+        return NS(id=bid)
+
+    def retrieve(self, bid):
+        st = self.statuses.pop(0) if len(self.statuses) > 1 else self.statuses[0]
+        return NS(processing_status=st)
+
+    def cancel(self, bid):
+        self.cancels += 1
+        if self.cancel_fail:
+            raise RuntimeError("cancel failed")
+
+    def results(self, bid):
+        self.results_calls += 1
+        cids = self.reqs[bid]
+        fail = self.results_fail > 0
+        self.results_fail -= 1
+        for k, cid in enumerate(cids):
+            if fail and k == 5:
+                raise ConnectionError("stream cut")
+            kind, err = self.plan(k)
+            if kind == "succeeded":
+                yield NS(custom_id=cid, result=NS(type=kind, message=_msg(
+                    f"m-{bid}-{cid}", inp=1000, out=50)))
+            else:
+                yield NS(custom_id=cid, result=NS(type=kind, error=NS(error=NS(type=err))))
+
+
+def _provider(fb):
+    cp = ClaudeProvider.__new__(ClaudeProvider)
+    cp.model, cp.name, cp._no_temp, cp.use_batch, cp.fallbacks = HAIKU, "claude", False, True, None
+    cp.sync_calls = 0
+
+    def _prewarm_create(**kw):
+        return _msg(f"pw-{id(kw)}", text="", inp=8, cw=4697)
+    cp._client = NS(messages=NS(batches=fb, create=_prewarm_create))
+
+    def _gen(system, user, temperature=1.0, max_tokens=700):
+        cp.sync_calls += 1
+        return GenResult("동기 본문", "claude", HAIKU, request_id=f"sync-{user}",
+                         input_tokens=1000, output_tokens=50)
+    cp.generate = _gen
+    return cp
+
+
+def _jobs(n=20, tag="a"):
+    sysblk = [{"type": "text", "text": "고정부", "cache_control": {"type": "ephemeral"}}]
+    return [(sysblk, f"{tag}-{i}") for i in range(n)]
+
+
+def batch_tests() -> list[bool]:
+    import json
+    import tempfile
+    import config
+    ok = []
+    ok_all = lambda rs: all(r.ok for r in rs)
+    orig = (config.BATCH_STATE_PATH, config.BATCH_CANCEL_WAIT_SEC)
+    config.BATCH_STATE_PATH = os.path.join(tempfile.mkdtemp(), "batch_jobs.json")
+    config.BATCH_CANCEL_WAIT_SEC = 0
+    state = lambda: json.load(open(config.BATCH_STATE_PATH, encoding="utf-8"))
+    try:
+        # A. 정상 완료
+        base.reset_usage()
+        fb = _FakeBatches(["in_progress", "ended"], lambda k: ("succeeded", ""))
+        cp = _provider(fb)
+        rs = cp.generate_many(_jobs(), poll_sec=0, timeout_sec=5)
+        for r in rs:
+            base.record_usage(r, "write")
+        u = base.usage_summary()
+        ok.append(run("배치 정상 완료: 20건 회수, 동기 0, 취소 0, 배치 단가 기록",
+                      ok_all(rs) and cp.sync_calls == 0 and fb.cancels == 0
+                      and u["by_billing_mode"]["batch"]["calls"] == 20
+                      and list(state().values())[0]["status"] == "collected"))
+
+        # B. 시간 초과 → 취소 요청 → 종료(성공 8, 취소 12): 성공분 회수, 취소분만 재시도
+        base.reset_usage()
+        fb = _FakeBatches(["in_progress", "ended"],
+                          lambda k: ("succeeded", "") if k < 8 else ("canceled", ""))
+        cp = _provider(fb)
+        rs = cp.generate_many(_jobs(tag="b"), poll_sec=0, timeout_sec=0)
+        for r in rs:
+            base.record_usage(r, "write")
+        u = base.usage_summary()
+        ok.append(run("취소 중 일부 성공: 성공 8 회수, 미처리 12만 동기, 이후 동기 전환",
+                      ok_all(rs) and fb.cancels == 1 and cp.sync_calls == 12
+                      and u["by_billing_mode"]["batch"]["calls"] == 8
+                      and u["by_attempt_type"]["batch_retry"]["calls"] == 12
+                      and cp.use_batch is False))
+
+        # C. 취소 실패 + 종료 불명: 무한 대기·전량 재호출·0원 처리 금지
+        base.reset_usage()
+        fb = _FakeBatches(["in_progress"], lambda k: ("succeeded", ""), cancel_fail=True)
+        cp = _provider(fb)
+        rs = cp.generate_many(_jobs(tag="c"), poll_sec=0, timeout_sec=0)
+        for r in rs:
+            base.record_usage(r, "write")
+        u = base.usage_summary()
+        ok.append(run("취소 실패·종료 불명: 동기 0, 20건 비용 미확정, 비용 완료 아님",
+                      not any(r.ok for r in rs) and cp.sync_calls == 0
+                      and u["unconfirmed_cost_calls"] == 20 and u["cost_complete"] is False))
+
+        # C'. 다음 실행: 그 배치가 끝나 있으면 결과 비용을 한 번만 원장에(작업은 다름)
+        base.reset_usage()
+        fb.statuses = ["ended"]
+        cp2 = _provider(fb)
+        cp2.generate_many(_jobs(16, tag="next"), poll_sec=0, timeout_sec=5)
+        u1 = base.usage_summary()
+        cp3 = _provider(fb)
+        cp3.generate_many(_jobs(16, tag="next2"), poll_sec=0, timeout_sec=5)
+        u2 = base.usage_summary()
+        orphan = lambda u: u["by_attempt_type"].get("orphan_batch", {}).get("calls", 0)
+        ok.append(run("재시작 복구: 이전 배치 성공분 비용 20건 1회만 합산",
+                      orphan(u1) == 20 and orphan(u2) == 20))
+
+        # D. 결과 다운로드 중단 1회 → 결과 조회만 재시도, 재제출·동기 0
+        base.reset_usage()
+        os.remove(config.BATCH_STATE_PATH)
+        fb = _FakeBatches(["ended"], lambda k: ("succeeded", ""), results_fail=1)
+        cp = _provider(fb)
+        rs = cp.generate_many(_jobs(tag="d"), poll_sec=0, timeout_sec=5)
+        ok.append(run("결과 조회 중단: 조회만 재시도(2회), 제출 1회, 동기 0",
+                      ok_all(rs) and fb.results_calls == 2 and len(fb.created) == 1
+                      and cp.sync_calls == 0))
+
+        # E. 결과 조회가 계속 실패 → 미확정으로 남김, 재시작 시 같은 배치를 찾아 회수
+        base.reset_usage()
+        os.remove(config.BATCH_STATE_PATH)
+        fb = _FakeBatches(["ended"], lambda k: ("succeeded", ""), results_fail=3)
+        cp = _provider(fb)
+        rs = cp.generate_many(_jobs(tag="e"), poll_sec=0, timeout_sec=5)
+        first = (sum(r.ok for r in rs) == 5 and cp.sync_calls == 0
+                 and sum(r.cost_status == "unconfirmed" for r in rs) == 15
+                 and list(state().values())[0]["status"] == "ended_uncollected")
+        base.reset_usage()                       # 재시작 = 새 프로세스
+        cp2 = _provider(fb)
+        rs2 = cp2.generate_many(_jobs(tag="e"), poll_sec=0, timeout_sec=5)
+        for r in rs2:
+            base.record_usage(r, "write")
+        u = base.usage_summary()
+        ok.append(run("결과 일부 미수신 → 받은 5건 사용·15건 미확정, 재시작 시 같은 배치 "
+                      "재사용(재제출 0)·이미 기록한 5건 비용 재합산 0",
+                      first and ok_all(rs2) and len(fb.created) == 1
+                      and cp2.sync_calls == 0
+                      and u["by_attempt_type"]["batch_reuse"]["estimated_token_cost_usd"] == 0
+                      and u["by_attempt_type"]["initial"]["calls"] == 15))
+
+        # F. 처리 중 재시작: 같은 작업이면 기존 배치를 기다린다(중복 제출 금지)
+        base.reset_usage()
+        os.remove(config.BATCH_STATE_PATH)
+        fb = _FakeBatches(["in_progress"], lambda k: ("succeeded", ""), cancel_fail=True)
+        cp = _provider(fb)
+        cp.generate_many(_jobs(tag="f"), poll_sec=0, timeout_sec=0)
+        fb.statuses = ["in_progress", "ended"]
+        cp2 = _provider(fb)
+        rs2 = cp2.generate_many(_jobs(tag="f"), poll_sec=0, timeout_sec=5)
+        ok.append(run("처리 중 재시작: 기존 배치 조회·대기, 제출 1회 유지",
+                      ok_all(rs2) and len(fb.created) == 1 and cp2.sync_calls == 0))
+
+        # G. errored: 잘못된 요청은 재시도 안 함, 서버 오류만 재시도
+        base.reset_usage()
+        os.remove(config.BATCH_STATE_PATH)
+        fb = _FakeBatches(["ended"], lambda k: (
+            ("errored", "invalid_request_error") if k == 0 else
+            ("errored", "api_error") if k == 1 else ("succeeded", "")))
+        cp = _provider(fb)
+        rs = cp.generate_many(_jobs(tag="g"), poll_sec=0, timeout_sec=5)
+        ok.append(run("errored: invalid_request 재시도 0, api_error 1건만 동기",
+                      not rs[0].ok and rs[1].ok and cp.sync_calls == 1))
+    finally:
+        config.BATCH_STATE_PATH, config.BATCH_CANCEL_WAIT_SEC = orig
+        base.reset_usage()
+    return ok
+
+
 def main():
     ok = []
     print("── 1. 비용 원장 ──")
@@ -346,6 +532,8 @@ def main():
     ok += enrich_tests()
     print("── 3. 생성 전 검사 ──")
     ok += preflight_tests()
+    print("── 4. 배치 ──")
+    ok += batch_tests()
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 

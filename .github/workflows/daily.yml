@@ -220,6 +220,8 @@ jobs:
           git add data/state.json data/run_stats.jsonl 2>/dev/null || true
           # 보강 캐시를 커밋해야 다음 실행이 그라운딩을 다시 하지 않는다
           git add -f data/enrich_cache.json 2>/dev/null || true
+          # 배치 상태. 재시도·다음 실행이 같은 배치를 다시 찾아 중복 제출·비용 누락을 막는다
+          git add -f data/batch_jobs.json 2>/dev/null || true
           # 상장사 목록 캐시. KIND 403 시 이게 없으면 종목 귀속이 무너진다
           git add -f data/listed_cache.json 2>/dev/null || true
           # 지정일 일별시세로 만든 확정 캐시. 다음 장전 실행의 2,600회 재조회를 줄인다

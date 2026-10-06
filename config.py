@@ -166,6 +166,11 @@ CLAUDE_BACKUP_JUDGE_MODEL = os.environ.get("CLAUDE_BACKUP_JUDGE_MODEL", "claude-
 # 워크플로는 기본값 'auto' 를 넘기는데 종전 비교식은 == "1" 이었다. 그래서 정기
 # 실행에서 배치(단가 50%)가 한 번도 켜진 적이 없었다. '0' 만 끈다.
 USE_BATCH = os.environ.get("USE_BATCH", "auto").lower() not in ("0", "false", "off")
+# 배치 대기 상한(초)과 취소 요청 뒤 종료 확인 대기(초). 둘 다 넘기면 결과를 '미확정'으로
+# 남기고 전량 동기 재호출하지 않는다. 상태 파일은 재시작 후 같은 배치를 다시 찾는 데 쓴다.
+BATCH_TIMEOUT_SEC = int(os.environ.get("BATCH_TIMEOUT_SEC", "300"))
+BATCH_CANCEL_WAIT_SEC = int(os.environ.get("BATCH_CANCEL_WAIT_SEC", "90"))
+BATCH_STATE_PATH = os.environ.get("BATCH_STATE_PATH", "data/batch_jobs.json")
 
 # 한 번에 전량 생성하지 않고 이 단위로 생성·심사한 뒤 목표 달성 여부를 본다.
 # 50건 기준 첫 묶음은 60건, 이후에는 실측 수율로 10~60건만 추가한다.

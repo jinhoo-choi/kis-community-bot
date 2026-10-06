@@ -74,6 +74,8 @@ _PRICES = (
 _USAGE_EVENTS: list[dict] = []
 _USAGE_SEEN: set = set()
 _USAGE_LOCK = threading.Lock()
+# 이전 실행에서 넘어와 아직 끝나지 않은 배치(batch_id → 요청 수). 비용 미확정.
+PENDING_BATCHES: dict = {}
 # 실행 식별자. Actions 에서는 run_id, 로컬은 시작 시각.
 RUN_ID = [os.environ.get("GITHUB_RUN_ID") or f"local-{int(time.time())}"]
 
@@ -83,6 +85,7 @@ def reset_usage() -> None:
     with _USAGE_LOCK:
         _USAGE_EVENTS.clear()
         _USAGE_SEEN.clear()
+        PENDING_BATCHES.clear()
 
 
 def record_usage(result: GenResult, role: str,
@@ -249,8 +252,11 @@ def usage_summary(delivered: int = 0) -> dict:
         "cost_basis": "usage_estimate",
         "billed_cost_usd": None,
         "billing_check": "unverified",
+        # 이전 실행에서 넘어와 아직 끝나지 않은 배치 요청 수(비용 미확정, 0원 아님)
+        "pending_batch_requests": sum(PENDING_BATCHES.values()),
         "cost_complete": total["unconfirmed_cost_calls"] == 0
-                         and total["unknown_cost_calls"] == 0,
+                         and total["unknown_cost_calls"] == 0
+                         and not PENDING_BATCHES,
         "by_route": dict(sorted(routes.items())),
         "by_attempt_type": dict(sorted(attempts.items())),
         "by_billing_mode": dict(sorted(billing.items())),
