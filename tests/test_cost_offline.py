@@ -239,21 +239,6 @@ def enrich_tests() -> list[bool]:
     return ok
 
 
-def _old_module(path, name):
-    """변경 전(ceb95c0) 코드를 같은 입력에 돌려 비교한다."""
-    import importlib.util
-    import subprocess
-    import tempfile
-    src = subprocess.run(["git", "show", f"ceb95c0:{path}"], capture_output=True,
-                         text=True, check=True).stdout
-    f = os.path.join(tempfile.mkdtemp(), name + ".py")
-    open(f, "w", encoding="utf-8").write(src)
-    spec = importlib.util.spec_from_file_location(name, f)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
 def preflight_tests() -> list[bool]:
     import json
     import random
@@ -278,13 +263,19 @@ def preflight_tests() -> list[bool]:
     thin = {"id": "pol-t", "kind": "policy", "title": t,
             "facts": f"출처: 테스트\n보도 시각: 2026-10-06 06:00 KST\n제목: {t}\n"
                      "요지: 금융감독원은 19일까지 신청을 받는다고 밝혔다.\n※ 단정하지 말 것."}
-    old = _old_module("src/generator.py", "gen_old")
-    old_pid = old.pick_style(dict(thin), {}, set())[0]
+    # 종전 fallback(ceb95c0): 사실 요건을 보지 않고 호환 Angle 이 있는 기본 후보를 다시 열어
+    # 최단 페르소나를 썼다. CI 는 얕은 checkout 이라 git 이력 대신 그 규칙을 그대로 계산한다.
+    from src import angles, claims
+    cand = angles.available(thin)
+    base_w = P.style_ids()["policy"]
+    old_pool = [pid for pid, w in base_w.items()
+                if w > 0 and any(P.v2.compatible(pid, a) for a in cand)]
+    old_pid = min(old_pool, key=lambda pid: P.len_bounds(pid)[0]) if old_pool else ""
     it = dict(thin)
     new = G.pick_style(it, {}, set())
     ok.append(run("부적합 조합: 종전 fallback 은 생성, 변경 후 호출 없이 보류",
                   old_pid and new[0] == "" and it.get("_style_hold", "").startswith("조합없음"),
-                  f"종전={old_pid} 사실요건={old.facts_mod.count(thin)}"))
+                  f"종전={old_pid} 주장{len(claims.build(thin))}개·사실슬롯{facts.count(thin)}"))
     G.STYLE_HELD.clear()
 
     class _NoCall:
