@@ -509,6 +509,148 @@ def batch_tests() -> list[bool]:
         rs = cp.generate_many(_jobs(tag="g"), poll_sec=0, timeout_sec=5)
         ok.append(run("errored: invalid_request 재시도 0, api_error 1건만 동기",
                       not rs[0].ok and rs[1].ok and cp.sync_calls == 1))
+
+        # H. 동기 모드에서도 과거 미완료 배치를 원장에 표시한다.
+        base.reset_usage()
+        os.remove(config.BATCH_STATE_PATH)
+        fb = _FakeBatches(["in_progress"], lambda k: ("succeeded", ""), cancel_fail=True)
+        _provider(fb).generate_many(_jobs(tag="h"), poll_sec=0, timeout_sec=0)
+        base.reset_usage()
+        cp = _provider(fb)
+        cp.use_batch = False
+        rs = cp.generate_many(_jobs(3, tag="new-h"))
+        u = base.usage_summary()
+        ok.append(run("동기 모드: 잔여 20건 미확정 표시, 신규 3건만 동기",
+                      ok_all(rs) and cp.sync_calls == 3 and len(fb.created) == 1
+                      and u["pending_batch_requests"] == 20 and not u["cost_complete"]))
+
+        # 기존 작업 일부 + 신규 작업. 미완료 기존 작업은 재호출하지 않는다.
+        base.reset_usage()
+        cp = _provider(fb)
+        cp.use_batch = False
+        rs = cp.generate_many(_jobs(3, tag="h") + _jobs(2, tag="new-h2"))
+        for r in rs:
+            base.record_usage(r, "write")
+        u = base.usage_summary()
+        ok.append(run("동기 혼합 작업: 미완료 기존 3건 보류, 신규 2건만 생성",
+                      not any(r.ok for r in rs[:3]) and ok_all(rs[3:])
+                      and cp.sync_calls == 2 and len(fb.created) == 1
+                      and u["unconfirmed_cost_calls"] == 3
+                      and u["pending_batch_requests"] == 20))
+
+        # I. 끝난 잔여 배치는 동기 모드에서 비용만 1회 회수한다.
+        base.reset_usage()
+        fb.statuses = ["ended"]
+        cp = _provider(fb)
+        cp.use_batch = False
+        cp.generate_many(_jobs(3, tag="new-i"))
+        u1 = base.usage_summary()
+        cp.generate_many(_jobs(3, tag="new-i2"))
+        u2 = base.usage_summary()
+        ok.append(run("동기 복구: 이전 성공 20건 비용 1회만 기록, 신규 배치·예열 0",
+                      orphan(u1) == 20 and orphan(u2) == 20
+                      and u1["pending_batch_requests"] == 0 and u1["cost_complete"]
+                      and cp.sync_calls == 6 and len(fb.created) == 1))
+
+        # J. 배치 설정이 켜져 있어도 소량 작업의 복구를 건너뛰지 않는다.
+        base.reset_usage()
+        os.remove(config.BATCH_STATE_PATH)
+        fb = _FakeBatches(["in_progress"], lambda k: ("succeeded", ""), cancel_fail=True)
+        _provider(fb).generate_many(_jobs(tag="j"), poll_sec=0, timeout_sec=0)
+        base.reset_usage()
+        fb.statuses = ["ended"]
+        cp = _provider(fb)
+        cp.generate_many(_jobs(3, tag="new-j"))
+        u = base.usage_summary()
+        ok.append(run("15건 미만 복구: 이전 성공 20건 비용 회수, 신규 3건만 동기",
+                      orphan(u) == 20 and cp.sync_calls == 3 and len(fb.created) == 1))
+
+        # K. 일부 결과 비용을 이미 기록한 배치 + 새 작업의 재시작 복구.
+        base.reset_usage()
+        os.remove(config.BATCH_STATE_PATH)
+        fb = _FakeBatches(["ended"], lambda k: ("succeeded", ""), results_fail=3)
+        cp = _provider(fb)
+        cp.generate_many(_jobs(tag="k"), poll_sec=0, timeout_sec=0)
+        base.reset_usage()
+        cp = _provider(fb)
+        cp.use_batch = False
+        rs = cp.generate_many(_jobs(3, tag="k") + _jobs(2, tag="new-k"))
+        for r in rs:
+            base.record_usage(r, "write")
+        u = base.usage_summary()
+        ok.append(run("동기 일부 재사용: 이미 기록한 3건 재생성·비용 재합산 0",
+                      ok_all(rs) and cp.sync_calls == 2 and len(fb.created) == 1
+                      and u["by_attempt_type"]["batch_reuse"]["calls"] == 3
+                      and u["by_attempt_type"]["batch_reuse"]["estimated_token_cost_usd"] == 0))
+
+        # L. 서버 접수 뒤 제출 응답 유실: 준비 기록·미확정 비용을 보존한다.
+        class _AcceptedThenLost(_FakeBatches):
+            error_name = "APITimeoutError"
+
+            def create(self, requests):
+                super().create(requests)
+                raise type(self.error_name, (Exception,), {})("accepted; response lost")
+
+        for error_name in ("APITimeoutError", "APIConnectionError"):
+            base.reset_usage()
+            os.remove(config.BATCH_STATE_PATH)
+            fb = _AcceptedThenLost(["in_progress"], lambda k: ("succeeded", ""))
+            fb.error_name = error_name
+            cp = _provider(fb)
+            rs = cp.generate_many(_jobs(tag="l"), poll_sec=0, timeout_sec=0)
+            for r in rs:
+                base.record_usage(r, "write")
+            u = base.usage_summary()
+            ok.append(run(f"제출 {error_name}: 동기 0·준비 기록 보존·20건 미확정",
+                          not any(r.ok for r in rs) and cp.sync_calls == 0
+                          and len(fb.created) == 1 and len(state()) == 1
+                          and u["unconfirmed_cost_calls"] == 20
+                          and u["pending_batch_requests"] == 20 and not u["cost_complete"]))
+
+            # 재시작 후 배치·동기 설정 모두 같은 요청을 재제출하지 않는다.
+            blocked = True
+            for batch_mode in (False, True):
+                base.reset_usage()
+                cp2 = _provider(fb)
+                cp2.use_batch = batch_mode
+                rs2 = cp2.generate_many(_jobs(tag="l"), poll_sec=0, timeout_sec=0)
+                blocked &= (not any(r.ok for r in rs2) and cp2.sync_calls == 0
+                            and len(fb.created) == 1
+                            and base.usage_summary()["pending_batch_requests"] == 20)
+            ok.append(run(f"제출 {error_name} 재시작: 배치·동기 모두 재제출 0", blocked))
+
+        # M. 미접수가 명확한 제출 오류는 동기 폴백을 유지한다.
+        class _Rejected(_FakeBatches):
+            def create(self, requests):
+                raise ValueError("invalid request")
+
+        base.reset_usage()
+        os.remove(config.BATCH_STATE_PATH)
+        fb = _Rejected(["ended"], lambda k: ("succeeded", ""))
+        cp = _provider(fb)
+        rs = cp.generate_many(_jobs(tag="m"))
+        ok.append(run("명시적 제출 거절: 기존 동기 20건 폴백 유지",
+                      ok_all(rs) and cp.sync_calls == 20 and not fb.created
+                      and not os.path.exists(config.BATCH_STATE_PATH)
+                      and base.usage_summary()["pending_batch_requests"] == 0))
+
+        # N. 한 실행에서 미완료로 조회한 배치가 끝나면 동일 작업도 회수한다.
+        base.reset_usage()
+        fb = _FakeBatches(["in_progress"], lambda k: ("succeeded", ""), cancel_fail=True)
+        _provider(fb).generate_many(_jobs(tag="n"), poll_sec=0, timeout_sec=0)
+        base.reset_usage()
+        cp = _provider(fb)
+        cp.use_batch = False
+        cp.generate_many(_jobs(1, tag="new-n"))
+        pending = base.usage_summary()["pending_batch_requests"]
+        fb.statuses = ["ended"]
+        rs = cp.generate_many(_jobs(tag="n"), poll_sec=0, timeout_sec=0)
+        for r in rs:
+            base.record_usage(r, "write")
+        ok.append(run("동일 실행 재조회: 잔여 배치 완료 회수·pending 해제·재제출 0",
+                      pending == 20 and ok_all(rs) and cp.sync_calls == 1
+                      and len(fb.created) == 1
+                      and base.usage_summary()["pending_batch_requests"] == 0))
     finally:
         config.BATCH_STATE_PATH, config.BATCH_CANCEL_WAIT_SEC = orig
         base.reset_usage()
