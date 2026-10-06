@@ -377,6 +377,7 @@ def _provider(fb):
     def _prewarm_create(**kw):
         return _msg(f"pw-{id(kw)}", text="", inp=8, cw=4697)
     cp._client = NS(messages=NS(batches=fb, create=_prewarm_create))
+    cp._client.with_options = lambda **kw: cp._client
 
     def _gen(system, user, temperature=1.0, max_tokens=700):
         cp.sync_calls += 1
@@ -651,6 +652,46 @@ def batch_tests() -> list[bool]:
                       pending == 20 and ok_all(rs) and cp.sync_calls == 1
                       and len(fb.created) == 1
                       and base.usage_summary()["pending_batch_requests"] == 0))
+
+        # O. 실제 SDK도 제출 응답 유실을 내부 재시도하지 않아야 한다.
+        import anthropic
+        from unittest.mock import patch
+        for error_name in ("APITimeoutError", "APIConnectionError"):
+            base.reset_usage()
+            os.remove(config.BATCH_STATE_PATH)
+            with patch.dict(os.environ, {k: v for k, v in os.environ.items()
+                                         if not k.lower().endswith("_proxy")}, clear=True):
+                client = anthropic.Anthropic(api_key="offline-dummy")
+            cp = _provider(fb)
+            cp._client = client
+            cp._prewarm = lambda jobs: None
+            requests = []
+
+            def accepted_then_lost(request, **kw):
+                requests.append(request)
+                raise getattr(anthropic, error_name)(request=request)
+
+            try:
+                with patch.object(client._client, "send", side_effect=accepted_then_lost), \
+                        patch.object(type(client), "_sleep_for_retry", return_value=None):
+                    rs = cp.generate_many(_jobs(tag=error_name), poll_sec=0, timeout_sec=0)
+                    blocked = True
+                    for batch_mode in (False, True):
+                        base.reset_usage()
+                        cp.use_batch = batch_mode
+                        again = cp.generate_many(_jobs(tag=error_name), poll_sec=0,
+                                                 timeout_sec=0)
+                        blocked &= not any(r.ok for r in again)
+                ok.append(run(f"실제 SDK {error_name}: 제출 1회·재시작 재제출 0",
+                              len(requests) == 1 and cp.sync_calls == 0 and blocked
+                              and not any(r.ok for r in rs)
+                              and client.max_retries == 2
+                              and all(r["status"] == "submission_unknown"
+                                      for r in state().values())
+                              and base.usage_summary()["pending_batch_requests"] == 20,
+                              f"POST {len(requests)}회"))
+            finally:
+                client.close()
     finally:
         config.BATCH_STATE_PATH, config.BATCH_CANCEL_WAIT_SEC = orig
         base.reset_usage()
