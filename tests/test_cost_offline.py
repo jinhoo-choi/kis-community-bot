@@ -131,10 +131,120 @@ def ledger_tests() -> list[bool]:
     return ok
 
 
+# 10-06 에 검색한 research 6건. 원본 facts 는 저장돼 있지 않아 fetch_naver_api 의
+# '상세 없음' 템플릿과 enrich_cache 의 종목명으로 재구성했다(원문 재현 아님).
+SIX = [("naver-api-96427", "삼양식품", "003230"), ("naver-api-96425", "NAVER", "035420"),
+       ("naver-api-96422", "대한항공", "003490"), ("naver-api-96420", "LG전자", "066570"),
+       ("naver-api-96419", "더블유게임즈", "192080"), ("naver-api-96415", "뷰웍스", "100120")]
+
+
+def _research_thin(i, name, code):
+    return {"id": i, "kind": "research", "stock_code": code, "stock_name": name,
+            "title": f"{name} 리포트",
+            "facts": (f"종목: {name} ({code})\n리포트 제목: {name} 리포트\n"
+                      "발간: 테스트증권 / 2026-10-02\n"
+                      "※ 제시 수치는 증권사 의견이며 단정하지 말 것.\n"
+                      "※ 목표주가·투자의견 미제공. 추정하지 말 것."), "src": "u"}
+
+
+def _policy_thin(i="pol-x", title="정부, 반도체 소부장 세제지원 확대 발표"):
+    return {"id": i, "kind": "policy", "stock_code": None, "stock_name": None,
+            "title": title,
+            "facts": f"출처: 테스트\n제목: {title}\n요지: {title}\n"
+                     "※ 수혜 종목을 특정하거나 추천하지 말 것.", "src": "u"}
+
+
+class _FakeSearch:
+    def __init__(self):
+        self.calls = 0
+
+    def available(self):
+        return True
+
+    def search(self, *a, **k):
+        self.calls += 1
+        return GenResult("- 반도체 소부장 지원은 2026-10-01 발표됐다", "claude", HAIKU,
+                         sources=[{"url": "https://example.org/a", "title": "t"}],
+                         request_id=f"s{self.calls}", input_tokens=1000,
+                         grounding_queries=1)
+
+
+def enrich_tests() -> list[bool]:
+    import json
+    import tempfile
+    import main as M
+    from src import enrich, gate, tickers
+    # 상장사 목록은 네트워크 대신 저장된 캐시만 쓴다
+    _lc = json.load(open("data/listed_cache.json", encoding="utf-8"))["map"]
+    tickers.listed = lambda: _lc
+    ok = []
+    base.reset_usage()
+    cnt = {"research": 21, "policy": 12, "flow": 195, "disclosure": 0}
+    six = [_research_thin(*x) for x in SIX]
+    _, blocked = gate.apply([dict(x) for x in six])
+    ok.append(run("재구성 research 6건은 기존 게이트에서 tier5:글감부족",
+                  [w for _, w in blocked] == ["tier5:글감부족"] * 6))
+    reasons = [M._enrich_skip_reason(x, {}, cnt) for x in six]
+    ok.append(run("research 6건은 검색 전 '보강으로충족불가'로 제외",
+                  reasons == ["research:보강으로충족불가"] * 6))
+    # 게이트 기준은 그대로: 회사 배경을 붙여도 research 는 막히고, 요지가 있으면 통과
+    bg = dict(six[0], facts=six[0]["facts"] + "\n\n[검색으로 확인된 배경]\n- 주력 사업은 라면")
+    gist = dict(six[0], facts=six[0]["facts"] + "\n리포트 요지: 3분기 영업이익 1,200억원 전망")
+    ok.append(run("research 게이트 완화 없음(배경≠요지, 요지는 통과)",
+                  not gate.has_substance(bg) and gate.has_substance(gist)))
+
+    fake = _FakeSearch()
+    orig_enricher, orig_path = enrich.enricher, enrich.CACHE_PATH
+    tmp = tempfile.mkdtemp()
+    enrich.enricher = lambda: fake
+    enrich.CACHE_PATH = os.path.join(tmp, "enrich_cache.json")
+    try:
+        pool = [x for x in six + [_policy_thin()]
+                if not M._enrich_skip_reason(x, {}, cnt)]
+        enrich.enrich_all(pool, workers=5)
+        ok.append(run("rescue 풀: research 검색 0회, 정책 1회만 호출",
+                      fake.calls == 1 and [x["id"] for x in pool] == ["pol-x"]))
+        ok.append(run("정상 정책 보강은 게이트 통과(기존 경로 유지)",
+                      gate.has_substance(pool[0]) and pool[0].get("enriched")))
+        # 캐시 재사용: 같은 id 를 다시 보강하면 호출 0
+        again = [_policy_thin()]
+        enrich.enrich_all(again, workers=5)
+        cached = json.load(open(enrich.CACHE_PATH, encoding="utf-8"))
+        ok.append(run("보강 캐시 재사용(재호출 0)",
+                      fake.calls == 1 and again[0].get("enriched")
+                      and cached["pol-x"]["status"] == "ok"))
+    finally:
+        enrich.enricher, enrich.CACHE_PATH = orig_enricher, orig_path
+    # 중복·게시판 부적합·슬롯 충족은 검색 전에 제외
+    seen = {"ID::pol-dup": "2026-10-05"}
+    ok.append(run("중복 항목은 검색 전 제외",
+                  M._enrich_skip_reason(_policy_thin("pol-dup"), seen, cnt) == "중복"))
+    ok.append(run("제목 기준 게시판 부적합(채용)은 검색 전 제외",
+                  M._enrich_skip_reason(_policy_thin("pol-job", "금감원 청년 채용 박람회 개최"),
+                                        {}, cnt) == "게시판부적합"))
+    full = dict(cnt, policy=999)
+    ok.append(run("이미 기대량이 슬롯을 채운 유형은 검색 전 제외",
+                  M._enrich_skip_reason(_policy_thin(), {}, full) == "슬롯충족"))
+
+    # 실데이터 대조: 10-06 원장의 보강 비용 = 이번 변경으로 회피되는 호출
+    row = [json.loads(x) for x in open("data/run_stats.jsonl", encoding="utf-8")
+           if x.startswith('{"ts": "2026-10-06')][-1]
+    er = row["llm_usage"]["by_route"]["claude|claude-haiku-4-5-20251001|paid|enrich"]
+    ec = json.load(open("data/enrich_cache.json", encoding="utf-8"))
+    ok.append(run("10-06 대조: 검색 6건 전부 research·캐시 ok, 회피 가능 $0.180627",
+                  er["calls"] == 6 and er["estimated_token_cost_usd"] == 0.180627
+                  and all(ec.get(i, {}).get("status") == "ok" for i, _, _ in SIX)
+                  and row["enrich_delivered"] == 0))
+    base.reset_usage()
+    return ok
+
+
 def main():
     ok = []
     print("── 1. 비용 원장 ──")
     ok += ledger_tests()
+    print("── 2. 보강 자격 ──")
+    ok += enrich_tests()
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 

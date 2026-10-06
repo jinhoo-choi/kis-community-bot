@@ -191,6 +191,27 @@ def assign(item: dict) -> bool:
     return True
 
 
+def board_unfit(item: dict) -> bool:
+    """보강 본문과 무관하게 확정되는 게시판 부적합만 판정한다(검색 전 사용).
+
+    assign 은 제목과 facts 앞 400자만 본다. 보강은 facts 뒤에 붙으므로 facts 가
+    이미 400자 이상이면 보강 후에도 판정이 같다. 그보다 짧으면 판정을 미룬다.
+    """
+    from src import tickers
+    if item.get("stock_code"):
+        return False
+    table = tickers.listed()
+    if not table:
+        return True
+    kind, _ = classify(item, table)
+    if kind == "NO_BOARD":
+        return True
+    if kind == "SECTOR_PROXY" and len(item.get("facts", "")) >= 400:
+        text = f"{item.get('title','')} {item.get('facts','')[:400]}"
+        return not [n for n in _pick_names(text) if n in table]
+    return False
+
+
 def assign_all(items: list[dict]) -> int:
     n = sum(1 for it in items
             if it.get("kind") in ("policy", "theme", "poll") and assign(it))
