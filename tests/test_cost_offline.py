@@ -239,12 +239,113 @@ def enrich_tests() -> list[bool]:
     return ok
 
 
+def _old_module(path, name):
+    """변경 전(ceb95c0) 코드를 같은 입력에 돌려 비교한다."""
+    import importlib.util
+    import subprocess
+    import tempfile
+    src = subprocess.run(["git", "show", f"ceb95c0:{path}"], capture_output=True,
+                         text=True, check=True).stdout
+    f = os.path.join(tempfile.mkdtemp(), name + ".py")
+    open(f, "w", encoding="utf-8").write(src)
+    spec = importlib.util.spec_from_file_location(name, f)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def preflight_tests() -> list[bool]:
+    import json
+    import random
+    import main as M
+    from src import generator as G, facts, filters, personas as P
+    ok = []
+    flow = json.load(open("data/market_cache.json", encoding="utf-8"))["items"]
+    facts.annotate_terms(flow)
+    posts = json.load(open("data/posts_latest.json", encoding="utf-8"))
+    random.seed(7)
+    picks = [(it, G.pick_style(dict(it), {}, set())) for it in flow + posts]
+    held = [it["id"] for it, st in picks if not st[0]]
+    bad = [it["id"] for it, (pid, ang, _, _) in picks
+           if pid and ang and not P.v2.compatible(pid, ang)]
+    nonflow = [st[0] for it, st in picks if it["kind"] != "flow"]
+    ok.append(run("실데이터 245건(flow 캐시+10-06 발송분): 보류 0, 계약 밖 조합 0",
+                  not held and not bad and all(nonflow),
+                  f"비-flow 페르소나 {sorted(set(nonflow))}"))
+
+    # 요건을 만족하는 조합이 없는 정책 요지(주장 1개, duration 앵글만 가능)
+    t = "금감원 '청년금융특강' 신청 접수"
+    thin = {"id": "pol-t", "kind": "policy", "title": t,
+            "facts": f"출처: 테스트\n보도 시각: 2026-10-06 06:00 KST\n제목: {t}\n"
+                     "요지: 금융감독원은 19일까지 신청을 받는다고 밝혔다.\n※ 단정하지 말 것."}
+    old = _old_module("src/generator.py", "gen_old")
+    old_pid = old.pick_style(dict(thin), {}, set())[0]
+    it = dict(thin)
+    new = G.pick_style(it, {}, set())
+    ok.append(run("부적합 조합: 종전 fallback 은 생성, 변경 후 호출 없이 보류",
+                  old_pid and new[0] == "" and it.get("_style_hold", "").startswith("조합없음"),
+                  f"종전={old_pid} 사실요건={old.facts_mod.count(thin)}"))
+    G.STYLE_HELD.clear()
+
+    class _NoCall:
+        def available(self):
+            return True
+
+        def generate_many(self, jobs, **kw):
+            raise AssertionError("보류 후보에 대해 LLM 이 호출됨")
+    orig = G.router.writers
+    G.router.writers = lambda: {"claude": _NoCall()}
+    try:
+        made = G.generate([dict(thin)], {})
+    finally:
+        G.router.writers = orig
+    ok.append(run("보류 후보는 작성 호출 0, 사유 기록",
+                  made == [] and G.STYLE_HELD and G.STYLE_HELD[0]["id"] == "pol-t"))
+    G.STYLE_HELD.clear()
+
+    # 회귀: flow-2026-10-02-079550 '시가 대비 마감: 4.8% 높은 수준' 의 기준 누락
+    p = next(x for x in posts if x["id"] == "flow-2026-10-02-079550")
+    errs = filters.check(p["body"], p["facts"], p.get("fmt"), p.get("angle"),
+                         p.get("length"), None, False, p["kind"], p["stock_code"])
+    fixed = p["body"].replace("종가는 4.8% 높은", "종가는 시가 대비 4.8% 높은")
+    ok.append(run("회귀 079550: 비교기준 누락은 리젝, 기준을 살리면 통과",
+                  any(e.startswith("비교기준누락") for e in errs)
+                  and not filters._basis_errors(fixed, p["facts"]),
+                  str(errs)))
+    f = p["facts"]
+    ok.append(run("귀속(기관)·비중 기준(거래대금)·날짜·배수 기준 보존 검사",
+                  filters._basis_errors("169억원 순매수가 들어왔습니다.", f)
+                  and not filters._basis_errors("기관이 169억원 순매수했습니다.", f)
+                  and filters._basis_errors("기관 순매수는 23.6% 비중이었어요.", f)
+                  and not filters._basis_errors("기관 순매수는 거래대금 대비 23.6%였어요.", f)
+                  and filters._basis_errors("10월 3일 종가는 759,000원입니다.", f)
+                  and not filters._basis_errors("10월 2일 종가는 759,000원입니다.", f)
+                  and filters._basis_errors("등락 크기는 2.3배였습니다.", f)
+                  and not filters._basis_errors("평균 등락폭의 2.3배였습니다.", f)))
+    # 실발송 50건·문장틀 66건 오탐
+    from src import template_reserve as T
+    res = T.build(flow, 200)
+    fp = [x["id"] for x in posts if filters._basis_errors(x["body"], x["facts"])]
+    fpt = [x["id"] for x in res if filters._basis_errors(x["body"], x["facts"])]
+    ok.append(run("기준 검사 오탐: 실발송 50건 중 079550 1건만, 문장틀 0건",
+                  fp == ["flow-2026-10-02-079550"] and not fpt, f"{len(res)}개 문장틀"))
+
+    # 마지막 소량 부족분: 10-06 3단계(부족 1, 누적 44/97)
+    ok.append(run("소량 부족분 묶음 10→6 (하한=추정치×2)",
+                  M._next_stage_size(131, 1, 97, 44) == 6
+                  and M._next_stage_size(168, 45, 0, 0) == 60
+                  and M._next_stage_size(131, 17, 60, 28) == 37))
+    return ok
+
+
 def main():
     ok = []
     print("── 1. 비용 원장 ──")
     ok += ledger_tests()
     print("── 2. 보강 자격 ──")
     ok += enrich_tests()
+    print("── 3. 생성 전 검사 ──")
+    ok += preflight_tests()
     print(f"\n{sum(ok)}/{len(ok)} passed")
     sys.exit(0 if all(ok) else 1)
 
