@@ -25,10 +25,11 @@ on:
         type: boolean
         default: false
       use_batch:
-        description: 'Batch API 사용 (50건 이상일 때만 권장)'
+        # 2026-10-06 운영 결정(가안): 아침 실행은 동기(제한 동시성). 배치는 수동 지정 시만.
+        description: 'Batch API 사용 (기본 0=동기, 아침 마감 우선)'
         type: choice
-        options: ['auto', '0', '1']
-        default: 'auto'
+        options: ['0', 'auto', '1']
+        default: '0'
       target_posts:
         description: '배포 건수 (비우면 50)'
         type: string
@@ -139,7 +140,7 @@ jobs:
           TELEGRAM_TEST_CHAT_SUFFIX: ${{ inputs.test_chat_suffix }}
           REFRESH_MARKET: ${{ inputs.refresh_market && '1' || '0' }}
           TEST_MODE:             ${{ inputs.test_mode && '1' || '0' }}
-          USE_BATCH:             ${{ inputs.use_batch || 'auto' }}
+          USE_BATCH:             ${{ inputs.use_batch || '0' }}
           IGNORE_SEEN:           ${{ inputs.ignore_seen && '1' || '0' }}
           CLAUDE_MODEL:      ${{ vars.CLAUDE_MODEL || 'claude-haiku-4-5-20251001' }}
           CLAUDE_BACKUP_JUDGE_MODEL: ${{ vars.CLAUDE_BACKUP_JUDGE_MODEL || 'claude-sonnet-5' }}
