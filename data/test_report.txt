@@ -292,7 +292,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    조회공시→시세 연결
   OK    가격제한폭 위반은 연결 안 함
 [market] 기준일 일치 확정 캐시 100건 사용 (필요 50건)
-[market] 수급 파싱 200/200종목 (수급순위 0종목) / 거래대금 대비 비중 중앙 5.74% p75 13.95% p90 23.13% 최대 55.31% / 출력 임계 5.0% 초과 207건 / 시세이력 실패 0종목
+[market] 수급 파싱 200/200종목 (수급순위 0종목) / 거래대금 대비 비중 중앙 6.96% p75 16.78% p90 30.21% 최대 60.51% / 출력 임계 5.0% 초과 228건 / 시세이력 실패 0종목
 [crawl] market 100건
   OK    기준일 일치 시세 캐시 우선 사용
 [market] 최근 확정 캐시 사용 (캐시 2026-09-11 vs 필요 2026-09-14, 3일 차이)
@@ -340,7 +340,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'brief_report', 'fact_note', 'data_focus', 'check_list', 'careful_note'})
+  OK    flow 에서 quick_memo 미선택  ({'brief_report', 'careful_note', 'data_focus', 'check_list', 'fact_note'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
   OK    미선정 비수치 사실도 프롬프트에서 제거
@@ -447,7 +447,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    ㅎㅎ·느낌표 1회는 허용
   OK    같은 기호 2회 이상 차단
   OK    하락 글의 ㅎㅎ·물결 차단
-  OK    느낌표는 두드러진 사실에만(특징주 10~24%)  (느낌표 22%)
+  OK    느낌표는 두드러진 사실에만(특징주 10~24%)  (느낌표 18%)
   OK    거래량 25배는 강조, 고저차 6%만 있으면 강조 안 함
   OK    ㅎㅎ 는 무작위 약 4%  (4.3%)
   OK    명사형 종결 배정 약 30%  (30.6%)
@@ -468,7 +468,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    심사 묶음 크기 설정 존재
   OK    목표 도달 시 심사 중단 로직 존재
   OK    보강 호출 인자가 프로바이더 시그니처와 맞음  (['self', 'system', 'user', 'temperature', 'max_tokens'])
-  OK    enrich 가 쓰는 인자가 전부 시그니처에 있음  ({'temperature', 'max_tokens'} vs {'temperature', 'max_tokens', 'user', 'self', 'system'})
+  OK    enrich 가 쓰는 인자가 전부 시그니처에 있음  ({'max_tokens', 'temperature'} vs {'max_tokens', 'user', 'self', 'temperature', 'system'})
   OK    주말은 휴장
   OK    평일 기본값은 영업일
   OK    추석·한글날 등 공휴일 등록
@@ -585,13 +585,13 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    이미 기대량이 슬롯을 채운 유형은 검색 전 제외
   OK    10-06 대조: 검색 6건 전부 research·캐시 ok, 회피 가능 $0.180627
 ── 3. 생성 전 검사 ──
-  OK    실데이터 245건(flow 캐시+10-06 발송분): 보류 0, 계약 밖 조합 0  (비-flow 페르소나 ['brief_report', 'check_list', 'fact_note'])
+  OK    실데이터 245건(flow 캐시+10-06 발송분): 보류 0, 계약 밖 조합 0  (비-flow 페르소나 ['brief_report', 'careful_note', 'check_list', 'fact_note'])
   OK    부적합 조합: 종전 fallback 은 생성, 변경 후 호출 없이 보류  (종전=fact_note 주장1개·사실슬롯0)
 [gen] 조합 보류 pol-t 조합없음(사실0·주장1·앵글1)
   OK    보류 후보는 작성 호출 0, 사유 기록
   OK    회귀 079550: 비교기준 누락은 리젝, 기준을 살리면 통과  (['비교기준누락(4.8%)'])
   OK    귀속(기관)·비중 기준(거래대금)·날짜·배수 기준 보존 검사
-  OK    기준 검사 오탐: 실발송 50건 중 079550 1건만, 문장틀 0건  (66개 문장틀)
+  OK    기준 검사 오탐: 현재 발송분의 알려진 079550 외 0건, 문장틀 0건  (66개 문장틀)
   OK    소량 부족분 묶음 10→6 (하한=추정치×2)
 ── 4. 배치 ──
 [claude] 캐시 예열 고정부 8토큰 (최소 4,096) / write 4,697 / read 0
@@ -666,14 +666,14 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
 [claude] 캐시 예열 고정부 8토큰 (최소 4,096) / write 4,697 / read 0
 [claude] batch 제출 응답 불명 — 20건 재호출 보류
   OK    제출 APITimeoutError: 동기 0·준비 기록 보존·20건 미확정
-[claude] ⚠ 제출 여부 불명 배치 기록 pending-37537764333-1791324055093604519 — 비용 미확정
-[claude] ⚠ 제출 여부 불명 배치 기록 pending-37537764333-1791324055093604519 — 비용 미확정
+[claude] ⚠ 제출 여부 불명 배치 기록 pending-37693308686-1791410458558823072 — 비용 미확정
+[claude] ⚠ 제출 여부 불명 배치 기록 pending-37693308686-1791410458558823072 — 비용 미확정
   OK    제출 APITimeoutError 재시작: 배치·동기 모두 재제출 0
 [claude] 캐시 예열 고정부 8토큰 (최소 4,096) / write 4,697 / read 0
 [claude] batch 제출 응답 불명 — 20건 재호출 보류
   OK    제출 APIConnectionError: 동기 0·준비 기록 보존·20건 미확정
-[claude] ⚠ 제출 여부 불명 배치 기록 pending-37537764333-1791324055095698239 — 비용 미확정
-[claude] ⚠ 제출 여부 불명 배치 기록 pending-37537764333-1791324055095698239 — 비용 미확정
+[claude] ⚠ 제출 여부 불명 배치 기록 pending-37693308686-1791410458560792027 — 비용 미확정
+[claude] ⚠ 제출 여부 불명 배치 기록 pending-37693308686-1791410458560792027 — 비용 미확정
   OK    제출 APIConnectionError 재시작: 배치·동기 모두 재제출 0
 [claude] 캐시 예열 고정부 8토큰 (최소 4,096) / write 4,697 / read 0
 [claude] batch 제출 실패 → 동기: invalid request
@@ -688,6 +688,28 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    동일 실행 재조회: 잔여 배치 완료 회수·pending 해제·재제출 0
 
 43/43 passed
+  OK    total 10 and fit 1 can pass
+  OK    flow still has an explicit soft floor of 10
+  OK    existing research relaxation is not accidentally tightened
+  OK    fact/compliance/fatal failures remain blocked
+  OK    missing hard scores are not a pass
+  OK    missing raw fatal field is an incomplete review
+  OK    36 stored rejects recover 14 through all filters, 22 remain rejected
+  OK    cacheable writer starts with a useful response, no extra warmup
+[gen] 후보 소진 후 재작성 0/1건 통과
+  OK    one missing post does not submit the entire rejected pool
+[gen] 후보 소진 후 재작성 0/1건 통과
+  OK    staged retries preserve one attempt per source
+  OK    a small bad stage does not prematurely disable the only writer
+  OK    cost profile keeps the normal five-template cap
+  OK    cost profile does not bypass cooldown
+  OK    50 delivered even after advisory cost target is exceeded
+  OK    small initial stages and no new paid enrichment
+  OK    normal profile preserves hard quality and at most five templates
+  OK    all templates cooled: continue past 45 LLM until the real selector reaches 50
+  OK    unknown cost cannot be reported as meeting target
+  OK    SDK missing/null/unsupported billing remains unknown without blocking content
+19/19 yield tests passed
 9/9 passed
 
 === 2b. 전수검사 (설정-코드 정합성) ===
@@ -776,7 +798,7 @@ FAIL 0 / WARN 0
 FAIL 0
 
 === 2d. 파이프라인 정합성 (facts 생성 x 게이트 x claim x 필터) ===
-=== 파이프라인 정합성 감사 — 대상 254건 (합성 6 + 캐시 248) ===
+=== 파이프라인 정합성 감사 — 대상 253건 (합성 6 + 캐시 247) ===
   WARN [I2] [research] claim 'gist' 인용이 필터에 걸림
        └ ['literary_style'] / 리포트 요지: 2027년 매출액 약 7.1조원, 영업이익 2조 1,203억원을 전망한다. 짐펜트라 미국 매출이 본격화되며 수익성이 개선될 것으로 본다.
   WARN [I2] [policy] claim 'policy' 인용이 필터에 걸림
@@ -811,7 +833,7 @@ FAIL 0 / WARN 2
        └ '두산에너빌리티 원전 수주 소식이 나왔네요. 저는 이거 물렸는데 이번엔 좀 오르려나요. 체코 건 이후로 분위기가 달라진 건 맞습니다. 다만 확정된 수치는 없습니다. 어떻게 보시나요.'
 [gen] 정규식 리젝 v2 ['trade_advice', 'price_target']
        └ '카카오 광고매출 회복 얘기가 나옵니다. 지금 비중확대 하세요. 목표가 6만원 갑니다. 반드시 오릅니다. 지금이 기회입니다. 다들 어떻게 보시나요.'
-[gen] 정규식 리젝 v3 ["미확인수치['1530', '452', '8742']", "근거없는수치['1530', '452', '8742']"]
+[gen] 정규식 리젝 v3 ["미확인수치['1530', '8742', '452']", "근거없는수치['1530', '452', '8742']"]
        └ 'LG에너지솔루션이 어제 2.30% 올랐습니다. 거래대금은 8,742억원이었고 외국인이 1,530억 순매수했습니다. 수주잔고도 452조원까지 늘었다고 합니다. 배터리 업황이 돌아서는 걸까요.'
 [gen] 정규식 통과 10건 / 시도 13건
 
