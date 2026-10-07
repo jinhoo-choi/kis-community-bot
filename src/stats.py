@@ -207,6 +207,7 @@ def summarize(collected, blocked, enriched, generated, sent, held, fallbacks,
         "generation_items_avoided": max(
             0, len(generation_candidates) - len(generation_attempted)),
         "generated": len(generated),
+        "deterministic_trim_count": sum(bool(p.get("deterministic_trim")) for p in generated),
         "template_reserve": len(template_reserve),
         "template_fallback_count": sum(
             p.get("provider") == "template" for p in sent),
@@ -271,6 +272,8 @@ def detail_log(items: list[dict], sent: list[dict], held: list[dict],
             "thin_facts": p.get("thin_facts", False),
             "len": len(p.get("body", "")),
             "body": p.get("body", ""),
+            "deterministic_trim": p.get("deterministic_trim", ""),
+            "pre_trim_body": p.get("pre_trim_body", ""),
         })
     os.makedirs("data", exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:

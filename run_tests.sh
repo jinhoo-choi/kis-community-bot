@@ -46,11 +46,12 @@ python3 -m pyflakes src tools main.py config.py 2>/dev/null \
 
 echo
 echo "=== 2. unit (decide / gate / entity / dedup / rules) ==="
-python3 tests/test_decide.py
-python3 tests/test_template_reserve.py
+COST_PRIORITY_MODE=0 python3 tests/test_decide.py
+COST_PRIORITY_MODE=0 python3 tests/test_template_reserve.py
 python3 tests/test_basis_offline.py
-python3 tests/test_cost_offline.py
-python3 tests/test_pipeline_offline.py > /tmp/pipeline_offline.log 2>&1 \
+COST_PRIORITY_MODE=0 python3 tests/test_cost_offline.py
+python3 tests/test_yield_offline.py
+COST_PRIORITY_MODE=0 python3 tests/test_pipeline_offline.py > /tmp/pipeline_offline.log 2>&1 \
   && grep -aE "^[0-9]+/[0-9]+ passed" /tmp/pipeline_offline.log \
   || { grep -aE "FAIL|Traceback" /tmp/pipeline_offline.log; exit 1; }
 echo
@@ -76,6 +77,6 @@ else
 fi
 echo
 echo "=== 3. E2E 시뮬레이션 ==="
-python3 tests/test_e2e.py
+COST_PRIORITY_MODE=0 python3 tests/test_e2e.py
 echo
 echo "ALL TESTS PASSED"

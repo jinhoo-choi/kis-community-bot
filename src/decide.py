@@ -38,7 +38,8 @@ def decide_distribution(
     min_factual: int = None,
     min_compliant: int = None,
     hard_kind_cap: dict = None,
-    cooled_templates: frozenset = frozenset()) -> tuple[list[dict], list[dict]]:
+    cooled_templates: frozenset = frozenset(),
+    allow_template_guarantee: bool = True) -> tuple[list[dict], list[dict]]:
     """(배포, 보류) 반환.
 
     순서가 중요하다. 상한 적용 전에 정렬해야 '좋은 글이 상한에 걸려 잘리는' 일이 없다.
@@ -66,6 +67,9 @@ def decide_distribution(
                    else config.MIN_FACTUAL_SCORE)
     min_compliant = (min_compliant if min_compliant is not None
                      else config.MIN_COMPLIANT_SCORE)
+    if config.COST_PRIORITY_MODE:
+        min_factual = max(4, min_factual)
+        min_compliant = max(4, min_compliant)
     hard_kind_cap = (hard_kind_cap if hard_kind_cap is not None
                      else {k: max(1, round(v * target / config.TARGET_POSTS))
                            for k, v in config.DIST_HARD_CAP.items()})
@@ -89,6 +93,14 @@ def decide_distribution(
             # 이전에는 Gemini quota 장애 때 score=null 50건이 그대로 발송됐다.
             p["hold_reason"] = "심사실패:" + p.get("judge_error", "점수없음")[:60]
             held.append(p)
+        elif config.COST_PRIORITY_MODE and (
+                not isinstance(s, dict)
+                or any(not isinstance(s.get(k), int) or isinstance(s.get(k), bool)
+                       or not 1 <= s[k] <= 5 for k in ("factual", "compliant"))
+                or not isinstance(s.get("fatal"), list)
+                or not all(isinstance(x, str) for x in s["fatal"])):
+            p["hold_reason"] = "심사실패:필수 안전 점수 누락/형식오류"
+            held.append(p)
         elif s.get("fatal"):
             p["hold_reason"] = "fatal:" + ",".join(s["fatal"])[:60]
             held.append(p)
@@ -103,12 +115,13 @@ def decide_distribution(
         # 특징주 45, 리포트·정책 0). min_score 인자를 명시로 넘긴 호출은
         # 그 값을 그대로 존중한다 — 테스트가 임계를 고정해 검증하기 때문이다.
         elif (s.get("fit") is not None
-              and s["fit"] < (config.min_fit_for(p.get("kind", ""))
+              and s["fit"] < ((config.COST_PRIORITY_MIN_FIT if config.COST_PRIORITY_MODE else config.min_fit_for(p.get("kind", "")))
                               if min_fit is None else min_fit)):
             p["hold_reason"] = (f"커뮤니티적합성 {s['fit']}/5 "
                                 f"(총점 {s.get('total','-')}/20) {s.get('reason','')}")
             held.append(p)
-        elif s.get("total", 0) < (config.min_score_for(p.get("kind", ""))
+        elif s.get("total", 0) < ((min(config.COST_PRIORITY_MIN_SCORE, config.min_score_for(p.get("kind", "")))
+                                   if config.COST_PRIORITY_MODE else config.min_score_for(p.get("kind", "")))
                                   if min_score_arg is None else min_score_arg):
             p["hold_reason"] = f"저점수 {s['total']}/20 {s.get('reason','')}"
             held.append(p)
@@ -124,10 +137,11 @@ def decide_distribution(
                              x.get("template_id", "") in cooled_templates,
                              -(x.get("score") or {}).get("total", 0)))
 
-    # 평시에는 LLM 승인본 70% 이상을 우선하고 template은 최대 30%(50건이면
-    # 15건)만 쓴다. 유효 LLM 공급이 그보다 적으면 50건 보장 모드로 전환한다.
+    # 평시에는 LLM 승인본을 우선하고 template은 현재 최대 10%(50건이면 5건).
+    # 보장 모드는 호출자가 명시적으로 허용한 경우에만 정상 상한을 넘는다.
     llm_pool_n = sum(p.get("provider") != "template" for p in pool)
-    guarantee_mode = llm_pool_n < template_reserve.normal_llm_target(target)
+    guarantee_mode = (allow_template_guarantee and
+                      llm_pool_n < template_reserve.normal_llm_target(target))
     template_limit = (target if guarantee_mode
                       else template_reserve.normal_template_limit(target))
 
@@ -261,9 +275,9 @@ def decide_distribution(
                   f"({before} → {len(sent)}) — 구성 목표 초과: {over}. "
                   "비-flow 공급 부족이 원인이다.")
 
-    # LLM pool은 35건 이상이었어도 종목·문체·말미 상한 때문에 실제 선택이
-    # 부족할 수 있다. 그 경우에만 평시 15건 상한을 보장 모드로 올린다.
-    if len(sent) < target and not guarantee_mode:
+    # LLM pool이 충분해도 종목·문체·말미 상한 때문에 실제 선택이 부족할 수 있다.
+    # 호출자가 허용한 경우에만 정상 문장틀 상한을 보장 모드로 올린다.
+    if len(sent) < target and not guarantee_mode and allow_template_guarantee:
         before = len(sent)
         for p in [x for x in rest if x.get("provider") == "template"
                   and x not in sent]:

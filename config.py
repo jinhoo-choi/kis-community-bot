@@ -4,6 +4,13 @@ from zoneinfo import ZoneInfo
 
 KST = ZoneInfo("Asia/Seoul")
 
+# 2026-10-07: delivery takes priority. Reduce soft rejection/over-generation;
+# the API cost target is advisory and must never stop generation or delivery.
+COST_PRIORITY_MODE = os.environ.get("COST_PRIORITY_MODE", "1") == "1"
+API_COST_TARGET_USD = 0.30
+COST_PRIORITY_MIN_SCORE = 10
+COST_PRIORITY_MIN_FIT = 1
+
 # --- Secrets (GitHub Actions Secrets 로 주입) ---
 ANTHROPIC_API_KEY = (os.environ.get("ANTHROPIC_API_KEY_TEST")
                      if os.environ.get("TEST_MODE", "0") == "1" else "") \
@@ -173,11 +180,13 @@ BATCH_CANCEL_WAIT_SEC = int(os.environ.get("BATCH_CANCEL_WAIT_SEC", "90"))
 BATCH_STATE_PATH = os.environ.get("BATCH_STATE_PATH", "data/batch_jobs.json")
 
 # 한 번에 전량 생성하지 않고 이 단위로 생성·심사한 뒤 목표 달성 여부를 본다.
-# 50건 기준 첫 묶음은 60건, 이후에는 실측 수율로 10~60건만 추가한다.
+# 비용 절감 모드는 최초 10건, 이후 실측 수율로 5~20건씩 추가한다.
+# 이전 모드는 최초 60건, 이후 10~60건으로 유지한다.
 GEN_STAGE_SIZE = max(1, int(os.environ.get(
-    "GEN_STAGE_SIZE", str(min(60, max(20, TARGET_POSTS + 10))))))
-GEN_STAGE_MIN = max(1, int(os.environ.get("GEN_STAGE_MIN", "10")))
-GEN_STAGE_MAX = max(GEN_STAGE_MIN, int(os.environ.get("GEN_STAGE_MAX", "60")))
+    "GEN_STAGE_SIZE", str(min(10, max(5, TARGET_POSTS)) if COST_PRIORITY_MODE
+                          else min(60, max(20, TARGET_POSTS + 10))))))
+GEN_STAGE_MIN = max(1, int(os.environ.get("GEN_STAGE_MIN", "5" if COST_PRIORITY_MODE else "10")))
+GEN_STAGE_MAX = max(GEN_STAGE_MIN, int(os.environ.get("GEN_STAGE_MAX", "20" if COST_PRIORITY_MODE else "60")))
 CLAUDE_SYNC_WORKERS = int(os.environ.get("CLAUDE_SYNC_WORKERS", "6"))
 
 # Gemini: 3.5-flash 가 GA 주력(=gemini-flash-latest), 3.1-flash-lite 는 저비용
@@ -248,7 +257,7 @@ ENABLE_POLL = os.environ.get("ENABLE_POLL", "0") == "1"
 ENABLE_JUDGE  = os.environ.get("ENABLE_JUDGE", "1") == "1"
 # 한 번에 심사할 묶음 크기. 목표를 채우면 남은 글은 심사하지 않는다.
 # 작게 잡으면 판정 호출이 늘고, 크게 잡으면 버릴 글까지 심사한다.
-JUDGE_CHUNK = int(os.environ.get("JUDGE_CHUNK", "20"))
+JUDGE_CHUNK = int(os.environ.get("JUDGE_CHUNK", "5" if COST_PRIORITY_MODE else "20"))
 MIN_JUDGE_SCORE = int(os.environ.get("MIN_JUDGE_SCORE", "12"))   # 20점 환산
 # 2026-10-01 운영 결정: 비용 우선. 14→12, fit 3→2 로 완화해 보류·재생성을 줄인다.
 # 사실성·준법성 하한(4)과 심사 fatal 은 그대로 둔다 — 할루시네이션·준법 방어선.

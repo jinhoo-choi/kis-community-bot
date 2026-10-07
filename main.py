@@ -186,6 +186,7 @@ def _next_stage_size(remaining: int, needed: int,
 def main():
     dry = "--dry-run" in sys.argv
     reset_usage()
+    generator.reset_quality_tracking()
     enrich.CALLS[0] = 0
     s = state.prune(state.load())
 
@@ -252,7 +253,7 @@ def main():
     enrich_skipped: dict = {}
     nonflow_target = config.TARGET_POSTS - config.DIST_HARD_CAP.get("flow", 0)
     nonflow_expected = config.expected_sent({k: v for k, v in cnt.items() if k != "flow"})
-    if config.ENABLE_ENRICH and not dry and (
+    if config.ENABLE_ENRICH and not dry and not config.COST_PRIORITY_MODE and (
             actual_expected < config.TARGET_POSTS
             or nonflow_expected < nonflow_target):
         reasons = dict(blocked)
@@ -287,6 +288,9 @@ def main():
             if (actual_expected >= config.TARGET_POSTS
                     and nonflow_expected >= nonflow_target):
                 break
+    elif config.COST_PRIORITY_MODE and not dry:
+        enrich_skipped["cost_priority:new_search_disabled"] = len(thin)
+        print("[enrich] 비용 절감 모드 — 유효 캐시만 사용, 신규 검색 0건")
     elif config.ENABLE_ENRICH and not dry:
         print(f"[enrich] 후보 충분 ({actual_expected:.1f}/{config.TARGET_POSTS})"
               " → 신규 그라운딩 0건")
@@ -307,12 +311,17 @@ def main():
     # LLM은 이 원본을 교체해 품질을 높이는 경로이며, 실패해도 준비량을 줄이지 않는다.
     reserve_goal = config.TARGET_POSTS + template_reserve.RESERVE_EXTRA
     reserve = template_reserve.build(picked, reserve_goal)
+    cooled_templates = state.cooled_templates(s, template_reserve.COOLDOWN_DAYS)
     reserve_probe, _ = decide.decide_distribution(
-        [dict(p) for p in reserve], target=config.TARGET_POSTS)
+        [dict(p) for p in reserve], target=config.TARGET_POSTS,
+        allow_template_guarantee=not config.COST_PRIORITY_MODE,
+        cooled_templates=cooled_templates if config.COST_PRIORITY_MODE else frozenset())
     reserve_ready = len(reserve_probe) >= config.TARGET_POSTS
     print(f"[template] 결정형 reserve {len(reserve)}/{reserve_goal}건"
           f" → 배분 dry-run {len(reserve_probe)}/{config.TARGET_POSTS}건")
-    if not reserve_ready:
+    if config.COST_PRIORITY_MODE:
+        print(f"[template] 비용 절감 모드 정상 상한·쿨다운 적용 예비 {len(reserve_probe)}건")
+    elif not reserve_ready:
         print("[template] ⚠ 50건 보장 reserve 미달 — 검증 사실 공급을 확인하세요")
 
     if dry:
@@ -377,6 +386,16 @@ def main():
     # LLM 승인본만으로 전체 목표를 추적한다.
     llm_target = (template_reserve.normal_llm_target(config.TARGET_POSTS)
                   if reserve_ready else config.TARGET_POSTS)
+    def target_progress(llm_posts):
+        if not config.COST_PRIORITY_MODE:
+            return len(decide.decide_distribution(llm_posts)[0]), llm_target
+        # Actual allowed reserve can be smaller than five, or collide with an
+        # LLM source. Stop only when the real final selector can deliver 50.
+        combined, _ = decide.decide_distribution(
+            [dict(p) for p in llm_posts + reserve],
+            allow_template_guarantee=False, cooled_templates=cooled_templates)
+        return len(combined), config.TARGET_POSTS
+
     start = 0
     next_size = min(config.GEN_STAGE_SIZE, len(picked))
     while start < len(picked) and next_size:
@@ -409,8 +428,8 @@ def main():
             judged, cut = [], 0
             for i in range(0, len(made), config.JUDGE_CHUNK):
                 judged.extend(judge.judge_all(made[i:i + config.JUDGE_CHUNK]))
-                probe, _ = decide.decide_distribution(posts + judged)
-                if len(probe) >= llm_target:
+                progress, goal = target_progress(posts + judged)
+                if progress >= goal:
                     cut = len(made) - len(judged)
                     break
             if cut:
@@ -420,25 +439,42 @@ def main():
         sent_posts, held = decide.decide_distribution(posts)
         print(f"[main] 단계 생성 {start}/{len(picked)}건"
               f" → LLM 승인 가능 {len(sent_posts)}/{llm_target}건")
-        if len(sent_posts) >= llm_target:
+        progress, goal = target_progress(posts)
+        if progress >= goal:
             break
         next_size = _next_stage_size(
             len(picked) - start,
-            llm_target - len(sent_posts),
+            goal - progress,
             len(attempted_items),
             len(sent_posts),
         )
     # 정규식 리젝분을 즉시 재호출하면 아직 쓰지 않은 원본보다 비싼 두 번째 시도를
     # 먼저 하게 된다. 전체 원본 후보를 소진하고도 목표가 모자랄 때만 한 번 재작성한다.
-    if len(sent_posts) < llm_target and not reserve_ready:
-        remade = generator.retry_rejected()
+    progress, goal = target_progress(posts)
+    while progress < goal and not reserve_ready:
+        pending_before = sum(not p.get("_rewrite_attempted") for p in generator.REJECTED)
+        if not pending_before:
+            break
+        limit = (min(config.GEN_STAGE_SIZE, config.JUDGE_CHUNK, goal - progress)
+                 if config.COST_PRIORITY_MODE else None)
+        remade = generator.retry_rejected(limit=limit)
         if config.ENABLE_JUDGE:
-            remade = judge.judge_all(remade)
+            reviewed = []
+            for i in range(0, len(remade), config.JUDGE_CHUNK):
+                reviewed.extend(judge.judge_all(remade[i:i + config.JUDGE_CHUNK]))
+                progress, goal = target_progress(posts + reviewed)
+                if progress >= goal:
+                    break
+            remade = reviewed
         if remade:
             posts.extend(remade)
             sent_posts, held = decide.decide_distribution(posts)
             print(f"[main] 후보 소진 후 재작성 → 누적 배포 가능 "
                   f"{len(sent_posts)}/{config.TARGET_POSTS}건")
+        progress, goal = target_progress(posts)
+        pending_after = sum(not p.get("_rewrite_attempted") for p in generator.REJECTED)
+        if not config.COST_PRIORITY_MODE or pending_after >= pending_before:
+            break
 
     # 최종 판정은 LLM과 reserve를 한 pool에서 다시 수행한다. decide가 LLM을
     # 우선하며, 같은 원본의 LLM/문장틀이 동시에 뽑히지 않게 막는다.
@@ -446,8 +482,9 @@ def main():
         # 최근 쓴 문장틀은 평시에 다시 쓰지 않는다(보장 모드에서는 무시).
         sent_posts, held = decide.decide_distribution(
             posts + reserve,
-            cooled_templates=state.cooled_templates(
-                s, template_reserve.COOLDOWN_DAYS))
+            # Cost optimization does not silently increase the approved 5/50 mix.
+            allow_template_guarantee=not config.COST_PRIORITY_MODE,
+            cooled_templates=cooled_templates)
         template_n = sum(p.get("provider") == "template" for p in sent_posts)
         print(f"[template] 최종 문장틀 보충 {template_n}건 / "
               f"LLM {len(sent_posts) - template_n}건")
