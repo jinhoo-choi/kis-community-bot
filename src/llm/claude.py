@@ -320,7 +320,10 @@ class ClaudeProvider(Provider):
                        "jobs": {cids[i]: hashes[i] for i in todo}, "collected": []}
             _save_state(st)
             try:
-                batch = self._client.messages.batches.create(requests=reqs)
+                # 제출 응답 유실은 SDK 내부 재시도도 중복 배치를 만들 수 있다.
+                # 제출만 1회 시도하고, 조회·일반 동기 호출의 재시도 설정은 유지한다.
+                batch = self._client.with_options(max_retries=0).messages.batches.create(
+                    requests=reqs)
             except Exception as e:
                 if _unclear(e) == "unconfirmed":
                     # 서버가 접수한 뒤 응답만 유실됐을 수 있다. 준비 기록을

@@ -2029,6 +2029,7 @@ def main():
         def __init__(self): self.batches = _BM()
     class _CC:
         def __init__(self): self.messages = _MM()
+        def with_options(self, **kw): return self
     _cp = _cl2.ClaudeProvider.__new__(_cl2.ClaudeProvider)
     _cp.model, _cp._no_temp, _cp.use_batch, _cp._client = \
         "claude-haiku-4-5-20251001", False, True, _CC()
