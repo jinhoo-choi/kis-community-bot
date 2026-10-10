@@ -1,5 +1,7 @@
 # 현재 상태
 
+**2026-10-07 Actions 호환성 (Codex, 검토용 PR·미병합):** GitHub-hosted action을 기본 Node 24 최소 버전으로 변경. runner 2.337.0 실측. verify-keys만 이미지 기본 Python/pip 의존으로 ubuntu-24.04 고정. 기존 테스트·workflow 정적 검증만 수행, 운영·실발송 미실행. 목록·근거·검증·롤백: [인계](HANDOFF_2026-10-07_ACTIONS_NODE24.md).
+
 > **작업 시작 전 이 파일을 먼저 읽습니다.** 작업 종료 시 갱신합니다.
 > 협업 규칙은 [`AI_COLLABORATION.md`](AI_COLLABORATION.md) 참조.
 
