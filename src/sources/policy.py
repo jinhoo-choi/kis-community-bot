@@ -1,13 +1,8 @@
 """정책·거시 소스.
 
-korea.kr(정책브리핑·기재부·금융위·산업부)은 GitHub Actions 의 해외 IP 에서
-전건 ConnectTimeout 이 난다 (진단 실측). 국내 IP 화이트리스트로 보인다.
-  → 국내 러너(self-hosted)나 국내 프록시를 쓰면 원 소스를 되살릴 수 있다.
-    그전까지는 접근 가능한 대체 소스를 쓴다.
-
-진단에서 살아있음이 확인된 소스만 사용한다.
-  연합뉴스 경제 RSS : HTTP 200, 정상 XML
-  한국은행          : HTTP 200 (HTML)
+korea.kr RSS는 2026-07-01 공식 서비스 중단으로 404를 반환한다.
+과거 ConnectTimeout 기록만으로 현재 원인을 IP 제한으로 단정하지 않는다.
+산업통상부 공식 HTML과 기존 연합뉴스·Google News RSS를 사용한다.
 
 주의: 언론사 콘텐츠이므로 제목·요지만 사용하고 본문은 재배포하지 않는다.
       정부 보도자료가 아니므로 '발표'가 아닌 '보도'로 취급한다.
@@ -18,9 +13,10 @@ from email.utils import parsedate_to_datetime
 from xml.etree import ElementTree as ET
 
 import requests
+from bs4 import BeautifulSoup
 
 from config import KST, USER_AGENT
-from src import crawl
+from src import crawl, dedup, gate
 
 # 일일 봇에서 이보다 오래된 종합 뉴스는 새 정책 소재로 취급하지 않는다.
 MAX_AGE = timedelta(hours=48)
@@ -37,14 +33,107 @@ FEEDS = [
 GOOGLE_NEWS = ("https://news.google.com/rss/search"
                "?q=site:korea.kr&hl=ko&gl=KR&ceid=KR:ko")
 
-# korea.kr 계열. 국내 IP 에서만 열리므로 실패해도 경고 대상에서 제외한다.
+# 선택 RSS. 중단된 korea.kr 직접 피드 4개는 호출하지 않는다.
 OPTIONAL_FEEDS = [
     ("정책브리핑(구글뉴스)", GOOGLE_NEWS),
-    ("정책브리핑", "https://www.korea.kr/rss/policy.xml"),
-    ("기획재정부", "https://www.korea.kr/rss/dept_moef.xml"),
-    ("금융위원회", "https://www.korea.kr/rss/dept_fsc.xml"),
-    ("산업통상자원부", "https://www.korea.kr/rss/dept_motie.xml"),
 ]
+
+MOTIR_LIST = "https://www.motir.go.kr/kor/article/ATCL3f49a5a8c"
+OFFICIAL_DETAIL_LIMIT = 3  # 목록 1회 + 상세 최대 3회; 유료 검색 없음
+
+
+def _append_unique(item: dict, out: list) -> bool:
+    """기존 제목 유사도 판정을 재사용한다. 공식 자료를 먼저 넣어 원문을 우선한다."""
+    if any(x.get("src") == item["src"] for x in out):
+        return False
+    titles = [("_theme", dedup.normalize_title(x["title"])) for x in out]
+    if dedup.is_dup(item, {f"ID::{x['id']}": True for x in out}, titles)[0]:
+        return False
+    out.append(item)
+    return True
+
+
+def _motir_rows(html: bytes) -> list[tuple[str, str, str]]:
+    """동일 행의 제목·등록일·상세 URL만 묶는다. 첨부/다른 게시판은 제외한다."""
+    rows, seen = [], set()
+    for tr in BeautifulSoup(html, "html.parser").select("tr"):
+        a = tr.select_one(".board-link a[href]")
+        if a is None:
+            continue
+        path = a["href"].split("?", 1)[0]
+        if not re.fullmatch(r"/kor/article/ATCL3f49a5a8c/\d+/view", path):
+            continue
+        dates = [td.get_text(strip=True) for td in tr.select("td")
+                 if re.fullmatch(r"20\d{2}-\d{2}-\d{2}", td.get_text(strip=True))]
+        title = re.sub(r"^\(참고자료\)\s*", "", " ".join(a.get_text().split()))
+        if title and len(dates) == 1 and path not in seen:
+            rows.append((title, dates[0], "https://www.motir.go.kr" + path))
+            seen.add(path)
+    return rows
+
+
+def _motir_detail(html: bytes, title: str, day: str) -> str:
+    """상세의 제목·등록일을 목록과 대조한다. 첨부파일 전용/빈 본문은 제외한다."""
+    soup = BeautifulSoup(html, "html.parser")
+    heading, info, body = (soup.select_one(s) for s in
+                           (".detail-tit", ".detail-info", ".detail-cont"))
+    if any(x is None for x in (heading, info, body)):
+        return ""
+    actual = re.sub(r"^\(참고자료\)\s*", "", " ".join(heading.get_text().split()))
+    if actual != title or not re.search(r"등록일\s*" + re.escape(day),
+                                       info.get_text(" ", strip=True)):
+        return ""
+    for node in body.select("script, style"):
+        node.decompose()
+    text = " ".join(body.get_text().split())
+    if text.startswith(title):
+        text = text[len(title):].strip()
+    return text if len(text) >= 80 else ""
+
+
+def _read_motir(out: list, limit: int) -> None:
+    """검증된 선택 공식 경로만 읽는다. 실패해도 기존 RSS 수집은 계속한다."""
+    before, attempts = len(out), 0
+    try:
+        r = requests.get(MOTIR_LIST, headers={"User-Agent": USER_AGENT}, timeout=12)
+        r.raise_for_status()
+        if r.url.split("?", 1)[0] != MOTIR_LIST:
+            raise ValueError("공식 목록 URL 변경")
+        rows = _motir_rows(r.content)
+        if not rows:
+            raise ValueError("공식 목록 파싱 0건")
+        for title, day, url in rows:
+            if len(out) >= limit or attempts >= OFFICIAL_DETAIL_LIMIT:
+                break
+            # 날짜만 있는 자료는 자정 기준으로 보수적으로 판정한다. 시각을 만들지 않는다.
+            published = _fresh_published_at(day)
+            if published is None or published.date() > datetime.now(KST).date():
+                continue
+            attempts += 1
+            try:
+                detail = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=12)
+                detail.raise_for_status()
+                if detail.url.split("?", 1)[0] != url:
+                    raise ValueError("상세 URL 변경")
+                desc = _motir_detail(detail.content, title, day)
+                if not desc or not is_relevant(title, desc)[0]:
+                    continue
+                item = {
+                    "id": "pol-" + re.sub(r"\W", "", title)[:24],
+                    "kind": "policy", "stock_code": None, "stock_name": None,
+                    "title": title, "src": url,
+                    "facts": (f"출처: 산업통상부 공식 보도·참고자료\n"
+                              f"보도일: {day}\n제목: {title}\n요지: {_gist(desc)}\n"
+                              "※ 공식 자료의 등록일이며 시행일·사건일과 다를 수 있음.\n"
+                              "※ 수혜 종목을 특정하거나 추천하지 말 것. 산업/테마 수준으로만 언급."),
+                }
+                if gate.has_substance(item):
+                    _append_unique(item, out)
+            except Exception as e:
+                print(f"[policy] 산업통상부 상세 실패: {type(e).__name__} {str(e)[:60]}")
+    except Exception as e:
+        print(f"[policy] 산업통상부 공식 실패: {type(e).__name__} {str(e)[:60]}")
+    print(f"[policy] 산업통상부 공식: 상세 {attempts}회 / 채택 {len(out) - before}건")
 
 # 2026-09-03 실측 오탐: '추미애 1차 추경', '김석봉 씨티 부사장 선임',
 # '연합뉴스 이시각 헤드라인 1800', '머니톡스 외국인 소문의 진실'
@@ -253,7 +342,7 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
             rejected += 1
             why_top[_why] = why_top.get(_why, 0) + 1
             continue
-        out.append({
+        _append_unique({
             "id": "pol-" + re.sub(r"\W", "", title)[:24],
             "kind": "policy",
             "stock_code": None,
@@ -268,7 +357,7 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
                 f"※ 언론 보도이며 정부 확정 발표가 아닐 수 있음. 단정하지 말 것."
             ),
             "src": (it.findtext("link") or "").strip(),
-        })
+        }, out)
         if len(out) >= limit:
             return True
     # 피드를 바꿔도 0건이면 어느 단계에서 죽는지 알아야 한다.
@@ -283,6 +372,9 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
 
 def fetch(limit: int = 8) -> list[dict]:
     out, ok = [], 0
+    if limit > 0:
+        _read_motir(out, limit)
+    official = len(out)
 
     for dept, url in FEEDS:
         if len(out) >= limit:
@@ -291,19 +383,15 @@ def fetch(limit: int = 8) -> list[dict]:
             ok += 1
         crawl.sleep_jitter(0.6, 1.4)
 
-    # 국내 IP 러너로 옮기면 자동으로 살아난다
     _base = len(out)
     for dept, url in OPTIONAL_FEEDS:
         if len(out) >= limit:
             break
         _read(dept, url, out, limit, optional=True)
 
-    # korea.kr 계열이 실제로 열리는지 로그가 없어 확인이 안 됐다.
-    # 러너가 해외 IP면 전건 0건일 텐데, 그러면 정책 공급은 연합뉴스 2개 피드가
-    # 전부다. 피드를 늘릴지 판단하려면 이 수치가 필요하다.
-    print(f"[policy] 필수 {ok}/{len(FEEDS)}피드 {_base}건 / "
-          f"선택(korea.kr) {len(out) - _base}건")
-    crawl.report("policy_rss", len(out), limit if ok else 0,
+    print(f"[policy] 공식 {official}건 / 필수 {ok}/{len(FEEDS)}피드 {_base - official}건 / "
+          f"선택(구글뉴스) {len(out) - _base}건")
+    crawl.report("policy_rss", len(out), limit if ok or official else 0,
                  "필수 RSS 전건 실패")
     return out
 

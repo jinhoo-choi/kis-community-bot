@@ -114,9 +114,10 @@ def diag_policy():
     cands = [
         ("korea.kr RSS",        "https://www.korea.kr/rss/policy.xml"),
         ("기재부 보도자료",      "https://www.moef.go.kr/nw/nes/nesdta.do?menuNo=4020100"),
+        ("재정경제부 보도자료",  "https://mofe.go.kr/nw/nes/nesdta.do?bbsId=MOSFBBS_000000000028&menuNo=4010100"),
         ("금융위 보도자료",      "https://www.fsc.go.kr/no010101"),
         ("한국은행 보도자료",    "https://www.bok.or.kr/portal/bbs/P0000559/list.do?menuNo=200690"),
-        ("산업부 보도자료",      "https://www.motie.go.kr/kor/article/ATCLc01234567/list"),
+        ("산업부 보도자료",      "https://www.motir.go.kr/kor/article/ATCL3f49a5a8c"),
         ("금감원 보도자료",      "https://www.fss.or.kr/fss/bbs/B0000188/list.do?menuNo=200218"),
         ("연합뉴스 경제 RSS",    "https://www.yna.co.kr/rss/economy.xml"),
         ("한경 정책 RSS",        "https://rss.hankyung.com/feed/economy.xml"),
@@ -126,6 +127,9 @@ def diag_policy():
             r = requests.get(u, headers=H, timeout=12)
             body = r.text[:120].replace("\n", " ")
             log(f"  {name:20s} HTTP {r.status_code}  {len(r.content):>7} bytes  {body[:70]!r}")
+            log(f"    최종 URL: {r.url}")
+            if r.status_code == 200 and not r.content.strip():
+                log("    빈 응답 — 수집 성공으로 취급하지 않음")
         except Exception as e:
             log(f"  {name:20s} 실패 {type(e).__name__}")
 
