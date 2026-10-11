@@ -1,5 +1,7 @@
 # 현재 상태
 
+**2026-10-11 Actions 재검증 (Codex, PR #69 Draft·미병합):** 최신 main `2705a4f` 통합, 운영 변경 보존. run_tests.sh 전체 통과: 단위 474/474, 문장틀 14/14, 비용 43/43, 수율 19/19, 파이프라인 9/9, E2E 20/20, 감사 FAIL 0. 기존 캐시 문체 WARN 2는 baseline과 동일. 로컬 Python 3.12.14; hosted Python 3.11 명시. 운영 발송·유료 API·네이버 저장 미실행. 검증 범위: [인계](HANDOFF_2026-10-07_ACTIONS_NODE24.md).
+
 **2026-10-07 Actions 호환성 (Codex, 검토용 PR·미병합):** GitHub-hosted action을 기본 Node 24 최소 버전으로 변경. runner 2.337.0 실측. verify-keys만 이미지 기본 Python/pip 의존으로 ubuntu-24.04 고정. 기존 테스트·workflow 정적 검증만 수행, 운영·실발송 미실행. 목록·근거·검증·롤백: [인계](HANDOFF_2026-10-07_ACTIONS_NODE24.md).
 
 > **작업 시작 전 이 파일을 먼저 읽습니다.** 작업 종료 시 갱신합니다.

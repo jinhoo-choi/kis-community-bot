@@ -2,6 +2,16 @@
 
 기준 main: `710106e2b2c204367af318321882fed31517087a`. 변경은 검토용 PR; 운영 workflow 및 실발송 미실행.
 
+## 2026-10-11 최신 main 재검증 (PR #69)
+
+- 통합 기준 main: `2705a4f9921c10bc40c85b725dc45d2b7bf62b9b`. 기존 PR head에 main을 병합하는 방식으로 이력 보존.
+- 최신 main 통합 충돌 없음. ref: main 중복 발송 가드와 verify-keys의 ubuntu-24.04 고정을 유지했습니다.
+- 최신 main baseline과 통합본을 각각 검증: run_tests.sh 전체 통과: 단위 474/474, 문장틀 14/14, 비용 43/43, 수율 19/19, 파이프라인 9/9, E2E 20/20, 감사 FAIL 0. 기존 캐시 문체 WARN 2는 baseline과 동일. 로컬 Python 3.12.14; hosted Python 3.11 명시.
+- 테스트는 비밀 환경변수 없이 실행하고 실제 socket 연결을 차단했습니다. 실제 연결 시도 0건; 유료 API·운영 발송·네이버 저장/발행 미실행.
+- 세 저장소 17개 workflow/18개 job: actionlint 1.7.12, hosted Bash 70개 syntax, YAML 의미 비교 통과. 최신 main과의 차이는 원래 PR의 action 버전, risk Node 강제 플래그 제거, community verify OS 고정뿐입니다. 트리거·권한·secret 참조·실행 명령·입력·Python minor·cache/artifact 설정은 보존.
+- Node24 action.yml 및 허용 입력, hosted runner/Python은 새 PR CI 로그로 따로 확인합니다. 오프라인 결과가 Ubuntu 26.04·운영 실행 성공을 뜻하지 않습니다.
+- 롤백: main 병합 커밋으로 추가 통합한 내용은 기존 PR head로 복귀 가능. 운영 main 미병합 상태이므로 운영 변경 롤백은 발생하지 않았습니다.
+
 ## 현재 workflow / job 목록
 
 | Workflow | Job | 기존 runner → 변경 | 기존 action → 변경 |
