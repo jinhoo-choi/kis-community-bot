@@ -750,7 +750,193 @@
   "flow-2026-10-08-000720": "2026-10-12",
   "flow-2026-10-08-267270": "2026-10-12",
   "flow-2026-10-08-098460": "2026-10-12",
-  "flow-2026-10-08-010120": "2026-10-12"
+  "flow-2026-10-08-010120": "2026-10-12",
+  "ID::naver-api-96621": "2026-10-13",
+  "TTL::018260::aidc추가확보글로벌사업추진기대": "2026-10-13",
+  "ID::pol-한은총재기준금리05p인상물가상승률008p하락": "2026-10-13",
+  "TTL::105560::한은총재기준금리05%p인상물가상승률008%p하락효과종합": "2026-10-13",
+  "ID::pol-LH사장집값급락가능성있어지금집안사도손해안봐": "2026-10-13",
+  "TTL::105560::lh사장집값급락가능성있어…지금집안사도손해안봐": "2026-10-13",
+  "ID::flow-2026-10-12-196170": "2026-10-13",
+  "EVT::196170::급등락::2026-10-12": "2026-10-13",
+  "TTL::196170::알테오젠전일499%하락": "2026-10-13",
+  "ID::flow-2026-10-12-000660": "2026-10-13",
+  "EVT::000660::급등락::2026-10-12": "2026-10-13",
+  "TTL::000660::sk하이닉스전일480%하락": "2026-10-13",
+  "ID::flow-2026-10-12-403870": "2026-10-13",
+  "EVT::403870::급등락::2026-10-12": "2026-10-13",
+  "TTL::403870::hpsp전일594%하락": "2026-10-13",
+  "ID::flow-2026-10-12-011790": "2026-10-13",
+  "EVT::011790::급등락::2026-10-12": "2026-10-13",
+  "TTL::011790::skc전일1042%하락": "2026-10-13",
+  "ID::flow-2026-10-12-051910": "2026-10-13",
+  "EVT::051910::급등락::2026-10-12": "2026-10-13",
+  "TTL::051910::lg화학전일746%하락": "2026-10-13",
+  "ID::dart-20261012800752": "2026-10-13",
+  "EVT::096770::공급계약::2026-10-12": "2026-10-13",
+  "TTL::096770::기재정정단일판매ㆍ공급계약체결자회사의주요경영사항": "2026-10-13",
+  "ID::naver-api-96618": "2026-10-13",
+  "TTL::096770::e&s재평가필요그핵심인호주dlng를가다": "2026-10-13",
+  "ID::naver-api-96615": "2026-10-13",
+  "TTL::024110::타행들과는다른nim상승현상긍정적": "2026-10-13",
+  "ID::flow-2026-10-12-042510": "2026-10-13",
+  "EVT::042510::급등락::2026-10-12": "2026-10-13",
+  "TTL::042510::라온시큐어전일651%상승": "2026-10-13",
+  "ID::flow-2026-10-12-290650": "2026-10-13",
+  "EVT::290650::급등락::2026-10-12": "2026-10-13",
+  "TTL::290650::엘앤씨바이오전일1595%상승": "2026-10-13",
+  "ID::flow-2026-10-12-080220": "2026-10-13",
+  "EVT::080220::급등락::2026-10-12": "2026-10-13",
+  "TTL::080220::제주반도체전일640%하락": "2026-10-13",
+  "ID::flow-2026-10-12-007340": "2026-10-13",
+  "EVT::007340::급등락::2026-10-12": "2026-10-13",
+  "TTL::007340::dn오토모티브전일1992%하락": "2026-10-13",
+  "ID::naver-api-96619": "2026-10-13",
+  "EVT::251970::실적::2026-10-12": "2026-10-13",
+  "TTL::251970::하반기실적의다크호스": "2026-10-13",
+  "ID::pol-GS건설80개협력사와상생행사실질지원확대": "2026-10-13",
+  "TTL::006360::gs건설80개협력사와상생행사…실질지원확대": "2026-10-13",
+  "ID::flow-2026-10-12-000150": "2026-10-13",
+  "EVT::000150::급등락::2026-10-12": "2026-10-13",
+  "TTL::000150::두산전일864%하락": "2026-10-13",
+  "ID::flow-2026-10-12-042700": "2026-10-13",
+  "EVT::042700::급등락::2026-10-12": "2026-10-13",
+  "TTL::042700::한미반도체전일570%하락": "2026-10-13",
+  "ID::flow-2026-10-12-353200": "2026-10-13",
+  "EVT::353200::급등락::2026-10-12": "2026-10-13",
+  "TTL::353200::대덕전자전일799%하락": "2026-10-13",
+  "ID::flow-2026-10-12-086520": "2026-10-13",
+  "EVT::086520::급등락::2026-10-12": "2026-10-13",
+  "TTL::086520::에코프로전일800%하락": "2026-10-13",
+  "ID::flow-2026-10-12-010140": "2026-10-13",
+  "EVT::010140::급등락::2026-10-12": "2026-10-13",
+  "TTL::010140::삼성중공업전일540%하락": "2026-10-13",
+  "ID::naver-api-96623": "2026-10-13",
+  "TTL::036570::아이온2글로벌성공적출시글로벌성과이어갈것": "2026-10-13",
+  "ID::pol-정부조선업계제조공정전반AX확대2030년까지1": "2026-10-13",
+  "TTL::009540::정부조선업계제조공정전반ax확대…2030년까지14조투입": "2026-10-13",
+  "ID::flow-2026-10-12-457190": "2026-10-13",
+  "EVT::457190::급등락::2026-10-12": "2026-10-13",
+  "TTL::457190::이수스페셜티케미컬전일497%상승": "2026-10-13",
+  "ID::flow-2026-10-12-001210": "2026-10-13",
+  "EVT::001210::급등락::2026-10-12": "2026-10-13",
+  "TTL::001210::금호전기전일3039%상승": "2026-10-13",
+  "ID::flow-2026-10-12-017670": "2026-10-13",
+  "EVT::017670::급등락::2026-10-12": "2026-10-13",
+  "TTL::017670::sk텔레콤전일582%하락": "2026-10-13",
+  "ID::flow-2026-10-12-058730": "2026-10-13",
+  "EVT::058730::급등락::2026-10-12": "2026-10-13",
+  "TTL::058730::다스코전일1023%상승": "2026-10-13",
+  "ID::flow-2026-10-12-247540": "2026-10-13",
+  "EVT::247540::급등락::2026-10-12": "2026-10-13",
+  "TTL::247540::에코프로비엠전일846%하락": "2026-10-13",
+  "ID::dart-20261012800721": "2026-10-13",
+  "EVT::004960::공급계약::2026-10-12": "2026-10-13",
+  "TTL::004960::단일판매ㆍ공급계약체결": "2026-10-13",
+  "ID::naver-api-96626": "2026-10-13",
+  "TTL::015760::좋아도좋은것이아닌": "2026-10-13",
+  "ID::hk-652887": "2026-10-13",
+  "TTL::128940::한미약품3분기북경한미이익개선세전망": "2026-10-13",
+  "ID::flow-2026-10-12-079650": "2026-10-13",
+  "EVT::079650::급등락::2026-10-12": "2026-10-13",
+  "TTL::079650::서산전일2925%상승": "2026-10-13",
+  "ID::flow-2026-10-12-278650": "2026-10-13",
+  "EVT::278650::급등락::2026-10-12": "2026-10-13",
+  "TTL::278650::hlb바이오스텝전일1585%하락": "2026-10-13",
+  "ID::flow-2026-10-12-038500": "2026-10-13",
+  "EVT::038500::급등락::2026-10-12": "2026-10-13",
+  "TTL::038500::삼표시멘트전일820%상승": "2026-10-13",
+  "ID::flow-2026-10-12-003670": "2026-10-13",
+  "EVT::003670::급등락::2026-10-12": "2026-10-13",
+  "TTL::003670::포스코퓨처엠전일748%하락": "2026-10-13",
+  "ID::dart-20261012800767": "2026-10-13",
+  "EVT::034730::공급계약::2026-10-12": "2026-10-13",
+  "TTL::034730::기재정정단일판매ㆍ공급계약체결자회사의주요경영사항": "2026-10-13",
+  "ID::naver-api-96636": "2026-10-13",
+  "TTL::200470::저도osat고요아직덜올랐어요": "2026-10-13",
+  "ID::naver-api-96616": "2026-10-13",
+  "TTL::005930::강한dram가격lpddr공급부족심화": "2026-10-13",
+  "ID::flow-2026-10-12-009150": "2026-10-13",
+  "EVT::009150::급등락::2026-10-12": "2026-10-13",
+  "TTL::009150::삼성전기전일423%하락": "2026-10-13",
+  "ID::flow-2026-10-12-302550": "2026-10-13",
+  "EVT::302550::급등락::2026-10-12": "2026-10-13",
+  "TTL::302550::리메드전일981%상승": "2026-10-13",
+  "ID::flow-2026-10-12-034730": "2026-10-13",
+  "EVT::034730::급등락::2026-10-12": "2026-10-13",
+  "TTL::034730::sk전일446%하락": "2026-10-13",
+  "ID::flow-2026-10-12-084370": "2026-10-13",
+  "EVT::084370::급등락::2026-10-12": "2026-10-13",
+  "TTL::084370::유진테크전일681%하락": "2026-10-13",
+  "ID::dart-20261012000401": "2026-10-13",
+  "EVT::001570::합병분할::2026-10-12": "2026-10-13",
+  "TTL::001570::기재정정주요사항보고서회사분할결정": "2026-10-13",
+  "ID::naver-api-96624": "2026-10-13",
+  "TTL::443060::기술서비스플랫폼업체goltens인수": "2026-10-13",
+  "ID::hk-652886": "2026-10-13",
+  "TTL::352820::하이브3q26previewbts이후를위한빌드업": "2026-10-13",
+  "ID::flow-2026-10-12-278470": "2026-10-13",
+  "EVT::278470::급등락::2026-10-12": "2026-10-13",
+  "TTL::278470::에이피알전일637%하락": "2026-10-13",
+  "ID::flow-2026-10-12-028050": "2026-10-13",
+  "EVT::028050::급등락::2026-10-12": "2026-10-13",
+  "TTL::028050::삼성e&a전일428%하락": "2026-10-13",
+  "ID::flow-2026-10-12-067080": "2026-10-13",
+  "EVT::067080::급등락::2026-10-12": "2026-10-13",
+  "TTL::067080::대화제약전일1891%하락": "2026-10-13",
+  "ID::flow-2026-10-12-002990": "2026-10-13",
+  "EVT::002990::급등락::2026-10-12": "2026-10-13",
+  "TTL::002990::금호건설전일2475%상승": "2026-10-13",
+  "naver-api-96621": "2026-10-13",
+  "pol-한은총재기준금리05p인상물가상승률008p하락": "2026-10-13",
+  "pol-LH사장집값급락가능성있어지금집안사도손해안봐": "2026-10-13",
+  "flow-2026-10-12-196170": "2026-10-13",
+  "flow-2026-10-12-000660": "2026-10-13",
+  "flow-2026-10-12-403870": "2026-10-13",
+  "flow-2026-10-12-011790": "2026-10-13",
+  "flow-2026-10-12-051910": "2026-10-13",
+  "dart-20261012800752": "2026-10-13",
+  "naver-api-96618": "2026-10-13",
+  "naver-api-96615": "2026-10-13",
+  "flow-2026-10-12-042510": "2026-10-13",
+  "flow-2026-10-12-290650": "2026-10-13",
+  "flow-2026-10-12-080220": "2026-10-13",
+  "flow-2026-10-12-007340": "2026-10-13",
+  "naver-api-96619": "2026-10-13",
+  "pol-GS건설80개협력사와상생행사실질지원확대": "2026-10-13",
+  "flow-2026-10-12-000150": "2026-10-13",
+  "flow-2026-10-12-042700": "2026-10-13",
+  "flow-2026-10-12-353200": "2026-10-13",
+  "flow-2026-10-12-086520": "2026-10-13",
+  "flow-2026-10-12-010140": "2026-10-13",
+  "naver-api-96623": "2026-10-13",
+  "pol-정부조선업계제조공정전반AX확대2030년까지1": "2026-10-13",
+  "flow-2026-10-12-457190": "2026-10-13",
+  "flow-2026-10-12-001210": "2026-10-13",
+  "flow-2026-10-12-017670": "2026-10-13",
+  "flow-2026-10-12-058730": "2026-10-13",
+  "flow-2026-10-12-247540": "2026-10-13",
+  "dart-20261012800721": "2026-10-13",
+  "naver-api-96626": "2026-10-13",
+  "hk-652887": "2026-10-13",
+  "flow-2026-10-12-079650": "2026-10-13",
+  "flow-2026-10-12-278650": "2026-10-13",
+  "flow-2026-10-12-038500": "2026-10-13",
+  "flow-2026-10-12-003670": "2026-10-13",
+  "dart-20261012800767": "2026-10-13",
+  "naver-api-96636": "2026-10-13",
+  "naver-api-96616": "2026-10-13",
+  "flow-2026-10-12-009150": "2026-10-13",
+  "flow-2026-10-12-302550": "2026-10-13",
+  "flow-2026-10-12-034730": "2026-10-13",
+  "flow-2026-10-12-084370": "2026-10-13",
+  "dart-20261012000401": "2026-10-13",
+  "naver-api-96624": "2026-10-13",
+  "hk-652886": "2026-10-13",
+  "flow-2026-10-12-278470": "2026-10-13",
+  "flow-2026-10-12-028050": "2026-10-13",
+  "flow-2026-10-12-067080": "2026-10-13",
+  "flow-2026-10-12-002990": "2026-10-13"
  },
  "recent_tone": {
   "_theme": [
@@ -839,17 +1025,17 @@
    "fact_note::fact_note:fact_note"
   ],
   "000660": [
-   "check_list:terms:check_list:check_list",
    "fact_note:duration:fact_note:fact_note",
-   "fact_note:ratio:fact_note:fact_note"
+   "fact_note:ratio:fact_note:fact_note",
+   "fact_note:duration:fact_note:fact_note"
   ],
   "034310": [
    "quick_memo:amount:quick_memo:quick_memo"
   ],
   "096770": [
-   "brief_report:compare:brief_report:brief_report",
-   "fact_note:amount:fact_note:fact_note",
-   "check_list:duration:check_list:check_list"
+   "check_list:duration:check_list:check_list",
+   "brief_report:ratio:brief_report:brief_report",
+   "brief_report:ratio:brief_report:brief_report"
   ],
   "030530": [
    "fact_note::fact_note:fact_note",
@@ -857,9 +1043,9 @@
    "careful_note:compare:careful_note:careful_note"
   ],
   "080220": [
-   "brief_report:amount:brief_report:brief_report",
    "brief_report::brief_report:brief_report",
-   "check_list:duration:check_list:check_list"
+   "check_list:duration:check_list:check_list",
+   "brief_report:amount:brief_report:brief_report"
   ],
   "011780": [
    "open_talk:reaction:open_talk:open_talk"
@@ -887,9 +1073,9 @@
    "data_focus:ratio:data_focus:data_focus"
   ],
   "128940": [
-   "data_focus::data_focus:data_focus",
    "careful_note:reaction:careful_note:careful_note",
-   "check_list:amount:check_list:check_list"
+   "check_list:amount:check_list:check_list",
+   "fact_note:duration:fact_note:fact_note"
   ],
   "005830": [
    "open_talk:amount:open_talk:open_talk"
@@ -898,9 +1084,9 @@
    "open_talk:amount:open_talk:open_talk"
   ],
   "051910": [
-   "data_focus:compare:data_focus:data_focus",
    "data_focus:ratio:data_focus:data_focus",
-   "two_view:reaction:two_view:two_view"
+   "two_view:reaction:two_view:two_view",
+   "data_focus::data_focus:data_focus"
   ],
   "086280": [
    "open_talk:reaction:open_talk:open_talk",
@@ -956,9 +1142,9 @@
    "fact_note:amount:fact_note:fact_note"
   ],
   "105560": [
+   "fact_note:ratio:fact_note:fact_note",
    "fact_note:duration:fact_note:fact_note",
-   "fact_note:duration:fact_note:fact_note",
-   "fact_note:ratio:fact_note:fact_note"
+   "fact_note:duration:fact_note:fact_note"
   ],
   "088350": [
    "careful_note:ratio:careful_note:careful_note"
@@ -969,9 +1155,9 @@
    "fact_note:duration:fact_note:fact_note"
   ],
   "196170": [
-   "open_talk:amount:open_talk:open_talk",
    "fact_note:terms:fact_note:fact_note",
-   "two_view:compare:two_view:two_view"
+   "two_view:compare:two_view:two_view",
+   "fact_note:compare:fact_note:fact_note"
   ],
   "009900": [
    "two_view:reaction:two_view:two_view"
@@ -991,10 +1177,12 @@
    "quick_memo:ratio:quick_memo:quick_memo"
   ],
   "001570": [
+   "quick_memo:decode:quick_memo:quick_memo",
    "quick_memo:decode:quick_memo:quick_memo"
   ],
   "278470": [
-   "brief_report:ratio:brief_report:brief_report"
+   "brief_report:ratio:brief_report:brief_report",
+   "brief_report:reaction:brief_report:brief_report"
   ],
   "007570": [
    "quick_memo:ratio:quick_memo:quick_memo"
@@ -1005,8 +1193,8 @@
   ],
   "017670": [
    "fact_note:duration:fact_note:fact_note",
-   "fact_note:duration:fact_note:fact_note",
-   "brief_report:terms:brief_report:brief_report"
+   "brief_report:terms:brief_report:brief_report",
+   "careful_note:reaction:careful_note:careful_note"
   ],
   "222800": [
    "careful_note:ratio:careful_note:careful_note",
@@ -1015,7 +1203,8 @@
   ],
   "018260": [
    "careful_note:terms:careful_note:careful_note",
-   "fact_note:duration:fact_note:fact_note"
+   "fact_note:duration:fact_note:fact_note",
+   "brief_report:ratio:brief_report:brief_report"
   ],
   "095610": [
    "brief_report:ratio:brief_report:brief_report",
@@ -1049,7 +1238,8 @@
    "check_list:terms:check_list:check_list"
   ],
   "015760": [
-   "open_talk:terms:open_talk:open_talk"
+   "open_talk:terms:open_talk:open_talk",
+   "fact_note:terms:fact_note:fact_note"
   ],
   "356860": [
    "brief_report:terms:brief_report:brief_report",
@@ -1120,14 +1310,14 @@
    "fact_note:amount:fact_note:fact_note"
   ],
   "042510": [
-   "data_focus::data_focus:data_focus",
    "fact_note:amount:fact_note:fact_note",
-   "two_view:compare:two_view:two_view"
+   "two_view:compare:two_view:two_view",
+   "two_view:ratio:two_view:two_view"
   ],
   "084370": [
-   "brief_report:compare:brief_report:brief_report",
    "careful_note:reaction:careful_note:careful_note",
-   "check_list:amount:check_list:check_list"
+   "check_list:amount:check_list:check_list",
+   "data_focus:compare:data_focus:data_focus"
   ],
   "120110": [
    "careful_note:reaction:careful_note:careful_note"
@@ -1193,9 +1383,9 @@
    "data_focus:ratio:data_focus:data_focus"
   ],
   "006360": [
-   "data_focus:reaction:data_focus:data_focus",
    "fact_note:terms:fact_note:fact_note",
-   "fact_note::fact_note:fact_note"
+   "fact_note::fact_note:fact_note",
+   "fact_note:duration:fact_note:fact_note"
   ],
   "332570": [
    "careful_note:compare:careful_note:careful_note",
@@ -1228,14 +1418,14 @@
    "brief_report::brief_report:brief_report"
   ],
   "042700": [
-   "check_list:duration:check_list:check_list",
    "brief_report:compare:brief_report:brief_report",
-   "two_view:reaction:two_view:two_view"
+   "two_view:reaction:two_view:two_view",
+   "data_focus:compare:data_focus:data_focus"
   ],
   "443060": [
    "fact_note:duration:fact_note:fact_note",
-   "fact_note:duration:fact_note:fact_note",
-   "check_list:terms:check_list:check_list"
+   "check_list:terms:check_list:check_list",
+   "fact_note:duration:fact_note:fact_note"
   ],
   "456010": [
    "check_list:terms:check_list:check_list",
@@ -1301,7 +1491,7 @@
   "034730": [
    "fact_note:duration:fact_note:fact_note",
    "brief_report:ratio:brief_report:brief_report",
-   "fact_note:duration:fact_note:fact_note"
+   "careful_note:reaction:careful_note:careful_note"
   ],
   "020150": [
    "fact_note:amount:fact_note:fact_note",
@@ -1321,9 +1511,9 @@
    "data_focus:ratio:data_focus:data_focus"
   ],
   "000150": [
-   "brief_report::brief_report:brief_report",
    "brief_report:terms:brief_report:brief_report",
-   "data_focus:compare:data_focus:data_focus"
+   "data_focus:compare:data_focus:data_focus",
+   "check_list:amount:check_list:check_list"
   ],
   "012450": [
    "brief_report:terms:brief_report:brief_report",
@@ -1334,9 +1524,9 @@
    "open_talk:amount:open_talk:open_talk"
   ],
   "005930": [
-   "fact_note:duration:fact_note:fact_note",
    "fact_note:context:fact_note:fact_note",
-   "fact_note:duration:fact_note:fact_note"
+   "fact_note:duration:fact_note:fact_note",
+   "brief_report:ratio:brief_report:brief_report"
   ],
   "272210": [
    "data_focus:ratio:data_focus:data_focus",
@@ -1354,9 +1544,9 @@
    "check_list:terms:check_list:check_list"
   ],
   "003670": [
-   "brief_report:amount:brief_report:brief_report",
    "brief_report:compare:brief_report:brief_report",
-   "data_focus:amount:data_focus:data_focus"
+   "data_focus:amount:data_focus:data_focus",
+   "data_focus::data_focus:data_focus"
   ],
   "001440": [
    "brief_report:compare:brief_report:brief_report",
@@ -1379,7 +1569,8 @@
    "data_focus::data_focus:data_focus"
   ],
   "001210": [
-   "fact_note::fact_note:fact_note"
+   "fact_note::fact_note:fact_note",
+   "data_focus:ratio:data_focus:data_focus"
   ],
   "402340": [
    "brief_report::brief_report:brief_report",
@@ -1398,9 +1589,9 @@
    "data_focus::data_focus:data_focus"
   ],
   "009150": [
-   "fact_note:duration:fact_note:fact_note",
    "data_focus:amount:data_focus:data_focus",
-   "fact_note:amount:fact_note:fact_note"
+   "fact_note:amount:fact_note:fact_note",
+   "data_focus:reaction:data_focus:data_focus"
   ],
   "261780": [
    "brief_report:terms:brief_report:brief_report",
@@ -1433,9 +1624,9 @@
    "fact_note:reaction:fact_note:fact_note"
   ],
   "403870": [
-   "brief_report:terms:brief_report:brief_report",
    "data_focus:compare:data_focus:data_focus",
-   "brief_report:ratio:brief_report:brief_report"
+   "brief_report:ratio:brief_report:brief_report",
+   "data_focus:compare:data_focus:data_focus"
   ],
   "004310": [
    "check_list:amount:check_list:check_list",
@@ -1537,13 +1728,14 @@
    "data_focus::data_focus:data_focus"
   ],
   "010140": [
-   "data_focus:ratio:data_focus:data_focus",
    "brief_report:terms:brief_report:brief_report",
-   "fact_note:context:fact_note:fact_note"
+   "fact_note:context:fact_note:fact_note",
+   "fact_note::fact_note:fact_note"
   ],
   "002990": [
    "data_focus::data_focus:data_focus",
-   "brief_report:ratio:brief_report:brief_report"
+   "brief_report:ratio:brief_report:brief_report",
+   "fact_note::fact_note:fact_note"
   ],
   "042660": [
    "check_list:terms:check_list:check_list",
@@ -1787,9 +1979,9 @@
    "fact_note:context:fact_note:fact_note"
   ],
   "028050": [
-   "careful_note:reaction:careful_note:careful_note",
    "brief_report:amount:brief_report:brief_report",
-   "brief_report:ratio:brief_report:brief_report"
+   "brief_report:ratio:brief_report:brief_report",
+   "two_view:ratio:two_view:two_view"
   ],
   "201490": [
    "brief_report::brief_report:brief_report"
@@ -1953,9 +2145,9 @@
    "data_focus:ratio:data_focus:data_focus"
   ],
   "353200": [
-   "brief_report::brief_report:brief_report",
    "fact_note:terms:fact_note:fact_note",
-   "check_list:amount:check_list:check_list"
+   "check_list:amount:check_list:check_list",
+   "brief_report:compare:brief_report:brief_report"
   ],
   "280360": [
    "brief_report:ratio:brief_report:brief_report"
@@ -2063,9 +2255,9 @@
    "brief_report:terms:brief_report:brief_report"
   ],
   "009540": [
-   "careful_note:terms:careful_note:careful_note",
    "fact_note:amount:fact_note:fact_note",
-   "fact_note:duration:fact_note:fact_note"
+   "fact_note:duration:fact_note:fact_note",
+   "fact_note:context:fact_note:fact_note"
   ],
   "419050": [
    "fact_note::fact_note:fact_note"
@@ -2130,7 +2322,8 @@
   ],
   "352820": [
    "data_focus:reaction:data_focus:data_focus",
-   "brief_report:compare:brief_report:brief_report"
+   "brief_report:compare:brief_report:brief_report",
+   "careful_note:terms:careful_note:careful_note"
   ],
   "131970": [
    "fact_note:duration:fact_note:fact_note",
@@ -2168,7 +2361,8 @@
   ],
   "251970": [
    "check_list:duration:check_list:check_list",
-   "check_list:duration:check_list:check_list"
+   "check_list:duration:check_list:check_list",
+   "brief_report:amount:brief_report:brief_report"
   ],
   "439260": [
    "brief_report:terms:brief_report:brief_report"
@@ -2327,7 +2521,8 @@
    "brief_report:amount:brief_report:brief_report"
   ],
   "457190": [
-   "open_talk:amount:open_talk:open_talk"
+   "open_talk:amount:open_talk:open_talk",
+   "brief_report:ratio:brief_report:brief_report"
   ],
   "032640": [
    "check_list:terms:check_list:check_list"
@@ -2442,7 +2637,8 @@
    "careful_note:ratio:careful_note:careful_note"
   ],
   "036570": [
-   "fact_note:reaction:fact_note:fact_note"
+   "fact_note:reaction:fact_note:fact_note",
+   "brief_report:ratio:brief_report:brief_report"
   ],
   "251270": [
    "fact_note:duration:fact_note:fact_note"
@@ -2469,7 +2665,8 @@
    "check_list:amount:check_list:check_list"
   ],
   "086520": [
-   "data_focus:reaction:data_focus:data_focus"
+   "data_focus:reaction:data_focus:data_focus",
+   "careful_note:ratio:careful_note:careful_note"
   ],
   "300080": [
    "brief_report:ratio:brief_report:brief_report"
@@ -2500,7 +2697,8 @@
    "data_focus:ratio:data_focus:data_focus"
   ],
   "038500": [
-   "two_view:amount:two_view:two_view"
+   "two_view:amount:two_view:two_view",
+   "data_focus:reaction:data_focus:data_focus"
   ],
   "002720": [
    "fact_note::fact_note:fact_note",
@@ -2539,7 +2737,8 @@
    "careful_note:ratio:careful_note:careful_note"
   ],
   "278650": [
-   "fact_note::fact_note:fact_note"
+   "fact_note::fact_note:fact_note",
+   "two_view:ratio:two_view:two_view"
   ],
   "282330": [
    "brief_report:amount:brief_report:brief_report"
@@ -2555,46 +2754,81 @@
   ],
   "141000": [
    "careful_note:ratio:careful_note:careful_note"
+  ],
+  "011790": [
+   "careful_note:ratio:careful_note:careful_note"
+  ],
+  "024110": [
+   "check_list:terms:check_list:check_list"
+  ],
+  "290650": [
+   "brief_report:reaction:brief_report:brief_report"
+  ],
+  "007340": [
+   "data_focus:ratio:data_focus:data_focus"
+  ],
+  "058730": [
+   "two_view:reaction:two_view:two_view"
+  ],
+  "247540": [
+   "fact_note::fact_note:fact_note"
+  ],
+  "004960": [
+   "brief_report:ratio:brief_report:brief_report"
+  ],
+  "079650": [
+   "brief_report:amount:brief_report:brief_report"
+  ],
+  "200470": [
+   "brief_report:amount:brief_report:brief_report"
+  ],
+  "302550": [
+   "careful_note:compare:careful_note:careful_note"
+  ],
+  "067080": [
+   "careful_note:compare:careful_note:careful_note"
   ]
  },
  "recent_templates": {
   "flow_template_12": "2026-10-07",
-  "flow_template_02": "2026-10-08",
+  "flow_template_02": "2026-10-13",
   "flow_template_03": "2026-10-07",
   "flow_template_09": "2026-10-07",
   "flow_template_10": "2026-10-12",
   "flow_template_01": "2026-10-12",
   "flow_template_04": "2026-10-08",
-  "flow_template_19": "2026-10-08",
-  "flow_template_14": "2026-10-08",
+  "flow_template_19": "2026-10-13",
+  "flow_template_14": "2026-10-13",
   "flow_template_07": "2026-10-12",
   "flow_template_05": "2026-10-12",
-  "flow_template_16": "2026-10-12"
+  "flow_template_16": "2026-10-12",
+  "flow_template_22": "2026-10-13",
+  "flow_template_20": "2026-10-13"
  },
  "recent_stocks": {
-  "005930": "2026-10-12",
-  "105560": "2026-10-12",
+  "005930": "2026-10-13",
+  "105560": "2026-10-13",
   "327260": "2026-10-06",
-  "000150": "2026-10-07",
-  "009150": "2026-10-07",
-  "353200": "2026-10-07",
+  "000150": "2026-10-13",
+  "009150": "2026-10-13",
+  "353200": "2026-10-13",
   "000270": "2026-10-08",
   "007810": "2026-10-06",
-  "000660": "2026-10-08",
+  "000660": "2026-10-13",
   "036930": "2026-10-12",
   "007660": "2026-10-08",
   "034020": "2026-10-12",
-  "403870": "2026-10-06",
+  "403870": "2026-10-13",
   "005490": "2026-10-06",
   "005380": "2026-10-12",
   "043260": "2026-10-06",
   "319660": "2026-10-12",
   "253590": "2026-10-06",
-  "096770": "2026-10-07",
+  "096770": "2026-10-13",
   "089970": "2026-10-06",
   "033790": "2026-10-12",
   "207940": "2026-10-12",
-  "051910": "2026-10-07",
+  "051910": "2026-10-13",
   "240810": "2026-10-06",
   "091580": "2026-10-07",
   "062040": "2026-10-07",
@@ -2612,7 +2846,7 @@
   "000500": "2026-10-08",
   "347700": "2026-10-08",
   "000250": "2026-10-06",
-  "080220": "2026-10-06",
+  "080220": "2026-10-13",
   "000720": "2026-10-12",
   "226950": "2026-10-07",
   "122870": "2026-10-07",
@@ -2626,13 +2860,13 @@
   "209640": "2026-10-06",
   "009830": "2026-10-06",
   "065440": "2026-10-06",
-  "028050": "2026-10-07",
+  "028050": "2026-10-13",
   "417200": "2026-10-12",
   "033160": "2026-10-06",
   "103590": "2026-10-06",
   "069540": "2026-10-12",
   "108490": "2026-10-06",
-  "036570": "2026-10-06",
+  "036570": "2026-10-13",
   "488280": "2026-10-06",
   "274090": "2026-10-06",
   "251270": "2026-10-06",
@@ -2645,7 +2879,7 @@
   "158430": "2026-10-07",
   "011070": "2026-10-12",
   "005090": "2026-10-07",
-  "128940": "2026-10-12",
+  "128940": "2026-10-13",
   "010060": "2026-10-07",
   "263860": "2026-10-07",
   "047920": "2026-10-07",
@@ -2658,7 +2892,7 @@
   "069960": "2026-10-07",
   "001820": "2026-10-07",
   "204270": "2026-10-07",
-  "086520": "2026-10-07",
+  "086520": "2026-10-13",
   "411080": "2026-10-07",
   "300080": "2026-10-07",
   "033780": "2026-10-07",
@@ -2682,33 +2916,33 @@
   "298040": "2026-10-08",
   "486510": "2026-10-12",
   "087010": "2026-10-08",
-  "038500": "2026-10-08",
+  "038500": "2026-10-13",
   "002720": "2026-10-12",
   "010960": "2026-10-08",
-  "042700": "2026-10-08",
+  "042700": "2026-10-13",
   "329180": "2026-10-12",
-  "003670": "2026-10-08",
+  "003670": "2026-10-13",
   "128820": "2026-10-08",
   "267260": "2026-10-12",
   "064400": "2026-10-08",
-  "352820": "2026-10-08",
+  "352820": "2026-10-13",
   "317530": "2026-10-08",
   "023530": "2026-10-08",
   "000990": "2026-10-08",
   "019170": "2026-10-08",
   "281820": "2026-10-08",
-  "084370": "2026-10-08",
+  "084370": "2026-10-13",
   "012170": "2026-10-08",
-  "034730": "2026-10-08",
+  "034730": "2026-10-13",
   "003350": "2026-10-08",
-  "042510": "2026-10-08",
+  "042510": "2026-10-13",
   "103140": "2026-10-08",
   "307750": "2026-10-08",
   "139480": "2026-10-08",
   "066570": "2026-10-12",
   "419530": "2026-10-08",
-  "009540": "2026-10-12",
-  "278650": "2026-10-08",
+  "009540": "2026-10-13",
+  "278650": "2026-10-13",
   "282330": "2026-10-12",
   "002320": "2026-10-12",
   "004370": "2026-10-12",
@@ -2716,7 +2950,7 @@
   "020150": "2026-10-12",
   "402340": "2026-10-12",
   "028260": "2026-10-12",
-  "018260": "2026-10-12",
+  "018260": "2026-10-13",
   "082740": "2026-10-12",
   "417840": "2026-10-12",
   "008930": "2026-10-12",
@@ -2728,6 +2962,29 @@
   "141000": "2026-10-12",
   "452190": "2026-10-12",
   "267270": "2026-10-12",
-  "098460": "2026-10-12"
+  "098460": "2026-10-12",
+  "196170": "2026-10-13",
+  "011790": "2026-10-13",
+  "024110": "2026-10-13",
+  "290650": "2026-10-13",
+  "007340": "2026-10-13",
+  "251970": "2026-10-13",
+  "006360": "2026-10-13",
+  "010140": "2026-10-13",
+  "457190": "2026-10-13",
+  "001210": "2026-10-13",
+  "017670": "2026-10-13",
+  "058730": "2026-10-13",
+  "247540": "2026-10-13",
+  "004960": "2026-10-13",
+  "015760": "2026-10-13",
+  "079650": "2026-10-13",
+  "200470": "2026-10-13",
+  "302550": "2026-10-13",
+  "001570": "2026-10-13",
+  "443060": "2026-10-13",
+  "278470": "2026-10-13",
+  "067080": "2026-10-13",
+  "002990": "2026-10-13"
  }
 }
