@@ -92,7 +92,7 @@
 | disclosure | DART OpenAPI / KIND 조회공시 | 자동 |
 | research | 네이버 금융 리서치 / 한경컨센서스 | 자동 / 제목매핑 |
 | flow | 네이버 금융 순위·siseJson·수급 | 자동 |
-| policy | 연합뉴스 경제·산업 RSS, 접근 가능한 정부 RSS | 섹터 근거가 있을 때만 대표주 방 |
+| policy | 산업통상부 공식 보도·참고자료 HTML, 연합뉴스 경제·산업 RSS, 정책브리핑 Google News RSS | 섹터 근거가 있을 때만 대표주 방 |
 | poll | 당일 수집 항목에서 파생 | 원 항목 매핑 승계 또는 섹터 매핑 |
 
 ## 모델 (2026 기준)
