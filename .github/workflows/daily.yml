@@ -63,11 +63,11 @@ jobs:
       # 대기(concurrency)했다 시작한 실행도 '지금의 main' 을 받아야 한다. 기본값은
       # 트리거 시점 커밋이라, 08:15 재시도가 08:00 실행의 발송 기록(run_stats·state)
       # 없는 과거 커밋으로 돌아 가드를 통과하고 50건을 다시 보냈다(실측 2026-09-30).
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: main
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -202,7 +202,7 @@ jobs:
       # 커밋 대신 아티팩트로 남긴다 — 품질 검토는 사후 1회면 충분하다.
       - name: Upload filter_log
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: filter-log-${{ github.run_id }}
           path: |

@@ -1843,7 +1843,7 @@ def main():
     # 2026-09-30 중복 발송: 대기 후 시작한 재시도가 트리거 시점 커밋으로 돌아 가드 통과
     _wf = open(".github/workflows/daily.yml", encoding="utf-8").read()
     ok.append(run("daily 워크플로는 최신 main 을 체크아웃(중복 발송 가드 전제)",
-                  bool(_re_mod.search(r"actions/checkout@v4\n\s+with:\n\s+ref: main", _wf))))
+                  bool(_re_mod.search(r"actions/checkout@v\d+\n\s+with:\n\s+ref: main", _wf))))
     # 2026-09-29 감사 2d FAIL 2건(I6 maturity, I2 gist 목표주가) 회귀 방지
     _mat = lambda f: next((c["value"] for c in _claims.build({"kind": "disclosure", "facts": f})
                            if c["type"] == "maturity"), None)
