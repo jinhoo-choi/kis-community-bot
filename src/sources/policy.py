@@ -1,13 +1,9 @@
 """정책·거시 소스.
 
-korea.kr(정책브리핑·기재부·금융위·산업부)은 GitHub Actions 의 해외 IP 에서
-전건 ConnectTimeout 이 난다 (진단 실측). 국내 IP 화이트리스트로 보인다.
-  → 국내 러너(self-hosted)나 국내 프록시를 쓰면 원 소스를 되살릴 수 있다.
-    그전까지는 접근 가능한 대체 소스를 쓴다.
-
-진단에서 살아있음이 확인된 소스만 사용한다.
-  연합뉴스 경제 RSS : HTTP 200, 정상 XML
-  한국은행          : HTTP 200 (HTML)
+정책브리핑은 2026-07-01 RSS 서비스를 종료했다(공식 공지 newsId=132038885).
+종료된 korea.kr/rss/* 대신 재정경제부 공식 RSS와 기존 뉴스 RSS를 사용한다.
+금융위·산업부는 공식 사이트를 대상으로 한 검색 RSS로 보완한다.
+공식 RSS에 요지가 없으면 검증된 HTML 요약 필드만 제한적으로 읽는다.
 
 주의: 언론사 콘텐츠이므로 제목·요지만 사용하고 본문은 재배포하지 않는다.
       정부 보도자료가 아니므로 '발표'가 아닌 '보도'로 취급한다.
@@ -15,9 +11,11 @@ korea.kr(정책브리핑·기재부·금융위·산업부)은 GitHub Actions 의
 import re
 from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
+from urllib.parse import parse_qs, urlencode, urlparse
 from xml.etree import ElementTree as ET
 
 import requests
+from bs4 import BeautifulSoup
 
 from config import KST, USER_AGENT
 from src import crawl
@@ -31,19 +29,25 @@ FEEDS = [
     ("연합뉴스 산업", "https://www.yna.co.kr/rss/industry.xml"),
 ]
 
+# 공식 RSS 안내: https://mofe.go.kr/mn/siteguide/rssService.do?menuNo=2060000
+# 2026-10-13 실측 HTTP 200 / RSS item 40건. 기존 부처명은 기획재정부.
+OFFICIAL_FEEDS = [
+    ("재정경제부", "https://mofe.go.kr/com/detailRssTagService.do?bbsId=MOSFBBS_000000000028"),
+]
+OFFICIAL_MAX = 4  # 공식 메타의 본문 확인도 회차당 최대 4회, LLM 호출 없음
+
 # 구글뉴스 RSS 는 해외 IP 에서도 열린다. korea.kr 보도자료를 site: 로 받아
 # 정책 원문 계열을 되살린다. 실측 #127: korea.kr 직접 피드 0건 / 구글뉴스
 # 경유 100건. 제목 끝에 ' - 출처' 가 붙는데 is_relevant 판정 전에 떼어낸다.
 GOOGLE_NEWS = ("https://news.google.com/rss/search"
                "?q=site:korea.kr&hl=ko&gl=KR&ceid=KR:ko")
 
-# korea.kr 계열. 국내 IP 에서만 열리므로 실패해도 경고 대상에서 제외한다.
+# korea.kr 직접 RSS는 종료됐으므로 다시 시도하지 않는다.
+# 검색 RSS는 공식 원문 확인을 대신하지 않으며 기존 보도 주의 문구를 유지한다.
 OPTIONAL_FEEDS = [
     ("정책브리핑(구글뉴스)", GOOGLE_NEWS),
-    ("정책브리핑", "https://www.korea.kr/rss/policy.xml"),
-    ("기획재정부", "https://www.korea.kr/rss/dept_moef.xml"),
-    ("금융위원회", "https://www.korea.kr/rss/dept_fsc.xml"),
-    ("산업통상자원부", "https://www.korea.kr/rss/dept_motie.xml"),
+    ("금융위원회(구글뉴스)", "https://news.google.com/rss/search?q=site:fsc.go.kr&hl=ko&gl=KR&ceid=KR:ko"),
+    ("산업통상부(구글뉴스)", "https://news.google.com/rss/search?q=site:motir.go.kr&hl=ko&gl=KR&ceid=KR:ko"),
 ]
 
 # 2026-09-03 실측 오탐: '추미애 1차 추경', '김석봉 씨티 부사장 선임',
@@ -72,7 +76,7 @@ KEYWORDS = [
 
 # 기관·산업 앵커. 정책성 기사라면 최소한 하나는 등장한다.
 ANCHORS = [
-    "정부", "부처", "기획재정부", "금융위", "금감원", "산업부", "중기부",
+    "정부", "부처", "기획재정부", "재정경제부", "금융위", "금감원", "산업부", "중기부",
     "과기정통부", "국토부", "한국은행", "한은", "코트라", "공정위", "국세청",
     "반도체", "배터리", "이차전지", "자동차", "조선", "철강", "화학", "원전",
     "바이오", "제약", "통신", "유통", "건설", "항공", "방산", "업계",
@@ -80,7 +84,7 @@ ANCHORS = [
 ]
 
 PUBLIC_AUTHORITY = [
-    "정부", "부처", "기획재정부", "금융위", "금감원", "산업부", "중기부",
+    "정부", "부처", "기획재정부", "재정경제부", "금융위", "금감원", "산업부", "중기부",
     "과기정통부", "국토부", "한국은행", "한은", "코트라", "공정위", "국세청",
 ]
 
@@ -215,12 +219,50 @@ def _gist(text: str) -> str:
     return " ".join(out).strip() or text.strip()[:GIST_MAX]
 
 
-def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
+def _official_link(link: str) -> str:
+    """실측된 공식 상세 경로만 허용하고 RSS의 HTTP 링크를 HTTPS로 정규화."""
+    parsed = urlparse(link)
+    if (parsed.hostname not in {"mofe.go.kr", "www.mofe.go.kr"}
+            or parsed.path != "/nw/nes/detailNesDtaView.do"
+            or parsed.scheme not in {"http", "https"} or parsed.port not in {None, 80, 443}):
+        return ""
+    query = parse_qs(parsed.query)
+    bbs = query.get("searchBbsId", [""])[0]
+    item_id = query.get("searchNttId", [""])[0]
+    if bbs != "MOSFBBS_000000000028" or not re.fullmatch(r"MOSF_\d+", item_id):
+        return ""
+    return "https://mofe.go.kr/nw/nes/detailNesDtaView.do?" + urlencode({
+        "searchBbsId": bbs, "searchNttId": item_id,
+    })
+
+
+def _official_excerpt(link: str) -> str:
+    """첨부파일·PDF는 읽지 않고 실측된 nttCn HTML 요약만 사용한다."""
+    try:
+        r = requests.get(link, headers={"User-Agent": USER_AGENT}, timeout=12)
+        r.raise_for_status()
+        field = BeautifulSoup(r.content, "html.parser").select_one("input#nttCn")
+        if field is None:
+            print("[policy] 공식 요약 필드 없음 — 제목만으로 요지를 만들지 않음")
+            return ""
+        text = BeautifulSoup(field.get("value", ""), "html.parser").get_text(" ", strip=True)
+        # 첨부 안내는 정책 사실이 아니다. 본문이 없으면 생성용 소재로 채택하지 않는다.
+        text = re.split(r"※|자세한 내용은 첨부", text, maxsplit=1)[0]
+        return _gist(_clean_desc(text))
+    except Exception as e:
+        print(f"[policy] 공식 요약 확인 실패: {type(e).__name__} {str(e)[:60]}")
+        return ""
+
+
+def _read(dept: str, url: str, out: list, limit: int, optional: bool,
+          official: bool = False, detail_budget: list[int] | None = None) -> bool:
     _before = len(out)
     try:
         r = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=12)
         r.raise_for_status()
         root = ET.fromstring(r.content)
+        if root.tag.rsplit("}", 1)[-1].lower() not in {"rss", "rdf"}:
+            raise ValueError("RSS가 아닌 응답")
     except Exception as e:
         # optional 이라고 조용히 넘기면 피드를 바꿔도 원인을 알 수 없다
         # (실측 #128·#129: 구글뉴스 경유분이 로그 한 줄 없이 0건이었다).
@@ -228,7 +270,7 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
         return False
 
     stale = 0
-    raw = rejected = 0
+    raw = rejected = missing_gist = 0
     why_top = {}
     sample = ""
     for it in root.iter("item"):
@@ -246,9 +288,28 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
         # 끝의 말줄임이 그대로 들어온다(실측 #129). 그대로 두면 본문에 기자명이
         # 섞이고 엔티티가 노출된다.
         desc = _clean_desc(desc)
+        link = (it.findtext("link") or "").strip()
+        if official:
+            try:
+                link = _official_link(link)
+            except ValueError:
+                link = ""
+            if not link:
+                rejected += 1
+                why_top["공식링크불일치"] = why_top.get("공식링크불일치", 0) + 1
+                continue
+            if not desc:
+                # 제목과 실제 발행기관이 관련성 기준을 통과할 때만 추가 HTTP 조회.
+                if (detail_budget is not None and detail_budget[0] > 0
+                        and is_relevant(title, dept)[0]):
+                    detail_budget[0] -= 1
+                    desc = _official_excerpt(link)
+                if not desc:
+                    missing_gist += 1
+                    continue
         if not sample:
             sample = f"{title[:40]} | 요지 {len(desc)}자: {desc[:60]}"
-        okay, _why = is_relevant(title, desc)
+        okay, _why = is_relevant(title, f"{dept} {desc}" if official else desc)
         if not okay:
             rejected += 1
             why_top[_why] = why_top.get(_why, 0) + 1
@@ -265,9 +326,10 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
                 f"제목: {title}\n"
                 f"요지: {_gist(desc)}\n"
                 f"※ 수혜 종목을 특정하거나 추천하지 말 것. 산업/테마 수준으로만 언급.\n"
-                f"※ 언론 보도이며 정부 확정 발표가 아닐 수 있음. 단정하지 말 것."
+                + ("※ 공식 보도자료 요지이며 확정·시행 여부를 원문 범위 안에서 구분할 것."
+                   if official else "※ 언론 보도이며 정부 확정 발표가 아닐 수 있음. 단정하지 말 것.")
             ),
-            "src": (it.findtext("link") or "").strip(),
+            "src": link,
         })
         if len(out) >= limit:
             return True
@@ -275,7 +337,7 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
     # 실측 #128: 구글뉴스 경유 선택 피드가 0건인데 원인을 알 수 없었다.
     top = sorted(why_top.items(), key=lambda x: -x[1])[:3]
     print(f"[policy] {dept}: 원문 {raw}건 / 시각제외 {stale} / "
-          f"관련성탈락 {rejected} {top} / 채택 {len(out) - _before}")
+          f"관련성탈락 {rejected} {top} / 요지미확인 {missing_gist} / 채택 {len(out) - _before}")
     if sample:
         print(f"[policy] {dept} 표본: {sample}")
     return True
@@ -284,6 +346,17 @@ def _read(dept: str, url: str, out: list, limit: int, optional: bool) -> bool:
 def fetch(limit: int = 8) -> list[dict]:
     out, ok = [], 0
 
+    # 뉴스 RSS가 상한을 먼저 채워 공식 소스가 영구 미조회되는 것을 방지한다.
+    detail_budget = [OFFICIAL_MAX]
+    official_ok = 0
+    for dept, url in OFFICIAL_FEEDS:
+        if limit <= 0:
+            break
+        if _read(dept, url, out, min(limit, OFFICIAL_MAX), optional=True,
+                 official=True, detail_budget=detail_budget):
+            official_ok += 1
+    official_count = len(out)
+
     for dept, url in FEEDS:
         if len(out) >= limit:
             break
@@ -291,20 +364,17 @@ def fetch(limit: int = 8) -> list[dict]:
             ok += 1
         crawl.sleep_jitter(0.6, 1.4)
 
-    # 국내 IP 러너로 옮기면 자동으로 살아난다
     _base = len(out)
     for dept, url in OPTIONAL_FEEDS:
         if len(out) >= limit:
             break
         _read(dept, url, out, limit, optional=True)
 
-    # korea.kr 계열이 실제로 열리는지 로그가 없어 확인이 안 됐다.
-    # 러너가 해외 IP면 전건 0건일 텐데, 그러면 정책 공급은 연합뉴스 2개 피드가
-    # 전부다. 피드를 늘릴지 판단하려면 이 수치가 필요하다.
-    print(f"[policy] 필수 {ok}/{len(FEEDS)}피드 {_base}건 / "
-          f"선택(korea.kr) {len(out) - _base}건")
-    crawl.report("policy_rss", len(out), limit if ok else 0,
-                 "필수 RSS 전건 실패")
+    print(f"[policy] 공식 {official_ok}/{len(OFFICIAL_FEEDS)}피드 {official_count}건 / "
+          f"뉴스 {ok}/{len(FEEDS)}피드 {_base - official_count}건 / "
+          f"검색 RSS {len(out) - _base}건")
+    crawl.report("policy_rss", len(out), limit if (ok or official_count) else 0,
+                 "사용 가능한 RSS 전건 실패")
     return out
 
 
@@ -314,3 +384,4 @@ def make_polls(pool: list[dict], n: int = 3) -> list[dict]:
     return [{**s, "id": "poll-" + s["id"], "kind": "poll",
              "facts": s["facts"] + "\n※ 결론을 내리지 말고, 찬반이 갈릴 만한 질문으로 마무리할 것."}
             for s in seeds]
+

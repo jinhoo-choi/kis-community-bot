@@ -47,6 +47,7 @@ python3 -m pyflakes src tools main.py config.py 2>/dev/null \
 echo
 echo "=== 2. unit (decide / gate / entity / dedup / rules) ==="
 COST_PRIORITY_MODE=0 python3 tests/test_decide.py
+python3 -m unittest -v tests.test_policy_sources
 COST_PRIORITY_MODE=0 python3 tests/test_template_reserve.py
 COST_PRIORITY_MODE=0 python3 tests/test_cost_offline.py
 python3 tests/test_yield_offline.py
@@ -79,3 +80,4 @@ echo "=== 3. E2E 시뮬레이션 ==="
 COST_PRIORITY_MODE=0 python3 tests/test_e2e.py
 echo
 echo "ALL TESTS PASSED"
+
