@@ -1,5 +1,7 @@
 # 현재 상태
 
+**2026-10-13 정책 RSS 종료 대응 (Codex, 검토용 PR):** korea.kr 직접 RSS 종료 공지를 확인하고, 재정경제부 공식 RSS·검증된 HTML 요약과 공식 도메인 검색 RSS로 대체했다. 새 회귀12/12·기존 unit474/474·template14/14·cost43/43·mocked pipeline9/9·E2E20/20 통과. 단, 수정 전후 전체 감사는 동일한 기존 공시 캐시 I1 실패2/경고2라 전체 CI 통과·운영 반영으로 보고하지 않는다. 상세와 불변식은 [`HANDOFF_2026-10-13_POLICY_RSS.md`](HANDOFF_2026-10-13_POLICY_RSS.md). 미병합이며 수동 운영 실행·유료 호출·재발송 없음.
+
 > **작업 시작 전 이 파일을 먼저 읽습니다.** 작업 종료 시 갱신합니다.
 > 협업 규칙은 [`AI_COLLABORATION.md`](AI_COLLABORATION.md) 참조.
 
@@ -346,3 +348,4 @@ facts 에 수치가 안 붙은 것이었습니다. 원문에서 값을 뽑을 �
 | 검색 보강 | 후보 부족 시 5건씩; 성공 캐시 7일 / NONE 1일 / 오류 미저장 |
 | 담당자 | 7명 (`data/assignees.json`) |
 | Gemini 무료 폴백 | 별도 무료 프로젝트의 `gemini-3.1-flash-lite`; 작성·심사만 사용 |
+
