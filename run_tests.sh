@@ -49,6 +49,7 @@ echo "=== 2. unit (decide / gate / entity / dedup / rules) ==="
 COST_PRIORITY_MODE=0 python3 tests/test_decide.py
 python3 -m unittest -v tests.test_policy_sources
 COST_PRIORITY_MODE=0 python3 tests/test_template_reserve.py
+python3 tests/test_basis_offline.py
 COST_PRIORITY_MODE=0 python3 tests/test_cost_offline.py
 python3 tests/test_yield_offline.py
 COST_PRIORITY_MODE=0 python3 tests/test_pipeline_offline.py > /tmp/pipeline_offline.log 2>&1 \
