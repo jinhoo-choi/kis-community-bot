@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.decide import decide_distribution, temperature_for
 from src.gate import is_hard_excluded
 from src import rules, entity, dedup
+from tests.fixture_data import FIXTURE_DIR, load_fixture
 from src.judge import _parse as parse_judge
 
 def P(i, code="005930", total=18, fatal=None, kind="disclosure"):
@@ -1088,6 +1089,8 @@ def main():
                           _f2.check("통관 특별 지원에 나선다고 밝혔습니다.", "기준일: x",
                                     "", "", "quick_memo"))))
     from src.sources import kind_inquiry as _ki, market as _mk2
+    # Cache helpers invoked below must not read the daily operating snapshot.
+    _mk2._CACHE = str(FIXTURE_DIR / "market_cache.json")
     _orig = _mk2._add_history
     _mk2._add_history = lambda r: r.update({"close_hist": 71000, "prev_close": 62000})
     _q = [{"stock_code": "005930", "facts": "답변 성격: 회사는 미확정이라고 답변"}]
@@ -2002,7 +2005,7 @@ def main():
     # 느낌표는 무작위 배정(#41)에서 사실 크기 연동으로 바꿨다. 무작위일 때
     # '고저 차이 6.1%였습니다!' 처럼 강조할 게 없는 글에도 붙었다(#137).
     from src import personas as _pers
-    _mc = __import__("json").load(open("data/market_cache.json"))["items"]
+    _mc = load_fixture("market_cache.json")["items"]
     _acc = [_pers.accent_for(x) for x in _mc]
     ok.append(run_data("느낌표는 두드러진 사실에만(특징주 10~24%)",
                   10 <= _acc.count("bang") / len(_acc) * 100 <= 24
@@ -2180,7 +2183,7 @@ def main():
                   all(len(d) == 10 for d in _tr2.holidays()), str(sorted(_tr2.holidays())[:3])))
 
     ok.append(run("평시 문장틀 비중 10%", _tr.normal_template_limit(50) == 5))
-    _res = _tr.build(__import__("json").load(open("data/market_cache.json"))["items"], 65)
+    _res = _tr.build(load_fixture("market_cache.json")["items"], 65)
     def _mkp(i, k):
         return {"id": f"{k}{i}", "kind": k, "provider": "claude",
                 # hash() 는 실행마다 값이 바뀐다(파이썬 해시 무작위화). 종목코드가
