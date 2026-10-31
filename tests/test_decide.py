@@ -1817,9 +1817,9 @@ def main():
                   all(_issue_amt(facts) == expected for facts, expected in _amount_cases),
                   str([_issue_amt(facts) for facts, _ in _amount_cases])))
     _report_facts = (
-        "종목: 삼성카드 (029780)\\n"
-        "리포트 제목: 조달코스트와 대손비용 측면에서 금리 상승 영향 본격화\\n"
-        "발간: 하나증권 / 2026-10-28\\n"
+        "종목: 삼성카드 (029780)\n"
+        "리포트 제목: 조달코스트와 대손비용 측면에서 금리 상승 영향 본격화\n"
+        "발간: 하나증권 / 2026-10-28\n"
         "리포트 요지: 자금 조달 여건이 개선될 수 있다는 설명입니다."
     )
     ok.append(run("리포트 제목·요지의 조달 표현은 금액 claim이 아님",
