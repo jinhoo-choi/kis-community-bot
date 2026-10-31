@@ -1802,6 +1802,29 @@ def main():
                   str([c["type"] for c in _claims.select(_dis, 2, "purpose")])))
     ok.append(run("금액 고정이 앵글 우선분을 밀어내지 않음",
                   "purpose" in [c["type"] for c in _claims.select(_dis, 2, "purpose")]))
+    # 2026-10-31 I6 회귀: 금액 라벨은 행 앞머리에서만 추출하고 설명 속 단어는 무시한다.
+    _issue_amt = lambda facts: next(
+        (c["value"] for c in _claims.build({"kind": "disclosure", "facts": facts})
+         if c["type"] == "issue_amt"), None)
+    _amount_cases = (
+        ("발행 총액: 200억원", "200억원"),
+        ("- 계약 금액: 220억원", "220억원"),
+        ("- 양수 금액: 823억원", "823억원"),
+        ("- 양도 금액: 410억원", "410억원"),
+        ("- 조달: 500억원", "500억원"),
+    )
+    ok.append(run("금액 라벨 5종은 행 시작에서 정상 추출",
+                  all(_issue_amt(facts) == expected for facts, expected in _amount_cases),
+                  str([_issue_amt(facts) for facts, _ in _amount_cases])))
+    _report_facts = (
+        "종목: 삼성카드 (029780)\n"
+        "리포트 제목: 조달코스트와 대손비용 측면에서 금리 상승 영향 본격화\n"
+        "발간: 하나증권 / 2026-10-28\n"
+        "리포트 요지: 자금 조달 여건이 개선될 수 있다는 설명입니다."
+    )
+    ok.append(run("리포트 제목·요지의 조달 표현은 금액 claim이 아님",
+                  _issue_amt(_report_facts) is None,
+                  str(_issue_amt(_report_facts))))
     # 2026-10-01 품질·비용 조정 회귀 방지
     from src import personas as _Pq, personas_v2 as _P2q, generator as _gq, filters as _fq
     from src.llm import base as _bq
