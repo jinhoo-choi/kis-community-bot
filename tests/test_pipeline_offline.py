@@ -1,8 +1,8 @@
 """main() 전 구간 오프라인 실행. 수집·모델·검색·텔레그램·상태 저장을 전부 가짜로 막는다.
 
 입력은 저장된 자료만 쓴다.
-  - flow  : data/market_cache.json (2026-10-02 기준 195건)
-  - 비-flow: data/posts_latest.json 의 10-06 실발송 research 7·policy 6 (facts 원문)
+  - tests/fixtures/pipeline_offline/ 의 고정 기사·시세·상장사 자료
+  - 출처 커밋·실제 구성은 같은 폴더 README.md 참고
   - research 6건(10-06 검색분): 상세 없음 템플릿으로 재구성(원문 아님)
 가짜 작성자는 같은 id 의 실발송 본문(비-flow) 또는 문장틀 본문(flow)을 돌려준다.
 10-06 전체 입력·응답 재현이 아니다. 경로·계약 검증용이다.
@@ -22,6 +22,7 @@ from src import (generator, judge, state, stats, telegram_bot, tickers, trading,
 from src.llm import router, base  # noqa: E402
 from src.llm.base import GenResult  # noqa: E402
 from tests.test_cost_offline import SIX, _research_thin, _FakeSearch  # noqa: E402
+from tests.fixture_data import load_fixture  # noqa: E402
 
 HAIKU = "claude-haiku-4-5-20251001"
 
@@ -31,8 +32,9 @@ def run(name, cond, detail=""):
     return cond
 
 
-FLOW = json.load(open("data/market_cache.json", encoding="utf-8"))["items"]
-POSTS = json.load(open("data/posts_latest.json", encoding="utf-8"))
+FLOW = load_fixture("market_cache.json")["items"]
+POSTS = load_fixture("posts_latest.json")
+LISTED = load_fixture("listed_cache.json")["map"]
 NONFLOW = [{k: p[k] for k in ("id", "kind", "stock_code", "stock_name", "title", "facts", "src")}
            for p in POSTS if p["kind"] != "flow"]
 BODY = {p["id"]: p["body"] for p in POSTS}
@@ -104,8 +106,7 @@ def run_main(raw, writer, judge_scores, cost_priority=False):
         (config, "BATCH_STATE_PATH", os.path.join(tmp, "batch.json")),
         (enrich, "CACHE_PATH", os.path.join(tmp, "enrich_cache.json")),
         (enrich, "enricher", lambda: fake_search),
-        (tickers, "listed", lambda: json.load(open("data/listed_cache.json",
-                                                   encoding="utf-8"))["map"]),
+        (tickers, "listed", lambda: copy.deepcopy(LISTED)),
         (crawl, "degraded_sources", lambda: []),
         (crawl, "health", lambda: {}),
         (router, "writers", lambda: {"claude": writer}),
