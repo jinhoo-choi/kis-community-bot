@@ -54,6 +54,7 @@ python3 tests/test_yield_offline.py
 COST_PRIORITY_MODE=0 python3 tests/test_pipeline_offline.py > /tmp/pipeline_offline.log 2>&1 \
   && grep -aE "^[0-9]+/[0-9]+ passed" /tmp/pipeline_offline.log \
   || { grep -aE "FAIL|Traceback" /tmp/pipeline_offline.log; exit 1; }
+python3 -m unittest -v tests.test_pipeline_fixture_isolation
 echo
 echo "=== 2b. 전수검사 (설정-코드 정합성) ==="
 python3 tools/audit.py

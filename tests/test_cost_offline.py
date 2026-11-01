@@ -9,6 +9,7 @@ from types import SimpleNamespace as NS
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.llm import base  # noqa: E402
+from tests.fixture_data import load_fixture  # noqa: E402
 from src.llm.base import GenResult  # noqa: E402
 from src.llm.claude import ClaudeProvider, _message_result  # noqa: E402
 
@@ -175,7 +176,7 @@ def enrich_tests() -> list[bool]:
     import main as M
     from src import enrich, gate, tickers
     # 상장사 목록은 네트워크 대신 저장된 캐시만 쓴다
-    _lc = json.load(open("data/listed_cache.json", encoding="utf-8"))["map"]
+    _lc = load_fixture("listed_cache.json")["map"]
     tickers.listed = lambda: _lc
     ok = []
     base.reset_usage()
@@ -245,16 +246,16 @@ def preflight_tests() -> list[bool]:
     import main as M
     from src import generator as G, facts, filters, personas as P
     ok = []
-    flow = json.load(open("data/market_cache.json", encoding="utf-8"))["items"]
+    flow = load_fixture("market_cache.json")["items"]
     facts.annotate_terms(flow)
-    posts = json.load(open("data/posts_latest.json", encoding="utf-8"))
+    posts = load_fixture("posts_latest.json")
     random.seed(7)
     picks = [(it, G.pick_style(dict(it), {}, set())) for it in flow + posts]
     held = [it["id"] for it, st in picks if not st[0]]
     bad = [it["id"] for it, (pid, ang, _, _) in picks
            if pid and ang and not P.v2.compatible(pid, ang)]
     nonflow = [st[0] for it, st in picks if it["kind"] != "flow"]
-    ok.append(run("실데이터 245건(flow 캐시+10-06 발송분): 보류 0, 계약 밖 조합 0",
+    ok.append(run("고정 시세·발송 fixture: 보류 0, 계약 밖 조합 0",
                   not held and not bad and all(nonflow),
                   f"비-flow 페르소나 {sorted(set(nonflow))}"))
 
