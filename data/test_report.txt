@@ -340,7 +340,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    함수 내 재import 로 전역 가림 없음  ([])
   OK    공급계약 수치가 근거로 인정됨
   OK    양수 수치가 근거로 인정됨
-  OK    flow 에서 quick_memo 미선택  ({'check_list', 'fact_note', 'careful_note', 'data_focus', 'brief_report'})
+  OK    flow 에서 quick_memo 미선택  ({'check_list', 'fact_note', 'careful_note', 'brief_report', 'data_focus'})
   OK    정정 공시 일괄차단 해제
   OK    num_cap 이 claim_cap 이상
   OK    미선정 비수치 사실도 프롬프트에서 제거
@@ -473,7 +473,7 @@ tools/audit_pipeline.py:35:1: 'config' imported but unused
   OK    심사 묶음 크기 설정 존재
   OK    목표 도달 시 심사 중단 로직 존재
   OK    보강 호출 인자가 프로바이더 시그니처와 맞음  (['self', 'system', 'user', 'temperature', 'max_tokens'])
-  OK    enrich 가 쓰는 인자가 전부 시그니처에 있음  ({'max_tokens', 'temperature'} vs {'system', 'max_tokens', 'temperature', 'self', 'user'})
+  OK    enrich 가 쓰는 인자가 전부 시그니처에 있음  ({'temperature', 'max_tokens'} vs {'user', 'self', 'max_tokens', 'temperature', 'system'})
   OK    주말은 휴장
   OK    평일 기본값은 영업일
   OK    추석·한글날 등 공휴일 등록
@@ -557,7 +557,7 @@ test_unrelated_title_never_fetches_summary (tests.test_policy_sources.PolicySour
 test_zero_limit_performs_no_network_requests (tests.test_policy_sources.PolicySources.test_zero_limit_performs_no_network_requests) ... ok
 
 ----------------------------------------------------------------------
-Ran 12 tests in 0.103s
+Ran 12 tests in 0.082s
 
 OK
   OK    문장틀 22종 계약
@@ -688,14 +688,14 @@ OK
 [claude] 캐시 예열 고정부 8토큰 (최소 4,096) / write 4,697 / read 0
 [claude] batch 제출 응답 불명 — 20건 재호출 보류
   OK    제출 APITimeoutError: 동기 0·준비 기록 보존·20건 미확정
-[claude] ⚠ 제출 여부 불명 배치 기록 pending-41533453168-1793656861222154434 — 비용 미확정
-[claude] ⚠ 제출 여부 불명 배치 기록 pending-41533453168-1793656861222154434 — 비용 미확정
+[claude] ⚠ 제출 여부 불명 배치 기록 pending-41726890410-1793743259207967495 — 비용 미확정
+[claude] ⚠ 제출 여부 불명 배치 기록 pending-41726890410-1793743259207967495 — 비용 미확정
   OK    제출 APITimeoutError 재시작: 배치·동기 모두 재제출 0
 [claude] 캐시 예열 고정부 8토큰 (최소 4,096) / write 4,697 / read 0
 [claude] batch 제출 응답 불명 — 20건 재호출 보류
   OK    제출 APIConnectionError: 동기 0·준비 기록 보존·20건 미확정
-[claude] ⚠ 제출 여부 불명 배치 기록 pending-41533453168-1793656861224222146 — 비용 미확정
-[claude] ⚠ 제출 여부 불명 배치 기록 pending-41533453168-1793656861224222146 — 비용 미확정
+[claude] ⚠ 제출 여부 불명 배치 기록 pending-41726890410-1793743259209551479 — 비용 미확정
+[claude] ⚠ 제출 여부 불명 배치 기록 pending-41726890410-1793743259209551479 — 비용 미확정
   OK    제출 APIConnectionError 재시작: 배치·동기 모두 재제출 0
 [claude] 캐시 예열 고정부 8토큰 (최소 4,096) / write 4,697 / read 0
 [claude] batch 제출 실패 → 동기: invalid request
@@ -736,7 +736,7 @@ OK
 test_full_pipeline_never_reads_production_snapshots (tests.test_pipeline_fixture_isolation.PipelineFixtureIsolationTests.test_full_pipeline_never_reads_production_snapshots) ... ok
 
 ----------------------------------------------------------------------
-Ran 1 test in 12.936s
+Ran 1 test in 9.391s
 
 OK
 
@@ -826,7 +826,7 @@ FAIL 0 / WARN 0
 FAIL 0
 
 === 2d. 파이프라인 정합성 (facts 생성 x 게이트 x claim x 필터) ===
-=== 파이프라인 정합성 감사 — 대상 252건 (합성 6 + 캐시 246) ===
+=== 파이프라인 정합성 감사 — 대상 251건 (합성 6 + 캐시 245) ===
   WARN [I2] [research] claim 'gist' 인용이 필터에 걸림
        └ ['literary_style'] / 리포트 요지: 2027년 매출액 약 7.1조원, 영업이익 2조 1,203억원을 전망한다. 짐펜트라 미국 매출이 본격화되며 수익성이 개선될 것으로 본다.
   WARN [I2] [policy] claim 'policy' 인용이 필터에 걸림
@@ -861,7 +861,7 @@ FAIL 0 / WARN 2
        └ '두산에너빌리티 원전 수주 소식이 나왔네요. 저는 이거 물렸는데 이번엔 좀 오르려나요. 체코 건 이후로 분위기가 달라진 건 맞습니다. 다만 확정된 수치는 없습니다. 어떻게 보시나요.'
 [gen] 정규식 리젝 v2 ['trade_advice', 'price_target']
        └ '카카오 광고매출 회복 얘기가 나옵니다. 지금 비중확대 하세요. 목표가 6만원 갑니다. 반드시 오릅니다. 지금이 기회입니다. 다들 어떻게 보시나요.'
-[gen] 정규식 리젝 v3 ["미확인수치['452', '1530', '8742']", "근거없는수치['1530', '452', '8742']"]
+[gen] 정규식 리젝 v3 ["미확인수치['1530', '452', '8742']", "근거없는수치['1530', '452', '8742']"]
        └ 'LG에너지솔루션이 어제 2.30% 올랐습니다. 거래대금은 8,742억원이었고 외국인이 1,530억 순매수했습니다. 수주잔고도 452조원까지 늘었다고 합니다. 배터리 업황이 돌아서는 걸까요.'
 [gen] 정규식 통과 10건 / 시도 13건
 
