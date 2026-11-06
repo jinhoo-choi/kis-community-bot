@@ -172,12 +172,18 @@ def _basis_errors(body: str, facts: str) -> list[str]:
     수급 줄은 금액에 주체(외국인·기관), 비중에 '거래대금' 이 필요하다.
     """
     need: dict[str, list] = {}
+    opening_starts: dict[str, str] = {}
     for line in (facts or "").splitlines():
         t = line.strip().lstrip("·").strip()
         if t.startswith("※") or ":" not in t:
             continue
         label, rest = (x.strip() for x in t.split(":", 1))
         anchor = next((a for lab, a in _BASIS if re.fullmatch(lab, label)), None)
+        if label == "시가 출발":
+            opening = re.fullmatch(
+                r"전일\s*종가\s*대비\s*(\d+(?:\.\d+)?)\s*%\s*(높게|낮게)", rest)
+            if opening:
+                opening_starts[opening.group(1) + "%"] = opening.group(2)
         inv = re.match(r"(외국인|기관) 순매[수도]", label)
         for m in _NUM_UNIT.finditer(rest):
             key = m.group(1).replace(",", "") + m.group(2)
@@ -198,10 +204,20 @@ def _basis_errors(body: str, facts: str) -> list[str]:
                 return [f"날짜불일치({a}월 {b}일)"]
     for sent in re.split(r"(?<=[.!?])\s+|\n", body or ""):
         for m in _NUM_UNIT.finditer(sent):
-            anchors = need.get(m.group(1).replace(",", "") + m.group(2))
+            key = m.group(1).replace(",", "") + m.group(2)
+            anchors = need.get(key)
             if not anchors or None in anchors:
                 continue
             if not any(re.search(a, sent) for a in anchors):
+                # 실측 #37537764333: '전일 종가 대비 8.2% 높게 시작한 뒤'.
+                # '시작' 단어만 허용하지 않고, 해당 수치 바로 앞뒤의 기준·방향을
+                # 시가 출발 원문과 대조한다. 다른 수치·문장의 기준으로 빌려 쓰지 않는다.
+                direction = opening_starts.get(key)
+                if (direction and re.search(r"전일\s*종가\s*대비\s*$", sent[:m.start()])
+                        and re.match(rf"\s*{direction}\s*시작(?:한\s+뒤|"
+                                     r"했(?:습니다|네요|어요|다)(?=$|[\s.!?,]))",
+                                     sent[m.end():])):
+                    continue
                 return [f"비교기준누락({m.group(0)})"]
     return []
 
