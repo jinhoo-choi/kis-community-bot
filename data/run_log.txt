@@ -1,166 +1,194 @@
+[dart] 주말 포함 조회 20261113 ~ 20261115
 [dart] corp_code 4016종목 매핑
-[dart] 상세 보강 17/48건
-[dart] 미보강 제목: ['최대주주변경을수반하는주식담보제공계약체결', '최대주주변경', '최대주주변경을수반하는주식양수도계약체결', '투자판단관련주요경영사항(임상시험계획변경승인)          ', '매출액또는손익구조30%(대규모법인은15%)이상변경', '주요사항보고서(자기전환사채만기전취득결정)', '유상증자또는주식관련사채등의청약결과(자율공시)', '연결재무제표기준영업(잠정)실적(공정공시)']
-[crawl] dart 48건
+[dart] piicDecsn 접수번호 불일치 20261113001593 — 상세 미사용
+[dart] 상세 보강 3/25건
+[dart] 미보강 제목: ['주요사항보고서(감자결정)(자회사의 주요경영사항)', '주요사항보고서(감자결정)', '최대주주변경', '[기재정정]주요사항보고서(유상증자결정)', '[기재정정]기타경영사항(자율공시)              (제', '[기재정정]주요사항보고서(자기전환사채매도결정)', '[기재정정]주요사항보고서(감자결정)', '매출액또는손익구조30%(대규모법인은15%)이상변동']
+[crawl] dart 25건
 [crawl] naver_research 33건
 [crawl] hankyung 20건
-[market] 기준일 일치 확정 캐시 199건 사용 (필요 250건)
-[market] 수급 파싱 200/200종목 (수급순위 0종목) / 거래대금 대비 비중 중앙 7.61% p75 17.2% p90 24.38% 최대 79.98% / 출력 임계 5.0% 초과 242건 / 시세이력 실패 0종목
-[crawl] market 199건
-[tickers] 상장 2629종목 로드 (lxml)
+[market] 기준일 일치 확정 캐시 198건 사용 (필요 250건)
+[market] 수급 파싱 200/200종목 (수급순위 0종목) / 거래대금 대비 비중 중앙 7.07% p75 14.99% p90 28.82% 최대 81.23% / 출력 임계 5.0% 초과 226건 / 시세이력 실패 0종목
+[crawl] market 198건
+[tickers] 상장 2630종목 로드 (lxml)
 [crawl] kind_inquiry 0건 (정상 0건)
-[policy] 재정경제부: 원문 40건 / 시각제외 32 / 관련성탈락 0 [] / 요지미확인 6 / 채택 2
-[policy] 재정경제부 표본: 범부처 민생안정지원단, 청년 취업지원 현장 점검 | 요지 110자: 범부처 민생안정지원단(단장 장도환)은 11.12.(목) 서울지방고용노동청 
-서울고용센터를 방문하여 청년 취
-[policy] 연합뉴스 경제: 원문 120건 / 시각제외 0 / 관련성탈락 111 [('키워드없음', 58), ('정책신호없음', 22), ('인물중심', 11)] / 요지미확인 0 / 채택 9
-[policy] 연합뉴스 경제 표본: [반려동물] "겨울철 털뭉치도 건조해요"…펫 스킨케어 시장 활기 | 요지 61자: 겨울철 건조한 날씨에 반려견과 반려묘의 피부 보습과 목욕 등에 대한 관심이 커지면서 반려동물 스킨케어(피부관
-[policy] 연합뉴스 산업: 원문 120건 / 시각제외 0 / 관련성탈락 113 [('키워드없음', 58), ('정책신호없음', 17), ('개별기업사건', 14)] / 요지미확인 0 / 채택 7
-[policy] 연합뉴스 산업 표본: 한국·프랑스 원자력 협력 격상…SMR부터 핵연료까지 확대 | 요지 61자: 과학기술정보통신부와 기후에너지환경부는 12~13일 프랑스 사클레에서 프랑스 원자력·대체에너지청(CEA)과 공
-[policy] 정책브리핑(구글뉴스): 원문 100건 / 시각제외 34 / 관련성탈락 64 [('키워드없음', 52), ('정책신호없음', 6), ('인물중심', 3)] / 요지미확인 0 / 채택 2
-[policy] 정책브리핑(구글뉴스) 표본: 유류세 인하 2개월 연장…휘발유 15%·경유 25% 인하 유지 | 요지 46자: 유류세 인하 2개월 연장…휘발유 15%·경유 25% 인하 유지  대한민국 정책브리핑
-[policy] 금융위원회(구글뉴스): 원문 89건 / 시각제외 68 / 관련성탈락 20 [('제목부족', 11), ('키워드없음', 9)] / 요지미확인 0 / 채택 1
-[policy] 금융위원회(구글뉴스) 표본: 모 두 말 씀 모 두 말 씀 | 요지 22자: 모 두 말 씀 모 두 말 씀  금융위원회
-[policy] 산업통상부(구글뉴스): 원문 59건 / 시각제외 59 / 관련성탈락 0 [] / 요지미확인 0 / 채택 0
-[policy] 공식 1/1피드 2건 / 뉴스 2/2피드 16건 / 검색 RSS 3건
-[crawl] policy_rss 21건
+[policy] 재정경제부: 원문 40건 / 시각제외 38 / 관련성탈락 0 [] / 요지미확인 2 / 채택 0
+[policy] 연합뉴스 경제: 원문 120건 / 시각제외 0 / 관련성탈락 113 [('키워드없음', 62), ('정책신호없음', 21), ('인물중심', 11)] / 요지미확인 0 / 채택 7
+[policy] 연합뉴스 경제 표본: 서리풀1지구 주택 79% 임대로…미리내집에 장기공공임대 추가 | 요지 61자: 정부가 서울 강남권 개발제한구역(그린벨트)을 풀어 조성하는 서리풀1 공공주택지구의 주택 공급 물량 중 79%
+[policy] 연합뉴스 산업: 원문 120건 / 시각제외 0 / 관련성탈락 113 [('키워드없음', 58), ('정책신호없음', 32), ('기관·산업앵커없음', 13)] / 요지미확인 0 / 채택 7
+[policy] 연합뉴스 산업 표본: 삼성D·LGD, 중국 게이밍 OLED 공략…현지업체·PC방 협력 강화 | 요지 61자: 삼성디스플레이와 LG디스플레이가 세계 최대 게임 시장인 중국에서 프리미엄 게이밍 유기발광다이오드(OLED) 
+[policy] 정책브리핑(구글뉴스): 원문 100건 / 시각제외 57 / 관련성탈락 42 [('키워드없음', 29), ('인물중심', 6), ('기관·산업앵커없음', 3)] / 요지미확인 0 / 채택 1
+[policy] 정책브리핑(구글뉴스) 표본: 아세안 및 APEC 정상회의 추가 일정 관련 강유정 수석대변인 서면 브리 | 요지 53자: 아세안 및 APEC 정상회의 추가 일정 관련 강유정 수석대변인 서면 브리핑  대한민국 정책브리핑
+[policy] 금융위원회(구글뉴스): 원문 100건 / 시각제외 74 / 관련성탈락 26 [('제목부족', 22), ('키워드없음', 2), ('인물중심', 2)] / 요지미확인 0 / 채택 0
+[policy] 금융위원회(구글뉴스) 표본: header.title | 요지 19자: header.title  금융위원회
+[policy] 산업통상부(구글뉴스): 원문 57건 / 시각제외 57 / 관련성탈락 0 [] / 요지미확인 0 / 채택 0
+[policy] 공식 1/1피드 0건 / 뉴스 2/2피드 14건 / 검색 RSS 1건
+[crawl] policy_rss 15건
 [tg-src] verified 채널 없음 → 스킵 (준법감시 검토 전)
 [crawl] telegram_ch 0건 (정상 0건)
-[main] 수집 총 321건
-[main] 최근 2일 게시 종목 특징주 57건 후순위
-[main] 용어 설명 주입 19건
+[main] 수집 총 291건
+[main] 용어 설명 주입 15건
 [main] 발송 목표 50건 / 수율 14% → 생성 상한 429건 → 기대 발송 50건
-[gate] 차단 49건 {'tier5': 48, 'tier3': 1}
-[theme] 배정 취소 — 관련 섹터 없음: 전남광주시, 대규모 사업에 지역 중소기업 참여 확대 모색
-[theme] 배정 취소 — 관련 섹터 없음: 환율, 수출업체 달러매도 등에 보름 만에 1,320원대로 하락
-[theme] 배정 취소 — 관련 섹터 없음: 전남광주시, 대규모 사업에 지역 중소기업 참여 확대 모색
-[theme] 배정 취소 — 관련 섹터 없음: 중기부, 메가프로젝트 참여 中企 위해 2조원 마련…PF 보증 신설
-[theme] 테마글 12건에 게시 종목 배정
-[theme] 게시판 매칭 실패 6건 생성 전 제외
-[dedup] 제외 7건 {'EVT': 3, 'TTL': 1, 'SIM': 1, 'ID': 2}
+[gate] 차단 38건 {'tier5': 34, 'tier4': 3, 'tier2': 1}
+[theme] 배정 취소 — 관련 섹터 없음: 한-투르크메니스탄 세관상호지원협정 발효…무역·통관 협력
+[theme] 배정 취소 — 관련 섹터 없음: 나스닥 23시간 거래 D-3주…"美투자 확대" "국내 영향 제한적"
+[theme] 배정 취소 — 관련 섹터 없음: 중기부 2차 '모두의창업' 개인 정보 유출…1차 유출사고 5개월만(종합)
+[theme] 배정 취소 — 관련 섹터 없음: 중기부 2차 '모두의 창업'서 참가자 818명 개인정보 유출
+[theme] 배정 취소 — 관련 섹터 없음: 기초연구 과제 '역대 최다'라는데…연구자들은 왜 목마를까
+[theme] 테마글 8건에 게시 종목 배정
+[theme] 게시판 매칭 실패 5건 생성 전 제외
+[dedup] 제외 7건 {'EVT': 3, 'SIM': 2, 'ID': 2}
 [enrich] 비용 절감 모드 — 유효 캐시만 사용, 신규 검색 0건
-[main] 생성 대상 259건 {'disclosure': 16, 'research': 34, 'flow': 199, 'policy': 10, 'poll': 0}
-[main] 실제 후보 기준 기대 발송 50.0건
-[template] 결정형 reserve 65/65건 → 배분 dry-run 4/50건
-[template] 비용 절감 모드 정상 상한·쿨다운 적용 예비 4건
+[main] 생성 대상 241건 {'disclosure': 4, 'research': 33, 'flow': 197, 'policy': 7, 'poll': 0}
+[main] 실제 후보 기준 기대 발송 47.0건
+[template] 결정형 reserve 65/65건 → 배분 dry-run 5/50건
+[template] 비용 절감 모드 정상 상한·쿨다운 적용 예비 5건
 [claude] SDK 2.8.0
 [claude] SDK 가 temperature 미지원 → 제외하고 재호출 (Messages.create() got an unexpected keyword argument 'temperature')
 [gen] claude: 10/10건 생성
-[gen] 정규식 리젝 flow-2026-11-12-000990 ['결합사실미사용']
-       └ 'DB하이텍이 전일 종가 대비 9.9% 낮게 시가를 출발했습니다. 종일 낙폭이 커져 장 마감 종가는 81,600원으로 17.49% 내렸네요. 이날 등락 크기는 최근 20거래일 평균 등락폭의 2.9배였습니다.'
-[gen] 문장 1개 제거 후 전체 필터 통과 flow-2026-11-12-211270 — 신규 작성 호출 0
-[gen] 문장 1개 제거 후 전체 필터 통과 flow-2026-11-12-451760 — 신규 작성 호출 0
-[gen] 문장 1개 제거 후 전체 필터 통과 naver-api-98119 — 신규 작성 호출 0
-[gen] 정규식 리젝 pol-제3차글로벌핵심투자자협의체개최 ['날짜불일치(11월 10일)']
-       └ '정부가 11월 10일 제3차 글로벌 핵심 투자자 협의체를 화상으로 개최했습니다. 문지성 재정경제부 국제경제관리관이 주재한 이번 회의에서는 11월 3일 발표된 증권시장 결제주기 단축(T+1) 방안이 주요 안건으로 다뤄졌습니다.'
-[gen] 정규식 리젝 dart-20261112801156 ["미확인수치['2026']", "근거없는수치['11', '12']", '미확인표현(확인되지 않)']
-       └ '이지스밸류플러스리츠가 매출액 또는 손익구조 30% 이상 변경을 공시했습니다. 2026년 11월 12일 제출된 공시입니다. 상세 수치는 확인되지 않았습니다.'
-[gen] 정규식 리젝 flow-2026-11-12-035900 ['선정외주장(1개)']
-       └ 'JYP Ent.의 거래량이 20일 평균의 5.9배였습니다! 2026년 11월 12일 종가 기준으로 최근 31거래일 중 최고가였고, 전일 종가 대비 8.29% 올랐네요. 시가는 전일 종가보다 4.2% 높게 출발했으며, 2거래일 연속 상승세를 이었습니다. 20일 이동평균 대비로는 14.0% 위에 있는 상태입니다.'
-[gen] 문장 1개 제거 후 전체 필터 통과 flow-2026-11-12-138040 — 신규 작성 호출 0
-[gen] 정규식 통과 6건 / 시도 10건
+[gen] 정규식 리젝 flow-2026-11-13-001210 ['선정외주장(1개)']
+       └ '금호전기의 거래량은 20일 평균의 5.7배였습니다! 2026년 11월 13일 종가는 전일 대비 22.77% 올랐고, 5거래일 누적으로는 32.85% 상승했어요. 장중 고저 차이는 저가 대비 24.0%였습니다.'
+[gen] 정규식 리젝 naver-api-98186 ['unsourced_eval', '수치과다(5개/brief_report)']
+       └ 'LG가 3분기 연결 영업이익으로 전년동기 대비 21.8% 감소한 3,277억원이었습니다. 미래에셋증권이 13일 발간한 리포트에서 이를 정리했는데, 화학 계열 부진과 지분법 감소가 영향을 미쳤다는 분석입니다. 컨센서스 4,417억원 대비 26% 하회한 수준이네요.'
+[gen] 정규식 통과 8건 / 시도 10건
 [claude] SDK 2.8.0
 [claude] SDK 2.8.0
 [judge] Claude Sonnet 교차모델 심사 5건
-[judge] Claude Sonnet 교차모델 심사 1건
-[main] 단계 생성 10/259건 → LLM 승인 가능 6/50건
+[judge] Claude Sonnet 교차모델 심사 3건
+[main] 단계 생성 10/241건 → LLM 승인 가능 8/50건
 [gen] claude: 20/20건 생성
-[gen] 문장 1개 제거 후 전체 필터 통과 naver-api-98113 — 신규 작성 호출 0
-[gen] 정규식 리젝 flow-2026-11-12-356860 ['선정외주장(1개)']
-       └ '티엘비 거래량이 20일 평균의 3.7배였습니다. 2026년 11월 12일 종가는 전일 대비 8.24% 올랐고, 시가는 전일 종가 대비 3.5% 높게 출발했네요. 장중 고가 대비 마감은 6.8% 낮은 수준이었으며, 5거래일 누적으로는 36.86% 상승했습니다.'
-[gen] 정규식 리젝 flow-2026-11-12-058610 ['주장과다(4개/3)']
-       └ '에스피지가 2026년 11월 12일 17.11% 내렸습니다. 거래량은 20일 평균의 3.7배였고, 최근 20거래일 최고 종가 대비 26.8% 아래입니다. 5거래일 누적으로는 11.38% 하락했네요.'
-[gen] 정규식 리젝 dart-20261112801117 ['수치과다(5개/brief_report)']
-       └ '금호건설이 최근 매출액의 18.43%에 해당하는 단일판매ㆍ공급계약을 체결했습니다! 공급 지역은 인천광역시 연수구 송도동 162-1이고 계약 종료일은 2028년 12월 31일입니다.'
-[gen] 정규식 리젝 naver-api-98112 ['수치과다(5개/brief_report)']
-       └ '이마트의 3분기 영업이익이 461억원으로 시장 기대치 1,595억원보다 훨씬 낮았습니다. 하나증권이 12일 공개한 리포트에 따르면 연결 순매출은 7조 4,919억원으로 전년 동기 대비 1% 증가했지만, 영업이익은 1% 감소하며 영업이익률 0.6%에 그쳤다는 내용입니다.'
-[gen] 정규식 리젝 flow-2026-11-12-035420 ['결합사실미사용']
-       └ '네이버가 전일 종가 대비 4.1% 낮게 시가했습니다. 종가는 180,900원으로 7.47% 내렸네요. 이날 등락 크기는 최근 20거래일 평균 등락폭의 2.8배였습니다.'
-[gen] 정규식 리젝 pol-삼성바이오노조한국노총가입추진조합원투표로결정 ['테마글종목언급(삼성바이오로직스)']
-       └ '삼성바이오로직스 노동조합이 한국노동조합총연맹(한국노총) 가입을 추진 중입니다. 조합원 투표를 통해 최종 결정하는 방식으로 진행될 예정이라고 밝혔네요. 연합뉴스 보도 기준 2026년 11월 12일입니다.'
-[gen] 문장 1개 제거 후 전체 필터 통과 flow-2026-11-12-036570 — 신규 작성 호출 0
-[gen] 정규식 리젝 naver-api-98111 ['unsourced_eval', '수치과다(5개/brief_report)']
-       └ '네오위즈가 2027년 신작 정보를 공개할 예정이라고 하나증권이 발표했습니다. 같은 리포트에서 3분기 실적을 다뤘는데, 영업수익 1,105억원과 영업이익 96억원이 컨센서스에 부합했다는 평가입니다. 전분기 대비로는 수익이 8.3%, 이익이 20.1% 올랐습니다.'
-[gen] 정규식 리젝 dart-20261112000665 ["미확인수치['6938', '234']", "근거없는수치['234', '30', '6938']"]
-       └ '바이브컴퍼니가 유상증자를 결정했습니다. 제3자배정증자 방식으로 234만6938주를 발행해 30억원을 조달할 계획이네요.'
-[gen] 정규식 리젝 flow-2026-11-12-069510 ['결합사실미사용']
-       └ '에스텍이 2026년 11월 12일 전일 종가 대비 19.8% 높게 시가했습니다. 종가는 19.83% 올랐네요. 이날 등락 크기는 최근 20거래일 평균 등락폭의 7.0배였습니다!'
-[gen] 문장 1개 제거 후 전체 필터 통과 flow-2026-11-12-257720 — 신규 작성 호출 0
-[gen] 문장 1개 제거 후 전체 필터 통과 naver-api-98109 — 신규 작성 호출 0
-[gen] 정규식 통과 11건 / 시도 20건
+[gen] 문장 1개 제거 후 전체 필터 통과 naver-api-98184 — 신규 작성 호출 0
+[gen] 정규식 리젝 flow-2026-11-13-277810 ['상대날짜(전일)', '선정외주장(1개)']
+       └ '레인보우로보틱스 거래량이 20일 평균의 2.6배였습니다. 2026년 11월 13일 종가는 전일보다 10.35% 올랐고, 5거래일 누적으로는 16.46% 상승했네요. 장중 고저 차이는 저가 대비 14.4%였으며 마감가는 장중 고가 대비 5.8% 낮은 수준이었습니다.'
+[gen] 정규식 리젝 flow-2026-11-13-092870 ['결합사실미사용']
+       └ '엑시콘이 전일 종가 대비 3.3% 높게 시가했습니다. 종가는 62,500원으로 9.46% 올랐네요. 장중에는 전일 종가까지 되돌렸다가 다시 올랐고, 최근 20거래일 최고 종가 대비로는 8.1% 아래 수준에서 마감했습니다.'
+[gen] 정규식 리젝 dart-20261113901937 ["미확인수치['2026']", "근거없는수치['11', '13']", '미확인표현(공개되지 않)']
+       └ '유비온이 매출액 또는 손익구조 15% 이상 변동을 공시했습니다. 2026년 11월 13일 제출된 공시인데, 상세 수치는 아직 공개되지 않았어요.'
+[gen] 정규식 리젝 flow-2026-11-13-074600 ['선정외주장(1개)']
+       └ '원익QnC의 거래량이 20일 평균의 6.5배였습니다! 종가는 전일 대비 19.35% 올랐고, 5거래일 누적으로는 38.21% 상승했네요. 장중 고저 차이는 저가 대비 18.3%였어요.'
+[gen] 문장 1개 제거 후 전체 필터 통과 naver-api-98182 — 신규 작성 호출 0
+[gen] 정규식 리젝 flow-2026-11-13-030530 ['선정외주장(1개)']
+       └ '원익홀딩스의 거래량이 20일 평균의 1.6배였습니다. 2026년 11월 13일 종가는 전일 대비 6.64% 올랐고, 5거래일 누적으로는 11.46% 상승했네요. 장중 고저 차이는 저가 대비 8.7%였습니다.'
+[gen] 정규식 리젝 pol-물가잡으려묶어둔석유전기가스요금커지는청구서 ['stock_ending']
+       └ '정부가 물가 안정을 위해 시행한 석유 최고가격제와 전기·가스요금 동결 조치가 막대한 청구서로 돌아오고 있다고 보도되었습니다. 연합뉴스 보도 기준 2026년 11월 15일 시점의 내용이네요. 정책 초기에는 소비자 부담 완화가 목표였지만, 시간이 지나면서 에너지 공급 비용과 실제 시장가격 간의 차이가 누적되는 상황으로 이어지고 있습니다.'
+[gen] 정규식 리젝 flow-2026-11-13-104620 ['주장과다(4개/3)']
+       └ '노랑풍선이 2026년 11월 13일 15.04% 올랐습니다! 거래량은 20일 평균의 13.4배였습니다. 최근 20거래일 평균 등락폭의 4.3배 수준으로 움직였고, 20일 이동평균 대비 26.3% 위에서 마감했습니다.'
+[gen] 문장 1개 제거 후 전체 필터 통과 naver-api-98181 — 신규 작성 호출 0
+[gen] 정규식 리젝 flow-2026-11-13-064400 ['선정외주장(1개)']
+       └ 'LG씨엔에스의 거래량은 20일 평균의 1.6배였습니다. 2026년 11월 13일 종가는 전일 대비 6.02% 올랐고, 5거래일 누적으로는 7.60% 상승했네요. 장중 고저 차이는 저가 대비 7.9%였으며 외국인이 순매수 155억원이었습니다.'
+[gen] 정규식 통과 12건 / 시도 20건
 [judge] Claude Sonnet 교차모델 심사 5건
 [judge] Claude Sonnet 교차모델 심사 5건
-[judge] Claude Sonnet 교차모델 심사 1건
-[main] 단계 생성 30/259건 → LLM 승인 가능 17/50건
+[judge] Claude Sonnet 교차모델 심사 2건
+[main] 단계 생성 30/241건 → LLM 승인 가능 20/50건
 [gen] claude: 20/20건 생성
-[gen] 문장 1개 제거 후 전체 필터 통과 flow-2026-11-12-078350 — 신규 작성 호출 0
-[gen] 문장 1개 제거 후 전체 필터 통과 dart-20261112000698 — 신규 작성 호출 0
-[gen] 정규식 리젝 naver-api-98108 ['수치과다(6개/brief_report)', '날짜불일치(12월 12일)']
-       └ '코오롱인더의 3분기 영업이익이 컨센서스를 18% 하회했습니다. 하나증권이 12월 12일 발표한 리포트에 따르면 3분기 영업이익은 402억원으로, 컨센서스 492억원보다 낮았네요. 같은 분기 전년 대비로는 49% 올랐지만 직전 분기 대비로는 58% 내렸습니다.'
-[gen] 문장 1개 제거 후 전체 필터 통과 flow-2026-11-12-005380 — 신규 작성 호출 0
-[gen] 문장 1개 제거 후 전체 필터 통과 naver-api-98106 — 신규 작성 호출 0
-[gen] 정규식 통과 19건 / 시도 20건
+[gen] 정규식 리젝 flow-2026-11-13-328130 ['문장성분오류']
+       └ '루닛이 장중 고저 차이는 저가 대비 17.5%였습니다. 종가는 15,250원으로 전일 대비 8.31% 올랐고, 마감 위치는 장중 고가 대비 5.6% 낮은 수준이었네요. 최근 20거래일 최고 종가 대비로는 9.1% 아래입니다.'
+[gen] 문장 1개 제거 후 전체 필터 통과 flow-2026-11-13-319660 — 신규 작성 호출 0
+[gen] 문장 1개 제거 후 전체 필터 통과 flow-2026-11-13-200710 — 신규 작성 호출 0
+[gen] 정규식 리젝 flow-2026-11-13-007810 ['결합사실미사용']
+       └ '코리아써키트가 전일 종가 대비 10.7% 높게 시가를 출발했습니다. 종가는 91,400원으로 4.70% 올랐고, 시가 대비 마감은 5.4% 낮은 수준이었어요.'
+[gen] 정규식 리젝 naver-api-98179 ['unsourced_eval']
+       └ '하나증권이 한국가스공사에 대해 해외 중심으로 유의미한 성장이 확인된다는 내용의 리포트를 발간했습니다. 환율이 빠르게 하락했고 별도에서 외화환산이익이 발생하며 별도 당기순이익이 크게 증가했다는 분석입니다. 제시 적정가격은 55,000원이고 투자의견은 매수입니다. 배당성향이 높아지지 않더라도 절대적인 순이익 증가에 따른 DPS 상향 가능성을 기대해볼 수 있다고'
+[gen] 정규식 리젝 flow-2026-11-13-445680 ['선정외주장(1개)']
+       └ '큐리옥스바이오시스템즈가 19.30% 내렸습니다. 2026년 11월 13일 종가는 전일보다 크게 내린 수준이었어요. 거래량은 20일 평균의 1.8배였고, 장중 고저 차이는 저가 대비 24.0%였습니다. 최근 20거래일 최고 종가 대비 29.4% 아래에 위치했으며, 20일 이동평균 대비로는 13.4% 낮은 수준.'
+[gen] 문장 1개 제거 후 전체 필터 통과 flow-2026-11-13-100790 — 신규 작성 호출 0
+[gen] 정규식 통과 16건 / 시도 20건
 [judge] Claude Sonnet 교차모델 심사 5건
 [judge] Claude Sonnet 교차모델 심사 5건
+[decide] 유형상한 완화로 1건 보충 (34 → 35)
 [judge] Claude Sonnet 교차모델 심사 5건
-[decide] 유형상한 완화로 5건 보충 (30 → 35)
+[decide] 유형상한 완화로 6건 보충 (34 → 40)
+[judge] Claude Sonnet 교차모델 심사 1건
+[decide] 유형상한 완화로 6건 보충 (34 → 40)
+[decide] ⚠ 절대상한 해제로 1건 보충 (40 → 41) — 구성 목표 초과: {'flow': 1}. 비-flow 공급 부족이 원인이다.
+[decide] 유형상한 완화로 2건 보충 (34 → 36)
+[main] 단계 생성 50/241건 → LLM 승인 가능 36/50건
+[decide] 유형상한 완화로 6건 보충 (34 → 40)
+[decide] ⚠ 절대상한 해제로 1건 보충 (40 → 41) — 구성 목표 초과: {'flow': 1}. 비-flow 공급 부족이 원인이다.
+[gen] claude: 13/13건 생성
+[gen] 정규식 리젝 flow-2026-11-13-003010 ['선정외주장(1개)']
+       └ '혜인이 2026년 11월 13일 전일 종가 대비 7.10% 내렸습니다. 거래량은 20일 평균의 3.1배였고, 최근 20거래일 최고 종가 대비 23.7% 아래입니다. 장중에는 상승으로 출발했다가 전일 종가까지 되돌렸는데, 이는 2거래일 연속 하락입니다.'
+[gen] 정규식 리젝 flow-2026-11-13-053800 ['문장성분오류']
+       └ '안랩이 장중 고저 차이는 저가 대비 9.7%였습니다. 2026년 11월 13일 종가는 111,400원으로 전일 대비 5.67% 내렸네요. 최근 20거래일 최고 종가 대비로는 8.0% 아래고, 상승 출발 후 장중에 전일 종가까지 되돌렸습니다.'
+[gen] 정규식 리젝 naver-api-98170 ['너무김(183자>150/brief_report)', '선두수치중복', '수치과다(6개/brief_report)']
+       └ '네이버가 3분기 매출액 3조 4,724억원을 기록했는데 전년 동기 대비 10.7% 증가했습니다. 다만 영업이익은 4,513억원으로 20.9% 감소했고, 당기순이익은 4,025억원으로 45.2% 줄어들었네요. SK증권은 영업이익이 컨센서스를 하회했다고 평가했습니다 ㅎㅎ. 성장성은 유지되는 가운데 수익성 개선이 과제로 남았습니다.'
+[gen] 정규식 리젝 flow-2026-11-13-089970 ["근거없는수치['25']"]
+       └ '브이엠이 전일 종가 대비 3.1% 높게 시가 출발했습니다. 종가는 41,950원이고 7.70% 올랐네요. 장중 고저 차이는 저가 대비 12.5%였습니다. 5거래일 누적으로는 34.89% 상승한 셈이에요 ㅎㅎ. 거래량은 20일 평균의 25배.'
+[gen] 정규식 리젝 flow-2026-11-13-006400 ["근거없는수치['25']"]
+       └ '삼성SDI가 2026년 11월 13일 2.89% 올랐습니다. 종가는 480,000원. 장중 고저 차이는 저가 대비 5.0%였고, 외국인은 285억원을 순매수했습니다. 거래대금 대비 외국인 순매수 비중은 13.0%. 거래량은 20일 평균의 25배.'
+[gen] 정규식 리젝 flow-2026-11-13-048410 ['선정외주장(1개)']
+       └ '현대바이오의 거래량이 20일 평균의 4.0배였습니다. 종가는 전일 대비 13.73% 올랐고, 5거래일 누적으로는 12.52% 상승했네요. 시가 대비 마감가는 11.5% 높은 수준이었습니다.'
+[gen] 문장 1개 제거 후 전체 필터 통과 flow-2026-11-13-095340 — 신규 작성 호출 0
+[gen] 문장 1개 제거 후 전체 필터 통과 naver-api-98168 — 신규 작성 호출 0
+[gen] 정규식 통과 7건 / 시도 13건
+[judge] Claude Sonnet 교차모델 심사 5건
+[decide] 유형상한 완화로 6건 보충 (36 → 42)
+[decide] ⚠ 절대상한 해제로 1건 보충 (42 → 43) — 구성 목표 초과: {'flow': 1}. 비-flow 공급 부족이 원인이다.
+[judge] Claude Sonnet 교차모델 심사 2건
+[decide] 유형상한 완화로 6건 보충 (36 → 42)
+[decide] ⚠ 절대상한 해제로 3건 보충 (42 → 45) — 구성 목표 초과: {'flow': 3}. 비-flow 공급 부족이 원인이다.
+[decide] 유형상한 완화로 4건 보충 (36 → 40)
+[main] 단계 생성 63/241건 → LLM 승인 가능 40/50건
+[decide] 유형상한 완화로 6건 보충 (36 → 42)
+[decide] ⚠ 절대상한 해제로 3건 보충 (42 → 45) — 구성 목표 초과: {'flow': 3}. 비-flow 공급 부족이 원인이다.
+[gen] claude: 8/8건 생성
+[gen] 정규식 리젝 flow-2026-11-13-267850 ['결합사실미사용']
+       └ '아시아나IDT가 2026년 11월 13일 5.80% 내렸습니다. 종가는 12,830원이었어요. 시가는 전일 종가 대비 3.3% 높게 출발했지만 결국 낙폭을 키우며 마감했네요.'
+[gen] 정규식 리젝 flow-2026-11-13-039490 ['stock_ending', '선정외주장(1개)']
+       └ '키움증권의 거래량이 20일 평균의 2.4배였습니다. 2026년 11월 13일 종가는 5.76% 올랐고, 5거래일 누적으로는 8.90% 상승했네요. 장중 고저 차이는 저가 대비 5.8%였으며, 시가 대비 마감가는 4.3% 높은 수준이었습니다. 4거래일 연속 상승 흐름이 이어지고 있습니다.'
+[gen] 문장 1개 제거 후 전체 필터 통과 flow-2026-11-13-263860 — 신규 작성 호출 0
+[gen] 정규식 리젝 flow-2026-11-13-108490 ["근거없는수치['25']"]
+       └ '로보티즈의 장중 고저 차이는 저가 대비 7.7%였습니다. 2026년 11월 13일 종가는 248,000원이고 5거래일 누적으로는 9.25% 올랐네요. 거래량은 20일 평균의 25배.'
+[gen] 문장 1개 제거 후 전체 필터 통과 flow-2026-11-13-078350 — 신규 작성 호출 0
+[gen] 정규식 통과 5건 / 시도 8건
+[judge] Claude Sonnet 교차모델 심사 5건
+[decide] 유형상한 완화로 6건 보충 (37 → 43)
+[decide] ⚠ 절대상한 해제로 6건 보충 (43 → 49) — 구성 목표 초과: {'flow': 6}. 비-flow 공급 부족이 원인이다.
+[decide] 유형상한 완화로 6건 보충 (37 → 43)
+[decide] ⚠ 절대상한 해제로 1건 보충 (43 → 44) — 구성 목표 초과: {'flow': 1}. 비-flow 공급 부족이 원인이다.
+[main] 단계 생성 71/241건 → LLM 승인 가능 44/50건
+[decide] 유형상한 완화로 6건 보충 (37 → 43)
+[decide] ⚠ 절대상한 해제로 6건 보충 (43 → 49) — 구성 목표 초과: {'flow': 6}. 비-flow 공급 부족이 원인이다.
+[gen] claude: 4/4건 생성
+[gen] 문장 1개 제거 후 전체 필터 통과 naver-api-98165 — 신규 작성 호출 0
+[gen] 정규식 리젝 flow-2026-11-13-232140 ['비교기준누락(3.2%)']
+       └ '와이씨가 전일 종가 대비 3.2% 높게 시작한 뒤 8.40% 올랐습니다. 종가는 13,030원이었어요. 거래량은 20일 평균의 2.0배였고, 최근 20거래일 최고 종가 대비로는 11.2% 아래입니다.'
+[gen] 정규식 리젝 flow-2026-11-13-131290 ['비교기준누락(4.2%)']
+       └ '티에스이가 6.96% 올랐습니다. 종가는 253,500원이고 전일 종가 대비 4.2% 높게 시작했네요. 마감 위치는 장중 고가 대비 5.8% 낮은 수준이었습니다.'
+[gen] 정규식 통과 2건 / 시도 4건
+[judge] Claude Sonnet 교차모델 심사 2건
+[decide] 유형상한 완화로 6건 보충 (37 → 43)
+[decide] ⚠ 절대상한 해제로 6건 보충 (43 → 49) — 구성 목표 초과: {'flow': 6}. 비-flow 공급 부족이 원인이다.
+[decide] 유형상한 완화로 6건 보충 (37 → 43)
+[decide] ⚠ 절대상한 해제로 1건 보충 (43 → 44) — 구성 목표 초과: {'flow': 1}. 비-flow 공급 부족이 원인이다.
+[main] 단계 생성 75/241건 → LLM 승인 가능 44/50건
+[decide] 유형상한 완화로 6건 보충 (37 → 43)
+[decide] ⚠ 절대상한 해제로 6건 보충 (43 → 49) — 구성 목표 초과: {'flow': 6}. 비-flow 공급 부족이 원인이다.
+[gen] claude: 4/4건 생성
+[gen] 문장 1개 제거 후 전체 필터 통과 naver-api-98163 — 신규 작성 호출 0
+[gen] 정규식 통과 4건 / 시도 4건
 [judge] Claude Sonnet 교차모델 심사 4건
-[decide] 유형상한 완화로 6건 보충 (30 → 36)
-[decide] ⚠ 절대상한 해제로 2건 보충 (36 → 38) — 구성 목표 초과: {'flow': 2}. 비-flow 공급 부족이 원인이다.
-[decide] 유형상한 완화로 4건 보충 (30 → 34)
-[main] 단계 생성 50/259건 → LLM 승인 가능 34/50건
-[decide] 유형상한 완화로 6건 보충 (30 → 36)
-[decide] ⚠ 절대상한 해제로 2건 보충 (36 → 38) — 구성 목표 초과: {'flow': 2}. 비-flow 공급 부족이 원인이다.
-[gen] claude: 18/18건 생성
-[gen] 문장 1개 제거 후 전체 필터 통과 dart-20261112900972 — 신규 작성 호출 0
-[gen] 정규식 리젝 dart-20261112000574 ['너무짧음(69자<90/check_list)']
-       └ '모아데이타가 유상증자를 결정했습니다. 제3자배정 방식으로 759,013주를 발행하며 20억원의 운영자금을 조달할 계획입니다.'
-[gen] 문장 1개 제거 후 전체 필터 통과 naver-api-98104 — 신규 작성 호출 0
-[gen] 정규식 리젝 flow-2026-11-12-120110 ['선정외주장(1개)']
-       └ '코오롱인더가 20일 평균의 3.1배 거래량이었고 9.73% 내렸습니다. 2026년 11월 12일 종가는 전일 종가 대비 하락한 수준이었고, 시가 대비 마감은 7.1% 낮았네요. 장중 고저 차이는 저가 대비 11.3%였습니다. 5거래일 누적으로는 12.45% 내렸습니다.'
-[gen] 정규식 리젝 flow-2026-11-12-359410 ['주장과다(4개/3)']
-       └ '영광의 거래량이 20일 평균의 0.5배였습니다. 종가는 10,630원으로 전일 대비 5.77% 올랐고, 장중 고저 차이는 저가 대비 25.1%였네요.'
-[gen] 정규식 리젝 naver-api-98103 ['수치과다(5개/brief_report)']
-       └ '코스맥스가 3분기 영업이익으로 시장 기대치를 넘었습니다. 하나증권의 리포트에 따르면 3분기 연결 매출은 8,758억원(YoY 50%), 영업이익은 833억원(YoY 95%)을 기록했는데, 이는 하나증권이 예상했던 영업이익 782억원을 초과한 수치입니다.'
-[gen] 정규식 통과 14건 / 시도 18건
-[judge] Claude Sonnet 교차모델 심사 5건
-[decide] 유형상한 완화로 6건 보충 (33 → 39)
-[judge] Claude Sonnet 교차모델 심사 5건
-[decide] 유형상한 완화로 6건 보충 (33 → 39)
-[decide] ⚠ 절대상한 해제로 4건 보충 (39 → 43) — 구성 목표 초과: {'flow': 4}. 비-flow 공급 부족이 원인이다.
-[judge] Claude Sonnet 교차모델 심사 4건
-[decide] 유형상한 완화로 6건 보충 (33 → 39)
-[decide] ⚠ 절대상한 해제로 8건 보충 (39 → 47) — 구성 목표 초과: {'flow': 8}. 비-flow 공급 부족이 원인이다.
-[decide] 유형상한 완화로 6건 보충 (33 → 39)
-[decide] ⚠ 절대상한 해제로 7건 보충 (39 → 46) — 구성 목표 초과: {'flow': 7}. 비-flow 공급 부족이 원인이다.
-[main] 단계 생성 68/259건 → LLM 승인 가능 46/50건
-[decide] 유형상한 완화로 6건 보충 (33 → 39)
-[decide] ⚠ 절대상한 해제로 8건 보충 (39 → 47) — 구성 목표 초과: {'flow': 8}. 비-flow 공급 부족이 원인이다.
-[gen] claude: 5/5건 생성
-[gen] 정규식 리젝 flow-2026-11-12-039980 ['선정외주장(1개)']
-       └ '폴라리스AI가 2026년 11월 12일 13.90% 올랐습니다. 5거래일 누적으로는 17.19% 상승했네요. 거래량은 20일 평균의 2.3배.'
-[gen] 정규식 통과 4건 / 시도 5건
-[judge] Claude Sonnet 교차모델 심사 4건
-[decide] 유형상한 완화로 6건 보충 (35 → 41)
-[decide] ⚠ 절대상한 해제로 9건 보충 (41 → 50) — 구성 목표 초과: {'flow': 9}. 비-flow 공급 부족이 원인이다.
-[decide] 유형상한 완화로 6건 보충 (35 → 41)
-[decide] ⚠ 절대상한 해제로 8건 보충 (41 → 49) — 구성 목표 초과: {'flow': 8}. 비-flow 공급 부족이 원인이다.
-[main] 단계 생성 73/259건 → LLM 승인 가능 49/50건
-[decide] 유형상한 완화로 6건 보충 (35 → 41)
-[decide] ⚠ 절대상한 해제로 9건 보충 (41 → 50) — 구성 목표 초과: {'flow': 9}. 비-flow 공급 부족이 원인이다.
-[decide] 유형상한 완화로 6건 보충 (35 → 41)
-[decide] ⚠ 절대상한 해제로 9건 보충 (41 → 50) — 구성 목표 초과: {'flow': 9}. 비-flow 공급 부족이 원인이다.
-[decide] 유형상한 완화로 6건 보충 (35 → 41)
-[decide] ⚠ 절대상한 해제로 9건 보충 (41 → 50) — 구성 목표 초과: {'flow': 9}. 비-flow 공급 부족이 원인이다.
-[template] 최종 문장틀 보충 1건 / LLM 49건
-[assign] {'강항원 차장님': 7, '김현원 차장님': 7, '정지운 차장님': 7, '김영애 차장님': 7, '방범상 차장님': 7, '최지선 차장님': 8, '박미영 차장님': 7}
+[decide] 유형상한 완화로 6건 보충 (38 → 44)
+[decide] ⚠ 절대상한 해제로 6건 보충 (44 → 50) — 구성 목표 초과: {'flow': 6}. 비-flow 공급 부족이 원인이다.
+[decide] 유형상한 완화로 6건 보충 (38 → 44)
+[decide] ⚠ 절대상한 해제로 2건 보충 (44 → 46) — 구성 목표 초과: {'flow': 2}. 비-flow 공급 부족이 원인이다.
+[main] 단계 생성 79/241건 → LLM 승인 가능 46/50건
+[decide] 유형상한 완화로 6건 보충 (38 → 44)
+[decide] ⚠ 절대상한 해제로 6건 보충 (44 → 50) — 구성 목표 초과: {'flow': 6}. 비-flow 공급 부족이 원인이다.
+[decide] 유형상한 완화로 6건 보충 (38 → 44)
+[decide] ⚠ 절대상한 해제로 6건 보충 (44 → 50) — 구성 목표 초과: {'flow': 6}. 비-flow 공급 부족이 원인이다.
+[decide] 유형상한 완화로 6건 보충 (38 → 44)
+[decide] ⚠ 절대상한 해제로 6건 보충 (44 → 50) — 구성 목표 초과: {'flow': 6}. 비-flow 공급 부족이 원인이다.
+[template] 최종 문장틀 보충 4건 / LLM 46건
+[assign] {'강항원 차장님': 8, '김현원 차장님': 8, '정지운 차장님': 8, '김영애 차장님': 7, '방범상 차장님': 6, '최지선 차장님': 7, '박미영 차장님': 6}
 [main] 배포 50건 / 보류 69건 (담당자 이름 내림차순 정렬)
-   보류 pol-한은강연서국가부채공짜아냐저금리영원하지않아 (claude) - fatal:허용된 사실 외 추측(금리 인상 가능성 언급)
-   보류 flow-2026-11-12-141000 (claude) - fatal:종가를 141,000원으로 오기재(종목코드와 혼동, 실제 12,190원)
-   보류 pol-속초대포항국가거점어항최종선정국비465억원지원 (claude) - fatal:허용된 사실 외의 주장(대규모 개발 사업 진행 추측),상투적 마무리 문구(구체화될 것으로 보인다)
-   보류 pol-안성소식사회경제기업이지역사회문제해결안성시우수 (claude) - 준법성 3/5
-   보류 flow-2026-11-12-373220 (claude) - 문체상한(brief_report)
-[tg] 429 — 26초 대기 후 재시도 flow-2026-11-12-036570
-[tg] 429 — 25초 대기 후 재시도 flow-2026-11-12-196170
-[main] filter_log data/filter_log_20261113_0707.json
-[main] usage_log data/usage_log_20261113_0707.json
-[main] stats {"ts": "2026-11-13T07:07:32+09:00", "test_mode": false, "collected": 321, "gate_blocked": 55, "gate_reasons": {"tier5": 54, "tier3": 1}, "gate_detail": {"tier5:글감부족": 48, "tier5:게시판없음": 6, "tier3:투기소지(국회)": 1}, "enrich_ok": 0, "enrich_delivered": 0, "reject_reasons": {"flow:선정외주장": 4, "research:수치과다": 4, "flow:결합사실미사용": 3, "flow:주장과다": 2, "policy:날짜불일치": 1, "disclosure:미확인수치['2026']": 1, "disclosure:근거없는수치['11', '12']": 1, "disclosure:미확인표현": 1, "disclosure:수치과다": 1, "policy:테마글종목언급": 1, "research:unsourced_eval": 1, "disclosure:미확인수치['6938', '234']": 1, "disclosure:근거없는수치['234', '30', '6938']": 1, "research:날짜불일치": 1, "disclosure:너무짧음": 1}, "cliche_tails": [" 변화가 생길지는 사업 추진 과정에서 구체화될 것으로 보입니다."], "fatal_codes": {"policy:허용된 사실 외 추측(금리 인상 가능성 언급)": 1, "flow:종가를 141,000원으로 오기재(종목코드와 혼동, 실제 12,190원)": 1, "policy:허용된 사실 외의 주장(대규모 개발 사업 진행 추측)": 1, "policy:상투적 마무리 문구(구체화될 것으로 보인다)": 1}, "score_axis_avg": {"factual": 4.37, "useful": 2.69, "natural": 3.19, "compliant": 4.44, "gain": 2.67, "fit": 2.81}, "fail_samples": {"fatal:허용된 사실 외 추측": "의 언급인데, 이는 향후 금리 인상 가능성을 염두에 둔 것으로 보입니다.", "fatal:종가를 141,000원으로 오기재": "동평균 대비로는 10.2% 위에서 마감했습니다. 종가는 141,000원.", "fatal:허용된 사실 외의 주장": "업에 어떤 변화가 생길지는 사업 추진 과정에서 구체화될 것으로 보입니다.", "fatal:상투적 마무리 문구": "업에 어떤 변화가 생길지는 사업 추진 과정에서 구체화될 것으로 보입니다.", "결합사실미사용": "네요. 이날 등락 크기는 최근 20거래일 평균 등락폭의 2.9배였습니다.", "날짜불일치": "표된 증권시장 결제주기 단축(T+1) 방안이 주요 안건으로 다뤄졌습니다.", "미확인수치['2026']": "6년 11월 12일 제출된 공시입니다. 상세 수치는 확인되지 않았습니다.", "근거없는수치['11', '12']": "6년 11월 12일 제출된 공시입니다. 상세 수치는 확인되지 않았습니다.", "미확인표현": "6년 11월 12일 제출된 공시입니다. 상세 수치는 확인되지 않았습니다.", "선정외주장": " 이었습니다. 20일 이동평균 대비로는 14.0% 위에 있는 상태입니다.", "주장과다": "대비 26.8% 아래입니다. 5거래일 누적으로는 11.38% 하락했네요.", "수치과다": "수구 송도동 162-1이고 계약 종료일은 2028년 12월 31일입니다.", "테마글종목언급": "예정이라고 밝혔네요. 연합뉴스 보도 기준 2026년 11월 12일입니다.", "unsourced_eval": "입니다. 전분기 대비로는 수익이 8.3%, 이익이 20.1% 올랐습니다.", "미확인수치['6938', '234']": "정증자 방식으로 234만6938주를 발행해 30억원을 조달할 계획이네요.", "근거없는수치['234', '30', '6938']": "정증자 방식으로 234만6938주를 발행해 30억원을 조달할 계획이네요.", "너무짧음": "으로 759,013주를 발행하며 20억원의 운영자금을 조달할 계획입니다."}, "raw_vs_clean": {"너무짧음": [{"raw_len": 69, "clean_len": 69, "raw_tail": "배정 방식으로 759,013주를 발행하며 20억원의 운영자금을 조달할 계획입니다.", "clean_tail": "배정 방식으로 759,013주를 발행하며 20억원의 운영자금을 조달할 계획입니다."}]}, "hold_kinds": {"flow:문장틀쿨다운": 44, "flow:소재중복": 17, "flow:문체상한": 3, "policy:fatal:허용된": 2, "flow:fatal:종가를": 1, "policy:준법성": 1, "flow:유형절대상한": 1}, "enrich_calls": 0, "generation_candidates": 259, "generation_attempted": 73, "generation_stages": [10, 20, 20, 18, 5], "generation_items_avoided": 186, "generated": 54, "deterministic_trim_count": 14, "template_reserve": 65, "template_fallback_count": 1, "judge_failed": 0, "delivery_attempted": 50, "delivery_failed": 0, "attempt_to_delivery_yield": 0.6712, "sent": 50, "held": 69, "hold_reasons": {"fatal": 3, "준법성 3/5": 1, "문체상한": 3, "소재중복": 17, "유형절대상한": 1, "문장틀쿨다운": 44}, "avg_score": 13.7, "by_provider": {"claude": {"generated": 54, "sent": 49, "avg_score": 13.44}, "template": {"generated": 65, "sent": 1, "avg_score": null}}, "by_persona": {"brief_report": {"attempted": 26, "filter_passed": 16, "template_prepared": 21, "held": 22, "delivered": 15, "avg_score": 13.04, "angles": {"amount": 5, "ratio": 6, "terms": 1, "reaction": 2, "compare": 2}}, "careful_note": {"attempted": 8, "filter_passed": 8, "template_prepared": 0, "held": 0, "delivered": 8, "avg_score": 14.26, "angles": {"compare": 4, "reaction": 3, "ratio": 1}}, "check_list": {"attempted": 8, "filter_passed": 4, "template_prepared": 0, "held": 0, "delivered": 4, "avg_score": 13.65, "angles": {"amount": 3, "duration": 1}}, "data_focus": {"attempted": 12, "filter_passed": 10, "template_prepared": 24, "held": 24, "delivered": 10, "avg_score": 14.19, "angles": {"ratio": 5, "amount": 2, "reaction": 2, "compare": 1}}, "fact_note": {"attempted": 15, "filter_passed": 13, "template_prepared": 20, "held": 23, "delivered": 10, "avg_score": 13.06, "angles": {"duration": 9, "compare": 1, "amount": 1, "ratio": 1, "reaction": 1}}, "quick_memo": {"attempted": 1, "filter_passed": 0, "template_prepared": 0, "held": 0, "delivered": 0, "avg_score": null, "angles": {}}, "two_view": {"attempted": 3, "filter_passed": 3, "template_prepared": 0, "held": 0, "delivered": 3, "avg_score": 12.2, "angles": {"compare": 1, "ratio": 2}}}, "by_kind_funnel": {"disclosure": {"collected": 48, "gate_blocked": 30, "candidates": 16, "attempted": 8, "filter_passed": 4, "judge_failed": 0, "held": 0, "delivery_attempted": 4, "delivered": 4}, "flow": {"collected": 199, "gate_blocked": 0, "candidates": 199, "attempted": 44, "filter_passed": 35, "judge_failed": 0, "held": 66, "delivery_attempted": 34, "delivered": 34}, "policy": {"collected": 21, "gate_blocked": 9, "candidates": 10, "attempted": 10, "filter_passed": 8, "judge_failed": 0, "held": 3, "delivery_attempted": 5, "delivered": 5}, "research": {"collected": 53, "gate_blocked": 16, "candidates": 34, "attempted": 11, "filter_passed": 7, "judge_failed": 0, "held": 0, "delivery_attempted": 7, "delivered": 7}}, "llm_usage": {"cost_target_usd": 0.3, "cost_target_mode": "advisory", "cost_target_met": true, "pricing_as_of": "2026-09-12", "cost_scope": "token + claude web_search; gemini grounding overage/storage excluded", "calls": 127, "input_tokens": 565685, "output_tokens": 13622, "thinking_tokens": 0, "cache_read_tokens": 441375, "cache_write_tokens": 6644, "grounding_queries": 0, "failed_calls": 0, "estimated_token_cost_usd": 0.299036, "unknown_cost_calls": 0, "uncached_input_tokens": 117666, "unconfirmed_cost_calls": 0, "api_attempts": 127, "cost_per_delivered_usd": 0.005981, "cost_basis": "usage_estimate", "billed_cost_usd": null, "billing_check": "unverified", "pending_batch_requests": 0, "cost_complete": true, "by_route": {"claude|claude-haiku-4-5-20251001|paid|write": {"calls": 73, "input_tokens": 432682, "output_tokens": 9582, "thinking_tokens": 0, "cache_read_tokens": 338184, "cache_write_tokens": 4697, "grounding_queries": 0, "failed_calls": 0, "estimated_token_cost_usd": 0.177401, "unknown_cost_calls": 0, "api_attempts": 73}, "claude|claude-sonnet-5|paid|judge": {"calls": 54, "input_tokens": 133003, "output_tokens": 4040, "thinking_tokens": 0, "cache_read_tokens": 103191, "cache_write_tokens": 1947, "grounding_queries": 0, "failed_calls": 0, "estimated_token_cost_usd": 0.121636, "unknown_cost_calls": 0, "api_attempts": 54}}, "by_attempt_type": {"initial": {"calls": 127, "api_attempts": 127, "estimated_token_cost_usd": 0.299036}}, "by_billing_mode": {"standard": {"calls": 127, "estimated_token_cost_usd": 0.299036}}}, "model_fallbacks": [], "dedup": {"EVT": 3, "TTL": 1, "SIM": 1, "ID": 2}, "crawl_health": {"dart": {"got": 48, "expected": 8, "degraded": false}, "naver_research": {"got": 33, "expected": 5, "degraded": false}, "hankyung": {"got": 20, "expected": 2, "degraded": false}, "market": {"got": 199, "expected": 20, "degraded": false}, "kind_inquiry": {"got": 0, "expected": 0, "degraded": false}, "policy_rss": {"got": 21, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}, "enrich_skipped": {"cost_priority:new_search_disabled": 48}, "enrich_outcome": {}, "style_held": []}
+   보류 flow-2026-11-13-437730 (claude) - fatal:종목코드를 종가로 오기재(437,730원은 종목코드)
+   보류 naver-api-98165 (claude) - 종목상한(2)
+   보류 flow-2026-11-13-015760 (claude) - 종목상한(2)
+   보류 flow-2026-11-13-036930 (claude) - 문체상한(brief_report)
+   보류 flow-2026-11-13-064290 (claude) - 문체상한(brief_report)
+[tg] 429 — 27초 대기 후 재시도 flow-2026-11-13-403870
+[tg] 429 — 25초 대기 후 재시도 flow-2026-11-13-078350
+[main] filter_log data/filter_log_20261116_0707.json
+[main] usage_log data/usage_log_20261116_0707.json
+[main] stats {"ts": "2026-11-16T07:07:41+09:00", "test_mode": false, "collected": 291, "gate_blocked": 43, "gate_reasons": {"tier5": 39, "tier4": 3, "tier2": 1}, "gate_detail": {"tier5:글감부족": 34, "tier5:게시판없음": 5, "tier4:제목부족": 2, "tier4:정보없음(기타경영사항)": 1, "tier2:자사계열종목": 1}, "enrich_ok": 0, "enrich_delivered": 0, "reject_reasons": {"flow:선정외주장": 9, "flow:결합사실미사용": 3, "flow:근거없는수치['25']": 3, "research:unsourced_eval": 2, "research:수치과다": 2, "flow:문장성분오류": 2, "flow:비교기준누락": 2, "flow:상대날짜": 1, "disclosure:미확인수치['2026']": 1, "disclosure:근거없는수치['11', '13']": 1, "disclosure:미확인표현": 1, "policy:stock_ending": 1, "flow:주장과다": 1, "research:너무김": 1, "research:선두수치중복": 1, "flow:stock_ending": 1}, "cliche_tails": [], "fatal_codes": {"flow:종목코드를 종가로 오기재(437,730원은 종목코드)": 1}, "score_axis_avg": {"factual": 4.41, "useful": 2.67, "natural": 3.13, "compliant": 4.52, "gain": 2.63, "fit": 2.69}, "fail_samples": {"fatal:종목코드를 종가로 오기재": " 25.79% 올랐네요. 장중 고저 차이는 저가 대비 13.3%였습니다.", "선정외주장": "32.85% 상승했어요. 장중 고저 차이는 저가 대비 24.0%였습니다.", "unsourced_eval": "다는 분석입니다. 컨센서스 4,417억원 대비 26% 하회한 수준이네요.", "수치과다": "다는 분석입니다. 컨센서스 4,417억원 대비 26% 하회한 수준이네요.", "상대날짜": " 14.4%였으며 마감가는 장중 고가 대비 5.8% 낮은 수준이었습니다.", "결합사실미사용": "최근 20거래일 최고 종가 대비로는 8.1% 아래 수준에서 마감했습니다.", "미확인수치['2026']": "년 11월 13일 제출된 공시인데, 상세 수치는 아직 공개되지 않았어요.", "근거없는수치['11', '13']": "년 11월 13일 제출된 공시인데, 상세 수치는 아직 공개되지 않았어요.", "미확인표현": "년 11월 13일 제출된 공시인데, 상세 수치는 아직 공개되지 않았어요.", "stock_ending": " 비용과 실제 시장가격 간의 차이가 누적되는 상황으로 이어지고 있습니다.", "주장과다": "수준으로 움직였고, 20일 이동평균 대비 26.3% 위에서 마감했습니다.", "문장성분오류": " 수준이었네요. 최근 20거래일 최고 종가 대비로는 9.1% 아래입니다.", "너무김": "습니다 ㅎㅎ. 성장성은 유지되는 가운데 수익성 개선이 과제로 남았습니다.", "선두수치중복": "습니다 ㅎㅎ. 성장성은 유지되는 가운데 수익성 개선이 과제로 남았습니다.", "근거없는수치['25']": "로는 34.89% 상승한 셈이에요 ㅎㅎ. 거래량은 20일 평균의 25배.", "비교기준누락": "2.0배였고, 최근 20거래일 최고 종가 대비로는 11.2% 아래입니다."}, "raw_vs_clean": {}, "hold_kinds": {"flow:소재중복": 24, "flow:유형절대상한": 23, "flow:문장틀쿨다운": 11, "flow:문체상한": 7, "flow:종목상한": 2, "flow:fatal:종목코드를": 1, "research:종목상한": 1}, "enrich_calls": 0, "generation_candidates": 241, "generation_attempted": 79, "generation_stages": [10, 20, 20, 13, 8, 4, 4], "generation_items_avoided": 162, "generated": 54, "deterministic_trim_count": 12, "template_reserve": 65, "template_fallback_count": 4, "judge_failed": 0, "delivery_attempted": 50, "delivery_failed": 0, "attempt_to_delivery_yield": 0.5823, "sent": 50, "held": 69, "hold_reasons": {"fatal": 1, "종목상한": 3, "문체상한": 7, "소재중복": 24, "유형절대상한": 23, "문장틀쿨다운": 11}, "avg_score": 13.52, "by_provider": {"claude": {"generated": 54, "sent": 46, "avg_score": 13.35}, "template": {"generated": 65, "sent": 4, "avg_score": null}}, "by_persona": {"brief_report": {"attempted": 27, "filter_passed": 21, "template_prepared": 21, "held": 27, "delivered": 15, "avg_score": 12.53, "angles": {"reaction": 2, "ratio": 12, "amount": 4, "terms": 1, "compare": 2}}, "careful_note": {"attempted": 10, "filter_passed": 5, "template_prepared": 0, "held": 0, "delivered": 5, "avg_score": 14.0, "angles": {"compare": 1, "ratio": 2, "reaction": 2}}, "check_list": {"attempted": 7, "filter_passed": 5, "template_prepared": 0, "held": 1, "delivered": 4, "avg_score": 15.32, "angles": {"duration": 4, "amount": 1}}, "data_focus": {"attempted": 16, "filter_passed": 10, "template_prepared": 24, "held": 23, "delivered": 11, "avg_score": 14.13, "angles": {"ratio": 3, "reaction": 2, "compare": 4, "amount": 1}}, "fact_note": {"attempted": 16, "filter_passed": 11, "template_prepared": 20, "held": 18, "delivered": 13, "avg_score": 13.03, "angles": {"duration": 8, "terms": 1, "reaction": 1, "amount": 1}}, "quick_memo": {"attempted": 1, "filter_passed": 1, "template_prepared": 0, "held": 0, "delivered": 1, "avg_score": 11.3, "angles": {"decode": 1}}, "two_view": {"attempted": 2, "filter_passed": 1, "template_prepared": 0, "held": 0, "delivered": 1, "avg_score": 15.3, "angles": {"reaction": 1}}}, "by_kind_funnel": {"disclosure": {"collected": 25, "gate_blocked": 21, "candidates": 4, "attempted": 4, "filter_passed": 3, "judge_failed": 0, "held": 0, "delivery_attempted": 3, "delivered": 3}, "flow": {"collected": 198, "gate_blocked": 1, "candidates": 197, "attempted": 54, "filter_passed": 34, "judge_failed": 0, "held": 68, "delivery_attempted": 31, "delivered": 31}, "policy": {"collected": 15, "gate_blocked": 6, "candidates": 7, "attempted": 7, "filter_passed": 6, "judge_failed": 0, "held": 0, "delivery_attempted": 6, "delivered": 6}, "research": {"collected": 53, "gate_blocked": 15, "candidates": 33, "attempted": 14, "filter_passed": 11, "judge_failed": 0, "held": 1, "delivery_attempted": 10, "delivered": 10}}, "llm_usage": {"cost_target_usd": 0.3, "cost_target_mode": "advisory", "cost_target_met": false, "pricing_as_of": "2026-09-12", "cost_scope": "token + claude web_search; gemini grounding overage/storage excluded", "calls": 133, "input_tokens": 597335, "output_tokens": 13794, "thinking_tokens": 0, "cache_read_tokens": 469557, "cache_write_tokens": 6644, "grounding_queries": 0, "failed_calls": 0, "estimated_token_cost_usd": 0.303011, "unknown_cost_calls": 0, "uncached_input_tokens": 121134, "unconfirmed_cost_calls": 0, "api_attempts": 133, "cost_per_delivered_usd": 0.00606, "cost_basis": "usage_estimate", "billed_cost_usd": null, "billing_check": "unverified", "pending_batch_requests": 0, "cost_complete": true, "by_route": {"claude|claude-haiku-4-5-20251001|paid|write": {"calls": 79, "input_tokens": 466859, "output_tokens": 9883, "thinking_tokens": 0, "cache_read_tokens": 366366, "cache_write_tokens": 4697, "grounding_queries": 0, "failed_calls": 0, "estimated_token_cost_usd": 0.187719, "unknown_cost_calls": 0, "api_attempts": 79}, "claude|claude-sonnet-5|paid|judge": {"calls": 54, "input_tokens": 130476, "output_tokens": 3911, "thinking_tokens": 0, "cache_read_tokens": 103191, "cache_write_tokens": 1947, "grounding_queries": 0, "failed_calls": 0, "estimated_token_cost_usd": 0.115292, "unknown_cost_calls": 0, "api_attempts": 54}}, "by_attempt_type": {"initial": {"calls": 133, "api_attempts": 133, "estimated_token_cost_usd": 0.303011}}, "by_billing_mode": {"standard": {"calls": 133, "estimated_token_cost_usd": 0.303011}}}, "model_fallbacks": [], "dedup": {"EVT": 3, "SIM": 2, "ID": 2}, "crawl_health": {"dart": {"got": 25, "expected": 8, "degraded": false}, "naver_research": {"got": 33, "expected": 5, "degraded": false}, "hankyung": {"got": 20, "expected": 2, "degraded": false}, "market": {"got": 198, "expected": 20, "degraded": false}, "kind_inquiry": {"got": 0, "expected": 0, "degraded": false}, "policy_rss": {"got": 15, "expected": 3, "degraded": false}, "telegram_ch": {"got": 0, "expected": 0, "degraded": false}}, "enrich_skipped": {"cost_priority:new_search_disabled": 36}, "enrich_outcome": {}, "style_held": []}
